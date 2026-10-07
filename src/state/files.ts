@@ -6,6 +6,7 @@ const db = createStore('webmap', 'files');
 export async function storeFile(blob: Blob): Promise<string> {
   const key = crypto.randomUUID();
   await set(key, blob, db);
+  requestPersistentStorage();
   return key;
 }
 
@@ -27,6 +28,6 @@ export async function collectFiles(referenced: ReadonlySet<string>): Promise<voi
 }
 
 /** Asks the browser not to evict stored files under storage pressure. */
-export function requestPersistentStorage(): void {
+function requestPersistentStorage(): void {
   void navigator.storage?.persist?.().catch(() => {});
 }
