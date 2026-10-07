@@ -1,0 +1,29 @@
+{
+  "name": "webmap",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@cantoo/pdf-lib": "^2.11.1",
+    "@maplibre/geojson-vt": "^6.1.2",
+    "@maplibre/vt-pbf": "^4.3.2",
+    "idb-keyval": "^6.3.0",
+    "maplibre-gl": "^6.13.0",
+    "pdfjs-dist": "^6.4.299",
+    "solid-js": "^1.9.17"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3",
+    "vite-plugin-solid": "^2.11.14",
+    "vitest": "^5.0.3"
+  }
+}
