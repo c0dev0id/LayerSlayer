@@ -25,6 +25,12 @@ export function tileZoom(resolution: number, tileSize: number): number | undefin
   return Math.abs(z - rounded) < 0.01 && rounded >= 0 ? rounded : undefined;
 }
 
+export function lngLatToMercator(lng: number, lat: number): [number, number] {
+  const x = (lng / 180) * HALF_WORLD;
+  const y = (Math.log(Math.tan(((90 + lat) * Math.PI) / 360)) / Math.PI) * HALF_WORLD;
+  return [x, y];
+}
+
 export function mercatorToLngLat(x: number, y: number): [number, number] {
   const lng = (x / HALF_WORLD) * 180;
   const lat = (Math.atan(Math.exp((y / HALF_WORLD) * Math.PI)) * 360) / Math.PI - 90;
