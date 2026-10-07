@@ -1,0 +1,29 @@
+import { describe, expect, it } from 'vitest';
+import { HALF_WORLD, mercatorToLngLat, scaleToZoom, tileZoom, validBounds } from './mercator';
+
+describe('mercator', () => {
+  it('converts scale denominators to map zooms', () => {
+    // GoogleMapsCompatible: 256 px tile zoom 1 is map zoom 0.
+    expect(scaleToZoom(279541132.0143589)).toBeCloseTo(0, 6);
+    expect(scaleToZoom(17061.8)).toBeCloseTo(14, 3);
+  });
+
+  it('finds whole tile zooms from resolutions', () => {
+    expect(tileZoom(156543.03392800014, 256)).toBe(0);
+    expect(tileZoom(78271.51696399994, 512)).toBe(0);
+    expect(tileZoom(19567.87924099992, 256)).toBe(3);
+    expect(tileZoom(100000, 256)).toBeUndefined();
+  });
+
+  it('converts metres to degrees', () => {
+    const [lng, lat] = mercatorToLngLat(HALF_WORLD, HALF_WORLD);
+    expect(lng).toBeCloseTo(180);
+    expect(lat).toBeCloseTo(85.0511, 3);
+  });
+
+  it('accepts only bounds in degrees and clamps the poles', () => {
+    expect(validBounds(-180, -90, 180, 90)).toEqual([-180, -85.0511287798, 180, 85.0511287798]);
+    expect(validBounds(-180, -90, 427603, 4285332)).toBeUndefined();
+    expect(validBounds(10, 50, 5, 51)).toBeUndefined();
+  });
+});
