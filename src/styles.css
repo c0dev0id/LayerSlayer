@@ -402,6 +402,14 @@ input.swatch {
   min-height: 0;
 }
 
+.filters {
+  flex-wrap: wrap;
+}
+
+.filters input {
+  flex-basis: 160px;
+}
+
 .filters input,
 .filters select {
   padding: 3px 6px;
