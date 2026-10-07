@@ -272,16 +272,16 @@ a {
 }
 
 .zoom-input {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.zoom-input input {
   width: 52px;
   padding: 2px 4px;
   border: 1px solid #ced4da;
   border-radius: 4px;
+}
+
+.now {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 input.swatch {

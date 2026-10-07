@@ -182,21 +182,20 @@ function ActiveLayer(props: { layer: Layer }) {
   };
   const fileName = () => ('data' in layer.source && 'file' in layer.source.data ? layer.source.data.name : undefined);
   const zoomInput = (key: 'minzoom' | 'maxzoom', label: string) => (
-    <label class="zoom-input">
-      <span class="muted">{label}</span>
-      <input
-        type="number"
-        min={MIN_ZOOM}
-        max={MAX_ZOOM}
-        step="0.5"
-        value={layer[key]}
-        onChange={(e) => {
-          const value = e.currentTarget.valueAsNumber;
-          if (Number.isFinite(value)) updateLayer(layer.id, { [key]: value });
-          else e.currentTarget.value = String(layer[key]);
-        }}
-      />
-    </label>
+    <input
+      class="zoom-input"
+      aria-label={label}
+      type="number"
+      min={MIN_ZOOM}
+      max={MAX_ZOOM}
+      step="0.5"
+      value={layer[key]}
+      onChange={(e) => {
+        const value = e.currentTarget.valueAsNumber;
+        if (Number.isFinite(value)) updateLayer(layer.id, { [key]: value });
+        else e.currentTarget.value = String(layer[key]);
+      }}
+    />
   );
 
   return (
@@ -225,10 +224,11 @@ function ActiveLayer(props: { layer: Layer }) {
       </div>
       <div class="row">
         <span class="muted label">Zoom</span>
-        {zoomInput('minzoom', 'from')}
-        {zoomInput('maxzoom', 'to')}
-        <span class="muted grow" title="The map's zoom now">
-          now {zoom().toFixed(1)}
+        {zoomInput('minzoom', `Lowest zoom ${layer.name} is shown at`)}
+        <span class="muted">to</span>
+        {zoomInput('maxzoom', `Zoom from which ${layer.name} is hidden`)}
+        <span class="muted grow now" title="The map's zoom now">
+          map {zoom().toFixed(1)}
         </span>
       </div>
       <Show when={isVector(layer.source)}>
