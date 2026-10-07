@@ -7,8 +7,12 @@ export default defineConfig({
   plugins: [solid()],
   build: {
     target: 'es2022',
+    // MapLibre alone is about 1 MB minified; the PDF libraries are split off and load on import.
+    chunkSizeWarningLimit: 1500,
   },
   test: {
     environment: 'jsdom',
+    // The library check reads live services and runs by hand (npm run check-library).
+    dir: 'src',
   },
 });
