@@ -94,8 +94,10 @@ export async function renderGeoPdf(data: ArrayBuffer): Promise<{ blob: Blob; coo
     throw new Error('This PDF has no georeference that can be read (a geospatial viewport as in ISO 32000-2).');
   }
   const toLngLat = georeference(viewport);
-  const pdfjs = await import('pdfjs-dist');
-  pdfjs.GlobalWorkerOptions.workerSrc = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default;
+  // The legacy build carries polyfills for the newest built-ins pdf.js uses (such as
+  // Map.prototype.getOrInsertComputed), which current browsers do not all have yet.
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  pdfjs.GlobalWorkerOptions.workerSrc = (await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url')).default;
   const loading = pdfjs.getDocument({ data: new Uint8Array(data.slice(0)) });
   const doc = await loading.promise;
   try {
