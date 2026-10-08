@@ -33,9 +33,30 @@ a {
 }
 
 .app {
+  position: relative;
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: var(--panel-width, 320px) 1fr;
   height: 100%;
+}
+
+/* The panel's edge, to drag: out of the grid, over the border between panel and map. */
+.panel-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--panel-width, 320px);
+  z-index: 5;
+  width: 8px;
+  margin-left: -4px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.panel-resizer:hover,
+.panel-resizer:focus-visible {
+  background: var(--accent);
+  opacity: 0.4;
+  outline: none;
 }
 
 .panel {
@@ -1107,6 +1128,10 @@ input.swatch {
 
   .map-wrap {
     grid-row: 1;
+  }
+
+  .panel-resizer {
+    display: none;
   }
 
   .panel {

@@ -13,6 +13,7 @@ import { AddLayerDialog } from './ui/AddLayerDialog';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { DetailsDialog } from './ui/DetailsDialog';
 import { IconPicker } from './ui/IconPicker';
+import { PanelResizer, panelWidth } from './ui/PanelResizer';
 import { FocusSection } from './ui/FocusSection';
 import { LayersSection } from './ui/LayersSection';
 import { ProjectSection } from './ui/ProjectSection';
@@ -23,7 +24,7 @@ import { WaypointDialog } from './ui/WaypointDialog';
 export function App() {
   const [adding, setAdding] = createSignal(false);
   return (
-    <div class="app">
+    <div class="app" style={{ '--panel-width': `${panelWidth()}px` }}>
       <aside class="panel">
         <ProjectSection />
         <FocusSection />
@@ -34,6 +35,7 @@ export function App() {
           Layers, routes and settings are kept in this browser; Save takes them to another. <a href="https://github.com/c0dev0id/webmap">Source</a>
         </footer>
       </aside>
+      <PanelResizer />
       <main class="map-wrap">
         <MapView />
         <Show when={map()}>
