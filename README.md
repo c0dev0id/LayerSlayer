@@ -47,7 +47,9 @@ in the browser.
   only within the bounds of the area, and a layer that lies entirely outside them is not
   loaded at all. The bottom layer, usually the base map, loads everywhere for
   orientation, and the map outside the polygon is dimmed. *Redraw* replaces the area, ×
-  removes it.
+  removes it. While an area is set, Add layer greys out what is known to lie outside it:
+  library entries by their region (or their own bounds), and the layers of a service by
+  the bounds the service gives.
 - **Routes**: *Draw route* starts a route and a toolbar over the map.
   - *Append* adds a point at the end with each tap on the map, *Insert* puts one into the
     line where it is tapped, *Waypoint* places a named pin, and *Delete* removes the point

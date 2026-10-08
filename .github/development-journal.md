@@ -278,6 +278,12 @@ It is a static single-page app on GitHub Pages; there is no server component.
   - Drawing it goes through the route tool's `Interactions` and tap filter; drawing a
     route and drawing the area exclude each other. The previous area stays until a new
     one is closed.
+  - Add layer greys out (never hides) what is known to lie outside the area, without
+    requests of its own. Library entries carry a region, not bounds, so `REGION_BOUNDS`
+    gives each region generous boxes, overseas parts included; an entry's own `bounds`
+    win, and Global entries are never marked. A test requires boxes for every region in
+    the library. State services sit under their country, so they are only marked when
+    the area lies outside it; inside a service, layers are marked by their own bounds.
 - **UI after mappic.** Top-first layer list with an active layer whose settings sit below
   it, names renamed in place on the card, a summary line per card (opacity, colour, zoom
   range, cache, proxy) so the list answers which layer is set how without opening each, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
