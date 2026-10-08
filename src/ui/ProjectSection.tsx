@@ -15,7 +15,7 @@ export function ProjectSection() {
   return (
     <header class="section">
       <div class="row">
-        <img class="logo" src={`${import.meta.env.BASE_URL}logo.svg`} alt="" />
+        <img class="logo" src={`${import.meta.env.BASE_URL}logo.png`} alt="" />
         <h1 class="grow">Layer Slayer</h1>
         <button
           title="Download the layers, routes, focus area and imported files as a .webmap file, to open in another browser or after clearing this one"
