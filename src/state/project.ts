@@ -5,16 +5,12 @@ import { collectFiles, loadFile, putFile } from './files';
 import type { Project } from './projectFile';
 import { replaceRouteData, routeData } from './routes';
 import { replaceState, state } from './store';
+import { map } from './ui';
 
 /**
  * Saving everything to a project file and opening one in its place. The file format, and
  * fflate with it, loads when it is first needed.
  */
-
-/** Whether there is anything an opened project would replace. */
-export function hasContent(): boolean {
-  return state.layers.length > 0 || routeData.routes.length > 0 || routeData.waypoints.length > 0 || state.focus !== undefined;
-}
 
 /** The project as a .webmap file, with the stored files of its layers. */
 export async function saveProject(): Promise<Blob> {
@@ -40,8 +36,8 @@ export async function readProject(file: Blob): Promise<Project> {
 
 /**
  * Makes the project the one in this browser: its files are stored first, so its layers
- * find them, then the state and routes are replaced and the files no layer uses are
- * deleted. Drawing ends.
+ * find them, then the state and routes are replaced, the files no layer uses are deleted
+ * and the map moves to the project's view. Drawing ends.
  */
 export async function openProject(project: Project): Promise<void> {
   stopDrawing();
@@ -50,4 +46,6 @@ export async function openProject(project: Project): Promise<void> {
   replaceState(project.state);
   replaceRouteData(project.routes);
   await collectFiles(new Set(project.files.keys()));
+  const { center, zoom, bearing, pitch } = project.state.view;
+  map()?.jumpTo({ center, zoom, bearing, pitch });
 }

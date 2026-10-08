@@ -21,29 +21,17 @@ export interface Project {
   files: ReadonlyMap<string, Blob>;
 }
 
+/** The project as a file; the caller hands over the stored file of every layer that has one. */
 export async function encodeProjectFile({ state, routes, files }: Project): Promise<Uint8Array<ArrayBuffer>> {
   const zip: Zippable = {};
   const types: Record<string, string> = {};
-  for (const layer of state.layers) {
-    const key = storedFile(layer.source);
-    if (!key) continue;
-    const blob = files.get(key);
-    if (!blob) throw new Error(`The file of layer "${layer.name}" is missing.`);
+  for (const [key, blob] of files) {
     types[key] = blob.type;
     // Images are compressed already; GeoJSON shrinks to a fraction.
     zip[`files/${key}`] = [new Uint8Array(await blob.arrayBuffer()), { level: blob.type.startsWith('image/') ? 0 : 6 }];
   }
-  const project = {
-    app: APP,
-    layers: state.layers,
-    activeLayerId: state.activeLayerId,
-    view: state.view,
-    ...(state.focus && { focus: state.focus }),
-    settings: { proxiedHosts: state.settings.proxiedHosts },
-    routes: routes.routes,
-    waypoints: routes.waypoints,
-    files: types,
-  };
+  const { proxy: _, ...settings } = state.settings;
+  const project = { app: APP, ...state, settings, ...routes, files: types };
   zip['project.json'] = [strToU8(JSON.stringify(project, null, 2)), { level: 6 }];
   return zipSync(zip);
 }
@@ -78,7 +66,8 @@ export function decodeProjectFile(data: Uint8Array): Project {
     const bytes = entries[`files/${key}`];
     if (!bytes) throw new Error(`The file of layer "${layer.name}" is missing from the project.`);
     const type = types[key];
-    files.set(key, new Blob([bytes.slice()], { type: typeof type === 'string' ? type : '' }));
+    // unzipSync returns arrays of their own, so the Blob can take them without a copy.
+    files.set(key, new Blob([bytes as Uint8Array<ArrayBuffer>], { type: typeof type === 'string' ? type : '' }));
   }
   return { state, routes: parseRouteData(text), files };
 }

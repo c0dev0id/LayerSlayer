@@ -1,17 +1,12 @@
 import { createSignal, Show } from 'solid-js';
-import { hasContent, openProject, readProject, saveProject } from '../state/project';
-import { errorMessage, map } from '../state/ui';
+import { openProject, readProject, saveProject } from '../state/project';
+import { errorMessage } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { downloadBlob } from './download';
 
 async function open(file: File): Promise<void> {
   const project = await readProject(file);
-  if (hasContent() && !(await askConfirmation(`Replace the layers, routes and focus area here with those of ${file.name}?`, 'Replace'))) {
-    return;
-  }
-  await openProject(project);
-  const { center, zoom, bearing, pitch } = project.state.view;
-  map()?.jumpTo({ center, zoom, bearing, pitch });
+  if (await askConfirmation(`Replace the layers, routes and focus area here with those of ${file.name}?`, 'Replace')) await openProject(project);
 }
 
 /** The app's name, with saving everything to a .webmap file and opening one in its place. */

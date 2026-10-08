@@ -42,10 +42,6 @@ describe('project file', () => {
     expect(json).not.toContain('secret');
   });
 
-  it('refuses to save a layer whose file is missing', async () => {
-    await expect(encodeProjectFile({ ...project, files: new Map() })).rejects.toThrow(/walk.kml/);
-  });
-
   it('turns away what is not a webmap project', () => {
     expect(() => decodeProjectFile(strToU8('hello'))).toThrow('This is not a webmap project file.');
     expect(() => decodeProjectFile(zipSync({ 'other.txt': strToU8('x') }))).toThrow(/no project.json/);
