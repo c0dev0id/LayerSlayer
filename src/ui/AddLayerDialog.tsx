@@ -7,6 +7,7 @@ import { SERVICE_TYPES, type Offer, type ServiceInfo, type ServiceType } from '.
 import { hostOf, isProxied } from '../state/net';
 import { addLayer, removeLayersWhere, setHostProxied, state } from '../state/store';
 import { errorMessage } from '../state/ui';
+import { askConfirmation } from './confirm';
 import { CloseIcon } from './icons';
 import { groupMembers, isFromSource, originOf, selection, type Selection } from './offers';
 
@@ -62,14 +63,15 @@ function toggle(url: string, offer: Offer): void {
 }
 
 /** Adds what of a group is not on the map yet, or removes the group when all of it is. */
-function toggleGroup(url: string, members: readonly Offer[]): void {
+async function toggleGroup(url: string, members: readonly Offer[]): Promise<void> {
   if (selection(members, (o) => isAdded(url, o)) === 'all') {
     const remove = new Set(members.map((o) => originOf(url, o)));
     removeLayersWhere((l) => l.origin !== undefined && remove.has(l.origin));
     return;
   }
   const missing = members.filter((o) => !isAdded(url, o));
-  if (missing.length > CONFIRM_ABOVE && !confirm(`Add ${missing.length} layers? Each is fetched and drawn on its own.`)) return;
+  const message = `Add ${missing.length} layers? Each is fetched and drawn on its own.`;
+  if (missing.length > CONFIRM_ABOVE && !(await askConfirmation(message, 'Add layers'))) return;
   for (const offer of missing) addLayer({ ...offer.draft!, origin: originOf(url, offer) });
 }
 
@@ -430,7 +432,7 @@ function OfferRow(props: { url: string; offers: readonly Offer[]; offer: Offer; 
         style={{ 'padding-left': `${8 + props.offer.depth * 14}px` }}
         disabled={selected() === undefined}
         aria-pressed={selected() === 'some' ? 'mixed' : selected() === 'all'}
-        onClick={() => (props.offer.draft ? toggle(props.url, props.offer) : toggleGroup(props.url, members()))}
+        onClick={() => (props.offer.draft ? toggle(props.url, props.offer) : void toggleGroup(props.url, members()))}
       >
         <span class="mark" aria-hidden="true" />
         <span class="grow">

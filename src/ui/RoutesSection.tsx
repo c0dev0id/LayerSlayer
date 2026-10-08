@@ -11,6 +11,7 @@ import { addRoute, importRouteData, removeRoute, renameRoute, routeData, setRout
 import { parseGpx, toGpx } from '../services/gpx';
 import { fileName } from '../services/read';
 import { errorMessage, showBounds } from '../state/ui';
+import { askConfirmation } from './confirm';
 import { downloadBlob } from './download';
 import { EditableName } from './EditableName';
 import { AreaIcon, CloseIcon } from './icons';
@@ -48,14 +49,10 @@ function showPoints(points: LngLat[]) {
   if (bounds) showBounds(bounds);
 }
 
-function exportGpx() {
+async function exportGpx() {
   const unrouted = pendingLegs() + failedLegCount();
-  if (
-    unrouted > 0 &&
-    !confirm(`${unrouted} ${unrouted === 1 ? 'leg is' : 'legs are'} not routed and will be exported as straight lines. Export anyway?`)
-  ) {
-    return;
-  }
+  const message = `${unrouted} ${unrouted === 1 ? 'leg is' : 'legs are'} not routed and will be exported as straight lines.`;
+  if (unrouted > 0 && !(await askConfirmation(message, 'Export anyway'))) return;
   const tracks = routeTracks(unwrap(routeData.routes));
   const gpx = toGpx('Routes', unwrap(routeData.waypoints), tracks, new Date());
   downloadBlob(new Blob([gpx], { type: 'application/gpx+xml' }), 'routes.gpx');
@@ -146,8 +143,8 @@ function RouteRow(props: { route: Route }) {
           class="icon"
           title="Delete route"
           aria-label={`Delete ${route.name}`}
-          onClick={() => {
-            if (confirm(`Delete the route "${route.name}"?`)) removeRoute(route.id);
+          onClick={async () => {
+            if (await askConfirmation(`Delete the route "${route.name}"?`, 'Delete')) removeRoute(route.id);
           }}
         >
           <CloseIcon />

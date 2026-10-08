@@ -282,6 +282,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
   it, names renamed in place on the card, a summary line per card (opacity, colour, zoom
   range, cache, proxy) so the list answers which layer is set how without opening each, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
   panel layout, and the panel below the map on narrow screens.
+- **No browser dialogs.** Questions such as deleting a route are asked in the app's own
+  modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
+  few native dialogs, browsers offer to silence the page's dialogs, and once silenced
+  `confirm()` answers no without asking, so the action could no longer be taken.
 - **The add-layer dialog stays open.** Adding many layers from several sources was a chore
   when the dialog closed after each one. Now a tap toggles a layer, the source list and a
   source's layer list take turns without the dialog closing, and only Close leaves it. The

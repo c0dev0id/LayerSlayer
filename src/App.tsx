@@ -9,6 +9,7 @@ import { Waypoints } from './map/Waypoints';
 import { editingRouteId } from './state/drawing';
 import { map } from './state/ui';
 import { AddLayerDialog } from './ui/AddLayerDialog';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 import { FocusSection } from './ui/FocusSection';
 import { LayersSection } from './ui/LayersSection';
 import { RoutesSection } from './ui/RoutesSection';
@@ -50,6 +51,7 @@ export function App() {
       </main>
       <AddLayerDialog open={adding()} onClose={() => setAdding(false)} />
       <WaypointDialog />
+      <ConfirmDialog />
     </div>
   );
 }

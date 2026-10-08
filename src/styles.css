@@ -819,6 +819,10 @@ input.swatch {
   resize: vertical;
 }
 
+.form-dialog .question {
+  margin: 0;
+}
+
 .row.end {
   justify-content: flex-end;
 }
