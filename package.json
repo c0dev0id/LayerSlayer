@@ -23,6 +23,7 @@
     "geotiff": "^3.0.5",
     "idb-keyval": "^6.3.0",
     "maplibre-gl": "^6.13.0",
+    "osmtogeojson": "^3.0.0-beta.5",
     "pbf": "^5.1.2",
     "pdfjs-dist": "^6.4.299",
     "solid-js": "^1.9.17"
@@ -33,5 +34,8 @@
     "vite": "^8.3.3",
     "vite-plugin-solid": "^2.11.14",
     "vitest": "^5.0.3"
+  },
+  "overrides": {
+    "@xmldom/xmldom": "^0.8.15"
   }
 }
