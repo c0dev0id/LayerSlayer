@@ -8,8 +8,9 @@ export default defineConfig({
   plugins: [solid(), iconSets()],
   build: {
     target: 'es2022',
-    // MapLibre alone is about 1 MB minified; the PDF libraries are split off and load on import.
-    chunkSizeWarningLimit: 1500,
+    // MapLibre alone is about 1 MB minified; the PDF libraries are split off and load on import,
+    // and the Material Design Icons (about 2.9 MB, 0.8 MB gzipped) load with the icon picker.
+    chunkSizeWarningLimit: 3000,
   },
   test: {
     environment: 'jsdom',
