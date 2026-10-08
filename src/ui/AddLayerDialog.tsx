@@ -105,6 +105,9 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
    */
   async function open(source: Source) {
     setFailure(undefined);
+    // The library knows which servers need the proxy; with one set, they use it from the start.
+    const host = hostOf(source.url);
+    if (source.entry?.cors === false && state.settings.proxy && host && !isProxied(source.url)) setHostProxied(host, true);
     setReading(source.url, true);
     try {
       const info = await read(source);
@@ -233,7 +236,10 @@ function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<strin
                       <span class="count">{onMap()} on the map</span>
                     </Show>
                     <Show when={entry.cors === false}>
-                      <span class="badge" title="The server does not allow web pages to read it (no valid CORS header), so it needs a CORS proxy">
+                      <span
+                        class="badge"
+                        title="The server does not allow web pages to read it (no valid CORS header). With a CORS proxy set in Settings, it goes through the proxy."
+                      >
                         proxy
                       </span>
                     </Show>
