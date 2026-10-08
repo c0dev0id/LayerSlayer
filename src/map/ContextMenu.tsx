@@ -17,19 +17,15 @@ export function ContextMenu(props: { map: MapLibreMap }) {
       {(m) => {
         // A long-press menu opens under the finger; only a new tap may choose an item.
         let armed = !m.touch;
-        let element!: HTMLUListElement;
         // Keep the menu inside the map, using its rendered size (larger on touch screens).
         onMount(() => {
           const container = props.map.getContainer();
-          element.style.left = `${Math.max(0, Math.min(m.x, container.clientWidth - element.offsetWidth))}px`;
-          element.style.top = `${Math.max(0, Math.min(m.y, container.clientHeight - element.offsetHeight))}px`;
+          list!.style.left = `${Math.max(0, Math.min(m.x, container.clientWidth - list!.offsetWidth))}px`;
+          list!.style.top = `${Math.max(0, Math.min(m.y, container.clientHeight - list!.offsetHeight))}px`;
         });
         return (
           <ul
-            ref={(el) => {
-              element = el;
-              list = el;
-            }}
+            ref={list}
             class="context-menu"
             style={{ left: `${m.x}px`, top: `${m.y}px` }}
             onContextMenu={(e) => e.preventDefault()}

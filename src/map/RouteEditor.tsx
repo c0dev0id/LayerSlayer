@@ -1,41 +1,36 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
-import { createEffect, createMemo, For, onCleanup } from 'solid-js';
+import { createEffect, createMemo, For, onCleanup, Show, type Accessor } from 'solid-js';
 import { roundLngLat } from '../routing/legs';
 import { editingRouteId, tool } from '../state/drawing';
 import { movePoint, removePoint, routeById } from '../state/routes';
-import { MarkerHandle, onMarkerMenu, openMenuAt } from './markers';
+import { MarkerHandle, onMarkerMenu } from './markers';
 
 /** Draggable markers for the points of the route being drawn. */
 export function RouteEditor(props: { map: MapLibreMap }) {
-  const keys = createMemo(
-    () => {
-      const id = editingRouteId();
-      return routeById(id)?.points.map((p) => `${id}/${p.id}`) ?? [];
-    },
-    [],
-    { equals: (a, b) => a.length === b.length && a.every((k, i) => k === b[i]) },
-  );
   return (
-    <For each={keys()}>
-      {(key) => {
-        const [routeId, pointId] = key.split('/') as [string, string];
-        return <PointMarker map={props.map} routeId={routeId} pointId={pointId} />;
+    <Show when={editingRouteId()} keyed>
+      {(routeId) => {
+        const route = createMemo(() => routeById(routeId));
+        return (
+          <For each={route()?.points.map((p) => p.id)}>
+            {(pointId, index) => <PointMarker map={props.map} routeId={routeId} pointId={pointId} index={index} />}
+          </For>
+        );
       }}
-    </For>
+    </Show>
   );
 }
 
-function PointMarker(props: { map: MapLibreMap; routeId: string; pointId: string }) {
-  const { map, routeId, pointId } = props;
+function PointMarker(props: { map: MapLibreMap; routeId: string; pointId: string; index: Accessor<number> }) {
+  const { map, routeId, pointId, index } = props;
   const route = createMemo(() => routeById(routeId));
-  const index = () => route()?.points.findIndex((p) => p.id === pointId) ?? -1;
 
   const content = (
     <div class="route-point" style={{ 'background-color': route()?.color }}>
       {index() + 1}
     </div>
   ) as HTMLElement;
-  const handle = new MarkerHandle(map, content, { className: 'route-point-marker', draggable: true });
+  const handle = new MarkerHandle(map, content, { className: 'route-point-marker' });
   createEffect(() => {
     const p = route()?.points[index()];
     handle.setPosition(p && [p.lngLat[0], p.lngLat[1]]);
@@ -47,9 +42,7 @@ function PointMarker(props: { map: MapLibreMap; routeId: string; pointId: string
   handle.root.addEventListener('click', () => {
     if (tool() === 'delete') removePoint(routeId, pointId);
   });
-  const stopMenu = onMarkerMenu(handle, (x, y, touch) =>
-    openMenuAt(map, x, y, touch, [{ label: 'Remove point', run: () => removePoint(routeId, pointId) }]),
-  );
+  const stopMenu = onMarkerMenu(handle, map, () => [{ label: 'Remove point', run: () => removePoint(routeId, pointId) }]);
   onCleanup(() => {
     stopMenu();
     handle.remove();

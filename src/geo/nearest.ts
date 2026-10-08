@@ -16,13 +16,13 @@ export function closestOnSegment(p: XY, a: XY, b: XY): XY {
  */
 export function nearestLine(lines: readonly (readonly XY[])[], p: XY): { index: number; distance: number; point: XY } | undefined {
   let best: { index: number; distance: number; point: XY } | undefined;
+  const consider = (index: number, point: XY) => {
+    const distance = Math.hypot(p[0] - point[0], p[1] - point[1]);
+    if (!best || distance < best.distance) best = { index, distance, point };
+  };
   lines.forEach((line, index) => {
-    for (let i = 0; i < line.length; i++) {
-      const point = line.length === 1 ? line[0]! : i === 0 ? undefined : closestOnSegment(p, line[i - 1]!, line[i]!);
-      if (!point) continue;
-      const distance = Math.hypot(p[0] - point[0], p[1] - point[1]);
-      if (!best || distance < best.distance) best = { index, distance, point };
-    }
+    if (line.length === 1) consider(index, line[0]!);
+    for (let i = 1; i < line.length; i++) consider(index, closestOnSegment(p, line[i - 1]!, line[i]!));
   });
   return best;
 }

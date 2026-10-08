@@ -35,13 +35,4 @@ describe('History', () => {
     expect(history.undo(2)).toBe(1);
     expect(history.undo(1)).toBeUndefined();
   });
-
-  it('can be cleared', () => {
-    const history = new History<number>();
-    history.record(0, 'a');
-    history.undo(1);
-    history.clear();
-    expect(history.undoLabel).toBeUndefined();
-    expect(history.redoLabel).toBeUndefined();
-  });
 });

@@ -1,6 +1,6 @@
 import * as maplibregl from 'maplibre-gl';
 import type { LngLat } from '../model/route';
-import { setMenu } from '../state/drawing';
+import { setMenu, type MenuItem } from '../state/drawing';
 import { onLongPress } from './longPress';
 
 /** True if a DOM event originated from a marker (the map's click fires after the marker's). */
@@ -9,8 +9,8 @@ export function fromMarker(event: Event | undefined): boolean {
 }
 
 /**
- * A marker whose root element is owned by MapLibre (it sets transform, opacity and
- * pointer-events); the given content is placed inside it.
+ * A draggable marker whose root element is owned by MapLibre (it sets transform, opacity
+ * and pointer-events); the given content is placed inside it.
  */
 export class MarkerHandle {
   readonly marker: maplibregl.Marker;
@@ -20,20 +20,18 @@ export class MarkerHandle {
   constructor(
     private readonly map: maplibregl.Map,
     content: Node,
-    options: { className: string; draggable?: boolean; anchor?: maplibregl.PositionAnchor },
+    options: { className: string; anchor?: maplibregl.PositionAnchor },
   ) {
     this.root = document.createElement('div');
     this.root.className = options.className;
     this.root.append(content);
-    this.marker = new maplibregl.Marker({ element: this.root, draggable: options.draggable ?? false, anchor: options.anchor ?? 'center' });
-    if (options.draggable) {
-      // MapLibre starts a marker drag with any button. A right-click opens a menu under the
-      // pointer that receives the release, which MapLibre never sees: the marker would
-      // then follow the mouse. Only the primary button may drag.
-      this.root.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) e.stopPropagation();
-      });
-    }
+    this.marker = new maplibregl.Marker({ element: this.root, draggable: true, anchor: options.anchor ?? 'center' });
+    // MapLibre starts a marker drag with any button. A right-click opens a menu under the
+    // pointer that receives the release, which MapLibre never sees: the marker would then
+    // follow the mouse. Only the primary button may drag.
+    this.root.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) e.stopPropagation();
+    });
   }
 
   /** Shows the marker at a position, or hides it for undefined. */
@@ -56,12 +54,19 @@ export class MarkerHandle {
 }
 
 /**
- * Opens a menu from a draggable marker, which swallows the map's own contextmenu event and
- * long press: right-click for mice, a long press for touch and pens. Dragging the marker
- * closes an open menu. Returns a function that removes the listeners.
+ * Opens the context menu with `items` from a draggable marker, which swallows the map's
+ * own contextmenu event and long press: right-click for mice, a long press for touch and
+ * pens. No items, no menu. Dragging the marker closes an open menu. Returns a function
+ * that removes the listeners.
  */
-export function onMarkerMenu(handle: MarkerHandle, open: (clientX: number, clientY: number, touch: boolean) => void): () => void {
+export function onMarkerMenu(handle: MarkerHandle, map: maplibregl.Map, items: () => MenuItem[] | undefined): () => void {
   const root = handle.root;
+  const open = (clientX: number, clientY: number, touch: boolean) => {
+    const list = items();
+    if (!list) return;
+    const rect = map.getContainer().getBoundingClientRect();
+    setMenu({ x: clientX - rect.left, y: clientY - rect.top, touch, items: list });
+  };
   let pointerType = 'mouse';
   const onPointerDown = (e: PointerEvent) => {
     pointerType = e.pointerType;
@@ -83,10 +88,4 @@ export function onMarkerMenu(handle: MarkerHandle, open: (clientX: number, clien
     root.removeEventListener('contextmenu', onContextMenu);
     handle.marker.off('dragstart', onDragStart);
   };
-}
-
-/** Opens the context menu at a client position, in the map container's coordinates. */
-export function openMenuAt(map: maplibregl.Map, clientX: number, clientY: number, touch: boolean, items: { label: string; run: () => void }[]): void {
-  const rect = map.getContainer().getBoundingClientRect();
-  setMenu({ x: clientX - rect.left, y: clientY - rect.top, touch, items });
 }
