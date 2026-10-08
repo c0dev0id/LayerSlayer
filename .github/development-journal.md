@@ -416,6 +416,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
   answer 404 and MapLibre keeps the coarser parent tile, so those errors are not shown.
   The AWS Terrain Tiles (Mapzen) were the alternative: also keyless, but coarser and
   ending at zoom 15. Like the bottom layer, the ground is not limited to the focus area.
+  3D brings hillshading along: a hillshade layer inserted right above the bottom layer, so
+  the base map is shaded and overlays are not. It reads the same tiles through a second
+  source, as MapLibre advises for terrain and hillshade, and is lighter than MapLibre's
+  default (exaggeration 0.3), which darkened a raster base map's labels in the Alps.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
@@ -457,7 +461,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
-- 3D terrain from Mapterhorn's open elevation tiles, switched by a button on the map.
+- 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched by a button
+  on the map.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
   a disc of the layer's colour, picked by search; OSM presets come with theirs.
 - OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about
