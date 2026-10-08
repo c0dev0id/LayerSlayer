@@ -38,7 +38,9 @@ in the browser.
   world have none). A layer shown in grey italics is outside its zoom range at the current
   zoom; a red triangle carries the last error loading it. Under each name, a small line
   shows its opacity, colour, zoom range (z5–15), and *cache* and *proxy* where its
-  tiles are kept or its server goes through the CORS proxy.
+  tiles are kept or its server goes through the CORS proxy. *Background*, below the last
+  layer, sets the colour the map is drawn on (white unless chosen); it shows wherever the
+  layers leave the map uncovered or see-through.
 - Below the list, the **active layer** (click a name) has its opacity, zoom range, colour
   (vector layers), source, the CORS proxy for its server and, for tiled layers, whether it
   keeps its tiles in the browser. New layers start at 50% opacity. Raster layers (XYZ, WMS,

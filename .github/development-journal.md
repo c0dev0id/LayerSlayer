@@ -71,6 +71,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
   levels, so tinting toward a chosen colour is not possible. Every layer is composited
   with plain alpha blending (`ColorMode.alphaBlended`). Vector layers and imported styles
   have no such properties; adjusting them would mean rewriting the colours in the style.
+- **The background colour is a MapLibre background layer.** Choosing a colour adds a
+  `background` layer at the bottom of the composed style rather than colouring the page
+  behind the canvas, so it is part of the map: it shows through see-through layers and is
+  in anything drawn from the canvas. It is a setting kept with the others and carried by
+  project files, as part of how a project looks; without one the map stays on white.
 - **ArcGIS symbology as a per-layer choice.** Vector layers without a style are drawn in
   one colour each (5 px dots with a white rim, 2.5 px lines, areas filled at a quarter of
   the opacity), which keeps overlapping layers apart. ArcGIS feature layers describe their
