@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
+import { createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
 import { allOutside } from '../geo/bounds';
 import { entryAreas, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
 import type { Bounds } from '../model/layer';
@@ -11,6 +11,7 @@ import { addLayer, focusBounds, removeLayersWhere, setHostProxied, state } from 
 import { errorMessage } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { CloseIcon } from './icons';
+import { showModalWhile } from './modal';
 import { groupMembers, isFromSource, originOf, selection, type Selection } from './offers';
 
 type Tab = 'library' | 'address' | 'file';
@@ -99,10 +100,7 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
   /** How many layers a source offers, once it has been read. */
   const [sizes, setSizes] = createSignal<ReadonlyMap<string, number>>(new Map());
 
-  createEffect(() => {
-    if (props.open && !dialog.open) dialog.showModal();
-    if (!props.open && dialog.open) dialog.close();
-  });
+  showModalWhile(() => dialog, () => props.open);
 
   const setReading = (url: string, reading: boolean) => {
     const next = new Set(busy());

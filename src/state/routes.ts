@@ -171,8 +171,7 @@ export function removeWaypoint(id: string): void {
 /** Replaces all routes and waypoints, as when a project is opened; nothing before it can be undone. */
 export function replaceRouteData(data: RouteData): void {
   history.clear();
-  setHistoryVersion((v) => v + 1);
-  setRouteData(reconcile(data, { key: 'id', merge: false }));
+  restore(data);
 }
 
 /** Adds routes and waypoints read from a file, as one undo step. */

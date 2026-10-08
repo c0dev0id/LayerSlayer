@@ -1,6 +1,7 @@
-import { createEffect, Show } from 'solid-js';
+import { Show } from 'solid-js';
 import { setWaypointDraft, waypointDraft } from '../state/drawing';
 import { addWaypoint, updateWaypoint } from '../state/routes';
+import { showModalWhile } from './modal';
 
 /**
  * Name and description of a waypoint, in the browser's modal dialog: Esc or Cancel
@@ -8,11 +9,7 @@ import { addWaypoint, updateWaypoint } from '../state/routes';
  */
 export function WaypointDialog() {
   let dialog!: HTMLDialogElement;
-  createEffect(() => {
-    const open = waypointDraft() !== undefined;
-    if (open && !dialog.open) dialog.showModal();
-    else if (!open && dialog.open) dialog.close();
-  });
+  showModalWhile(() => dialog, () => waypointDraft() !== undefined);
   const save = (form: HTMLFormElement) => {
     const draft = waypointDraft();
     if (!draft) return;

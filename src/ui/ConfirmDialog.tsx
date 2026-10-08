@@ -1,14 +1,11 @@
-import { createEffect, Show } from 'solid-js';
+import { Show } from 'solid-js';
 import { answerConfirmation, question } from './confirm';
+import { showModalWhile } from './modal';
 
 /** The open yes-or-no question, in a modal dialog of the page: Esc or Cancel declines. */
 export function ConfirmDialog() {
   let dialog!: HTMLDialogElement;
-  createEffect(() => {
-    const open = question() !== undefined;
-    if (open && !dialog.open) dialog.showModal();
-    else if (!open && dialog.open) dialog.close();
-  });
+  showModalWhile(() => dialog, () => question() !== undefined);
   return (
     <dialog ref={dialog} class="dialog form-dialog" aria-label="Confirm" onClose={() => answerConfirmation(false)}>
       <Show when={question()}>
