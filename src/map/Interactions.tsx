@@ -22,9 +22,6 @@ import { fromMarker } from './markers';
 import { insertPointOnLine } from './routeTools';
 import { TapFilter, type PointerSample } from './tapFilter';
 
-/** How near the first corner of a focus area a tap closes it, in CSS pixels, by pointer. */
-const CLOSE_DISTANCE = { mouse: 10, touch: 24 };
-
 /** Taps on the map and keys while a route or the focus area is drawn. */
 export function Interactions(props: { map: MapLibreMap }) {
   const map = props.map;
@@ -45,6 +42,8 @@ export function Interactions(props: { map: MapLibreMap }) {
   // Clicks that come with dragging the map are no taps (a mouse button that bounces, a
   // browser's click after a touch pan): every tap waits a moment first.
   const taps = new TapFilter();
+  /** How near a tap must be to what it acts on (a route line, a first corner), in CSS pixels. */
+  const tapRadius = () => (pointerType === 'mouse' ? 10 : 24);
   const sample = (e: MouseEvent): PointerSample => ({ x: e.clientX, y: e.clientY, t: e.timeStamp, touch: pointerType !== 'mouse' });
   const onPointerDown = (e: PointerEvent) => {
     pointerType = e.pointerType;
@@ -76,7 +75,7 @@ export function Interactions(props: { map: MapLibreMap }) {
     setMenu(undefined);
     const { lng, lat } = e.lngLat.wrap();
     const t = tool();
-    if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], pointerType === 'mouse' ? 10 : 24);
+    if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], tapRadius());
     else if (t === 'waypoint') setWaypointDraft({ lngLat: roundLngLat([lng, lat]), name: '', description: '' });
     else if (t === 'append') appendPoint(routeId, roundLngLat([lng, lat]), reach() === 'line');
   };
@@ -85,8 +84,7 @@ export function Interactions(props: { map: MapLibreMap }) {
     const corners = focusDraft();
     if (!corners || fromMarker(e.originalEvent)) return;
     const first = corners[0];
-    const near = pointerType === 'mouse' ? CLOSE_DISTANCE.mouse : CLOSE_DISTANCE.touch;
-    if (corners.length >= 3 && first && map.project(first).dist(e.point) <= near) closeFocusArea();
+    if (corners.length >= 3 && first && map.project(first).dist(e.point) <= tapRadius()) closeFocusArea();
     else {
       const { lng, lat } = e.lngLat.wrap();
       addFocusCorner(roundLngLat([lng, lat]));
