@@ -72,6 +72,11 @@ in the browser.
   opacity instead of 50%.
   OSM query layers show their tags and when they were queried; *Update* queries again in
   the focus area as it is now and replaces the layer's data.
+- **3D** (with the map's controls on the right) raises the ground by its elevation and
+  tilts the map to show it; a second tap levels it again. Elevation comes from
+  Mapterhorn's open terrain tiles: about 30 m worldwide, and finer (down to a metre or so)
+  where countries publish detailed elevation, such as much of Europe. Tilt and turn the
+  map with the right mouse button, Ctrl and drag, or two fingers.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
   search, preferring those in view. Enter searches; the first place found gets a pin and the
   map flies to it, and the list below offers the other places found. × clears the search

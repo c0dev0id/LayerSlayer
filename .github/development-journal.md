@@ -43,6 +43,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
   dependencies only, each set a chunk that loads with the icon picker.
 - Routing by the FOSSGIS OSRM servers (routing.openstreetmap.de), car, bike and foot.
 - OSM queries by the Overpass API (overpass-api.de).
+- Elevation for 3D terrain from Mapterhorn (tiles.mapterhorn.com).
 - Deployment: GitHub Actions to GitHub Pages.
 
 ## Key decisions
@@ -405,6 +406,16 @@ It is a static single-page app on GitHub Pages; there is no server component.
   there missed it, which ArcGIS symbols suffered from too. Waypoints keep an icon the
   same way (`MapIcon`), shown white in their pin in place of the dot; GPX export leaves
   it out, since GPX symbol names are device-specific.
+- **3D terrain is part of the composed style.** Every layer change applies the whole
+  style with a diff, so terrain set with `map.setTerrain` (as MapLibre's TerrainControl
+  does) would be dropped by the next change. The 3D button switches `settings.terrain`
+  instead, and `composeStyle` then adds a `raster-dem` source and the style's `terrain`;
+  the button also tilts the map, so the relief shows. Elevation comes from Mapterhorn
+  (Terrarium-encoded WebP tiles, 512 px, CORS, no key): global at about 30 m and finer
+  where countries publish it, down to zoom 18 in Germany. Where finer data ends its tiles
+  answer 404 and MapLibre keeps the coarser parent tile, so those errors are not shown.
+  The AWS Terrain Tiles (Mapzen) were the alternative: also keyless, but coarser and
+  ending at zoom 15. Like the bottom layer, the ground is not limited to the focus area.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
@@ -446,6 +457,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
+- 3D terrain from Mapterhorn's open elevation tiles, switched by a button on the map.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
   a disc of the layer's colour, picked by search; OSM presets come with theirs.
 - OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about
