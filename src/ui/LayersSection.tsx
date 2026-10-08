@@ -12,10 +12,9 @@ import {
   NO_ADJUSTMENTS,
   SOURCE_KINDS,
   type Layer,
-  type OsmQuerySource,
+  type OsmQuery,
   type RasterAdjustments,
 } from '../model/layer';
-import { OVERPASS_URL } from '../services/overpass';
 import { hostOf } from '../state/net';
 import { updateOsmQueryLayer } from '../state/osmQuery';
 import { moveLayer, removeLayer, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
@@ -282,8 +281,6 @@ function sourceUrl(layer: Layer): string | undefined {
     case 'geojson':
     case 'image':
       return 'url' in source.data ? source.data.url : undefined;
-    case 'osm-query':
-      return OVERPASS_URL;
     default:
       return source.url;
   }
@@ -296,7 +293,7 @@ function layerHost(layer: Layer): string | undefined {
 }
 
 /** What an OSM query layer asked for and when; Update asks again, in the focus area as it is now. */
-function OsmQueryRows(props: { layer: Layer; source: OsmQuerySource }) {
+function OsmQueryRows(props: { layer: Layer; query: OsmQuery }) {
   const [updating, setUpdating] = createSignal(false);
   const [outcome, setOutcome] = createSignal<{ text: string; error?: boolean }>();
 
@@ -317,13 +314,13 @@ function OsmQueryRows(props: { layer: Layer; source: OsmQuerySource }) {
     <>
       <div class="row">
         <span class="muted label">Tags</span>
-        <span class="grow name" title={props.source.filters.join('\n')}>
-          {props.source.filters.join(', ')}
+        <span class="grow name" title={props.query.filters.join('\n')}>
+          {props.query.filters.join(', ')}
         </span>
       </div>
       <div class="row">
         <span class="muted label">Queried</span>
-        <span class="grow">{new Date(props.source.queried).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</span>
+        <span class="grow">{new Date(props.query.queried).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</span>
         <button
           disabled={updating() || !state.focus}
           title={state.focus ? 'Query the focus area again, as it is now' : 'Draw a focus area first'}
@@ -405,8 +402,8 @@ function ActiveLayer(props: { layer: Layer }) {
           />
         </div>
       </Show>
-      <Show when={layer.source.type === 'osm-query' ? layer.source : undefined}>
-        {(source) => <OsmQueryRows layer={layer} source={source()} />}
+      <Show when={layer.source.type === 'geojson' ? layer.source.query : undefined}>
+        {(query) => <OsmQueryRows layer={layer} query={query()} />}
       </Show>
       <div class="row">
         <span class="muted label">Source</span>

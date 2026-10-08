@@ -1,7 +1,7 @@
 import { validateStyleMin } from '@maplibre/maplibre-gl-style-spec';
 import type { StyleSpecification } from 'maplibre-gl';
 import { describe, expect, it } from 'vitest';
-import { createLayer, type Bounds, type Layer, type LayerDraft, type OsmQuerySource } from '../model/layer';
+import { createLayer, type Bounds, type Layer, type LayerDraft } from '../model/layer';
 import {
   composeStyle,
   prefixImage,
@@ -126,13 +126,6 @@ describe('composeStyle', () => {
     expect(style.layers[3]!.paint).toMatchObject({ 'circle-opacity': 0.8 });
   });
 
-  it('draws an OSM query from its stored file, with its attribution', () => {
-    const source: OsmQuerySource = { type: 'osm-query', filters: ['amenity=bench'], file: 'f1', queried: '2026-10-08T12:00:00Z' };
-    expect(compose([layer({ name: 'o', source, attribution: '© OSM' })]).sources).toEqual({});
-    const style = compose([layer({ name: 'o', source, attribution: '© OSM' })], { L: { url: 'blob:x' } });
-    expect(style.sources.L).toEqual({ type: 'geojson', data: 'blob:x', attribution: '© OSM' });
-    expect(style.layers.map((l) => l.id)).toEqual(['L/fill', 'L/outline', 'L/line', 'L/point']);
-  });
 
   it('queries feature layers as vector tiles through the feature protocol', () => {
     const style = compose([

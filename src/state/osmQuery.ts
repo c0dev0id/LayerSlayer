@@ -1,5 +1,5 @@
 import { geojsonBounds } from '../geo/bounds';
-import type { OsmQuerySource } from '../model/layer';
+import type { GeoJsonSource } from '../model/layer';
 import type { LngLat } from '../model/route';
 import { findOsmFeatures, OSM_ATTRIBUTION } from '../services/overpass';
 import { storeFile } from './files';
@@ -15,9 +15,9 @@ function focusArea(): LngLat[] {
   return state.focus;
 }
 
-async function keep(filters: readonly string[], geojson: GeoJSON.FeatureCollection): Promise<OsmQuerySource> {
+async function keep(filters: readonly string[], geojson: GeoJSON.FeatureCollection): Promise<GeoJsonSource> {
   const file = await storeFile(new Blob([JSON.stringify(geojson)], { type: 'application/geo+json' }));
-  return { type: 'osm-query', filters: [...filters], file, queried: new Date().toISOString() };
+  return { type: 'geojson', data: { file, name: 'OpenStreetMap.geojson' }, query: { filters: [...filters], queried: new Date().toISOString() } };
 }
 
 /** Adds a layer of the features the filters find in the focus area, unless none are found. Resolves to how many were. */
@@ -33,8 +33,8 @@ export async function addOsmQueryLayer(name: string, filters: readonly string[])
 /** Runs an OSM query layer's query again in the focus area as it is now. Resolves to how many features it found. */
 export async function updateOsmQueryLayer(id: string): Promise<number> {
   const source = state.layers.find((l) => l.id === id)?.source;
-  if (source?.type !== 'osm-query') throw new Error('The layer is no OSM query.');
-  const filters = [...source.filters];
+  if (source?.type !== 'geojson' || !source.query) throw new Error('The layer is no OSM query.');
+  const filters = [...source.query.filters];
   const geojson = await findOsmFeatures(filters, focusArea());
   replaceLayerSource(id, await keep(filters, geojson), geojsonBounds(geojson));
   return geojson.features.length;
