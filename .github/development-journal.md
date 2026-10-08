@@ -389,14 +389,17 @@ It is a static single-page app on GitHub Pages; there is no server component.
   `<path>` elements, so an icon is its viewBox and path data, drawn with `Path2D`. The
   plugin turns each package into a virtual module (MDI about 800 kB gzipped), loaded when
   the picker opens. A layer keeps its icon's shape, not just its id, so drawing it needs no
-  set loaded and a project file carries it. Its size (1× to 3×) is drawn, not scaled: the
-  image is rendered at that many times the display's resolution and handed to the map at
-  the display's pixel ratio. Layers created with an icon start opaque, the exception to
+  set loaded and a project file carries it. Its size (1× to 3×) scales the disc, which a
+  distance field allows, and is drawn into the icon image, rendered at that many times
+  the display's resolution and handed to the map at the display's pixel ratio. Layers created with an icon start opaque, the exception to
   the half-transparent default, since icons on see-through discs read poorly. The OSM
   feature presets each name an icon; the plugin serves just those
-  (`virtual:osm-feature-icons`, 30 kB) and fails the build on a name no set has. Map
-  images are named after icon, colour and size (`poi:set:name:#rrggbb:size`) and drawn
-  when the map asks, through `setMissingStyleImageResolver`: in MapLibre 6 the
+  (`virtual:osm-feature-icons`, 30 kB, loaded when the OSM tab is first shown) and fails
+  the build on a name no set has. The disc is one signed distance field image for all
+  layers, tinted with `icon-color` and ringed by a white `icon-halo`: colour and opacity
+  stay paint properties, so dragging the colour picker neither lays out tiles again nor
+  adds images. The icon is a second symbol layer, one image per icon and size
+  (`poi:set:name:size`). Images are drawn when the map asks, through `setMissingStyleImageResolver`: in MapLibre 6 the
   `styleimagemissing` event fires only after the asking tile was laid out, so images added
   there missed it, which ArcGIS symbols suffered from too. Waypoints keep an icon the
   same way (`MapIcon`), shown white in their pin in place of the dot; GPX export leaves
