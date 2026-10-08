@@ -8,7 +8,13 @@ describe('icon sets', () => {
     expect(counts.maki).toBeGreaterThan(200);
     expect(counts.temaki).toBeGreaterThan(500);
     expect(counts.mdi).toBeGreaterThan(6500);
-    for (const set of sets) for (const icon of Object.values(set.icons)) expect(icon.paths.length).toBeGreaterThan(0);
+    for (const set of sets) {
+      for (const icon of Object.values(set.icons)) {
+        expect(icon.paths.length).toBeGreaterThan(0);
+        // Character references, as some Maki files have in their path data, are decoded.
+        for (const d of icon.paths) expect(d).not.toContain('&');
+      }
+    }
   });
 
   it('leave out brand logos and deprecated icons', async () => {

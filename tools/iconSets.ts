@@ -27,10 +27,14 @@ interface IconSet {
 
 const packageDir = (name: string) => fileURLToPath(new URL(`../node_modules/${name}/`, import.meta.url));
 
+/** Character references in attribute values, such as the tabs and line breaks some path data has. */
+const decodeReferences = (text: string) =>
+  text.replace(/&#(x[0-9a-f]+|\d+);/gi, (_, code: string) => String.fromCodePoint(code[0] === 'x' || code[0] === 'X' ? parseInt(code.slice(1), 16) : Number(code)));
+
 /** The icon of an SVG file: its paths and its viewBox where it is not `size` square. */
 function readSvg(file: string, size: number): IconData {
   const svg = readFileSync(file, 'utf8');
-  const paths = [...svg.matchAll(/<path\b[^>]*\sd="([^"]+)"/g)].map((m) => m[1]!);
+  const paths = [...svg.matchAll(/<path\b[^>]*\sd="([^"]+)"/g)].map((m) => decodeReferences(m[1]!));
   if (paths.length === 0 || /<(circle|rect|ellipse|line|polyline|polygon|use)\b/.test(svg)) {
     throw new Error(`${file} draws with more than paths.`);
   }
