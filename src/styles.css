@@ -339,6 +339,10 @@ input.swatch {
   content: '▾ ';
 }
 
+.field-row {
+  margin-top: 8px;
+}
+
 .field {
   display: grid;
   gap: 2px;

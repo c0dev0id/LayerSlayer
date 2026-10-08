@@ -2,8 +2,10 @@ import { geoJSONToTile } from '@maplibre/geojson-vt';
 import { fromGeojsonVt } from '@maplibre/vt-pbf';
 import { AJAXError, type AddProtocolAction } from 'maplibre-gl';
 import { HALF_WORLD, WORLD } from '../geo/mercator';
-import { requestUrl } from '../state/net';
+import { hostOf, requestUrl } from '../state/net';
 import { FEATURE_LAYER, parseFeatureTileUrl, resolveWmtsTile } from './compose';
+import { createLimiter } from './limit';
+import { cachedTile, storeTile } from './tileCache';
 import { withParams } from './urls';
 
 const EXTENT = 4096;
@@ -46,24 +48,44 @@ export function featureQueryUrl(layerUrl: string, z: number, x: number, y: numbe
 
 const truncatedLayers = new Set<string>();
 
+/** Feature queries running at once per server; the map asks for every visible tile at once. */
+const QUERIES_PER_SERVER = 4;
+const limiters = new Map<string, ReturnType<typeof createLimiter>>();
+
+function limiterFor(url: string): ReturnType<typeof createLimiter> {
+  const host = hostOf(url) ?? '';
+  let limiter = limiters.get(host);
+  if (!limiter) limiters.set(host, (limiter = createLimiter(QUERIES_PER_SERVER)));
+  return limiter;
+}
+
 /**
  * ArcGIS feature layer tiles: the features in the tile's extent, queried as GeoJSON and
  * cut into a vector tile, so the map loads, caches and draws them like any vector source.
+ * Tiles come from the tile cache while they are fresh; queries to one server are limited.
  */
 export const loadFeatureTile: AddProtocolAction = async (params, abort) => {
   const { z, x, y, layerUrl, maxRecordCount } = parseFeatureTileUrl(params.url);
-  const response = await fetchTile(featureQueryUrl(layerUrl, z, x, y, maxRecordCount), abort.signal);
-  const json = (await response.json()) as GeoJSON.FeatureCollection & {
-    error?: { message?: string };
-    exceededTransferLimit?: boolean;
-    properties?: { exceededTransferLimit?: boolean };
-  };
-  if (json.error) throw new Error(`${layerUrl}: ${json.error.message ?? 'query failed'}`);
-  if ((json.exceededTransferLimit || json.properties?.exceededTransferLimit) && !truncatedLayers.has(layerUrl)) {
-    truncatedLayers.add(layerUrl);
-    console.warn(`${layerUrl}: some tiles hold more features than one query returns; zoom in to see them all.`);
-  }
-  return { data: encodeFeatures(json, z, x, y) };
+  const query = featureQueryUrl(layerUrl, z, x, y, maxRecordCount);
+  const cached = await cachedTile(query).catch(() => undefined);
+  if (cached) return { data: cached };
+  const data = await limiterFor(query)(async () => {
+    const response = await fetchTile(query, abort.signal);
+    const json = (await response.json()) as GeoJSON.FeatureCollection & {
+      error?: { message?: string };
+      exceededTransferLimit?: boolean;
+      properties?: { exceededTransferLimit?: boolean };
+    };
+    if (json.error) throw new Error(`${layerUrl}: ${json.error.message ?? 'query failed'}`);
+    if ((json.exceededTransferLimit || json.properties?.exceededTransferLimit) && !truncatedLayers.has(layerUrl)) {
+      truncatedLayers.add(layerUrl);
+      console.warn(`${layerUrl}: some tiles hold more features than one query returns; zoom in to see them all.`);
+    }
+    return encodeFeatures(json, z, x, y);
+  }, abort.signal);
+  // A copy, since the map may hand the returned buffer to its worker and detach it.
+  void storeTile(query, data.slice(0)).catch(() => {});
+  return { data };
 };
 
 /** GeoJSON features as one vector tile. */
