@@ -69,8 +69,9 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 
 /**
  * Reads vector tiles from a TileJSON, or from a tile template by the layers of two of its
- * tiles: the one at zoom 0, which every tile set has, and the one at TEMPLATE_MAXZOOM at
- * `near`, which holds the layers that only begin at higher zooms, if the area has them.
+ * tiles: the one at zoom 0, and the one at TEMPLATE_MAXZOOM at `near`, which holds the
+ * layers that only begin at higher zooms, if the area has them. Tile sets whose data
+ * begins above zoom 0 answer that tile with an error, so either tile may be missing.
  */
 async function readVectorTiles(url: string, near: LngLat): Promise<ServiceInfo> {
   if (!/\{z(oom)?\}/.test(url)) return parseTileJson(await fetchJson<TileJson>(url), url);
@@ -82,20 +83,16 @@ async function readVectorTiles(url: string, near: LngLat): Promise<ServiceInfo> 
       .replace('{x}', String(x))
       .replace('{y}', String(templates.scheme === 'tms' ? 2 ** z - 1 - y : y));
   const here = tileAt(near[0], near[1], TEMPLATE_MAXZOOM);
-  const [{ tileLayerNames }, world, local] = await Promise.all([
-    import('./mvt'),
-    fetchResource(tileUrl(0, 0, 0)).then((r) => r.arrayBuffer()),
-    fetchResource(tileUrl(TEMPLATE_MAXZOOM, here.x, here.y))
+  const tile = (z: number, x: number, y: number) =>
+    fetchResource(tileUrl(z, x, y))
       .then((r) => r.arrayBuffer())
-      .catch(() => undefined),
-  ]);
-  const names = tileLayerNames(world);
-  if (!names) throw new Error('The tile at zoom 0 is not a vector tile; the address of its TileJSON may work instead.');
-  return parseTemplate(
-    templates,
-    [...new Set([...names, ...(tileLayerNames(local) ?? [])])],
-    fileName(url.split(/\{z/)[0]!) || 'Vector tiles',
-  );
+      .catch(() => undefined);
+  const [{ tileLayerNames }, world, local] = await Promise.all([import('./mvt'), tile(0, 0, 0), tile(TEMPLATE_MAXZOOM, here.x, here.y)]);
+  const names = [...new Set([...(tileLayerNames(world) ?? []), ...(tileLayerNames(local) ?? [])])];
+  if (names.length === 0) {
+    throw new Error(`No vector tile with layers was found at zoom 0, nor here at zoom ${TEMPLATE_MAXZOOM}; the address of its TileJSON may work instead.`);
+  }
+  return parseTemplate(templates, names, fileName(url.split(/\{z/)[0]!) || 'Vector tiles');
 }
 
 /** OGC APIs answer HTML to a browser's default Accept header. */
