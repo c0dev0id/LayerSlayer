@@ -67,6 +67,10 @@ in the browser.
 
 Layers, their settings, the focus area, routes and the map view are kept in the browser's local storage,
 files in IndexedDB, so the map is as it was after a restart.
+*Save* (top of the panel) downloads all of it as a `.webmap` file, imported files
+included, and *Open* puts such a file in place of what is there: to move to another
+browser, or to come back after clearing this one. The CORS proxy address stays in the
+browser, since it may carry an account key; which servers go through it is saved.
 
 ## How each source is drawn
 

@@ -149,6 +149,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   store and so subscribes to every property; imported files are Blobs in IndexedDB, referenced by key,
   deleted with their layer and swept at start-up. Before 1.0 there is no migration: stored
   layers that no longer have the current shape are dropped one by one.
+- **Project files, as in mappic.** *Save* writes a ZIP (`.webmap`): `project.json` with
+  the layers, view, focus area, proxied hosts, routes and waypoints, and each stored file
+  as `files/<key>` under the key its layer refers to, so nothing needs rewriting. Reading
+  goes through the same `parseState` and `parseRouteData` as local storage, and the whole
+  file is checked (every layer's file present) before anything is replaced. *Open*
+  replaces rather than merges, asks first, clears the route undo history and sweeps the
+  files no layer refers to. The proxy address is left out of the file, as it may hold an
+  account key, and the browser keeps its own. fflate and the format load on first use.
 - **CORS is the limit of a static site.** WebGL needs CORS-clean images. Requests go
   through one function (`requestUrl`), used by MapLibre's `transformRequest` and by the
   app's own fetches and protocols: plain HTTP is upgraded on an HTTPS page, and hosts the
@@ -323,4 +331,5 @@ It is a static single-page app on GitHub Pages; there is no server component.
   tiles, with the map around it dimmed.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
   waypoints, undo and redo, car, bike and foot profiles, GPX export and import.
-- Layers, routes, settings, view and imported files survive a browser restart.
+- Layers, routes, settings, view and imported files survive a browser restart, and go
+  to another browser as a `.webmap` project file.
