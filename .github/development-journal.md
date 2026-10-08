@@ -177,7 +177,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   so the map starts where it was), saved by `persistedStore` after writes through the
   store's setter, once per batch of writes, rather than by an effect that serialises the
   store and so subscribes to every property; imported files are Blobs in IndexedDB, referenced by key,
-  deleted with their layer and swept at start-up. Before 1.0 there is no migration: stored
+  deleted by one store effect once no layer uses them (removed, given new data, or replaced
+  by an opened project) and swept at start-up. Before 1.0 there is no migration: stored
   layers that no longer have the current shape are dropped one by one.
 - **Named Layer Slayer, code name webmap.** The name shows in the page title, the panel,
   messages, GPX files and saved project names. The repository and its Pages address, the
@@ -355,11 +356,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   its bounds) and asks for `out geom`. The focus area is required, not just advised: a
   query without one would be worldwide and time out anyway. Querying is done once; the
   result is converted to GeoJSON and stored like an imported file, so it travels in
-  project files and costs Overpass nothing while the map is used. The layer keeps its
-  filters and the time it ran; *Update* runs them again in the focus area as it is then.
-  Overpass reports timeouts and memory exhaustion with status 200 and a `remark`, which is
-  treated as the failure it is, and its 429 and 504 pages are explained in words. One
-  layer has one colour; features that should look different go in separate layers.
+  project files and costs Overpass nothing while the map is used. The layer is a plain
+  GeoJSON layer that records its `query` (filters and the time it ran), not a source kind
+  of its own, so drawing and file handling know nothing of Overpass; *Update* runs the
+  query again in the focus area as it is then, one update per layer at a time. Overpass
+  reports timeouts and memory exhaustion with status 200 and a `remark`, which is treated
+  as the failure it is; its 429 and 504 pages, like any busy server's, are put in words by
+  `statusMessage`. One layer has one colour; features that should look different go in
+  separate layers.
 - **GeoJSON loaded from an address survives style diffs.** MapLibre 6 keeps the GeoJSON it
   loaded from an address in place of the address, so every diffed `setStyle` saw such a
   source as changed and fetched and indexed it again, on any change of any layer (each
@@ -368,8 +372,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   address back into the current style the diff compares against. That relies on MapLibre
   diffing against the very object it hands to `transformStyle`; carrying the loaded data
   into the next style instead, the documented way, would have MapLibre compare and clone
-  all of it on every change. A layer whose file changes keeps its old object URL until
-  the new one has loaded, so the map never reads a revoked address.
+  all of it on every change. A layer whose file changes keeps drawing its old file until
+  the new one has loaded, rather than vanishing meanwhile.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
