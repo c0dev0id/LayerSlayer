@@ -64,12 +64,14 @@ async function check(entry: Entry): Promise<string> {
   const url = documentUrl(entry).replace(/^http:/, 'https:');
   try {
     const response = await fetch(url, { headers: { Origin: ORIGIN }, signal: AbortSignal.timeout(30_000) });
+    // An error answer says nothing about CORS (servers rarely add the header to errors), so
+    // the entry keeps what it had.
+    if (!response.ok) return `HTTP ${response.status}, CORS not checked`;
     // Repeated headers come back joined ("*, *"), and browsers refuse those just the same:
     // the header must hold exactly one value.
     const allowed = response.headers.get('access-control-allow-origin');
     entry.cors = allowed === '*' || allowed === ORIGIN;
     const header = entry.cors ? '' : ` [Access-Control-Allow-Origin: ${allowed ?? 'none'}]`;
-    if (!response.ok) return `HTTP ${response.status}${header}`;
     const info = await parse(entry, entry.type === 'xyz' ? '' : await response.text(), url);
     if (!info) return `ok${header}`;
     const usable = info.offers.filter((o) => o.draft).length;
