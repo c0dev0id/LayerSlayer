@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { LngLat, Route } from '../model/route';
 import { parseGpx } from '../services/gpx';
-import { gpxToRouteData, MAX_ROUTED_POINTS, MAX_TRACK_POINTS, routeTracks } from './gpx';
+import { gpxToRouteData, MAX_TRACK_POINTS, routeTracks } from './gpx';
 
 const decode = (geometry: string): LngLat[] => JSON.parse(geometry);
 
@@ -78,13 +78,12 @@ describe('gpxToRouteData', () => {
     ]);
   });
 
-  it('simplifies long tracks and treats long routes as tracks', () => {
+  it('routes every point of a long route and simplifies long tracks', () => {
     const zigzag = (count: number): LngLat[] => Array.from({ length: count }, (_, i) => [i * 0.0001, (i % 2) * 0.0002]);
-    const data = gpxToRouteData(
-      { waypoints: [], routes: [{ points: zigzag(MAX_ROUTED_POINTS + 1) }], tracks: [{ segments: [zigzag(3000)] }] },
-      options,
-    );
-    expect(data.routes[0]!.points.slice(1).every((p) => p.straight)).toBe(true);
+    const data = gpxToRouteData({ waypoints: [], routes: [{ points: zigzag(1000) }], tracks: [{ segments: [zigzag(3000)] }] }, options);
+    expect(data.routes[0]!.points).toHaveLength(1000);
+    expect(data.routes[0]!.points.some((p) => p.straight)).toBe(false);
     expect(data.routes[1]!.points.length).toBeLessThanOrEqual(MAX_TRACK_POINTS);
+    expect(data.routes[1]!.points.slice(1).every((p) => p.straight)).toBe(true);
   });
 });

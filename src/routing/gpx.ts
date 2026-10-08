@@ -12,8 +12,6 @@ export function routeTracks(routes: readonly Route[], decode = decodePolyline): 
   return routes.filter((r) => r.points.length >= 2).map((r) => ({ name: r.name, points: routePoints(r, decode) }));
 }
 
-/** A GPX route with more points than this is a track in disguise; routing each leg would take minutes. */
-export const MAX_ROUTED_POINTS = 100;
 /** Tracks are simplified to at most this many points, each a marker while the route is drawn. */
 export const MAX_TRACK_POINTS = 500;
 
@@ -21,17 +19,17 @@ export const MAX_TRACK_POINTS = 500;
 const cleanPoints = (points: readonly LngLat[]) => withoutRepeats(points.map(roundLngLat));
 
 /**
- * Routes and waypoints from a GPX file. A GPX route keeps its points and is routed with
- * `profile`; a track, and a route of more than MAX_ROUTED_POINTS, is simplified to at most
- * MAX_TRACK_POINTS joined by straight lines, so that it keeps its shape. Unnamed entries
- * are named after the file.
+ * Routes and waypoints from a GPX file. A GPX route keeps all its points and each leg is
+ * routed with `profile`; a leg the routing cannot find stays unrouted until one of its
+ * points moves. A track is simplified to at most MAX_TRACK_POINTS joined by straight
+ * lines, so that it keeps its shape. Unnamed entries are named after the file.
  */
 export function gpxToRouteData(
   gpx: GpxContent,
   options: { fileName: string; profile: Profile; existing: readonly Route[]; newId: () => string },
 ): RouteData {
   const lines = [
-    ...gpx.routes.map((r) => ({ ...r, routed: r.points.length <= MAX_ROUTED_POINTS })),
+    ...gpx.routes.map((r) => ({ ...r, routed: true })),
     ...gpx.tracks.map((t) => ({ name: t.name, points: t.segments.flat(), routed: false })),
   ].filter((l) => l.points.length > 0);
   const routes: Route[] = [];

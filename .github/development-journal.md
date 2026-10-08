@@ -240,12 +240,13 @@ It is a static single-page app on GitHub Pages; there is no server component.
     undo steps; an undo restores the cached legs with the points.
   - The GPX format, reading and writing, is `services/gpx.ts`; reading keeps track
     segments, which the layer import draws apart and the route import joins.
-  - GPX import goes into the route editor. Waypoints stay waypoints; a `<rte>` keeps its
-    points and is routed with the profile of the last route; a `<trk>`, or a route of more
-    than 100 points (routing those would take minutes at one request per second), is
-    simplified with Douglas–Peucker to at most 500 points joined by straight lines, since
-    every point is a marker while the route is drawn and an undo step copies all routes.
-    Straight legs keep their shape when the profile changes.
+  - GPX import goes into the route editor. Waypoints stay waypoints; a `<rte>` keeps all
+    its points and every leg is routed with the profile of the last route, however long
+    that takes at one request per second; a leg that fails stays unrouted (red dashed)
+    until a point of it moves, which gives it a new key. A `<trk>` is simplified with
+    Douglas–Peucker to at most 500 points joined by straight lines, since every point is
+    a marker while the route is drawn and an undo step copies all routes. Straight legs
+    keep their shape when the profile changes.
   - A GPX file can also be a layer (Add layer > Files), for tracks to look at rather than
     edit. Only its tracks are read, converted to GeoJSON at import and kept as a GeoJSON
     file, so the layer is an ordinary GeoJSON layer with a palette colour and the colour

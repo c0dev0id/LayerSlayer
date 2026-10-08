@@ -51,9 +51,10 @@ in the browser.
   - *Undo* and *Redo* (Ctrl+Z, Ctrl+Shift+Z) step through route and waypoint edits; layer
     changes are not part of it. *Done* or Esc ends drawing.
   - *Export GPX* writes the waypoints and one track per route. *Import GPX* adds a file's
-    waypoints, its routes (`<rte>`) as routed points, and its tracks (`<trk>`) simplified
-    to at most 500 points joined by straight lines, so they keep their shape and stay
-    editable. Routes of more than 100 points are taken as tracks.
+    waypoints, its routes (`<rte>`) with every point routed, and its tracks (`<trk>`)
+    simplified to at most 500 points joined by straight lines, so they keep their shape
+    and stay editable. A leg the routing cannot find stays a red dashed line until one of
+    its points is moved.
 
 Layers, their settings, routes and the map view are kept in the browser's local storage,
 files in IndexedDB, so the map is as it was after a restart.
