@@ -77,19 +77,13 @@ export function MapView() {
       else console.error(event.error);
     });
     // Layer icons and the icons of ArcGIS symbols are not in any sprite; the map asks for
-    // each when it needs it.
-    map.on('styleimagemissing', (event: { id: string }) => {
-      const poi = parsePoiImageId(event.id);
-      if (poi) {
-        const icon = state.layers.find((l) => l.icon?.id === poi.icon)?.icon;
-        if (!icon) return;
-        const drawn = drawPoi(icon, poi.color);
-        return map.addImage(event.id, drawn.image, { pixelRatio: drawn.pixelRatio });
-      }
-      for (const loaded of assets().values()) {
-        const icon = loaded.icons?.get(event.id);
-        if (icon) return map.addImage(event.id, icon.image, { pixelRatio: icon.pixelRatio });
-      }
+    // each when it needs it, and waits for the answer before laying out the tile.
+    map.setMissingStyleImageResolver((id) => {
+      if (map.hasImage(id)) return;
+      const poi = parsePoiImageId(id);
+      const layerIcon = poi && state.layers.find((l) => l.icon?.id === poi.icon)?.icon;
+      const icon = layerIcon ? drawPoi(layerIcon, poi.color) : [...assets().values()].find((loaded) => loaded.icons?.has(id))?.icons?.get(id);
+      if (icon) map.addImage(id, icon.image, { pixelRatio: icon.pixelRatio });
     });
     watchGeoJsonBounds(map);
     map.on('sourcedata', (event) => {
