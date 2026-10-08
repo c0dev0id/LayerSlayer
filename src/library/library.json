@@ -1076,7 +1076,44 @@
       "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursCombined/FeatureServer",
       "region": "United States",
       "category": "Weather",
-      "note": "Contours of the latest air quality index, ozone and fine particles combined."
+      "note": "Contours of the latest air quality index, ozone and fine particles combined, in the AQI colours from green (good) to maroon (hazardous).",
+      "ownStyle": true
+    },
+    {
+      "name": "EPA AirNow — fine particles (PM2.5)",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursPM25/FeatureServer",
+      "region": "United States",
+      "category": "Weather",
+      "note": "Contours of the latest air quality index for fine particles (PM2.5), the pollutant wildfire smoke raises, in the AQI colours.",
+      "ownStyle": true
+    },
+    {
+      "name": "EPA AirNow — ozone",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursOzone/FeatureServer",
+      "region": "United States",
+      "category": "Weather",
+      "note": "Contours of the latest air quality index for ozone, in the AQI colours.",
+      "ownStyle": true
+    },
+    {
+      "name": "EPA AirNow — monitoring stations",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/Air_Now_Current_Monitors_Ozone_and_PM/FeatureServer",
+      "region": "United States",
+      "category": "Weather",
+      "note": "The latest readings of the stations measuring ozone and particles, each dot in the colour of its air quality index.",
+      "ownStyle": true
+    },
+    {
+      "name": "EPA AirNow — air quality forecast",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNow_National_Air_Quality_Index_(AQI)_Forecast/FeatureServer",
+      "region": "United States",
+      "category": "Weather",
+      "note": "Today's and tomorrow's air quality forecast for each reporting area, in the AQI colours.",
+      "ownStyle": true
     },
     {
       "name": "NOAA — wildfire smoke forecast",
