@@ -320,6 +320,16 @@ It is a static single-page app on GitHub Pages; there is no server component.
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
   `confirm()` answers no without asking, so the action could no longer be taken.
+- **Vector tile templates in the library list their tile layers.** A template has no
+  TileJSON to name its layers, and the two sample tiles the reader takes (zoom 0 and zoom
+  14 near the view) miss layers that the area or zoom lacks; Open Infrastructure Map's
+  petroleum, pipeline and water sets have no tile below zoom 2 or 3 at all. Such entries
+  carry `layers`, `minzoom` and `maxzoom` (from the site's own style and sample tiles),
+  so opening one reads nothing and no tile below the first zoom is asked for. Open
+  Infrastructure Map's solar heatmap was left out: a zoom 5 tile holds 370 000 points in
+  8 MB, drawn as a heatmap there, which webmap's generated styles do not do. Its base map
+  is left out too: its address carries a build date, and OpenFreeMap serves base maps
+  with a style.
 - **The add-layer dialog stays open.** Adding many layers from several sources was a chore
   when the dialog closed after each one. Now a tap toggles a layer, the source list and a
   source's layer list take turns without the dialog closing, and only Close leaves it. The
