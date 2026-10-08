@@ -19,7 +19,7 @@ export function WaypointDialog() {
     const name = String(data.get('name') ?? '').trim();
     const description = String(data.get('description') ?? '').trim();
     if (!name) return;
-    if (draft.id) updateWaypoint(draft.id, { name, description, icon }, 'Edit waypoint');
+    if ('id' in draft) updateWaypoint(draft.id, { name, description, icon }, 'Edit waypoint');
     else addWaypoint({ id: crypto.randomUUID(), routeId: draft.routeId, lngLat: draft.lngLat, name, ...(description && { description }), ...(icon && { icon }) });
     setWaypointDraft(undefined);
   };
@@ -35,7 +35,7 @@ export function WaypointDialog() {
                 save(e.currentTarget, icon());
               }}
             >
-              <h2>{draft.id ? 'Edit waypoint' : 'New waypoint'}</h2>
+              <h2>{'id' in draft ? 'Edit waypoint' : 'New waypoint'}</h2>
               <label>
                 Name
                 <input name="name" required autofocus value={draft.name} placeholder="Viewpoint, café, gravel ahead…" />

@@ -31,10 +31,12 @@ export function gpxToRouteData(
   gpx: GpxContent,
   options: { fileName: string; profile: Profile; existing: readonly Route[]; newId: () => string },
 ): RouteData {
-  const lines = [
+  const lines: { name?: string | undefined; points: LngLat[]; routed: boolean }[] = [
     ...gpx.routes.map((r) => ({ ...r, routed: true })),
     ...gpx.tracks.map((t) => ({ name: t.name, points: t.segments.flat(), routed: false })),
   ].filter((l) => l.points.length > 0);
+  // Waypoints without a route or track get a route of their own, without points.
+  if (lines.length === 0 && gpx.waypoints.length > 0) lines.push({ points: [], routed: true });
   const routes: Route[] = [];
   lines.forEach((line, i) => {
     const points = cleanPoints(line.routed ? line.points : simplifyToCount(line.points, MAX_TRACK_POINTS));
@@ -47,9 +49,6 @@ export function gpxToRouteData(
       legs: {},
     });
   });
-  if (routes.length === 0 && gpx.waypoints.length > 0) {
-    routes.push({ id: options.newId(), name: options.fileName, profile: options.profile, color: nextRouteColor(options.existing), points: [], legs: {} });
-  }
   const routeId = routes[0]?.id ?? '';
   const waypoints = gpx.waypoints.map((w, i) => ({
     id: options.newId(),
