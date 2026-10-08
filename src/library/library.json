@@ -72,6 +72,14 @@
       "attribution": "USGS"
     },
     {
+      "name": "Esri World Imagery",
+      "type": "arcgis-mapserver",
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+      "region": "Global",
+      "category": "Aerial",
+      "note": "Satellite and aerial imagery of the whole world, down to about 30 cm per pixel in many places, from Esri and its partners."
+    },
+    {
       "name": "NASA GIBS — satellite imagery",
       "type": "wmts",
       "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/1.0.0/WMTSCapabilities.xml",
