@@ -70,12 +70,20 @@ It is a static single-page app on GitHub Pages; there is no server component.
     one extent query (`f=geojson`, generalised to about a pixel), cut into a tile with
     `geoJSONToTile` and encoded with vt-pbf, so MapLibre loads, caches and overzooms it like
     any vector source. Tiles are queried up to zoom 14. A tile with more features than one
-    query returns is truncated (logged once per layer). The service's query formats are not
-    checked at service level, since hosted layers support GeoJSON even where the service
-    says only JSON. New feature layers start at zoom 9 (or the service's minimum where
-    higher), because a low-zoom tile makes the server return its whole record limit. The
-    source is not limited to the layer's bounds: those are where the features were when
-    the layer was added, and live data moves.
+    query returns is truncated (logged once per layer). Opening a FeatureServer also reads
+    each feature layer's own description and feature count, because the service listing
+    understates its layers: the NTAD services list 1000 records and JSON only, where each
+    layer allows 2000, GeoJSON and tile queries. Layers that support `resultType=tile` are
+    queried that way with their `tileMaxRecordCount` (4000 or 8000 on hosted services); on
+    the NTAD rail lines a zoom 9 tile then came back complete with 3597 features in 1.4 s,
+    against a standard query cut off at 2000 after 23 s. A layer whose features all fit in
+    one query is shown from zoom 0, since no tile can hold more; a larger one starts at
+    zoom 9 (or the service's minimum where higher), because a low-zoom tile makes the
+    server return its whole record limit. Where a layer's own description cannot be read,
+    the service's word is taken and its query formats are not checked, since hosted layers
+    support GeoJSON even where the service says only JSON. The source is not limited to the
+    layer's bounds: those are where the features were when the layer was added, and live
+    data moves.
   - XYZ: Leaflet and OpenLayers spellings are converted (`{s}` and `{a-c}` to one template
     per subdomain, `{-y}` to the TMS scheme, `{q}` to `{quadkey}`, `{r}` to `{ratio}`).
   - MapLibre style: sources and layers prefixed with the layer id, URLs made absolute
@@ -104,9 +112,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - **The library.** Generated once from WMSproxy's `library.json` and mappic's base maps;
   each entry names its type explicitly, and a unit test checks that address detection
   agrees with every entry. `npm run check-library` reads every entry with the app's own
-  parsers and records `cors: false` for servers without a valid CORS header; it reads live
-  services, so it is run by hand. Esri World Imagery (in mappic) was left out: its keyless
-  endpoint is only licensed with Esri software.
+  parsers and records `cors: false` for servers without a valid CORS header; an error
+  answer leaves the mark as it was, since servers rarely add CORS headers to errors. It
+  reads live services, so it is run by hand. Esri World Imagery (in mappic) was left out:
+  its keyless endpoint is only licensed with Esri software. The feature services WMSproxy
+  had to refuse for want of a renderer (its `docs/feature-servers.md`) are in the library,
+  with the distinct rail datasets of geodata.bts.gov; the per-railroad views of the rail
+  network were left out as copies of the same lines. Amsterdam's travel time feed is
+  served over plain HTTP only and is listed as needing the proxy; it could not be reached
+  for checking.
 - **GeoPDF georeferencing.** Only ISO 32000-2 geospatial viewports (Adobe's extension:
   `/VP` with a `/Measure` of subtype `/GEO`, `GPTS` and `LPTS`) are read; the OGC/TerraGo
   `LGIDict` encoding is not. pdf.js gives no access to raw page dictionaries, so pdf-lib

@@ -45,7 +45,7 @@ in IndexedDB, so the map is as it was after a restart.
 | WMS 1.1.1 / 1.3.0 | GetCapabilities | Raster tiles: a 512 px GetMap per tile with MapLibre's `{bbox-epsg-3857}`, in the service's name for Web Mercator (EPSG:3857, 900913, 102100, …) |
 | WMTS 1.0.0 | GetCapabilities | Raster tiles from a tile matrix set that lines up with Web Mercator tiles; RESTful template or KVP |
 | ArcGIS MapServer | `?f=json` | Cached Web Mercator services as XYZ tiles, others as `export` images per tile, the whole map or one layer |
-| ArcGIS FeatureServer | `?f=json` | Vector tiles: one extent query per tile answered as GeoJSON and cut into a vector tile in the browser, shown from zoom 9 unless widened |
+| ArcGIS FeatureServer | `?f=json`, and each layer's own description and feature count | Vector tiles: one extent query per tile (a tile query where the layer supports it) answered as GeoJSON and cut into a vector tile in the browser |
 | XYZ template | the template | Raster tiles; `{s}`, `{a-c}`, `{-y}`, `{q}` and `{r}` spellings are converted |
 | GeoJSON | URL or file | GeoJSON source, drawn in the layer's colour |
 | MapLibre style | style JSON | The style's own sources and layers |
@@ -59,10 +59,10 @@ browser* in its settings, and tiles once loaded are answered from the browser's 
 Storage for 24 hours. New feature layers keep their tiles from the start. Settings shows
 how many tiles are kept and clears them.
 
-At most four feature queries run at once per server. New feature layers are shown from
-zoom 9, or from the service's own minimum zoom where that is higher: at lower zooms each
-tile covers so much that the server returns its whole record limit for it. The zoom range
-of the layer widens that.
+At most four feature queries run at once per server. A feature layer whose features all fit
+in one query is shown at every zoom; a larger one starts at zoom 9, or at the service's own
+minimum zoom where that is higher, since at lower zooms each tile covers so much that the
+server returns its whole record limit for it. The zoom range of the layer widens that.
 
 ## CORS and the proxy
 
