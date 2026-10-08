@@ -844,8 +844,10 @@ input.swatch {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
 }
 
+/* Level with the middle of the pin's head, 11 of its 28 units down. */
 .waypoint-name {
   position: absolute;
+  top: calc(100% * 11 / 28);
   left: 100%;
   max-width: 180px;
   margin-left: 2px;
@@ -959,12 +961,6 @@ input.swatch {
 }
 
 /* Place search over the map's top left corner, its places listed below it. */
-/* Narrow screens only: the button the search folds into, and the one that folds the panel. */
-button.search-toggle,
-button.panel-toggle {
-  display: none;
-}
-
 .search {
   position: absolute;
   top: 10px;
@@ -976,7 +972,8 @@ button.panel-toggle {
 
 .search-form,
 .search-results,
-.search > .search-note {
+.search > .search-note,
+.search-toggle {
   border-radius: 6px;
   background: #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
@@ -1125,6 +1122,14 @@ button.panel-toggle {
   justify-content: flex-end;
 }
 
+/* Wide screens show the search box itself, and the panel beside the map stays open. */
+@media (width > 720px) {
+  .search-toggle,
+  .panel .panel-toggle {
+    display: none;
+  }
+}
+
 @media (max-width: 720px) {
   .app {
     grid-template-columns: 1fr;
@@ -1154,10 +1159,6 @@ button.panel-toggle {
   }
 
   /* Folded to its header, the panel leaves the map the screen. */
-  button.panel-toggle {
-    display: inline-grid;
-  }
-
   .app.panel-collapsed .panel > :not(:first-child) {
     display: none;
   }
@@ -1167,15 +1168,12 @@ button.panel-toggle {
     width: auto;
   }
 
-  button.search-toggle {
+  .search-toggle {
     display: grid;
     place-items: center;
     width: 40px;
     height: 40px;
     border: none;
-    border-radius: 6px;
-    background: #fff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
     color: #343a40;
     cursor: pointer;
   }
