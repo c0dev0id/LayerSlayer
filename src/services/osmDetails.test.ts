@@ -1,0 +1,138 @@
+import { describe as group, expect, it } from 'vitest';
+import type { OsmElement } from './overpass';
+import { describe, detailsQuery, distanceTo, kindOf, nearestByKind, searchRadius, words } from './osmDetails';
+
+const spot: [number, number] = [8.4, 49.0];
+/** A point `east` and `north` metres from the spot. */
+const at = (east: number, north: number) => ({ lat: 49 + north / 110_574, lon: 8.4 + east / (111_320 * Math.cos((49 * Math.PI) / 180)) });
+const node = (id: number, east: number, north: number, tags: Record<string, string>): OsmElement => ({ type: 'node', id, ...at(east, north), tags });
+const way = (id: number, points: [number, number][], tags: Record<string, string>): OsmElement => ({ type: 'way', id, geometry: points.map(([e, n]) => at(e, n)), tags });
+
+group('kindOf', () => {
+  it('takes drivable ways, places to go to and barriers', () => {
+    expect(kindOf(way(1, [[0, 0], [1, 1]], { highway: 'track' }))).toBe('road');
+    expect(kindOf(way(1, [[0, 0], [1, 1]], { highway: 'primary_link' }))).toBe('road');
+    expect(kindOf(node(1, 0, 0, { amenity: 'fuel' }))).toBe('poi');
+    expect(kindOf(node(1, 0, 0, { shop: 'bakery' }))).toBe('poi');
+    expect(kindOf(node(1, 0, 0, { barrier: 'gate' }))).toBe('barrier');
+  });
+
+  it('leaves out footways, street furniture, kerbs and unnamed boards', () => {
+    expect(kindOf(way(1, [[0, 0], [1, 1]], { highway: 'footway' }))).toBeUndefined();
+    expect(kindOf(way(1, [[0, 0], [1, 1]], { landuse: 'farmland' }))).toBeUndefined();
+    expect(kindOf(node(1, 0, 0, { amenity: 'bench', backrest: 'yes' }))).toBeUndefined();
+    expect(kindOf(node(1, 0, 0, { barrier: 'kerb' }))).toBeUndefined();
+    expect(kindOf(node(1, 0, 0, { tourism: 'information', information: 'board' }))).toBeUndefined();
+    expect(kindOf(node(1, 0, 0, { leisure: 'picnic_table' }))).toBeUndefined();
+    expect(kindOf(node(1, 0, 0, { leisure: 'park', name: 'Schlossgarten' }))).toBe('poi');
+  });
+});
+
+group('distanceTo', () => {
+  it('measures to a node, to the nearest part of a line, and inside an area as none', () => {
+    expect(distanceTo(node(1, 30, 40, {}), spot)).toBeCloseTo(50, 0);
+    expect(distanceTo(way(1, [[-100, 20], [100, 20]], {}), spot)).toBeCloseTo(20, 0);
+    expect(distanceTo(way(1, [[-10, -10], [10, -10], [10, 10], [-10, 10], [-10, -10]], {}), spot)).toBe(0);
+    expect(distanceTo({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [at(5, -50), at(5, 50)] }] }, spot)).toBeCloseTo(5, 0);
+    expect(distanceTo({ type: 'way', id: 1 }, spot)).toBeUndefined();
+  });
+});
+
+group('nearestByKind', () => {
+  it('keeps the nearest of each kind, nearest first', () => {
+    const found = nearestByKind(
+      [
+        way(1, [[-100, 30], [100, 30]], { highway: 'residential' }),
+        way(2, [[-100, 12], [100, 12]], { highway: 'track' }),
+        node(3, 3, 4, { amenity: 'bench' }),
+        node(4, 60, 0, { amenity: 'cafe' }),
+        node(5, 0, 8, { barrier: 'gate' }),
+      ],
+      spot,
+    );
+    expect(found.map((f) => [f.kind, f.element.id])).toEqual([
+      ['barrier', 5],
+      ['road', 2],
+      ['poi', 4],
+    ]);
+  });
+});
+
+group('describe', () => {
+  it('tells a road or trail by type, name, speed, direction, surface and access', () => {
+    const details = describe({
+      kind: 'road',
+      distance: 12,
+      element: way(7, [[0, 0], [1, 1]], { highway: 'track', name: 'Waldweg', tracktype: 'grade3', surface: 'fine_gravel', maxspeed: '30', oneway: 'no', motor_vehicle: 'forestry', '4wd_only': 'yes' }),
+    });
+    expect(details).toMatchObject({ kind: 'road', title: 'Track', name: 'Waldweg', url: 'https://www.openstreetmap.org/way/7' });
+    expect(details.rows.map((r) => [r.label, r.value])).toEqual([
+      ['Speed limit', '30 km/h'],
+      ['Direction', 'Both ways'],
+      ['Surface', 'Fine gravel'],
+      ['Track', 'Grade 3: mixed hard and soft'],
+      ['Motor vehicles', 'Forestry only'],
+      ['Four-wheel drive', 'Required'],
+    ]);
+    expect(describe({ kind: 'road', distance: 0, element: way(8, [], { highway: 'secondary_link', junction: 'roundabout' }) })).toMatchObject({
+      title: 'Secondary slip road',
+      rows: [{ label: 'Direction', value: 'One way' }],
+    });
+    expect(describe({ kind: 'road', distance: 0, element: way(9, [], { highway: 'service', service: 'driveway' }) }).title).toBe('Driveway');
+  });
+
+  it('tells a place by type, name, address, phone, website and opening hours', () => {
+    const details = describe({
+      kind: 'poi',
+      distance: 40,
+      element: node(3, 0, 0, {
+        amenity: 'fuel',
+        brand: 'Aral',
+        'addr:street': 'Hauptstraße',
+        'addr:housenumber': '5',
+        'addr:postcode': '76131',
+        'addr:city': 'Karlsruhe',
+        phone: '+49 721 123456',
+        website: 'https://www.aral.de/',
+        opening_hours: 'Mo-Fr 06:00-22:00; Sa,Su 08:00-20:00',
+      }),
+    });
+    expect(details).toMatchObject({ title: 'Fuel station', name: 'Aral', url: 'https://www.openstreetmap.org/node/3' });
+    expect(details.rows).toEqual([
+      { icon: 'address', label: 'Address', value: 'Hauptstraße 5, 76131 Karlsruhe' },
+      { icon: 'phone', label: 'Phone', value: '+49 721 123456', href: 'tel:+49721123456' },
+      { icon: 'website', label: 'Website', value: 'aral.de', href: 'https://www.aral.de/' },
+      { icon: 'hours', label: 'Opening hours', value: 'Mo-Fr 06:00-22:00\nSa,Su 08:00-20:00' },
+    ]);
+  });
+
+  it('tells a barrier by type, opening hours, lock and access', () => {
+    const details = describe({ kind: 'barrier', distance: 5, element: node(5, 0, 0, { barrier: 'lift_gate', locked: 'yes', access: 'private' }) });
+    expect(details.title).toBe('Lift gate');
+    expect(details.rows.map((r) => [r.label, r.value])).toEqual([
+      ['Locked', 'Yes'],
+      ['Access', 'Private'],
+    ]);
+  });
+});
+
+group('the query', () => {
+  it('asks for drivable ways, places and barriers around the spot', () => {
+    const query = detailsQuery(spot, 63.4);
+    expect(query).toMatch(/^\[out:json\]\[timeout:20\];\(.*\);out geom;$/);
+    expect(query).toContain('way["highway"~"^((motorway|trunk|primary|secondary|tertiary)(_link)?|');
+    expect(query).toContain('nwr["amenity"](around:63,49.000000,8.400000);');
+    expect(query).toContain('nwr["leisure"]["name"](around:63,49.000000,8.400000);');
+    expect(query).toContain('node["barrier"](around:63,49.000000,8.400000);');
+  });
+
+  it('looks about 40 pixels around, between 15 and 250 metres', () => {
+    expect(searchRadius(49, 15)).toBeCloseTo(63, 0);
+    expect(searchRadius(49, 20)).toBe(15);
+    expect(searchRadius(49, 10)).toBe(250);
+  });
+
+  it('puts tag values in words', () => {
+    expect(words('lift_gate')).toBe('Lift gate');
+  });
+});
