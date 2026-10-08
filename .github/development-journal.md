@@ -234,7 +234,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   - Requests to the routing server go out directly, not through the CORS proxy; it sends
     `Access-Control-Allow-Origin: *`.
 - **UI after mappic.** Top-first layer list with an active layer whose settings sit below
-  it, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
+  it, names renamed in place on the card, a summary line per card (opacity, colour, zoom
+  range, cache, proxy) so the list answers which layer is set how without opening each, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
   panel layout, and the panel below the map on narrow screens.
 - **The add-layer dialog stays open.** Adding many layers from several sources was a chore
   when the dialog closed after each one. Now a tap toggles a layer, the source list and a

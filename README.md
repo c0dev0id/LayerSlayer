@@ -30,13 +30,15 @@ in the browser.
     they are chosen. Each new GeoJSON or GPX layer takes the next colour of a palette,
     which its settings can change.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
-  arrow keys on it) to change the order; the eye hides it, × removes it, and the frame
-  icon flies to the area the layer covers (layers that span most of the world have none).
-  A layer shown in grey italics is outside its zoom range at the current zoom; a red
-  triangle carries the last error loading it.
-- Below the list, the **active layer** (click a name) has its name, opacity, zoom range,
-  colour (vector layers), source, the CORS proxy for its server and, for tiled layers,
-  whether it keeps its tiles in the browser.
+  arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
+  it, and the frame icon flies to the area the layer covers (layers that span most of the
+  world have none). A layer shown in grey italics is outside its zoom range at the current
+  zoom; a red triangle carries the last error loading it. Under each name, a small line
+  shows its opacity, colour, zoom range where narrowed, and *cache* and *proxy* where its
+  tiles are kept or its server goes through the CORS proxy.
+- Below the list, the **active layer** (click a name) has its opacity, zoom range, colour
+  (vector layers), source, the CORS proxy for its server and, for tiled layers, whether it
+  keeps its tiles in the browser. New layers start at 50% opacity.
 - **Routes**: *Draw route* starts a route and a toolbar over the map.
   - *Append* adds a point at the end with each tap on the map, *Insert* puts one into the
     line where it is tapped, *Waypoint* places a named pin, and *Delete* removes the point
