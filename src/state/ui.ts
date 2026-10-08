@@ -2,6 +2,7 @@ import type { Map as MapLibreMap } from 'maplibre-gl';
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { Bounds } from '../model/layer';
+import { keepStored, readStored } from './persist';
 
 /** The map once it exists, for actions like zooming to a layer. */
 export const [map, setMap] = createSignal<MapLibreMap>();
@@ -13,29 +14,16 @@ export function showBounds(bounds: Bounds, maxZoom = 16): void {
 
 const PANEL_COLLAPSED_KEY = 'webmap-panel-collapsed';
 
-function storedPanelCollapsed(): boolean {
-  try {
-    return localStorage.getItem(PANEL_COLLAPSED_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
 /**
  * Whether the panel is folded to its header, which narrow screens offer to give the map
  * room. This browser's convenience, kept in local storage rather than in projects.
  */
-const [panelCollapsed, setCollapsed] = createSignal(storedPanelCollapsed());
+const [panelCollapsed, setCollapsed] = createSignal(readStored(PANEL_COLLAPSED_KEY) === '1');
 export { panelCollapsed };
 
 export function setPanelCollapsed(collapsed: boolean): void {
   setCollapsed(collapsed);
-  try {
-    if (collapsed) localStorage.setItem(PANEL_COLLAPSED_KEY, '1');
-    else localStorage.removeItem(PANEL_COLLAPSED_KEY);
-  } catch {
-    // Without storage the choice lasts until the page is left.
-  }
+  keepStored(PANEL_COLLAPSED_KEY, collapsed ? '1' : undefined);
 }
 
 /** The map's current zoom, shown next to a layer's zoom range. */

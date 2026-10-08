@@ -36,3 +36,22 @@ export function persistedStore<T extends object>(
   }) as SetStoreFunction<T>;
   return [store, set];
 }
+
+/** A value this browser keeps as a convenience; undefined when nothing is kept or storage cannot be read. */
+export function readStored(key: string): string | undefined {
+  try {
+    return localStorage.getItem(key) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Keeps a value in this browser, or forgets it for undefined. */
+export function keepStored(key: string, value: string | undefined): void {
+  try {
+    if (value === undefined) localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
+  } catch {
+    // Without storage the value lasts until the page is left.
+  }
+}

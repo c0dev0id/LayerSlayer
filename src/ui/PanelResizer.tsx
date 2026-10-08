@@ -1,4 +1,5 @@
 import { createSignal } from 'solid-js';
+import { keepStored, readStored } from '../state/persist';
 
 /**
  * The width of the side panel, which the handle on its edge changes: dragged, or with the
@@ -18,26 +19,13 @@ export function panelWidthWithin(width: number, windowWidth: number): number {
   return Math.round(Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, windowWidth - MAP_MIN_WIDTH, width)));
 }
 
-function storedWidth(): number {
-  try {
-    const stored = Number(localStorage.getItem(STORAGE_KEY));
-    return stored > 0 ? stored : DEFAULT_PANEL_WIDTH;
-  } catch {
-    return DEFAULT_PANEL_WIDTH;
-  }
-}
-
-const [panelWidth, setWidth] = createSignal(storedWidth());
+const stored = Number(readStored(STORAGE_KEY));
+const [panelWidth, setWidth] = createSignal(stored > 0 ? stored : DEFAULT_PANEL_WIDTH);
 export { panelWidth };
 
 function setPanelWidth(width: number, keep: boolean): void {
   setWidth(panelWidthWithin(width, window.innerWidth));
-  if (!keep) return;
-  try {
-    localStorage.setItem(STORAGE_KEY, String(panelWidth()));
-  } catch {
-    // Without storage the width lasts until the page is left.
-  }
+  if (keep) keepStored(STORAGE_KEY, String(panelWidth()));
 }
 
 /** The handle on the panel's edge. */
