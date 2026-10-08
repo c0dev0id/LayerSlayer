@@ -1,19 +1,16 @@
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-import { createEffect, createMemo, onCleanup, onMount } from 'solid-js';
+import { createEffect, createMemo, on, onCleanup, onMount, untrack } from 'solid-js';
 import { unwrap } from 'solid-js/store';
-import { failedLegs } from '../routing/service';
-import { ROUTING_ATTRIBUTION } from '../routing/osrm';
 import { describeLoadError, requestUrl } from '../state/net';
-import { routeData } from '../state/routes';
 import { setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
 import { CACHED_SCHEMES, composeStyle, FEATURE_PROTOCOL, WMTS_PROTOCOL } from './compose';
 import { loadCachedTile, loadTile } from './protocols';
-import { routeFeatures, withRoutes } from './routeOverlay';
+import { routeLines, ROUTES_SOURCE, withRoutes } from './routeOverlay';
 
 maplibregl.setWorkerUrl(workerUrl);
 maplibregl.addProtocol(FEATURE_PROTOCOL, loadTile);
@@ -22,9 +19,13 @@ for (const scheme of CACHED_SCHEMES) maplibregl.addProtocol(scheme, loadCachedTi
 
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits;
 
-/** The user layer a MapLibre source belongs to: its id, or the part before the first slash. */
+/**
+ * The user layer a MapLibre source belongs to: its id, or the part before the first
+ * slash. None for the map's own sources, such as the route lines.
+ */
 function layerOf(sourceId: string | undefined): string | undefined {
-  return sourceId?.split('/')[0];
+  const id = sourceId?.split('/')[0];
+  return state.layers.some((l) => l.id === id) ? id : undefined;
 }
 
 export function MapView() {
@@ -39,7 +40,7 @@ export function MapView() {
       zoom,
       bearing,
       pitch,
-      attributionControl: { compact: true, customAttribution: ROUTING_ATTRIBUTION },
+      attributionControl: { compact: true },
       transformRequest: (url) => ({ url: requestUrl(url) }),
     });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
@@ -73,8 +74,11 @@ export function MapView() {
       // Composing reads every layer setting, so any change recomposes. The style goes to
       // MapLibre as plain data: store proxies cannot be sent to its workers.
       const layers = createMemo(() => JSON.parse(JSON.stringify(composeStyle(state.layers, assets()))));
-      const lines = createMemo(() => routeFeatures(routeData.routes, failedLegs()));
-      createEffect(() => map.setStyle(withRoutes(layers(), lines()), { diff: true }));
+      // A layer change carries the route lines as they are; a route change only replaces their data.
+      createEffect(() => map.setStyle(withRoutes(layers(), untrack(routeLines)), { diff: true }));
+      createEffect(
+        on(routeLines, (lines) => map.getSource<maplibregl.GeoJSONSource>(ROUTES_SOURCE)?.setData(lines), { defer: true }),
+      );
     });
     onCleanup(() => {
       setMap(undefined);

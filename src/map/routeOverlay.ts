@@ -1,9 +1,13 @@
 import type { FilterSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl';
+import { createMemo, createRoot } from 'solid-js';
 import type { LngLat, Route } from '../model/route';
 import { legCoordinates, legState, routeLegs } from '../routing/legs';
+import { ROUTING_ATTRIBUTION } from '../routing/osrm';
 import { decodePolyline } from '../routing/polyline';
+import { failedLegs } from '../routing/service';
+import { routeData } from '../state/routes';
 
-/** The source of the route tool's lines; no layer id has this form. */
+/** The source of the route tool's lines. */
 export const ROUTES_SOURCE = 'route-tool';
 
 const round = { 'line-join': 'round', 'line-cap': 'round' } as const;
@@ -67,6 +71,9 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
   return { type: 'FeatureCollection', features };
 }
 
+/** The route lines as they are now, as plain data for the map. */
+export const routeLines = createRoot(() => createMemo(() => routeFeatures(routeData.routes, failedLegs())));
+
 /**
  * The style with the route lines on top of every layer. The lines are part of the style
  * rather than added to the map, so that applying the next composed style keeps them.
@@ -74,7 +81,7 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
 export function withRoutes(style: StyleSpecification, lines: GeoJSON.FeatureCollection): StyleSpecification {
   return {
     ...style,
-    sources: { ...style.sources, [ROUTES_SOURCE]: { type: 'geojson', data: lines } },
+    sources: { ...style.sources, [ROUTES_SOURCE]: { type: 'geojson', data: lines, attribution: ROUTING_ATTRIBUTION } },
     layers: [...style.layers, ...ROUTE_LAYERS],
   };
 }
