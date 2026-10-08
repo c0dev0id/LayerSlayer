@@ -134,7 +134,7 @@ a {
   border: 1px solid #ced4da;
   border-radius: 4px;
   background: #f8f9fa;
-  color: inherit;
+  color: var(--text);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -753,11 +753,6 @@ input.swatch {
   background: rgba(33, 37, 41, 0.85);
   color: #fff;
   font-size: 13px;
-}
-
-/* Plain buttons keep dark text on their light face; the bar's text is white. */
-.hint-bar button:not(.primary) {
-  color: #212529;
 }
 
 .context-menu {
