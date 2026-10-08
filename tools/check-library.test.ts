@@ -7,6 +7,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { it } from 'vitest';
+import { entryService, type LibraryEntry } from '../src/library/library';
 import { getParam, withParams } from '../src/map/urls';
 import { parseFeatureService, parseMapServer, serviceUrl } from '../src/services/arcgis';
 import { collectionsAddress, parseCollections } from '../src/services/ogcFeatures';
@@ -44,6 +45,9 @@ function documentUrl(entry: Entry): string {
       return withParams(serviceUrl(entry.url), { f: 'json' });
     case 'xyz':
       return entry.url.replace(/\{s\}/, 'a').replace('{z}', '0').replace('{x}', '0').replace('{y}', '0');
+    case 'vector-tiles':
+      // A template is asked for a tile at the first zoom it has.
+      return entry.url.replace('{z}', String(entry.minzoom ?? 0)).replace('{x}', '0').replace('{y}', '0');
     default:
       return entry.url;
   }
@@ -66,7 +70,7 @@ async function parse(entry: Entry, body: string, url: string): Promise<ServiceIn
       return address ? parseCollections(JSON.parse(body), address.collections, address.id) : undefined;
     }
     case 'vector-tiles':
-      return parseTileJson(JSON.parse(body), entry.url);
+      return entryService(entry as LibraryEntry) ?? parseTileJson(JSON.parse(body), entry.url);
     case 'xyz':
       return parseXyz(entry.url);
     default:
@@ -92,7 +96,8 @@ async function check(entry: Entry): Promise<string> {
     const allowed = response.headers.get('access-control-allow-origin');
     entry.cors = allowed === '*' || allowed === ORIGIN;
     const header = entry.cors ? '' : ` [Access-Control-Allow-Origin: ${allowed ?? 'none'}]`;
-    const info = await parse(entry, entry.type === 'xyz' || entry.type === 'cog' ? '' : await response.text(), url);
+    const binary = entry.type === 'xyz' || entry.type === 'cog' || (entry.type === 'vector-tiles' && entry.url.includes('{z}'));
+    const info = await parse(entry, binary ? '' : await response.text(), url);
     if (!info) return `ok${header}`;
     const usable = info.offers.filter((o) => o.draft).length;
     const refused = info.offers.filter((o) => o.reason).length;

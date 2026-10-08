@@ -1,5 +1,7 @@
 import type { Bounds, LayerDraft } from '../model/layer';
 import type { ServiceInfo, ServiceType } from '../services/types';
+import { parseTemplate } from '../services/vectorTiles';
+import { tileTemplates } from '../services/xyz';
 import { REGION_BOUNDS } from './regions';
 
 /** A service in the library: where it is, what it covers and what it is for. */
@@ -12,10 +14,14 @@ export interface LibraryEntry {
   note?: string;
   /** False where the server sends no valid CORS header, so a browser needs a proxy to use it. */
   cors?: false;
-  /** For a single tile template: what the template cannot say itself. */
+  /** For a tile template: what the template cannot say itself. */
   attribution?: string;
   bounds?: Bounds;
+  /** The zooms the tile set has tiles for. */
+  minzoom?: number;
   maxzoom?: number;
+  /** The tile layers of a vector tile template, which sample tiles may not all show. */
+  layers?: string[];
 }
 
 export async function loadLibrary(): Promise<LibraryEntry[]> {
@@ -39,10 +45,15 @@ export function filterLibrary(entries: readonly LibraryEntry[], query: string, r
   );
 }
 
+/** What an entry offers without reading the service: a vector tile template whose tile layers it lists. */
+export function entryService(entry: LibraryEntry): ServiceInfo | undefined {
+  return entry.type === 'vector-tiles' && entry.layers ? parseTemplate(tileTemplates(entry.url), entry.layers, entry.name) : undefined;
+}
+
 /**
  * What a service read from the library offers, with what the entry knows on top: a
  * service with a single layer takes the entry's name, and a tile template its
- * attribution, bounds and highest zoom.
+ * attribution, bounds and zooms.
  */
 export function withEntry(info: ServiceInfo, entry: LibraryEntry): ServiceInfo {
   const single = info.offers.length === 1;
@@ -55,7 +66,13 @@ export function withEntry(info: ServiceInfo, entry: LibraryEntry): ServiceInfo {
       if (single) draft.name = entry.name;
       if (entry.attribution) draft.attribution = entry.attribution;
       if (entry.bounds) draft.bounds = entry.bounds;
-      if (entry.maxzoom !== undefined && draft.source.type === 'xyz') draft.source = { ...draft.source, maxzoom: entry.maxzoom };
+      if (draft.source.type === 'xyz' || draft.source.type === 'vector-tiles') {
+        draft.source = {
+          ...draft.source,
+          ...(entry.minzoom !== undefined && { minzoom: entry.minzoom }),
+          ...(entry.maxzoom !== undefined && { maxzoom: entry.maxzoom }),
+        };
+      }
       return { ...offer, title: single ? entry.name : offer.title, draft };
     }),
   };

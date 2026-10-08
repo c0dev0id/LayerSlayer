@@ -5,7 +5,7 @@ import { parseXyz } from '../services/xyz';
 import { defaultState } from '../state/store';
 import library from './library.json';
 import { validBounds } from '../geo/mercator';
-import { entryAreas, filterLibrary, withEntry, type LibraryEntry } from './library';
+import { entryAreas, entryService, filterLibrary, withEntry, type LibraryEntry } from './library';
 import { REGION_BOUNDS } from './regions';
 
 const entries = library.entries as LibraryEntry[];
@@ -46,6 +46,18 @@ describe('library', () => {
     expect(entryAreas(swiss)).toEqual([swiss.bounds]);
     expect(entryAreas({ ...swiss, bounds: undefined })).toBe(REGION_BOUNDS[swiss.region]);
     expect(entryAreas({ ...swiss, bounds: undefined, region: 'Global' })).toEqual([]);
+  });
+
+  it('offers the tile layers a vector tile template lists, within its zooms', () => {
+    const entry = entries.find((e) => e.name === 'Open Infrastructure Map — water')!;
+    const info = withEntry(entryService(entry)!, entry);
+    const drafts = info.offers.filter((o) => o.draft).map((o) => o.draft!);
+    expect(drafts.map((d) => d.name)).toEqual(entry.layers);
+    expect(drafts[0]).toMatchObject({
+      source: { type: 'vector-tiles', tiles: ['https://openinframap.org/map/water/{z}/{x}/{y}.pbf'], layer: 'water_pipeline', minzoom: 3, maxzoom: 17 },
+      attribution: entry.attribution,
+    });
+    expect(entryService(entries.find((e) => e.name === 'OpenTopoMap')!)).toBeUndefined();
   });
 
   it('filters by words, region and category', () => {

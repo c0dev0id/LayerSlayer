@@ -1,6 +1,6 @@
 import { createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
 import { allOutside } from '../geo/bounds';
-import { entryAreas, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
+import { entryAreas, entryService, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
 import type { Bounds } from '../model/layer';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
@@ -42,7 +42,10 @@ function read(source: Source): Promise<ServiceInfo> {
   const key = `${source.type} ${source.url}`;
   let info = reads.get(key);
   if (!info) {
-    info = readService(source.type, source.url, state.view.center).then((i) => (source.entry ? withEntry(i, source.entry) : i));
+    const known = source.entry && entryService(source.entry);
+    info = (known ? Promise.resolve(known) : readService(source.type, source.url, state.view.center)).then((i) =>
+      source.entry ? withEntry(i, source.entry) : i,
+    );
     info.catch(() => reads.delete(key));
     reads.set(key, info);
   }
