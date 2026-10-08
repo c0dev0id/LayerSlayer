@@ -2,8 +2,8 @@ import { cornersBounds, geojsonBounds } from '../geo/bounds';
 import type { LayerDraft } from '../model/layer';
 import { storeFile } from '../state/files';
 import { fetchResource } from '../state/net';
-import { gpxTracksGeoJson } from '../routing/gpx';
 import { renderGeoPdf } from './geopdf';
+import { gpxTracksGeoJson } from './gpx';
 import { fileName } from './read';
 
 const GEOJSON_TYPES = new Set([
@@ -32,19 +32,20 @@ function isGpx(blob: Blob, name: string): boolean {
  */
 export async function importFile(file: Blob, name: string): Promise<LayerDraft> {
   const title = fileName(name);
-  if (isGpx(file, name)) {
-    const tracks = gpxTracksGeoJson(await file.text());
-    if (tracks.features.length === 0) throw new Error(`${name} holds no tracks; its routes and waypoints can be imported under Routes.`);
-    const key = await storeFile(new Blob([JSON.stringify(tracks)], { type: 'application/geo+json' }));
-    const bounds = geojsonBounds(tracks);
-    return { name: title, source: { type: 'geojson', data: { file: key, name } }, ...(bounds && { bounds }) };
-  }
   if (isPdf(file, name)) {
     const { blob, coordinates } = await renderGeoPdf(await file.arrayBuffer());
     const key = await storeFile(blob);
     const bounds = cornersBounds(coordinates);
     return { name: title, source: { type: 'image', data: { file: key, name }, coordinates }, ...(bounds && { bounds }) };
   }
+  const [geojson, blob] = isGpx(file, name) ? await gpxTracks(file, name) : await readGeoJson(file, name);
+  const key = await storeFile(blob);
+  const bounds = geojsonBounds(geojson);
+  return { name: title, source: { type: 'geojson', data: { file: key, name } }, ...(bounds && { bounds }) };
+}
+
+/** A GeoJSON file, kept as it is. */
+async function readGeoJson(file: Blob, name: string): Promise<[GeoJSON.GeoJSON, Blob]> {
   let geojson: GeoJSON.GeoJSON;
   try {
     geojson = JSON.parse(await file.text()) as GeoJSON.GeoJSON;
@@ -52,9 +53,14 @@ export async function importFile(file: Blob, name: string): Promise<LayerDraft> 
     throw new Error(`${name} is neither a GeoPDF nor GeoJSON.`);
   }
   if (!GEOJSON_TYPES.has((geojson as { type?: string })?.type ?? '')) throw new Error(`${name} is not GeoJSON.`);
-  const key = await storeFile(file);
-  const bounds = geojsonBounds(geojson);
-  return { name: title, source: { type: 'geojson', data: { file: key, name } }, ...(bounds && { bounds }) };
+  return [geojson, file];
+}
+
+/** The tracks of a GPX file, kept as GeoJSON. */
+async function gpxTracks(file: Blob, name: string): Promise<[GeoJSON.GeoJSON, Blob]> {
+  const tracks = gpxTracksGeoJson(await file.text());
+  if (tracks.features.length === 0) throw new Error(`${name} holds no tracks; its routes and waypoints can be imported under Routes.`);
+  return [tracks, new Blob([JSON.stringify(tracks)], { type: 'application/geo+json' })];
 }
 
 /** A GeoPDF fetched from an address, imported like a file. */

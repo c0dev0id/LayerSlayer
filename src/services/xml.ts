@@ -1,9 +1,9 @@
 /** Namespace-agnostic reading of OGC capabilities documents. */
 
-export function parseXml(text: string): Element {
+export function parseXml(text: string, unreadable = 'The service did not answer with a readable XML document.'): Element {
   const doc = new DOMParser().parseFromString(text, 'application/xml');
   const error = doc.getElementsByTagName('parsererror')[0];
-  if (error) throw new Error('The service did not answer with a readable XML document.');
+  if (error) throw new Error(unreadable);
   return doc.documentElement;
 }
 

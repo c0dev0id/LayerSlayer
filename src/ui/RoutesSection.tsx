@@ -2,12 +2,14 @@ import { createSignal, For, Show } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { geojsonBounds } from '../geo/bounds';
 import { PROFILES, type Profile, type Route } from '../model/route';
-import { gpxToRouteData, parseGpx, routeTracks, toGpx } from '../routing/gpx';
+import { gpxToRouteData, routeTracks } from '../routing/gpx';
 import { routePoints } from '../routing/legs';
 import { nextRouteColor } from '../routing/routeEdit';
 import { failedLegCount, lastError, pendingLegs, retryFailedLegs } from '../routing/service';
 import { editingRouteId, startDrawing, stopDrawing } from '../state/drawing';
 import { addRoute, importRouteData, removeRoute, renameRoute, routeData, setRouteProfile } from '../state/routes';
+import { parseGpx, toGpx } from '../services/gpx';
+import { fileName } from '../services/read';
 import { errorMessage, map } from '../state/ui';
 import { downloadBlob } from './download';
 import { EditableName } from './EditableName';
@@ -31,7 +33,7 @@ function drawNewRoute() {
 
 async function importGpx(file: File): Promise<void> {
   const data = gpxToRouteData(parseGpx(await file.text()), {
-    fileName: file.name.replace(/\.gpx$/i, '') || file.name,
+    fileName: fileName(file.name),
     profile: lastProfile(),
     existing: routeData.routes,
     newId: () => crypto.randomUUID(),
