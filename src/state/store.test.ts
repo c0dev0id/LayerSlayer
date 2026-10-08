@@ -13,7 +13,7 @@ describe('parseState', () => {
       }),
     );
     expect(state.layers).toEqual([valid]);
-    expect(state.activeLayerId).toBe(valid.id);
+    expect(state).not.toHaveProperty('activeLayerId');
     expect(state.settings).toEqual({ proxy: 'https://p/?u={url}', proxiedHosts: ['a'] });
     expect(state.view).toEqual({ center: [1, 2], zoom: 3, bearing: 0, pitch: 0 });
   });

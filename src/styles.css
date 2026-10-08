@@ -333,11 +333,11 @@ a {
   color: #e03131;
 }
 
-/* Settings of the active layer */
+/* Settings of the active layer, open under its entry */
 
 .active-layer {
-  margin-top: 8px;
-  padding-top: 8px;
+  margin: 4px 2px 4px 8px;
+  padding-top: 6px;
   border-top: 1px dashed var(--border);
 }
 

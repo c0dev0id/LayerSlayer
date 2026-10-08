@@ -28,7 +28,7 @@ export interface View {
 export interface AppState {
   /** Bottom layer first, the order the map draws them in. */
   layers: Layer[];
-  /** The layer whose settings the panel shows. */
+  /** The layer whose settings are open, under its entry in the list; none when all are closed. */
   activeLayerId?: string;
   settings: Settings;
   view: View;
@@ -95,7 +95,7 @@ export function parseState(json: string): AppState {
   const settings = stored.settings;
   return {
     layers,
-    activeLayerId: layers.some((l) => l.id === stored.activeLayerId) ? stored.activeLayerId : layers.at(-1)?.id,
+    ...(layers.some((l) => l.id === stored.activeLayerId) && { activeLayerId: stored.activeLayerId }),
     settings: {
       proxy: typeof settings?.proxy === 'string' ? settings.proxy : '',
       proxiedHosts: Array.isArray(settings?.proxiedHosts) ? settings.proxiedHosts.filter((h) => typeof h === 'string') : [],
@@ -152,11 +152,9 @@ export function replaceLayerSource(id: string, source: LayerSource, bounds: Boun
 }
 
 export function removeLayer(id: string): void {
-  const index = state.layers.findIndex((l) => l.id === id);
-  const layer = state.layers[index];
-  if (!layer) return;
+  if (!state.layers.some((l) => l.id === id)) return;
   setState('layers', (layers) => layers.filter((l) => l.id !== id));
-  if (state.activeLayerId === id) setState('activeLayerId', state.layers[Math.min(index, state.layers.length - 1)]?.id);
+  if (state.activeLayerId === id) setState('activeLayerId', undefined);
 }
 
 /** Removes every layer that `matches`. */
@@ -178,7 +176,8 @@ export function moveItem<T>(items: readonly T[], from: number, to: number): T[] 
   return next;
 }
 
-export function setActiveLayer(id: string): void {
+/** Opens a layer's settings, closing those open before; undefined closes them. */
+export function setActiveLayer(id: string | undefined): void {
   setState('activeLayerId', id);
 }
 

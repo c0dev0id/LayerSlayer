@@ -33,7 +33,6 @@ import { reorderTarget } from './reorder';
 export function LayersSection(props: { onAdd: () => void }) {
   // Top layer first, like an image editor's layer list.
   const topFirst = () => [...state.layers].reverse();
-  const active = () => state.layers.find((l) => l.id === state.activeLayerId);
   let list!: HTMLUListElement;
 
   return (
@@ -65,9 +64,6 @@ export function LayersSection(props: { onAdd: () => void }) {
           </button>
         </Show>
       </div>
-      <Show when={active()} keyed>
-        {(layer) => <ActiveLayer layer={layer} />}
-      </Show>
     </section>
   );
 }
@@ -81,7 +77,10 @@ function outOfRange(layer: Layer): boolean {
   return zoom() < layer.minzoom || zoom() >= layer.maxzoom;
 }
 
-/** Name (a click makes the layer active), visibility, flying to its area, error, delete and a drag handle. */
+/**
+ * Name (a click opens the layer's settings under it, or closes them), visibility, flying to
+ * its area, error, delete and a drag handle; its summary line while its settings are closed.
+ */
 function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
   const layer = props.layer;
   const isActive = () => state.activeLayerId === layer.id;
@@ -117,8 +116,8 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
           <button
             class="layer-select grow"
             title={outOfRange(layer) ? `${layer.name} (not shown at this zoom)` : layer.name}
-            aria-pressed={isActive()}
-            onClick={() => setActiveLayer(layer.id)}
+            aria-expanded={isActive()}
+            onClick={() => setActiveLayer(isActive() ? undefined : layer.id)}
           >
             <span class="name">{layer.name}</span>
           </button>
@@ -144,12 +143,14 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
           <CloseIcon />
         </button>
       </div>
-      <LayerSummary layer={layer} />
+      <Show when={isActive()} fallback={<LayerSummary layer={layer} />}>
+        <ActiveLayer layer={layer} />
+      </Show>
     </li>
   );
 }
 
-/** The layer's settings at a glance: opacity, colour, zoom range and the options that are on. Edited below the list. */
+/** The layer's settings at a glance: opacity, colour, zoom range and the options that are on. Edited where they open, in its place. */
 function LayerSummary(props: { layer: Layer }) {
   const layer = props.layer;
   // From the settings rather than net.ts, so the tag follows the proxy checkbox.
@@ -246,6 +247,8 @@ function dragToReorder(e: PointerEvent, layer: Layer, entry: HTMLLIElement, list
   const rect = entry.getBoundingClientRect();
   const ghost = entry.cloneNode(true) as HTMLElement;
   ghost.classList.add('layer-ghost');
+  // The entry alone follows the pointer, without its open settings.
+  ghost.querySelector('.active-layer')?.remove();
   Object.assign(ghost.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px` });
   // Inside the panel, so the copy keeps the panel's button styles; fixed to the viewport.
   (entry.closest('.panel') ?? document.body).append(ghost);

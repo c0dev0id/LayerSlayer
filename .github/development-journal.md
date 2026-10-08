@@ -365,8 +365,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
     win, and Global entries are never marked. A test requires boxes for every region in
     the library. State services sit under their country, so they are only marked when
     the area lies outside it; inside a service, layers are marked by their own bounds.
-- **UI after mappic.** Top-first layer list with an active layer whose settings sit below
-  it, names renamed in place on the card, a summary line per card (opacity, colour, zoom
+- **UI after mappic.** Top-first layer list with an active layer whose settings open in
+  its card, in place of its summary line: below the whole list they were a scroll away
+  from the layer once the list grew, and editing several layers meant scrolling between
+  list and settings for each. A second click on the name closes them, and none are open
+  after the open layer is removed. Names are renamed in place on the card, a summary line per card (opacity, colour, zoom
   range, cache, proxy) so the list answers which layer is set how without opening each, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
   panel layout, and the panel below the map on narrow screens.
 - **Place search with Nominatim.** OpenStreetMap's geocoder needs no key and sends CORS
