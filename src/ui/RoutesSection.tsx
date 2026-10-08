@@ -146,9 +146,7 @@ function RouteRow(props: { route: Route }) {
           title="Delete route"
           aria-label={`Delete ${route.name}`}
           onClick={() => {
-            if (!confirm(`Delete the route "${route.name}"?`)) return;
-            if (editing()) stopDrawing();
-            removeRoute(route.id);
+            if (confirm(`Delete the route "${route.name}"?`)) removeRoute(route.id);
           }}
         >
           <CloseIcon />

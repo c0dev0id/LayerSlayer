@@ -1,8 +1,7 @@
 import { createSignal } from 'solid-js';
 import { reconcile, unwrap } from 'solid-js/store';
-import type { LngLat, Profile, Route, RouteData, Waypoint } from '../model/route';
+import { PROFILES, type LngLat, type Profile, type Route, type RouteData, type Waypoint } from '../model/route';
 import * as edit from '../routing/routeEdit';
-import { editingRouteId, setMenu, stopDrawing } from './drawing';
 import { History } from './history';
 import { persistedStore } from './persist';
 
@@ -14,8 +13,6 @@ import { persistedStore } from './persist';
 
 const STORAGE_KEY = 'webmap-routes';
 
-const PROFILE_VALUES = new Set<unknown>(['car', 'bike', 'foot']);
-
 const isLngLat = (value: unknown): value is LngLat =>
   Array.isArray(value) && value.length === 2 && value.every((n) => typeof n === 'number' && Number.isFinite(n));
 
@@ -26,7 +23,7 @@ function isRoute(value: unknown): value is Route {
     r !== null &&
     typeof r.id === 'string' &&
     typeof r.name === 'string' &&
-    PROFILE_VALUES.has(r.profile) &&
+    PROFILES.some((p) => p.value === r.profile) &&
     typeof r.color === 'string' &&
     Array.isArray(r.points) &&
     r.points.every((p) => typeof p?.id === 'string' && isLngLat(p.lngLat)) &&
@@ -86,10 +83,7 @@ export function redo(): void {
 
 function restore(state: RouteData | undefined): void {
   if (!state) return;
-  setMenu(undefined);
   setRouteData(reconcile(state, { key: 'id', merge: false }));
-  const routeId = editingRouteId();
-  if (routeId && !routeById(routeId)) stopDrawing();
   setHistoryVersion((v) => v + 1);
 }
 

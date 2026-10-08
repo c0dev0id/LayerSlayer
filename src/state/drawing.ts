@@ -1,5 +1,6 @@
-import { createSignal } from 'solid-js';
+import { createEffect, createRoot, createSignal } from 'solid-js';
 import type { LngLat } from '../model/route';
+import { routeById } from './routes';
 
 /**
  * Transient state of the route tool; never kept. A route is being drawn while
@@ -51,5 +52,12 @@ export function startDrawing(routeId: string): void {
 export function stopDrawing(): void {
   setMenu(undefined);
   setEditingRouteId(undefined);
-  setTool('append');
 }
+
+// Drawing ends when its route goes, however it goes: deleted, undone or replaced.
+createRoot(() => {
+  createEffect(() => {
+    const id = editingRouteId();
+    if (id && !routeById(id)) stopDrawing();
+  });
+});

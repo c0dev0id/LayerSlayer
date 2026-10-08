@@ -69,6 +69,8 @@ export function Interactions(props: { map: MapLibreMap }) {
     const key = e.key.toLowerCase();
     if ((e.ctrlKey || e.metaKey) && !e.altKey && (key === 'z' || key === 'y')) {
       e.preventDefault();
+      // An open menu may name a point the step takes away.
+      setMenu(undefined);
       if (key === 'y' || e.shiftKey) redo();
       else undo();
       return;
