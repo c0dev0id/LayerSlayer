@@ -71,7 +71,12 @@ It is a static single-page app on GitHub Pages; there is no server component.
   - ArcGIS MapServer: a cached Web Mercator service whose levels are numbered by zoom is
     XYZ (`/tile/{z}/{y}/{x}`); anything else is drawn by `export` per tile, the whole map or
     one layer (`show:id`).
-  - ArcGIS FeatureServer: the `arcgis-features://` protocol answers each vector tile with
+  - Feature sources (ArcGIS FeatureServer, WFS, OGC API – Features) share one tile
+    protocol, `features://`, whose tile address carries the source as JSON;
+    `featureTiles.ts` builds each kind's query, reads the GeoJSON answer (and the messages
+    of ArcGIS errors, OGC API errors and WFS exception reports, which come as XML whatever
+    was asked for), and the tile is cut and cached like any other.
+  - ArcGIS FeatureServer: the feature protocol answers each vector tile with
     one extent query (`f=geojson`, generalised to about a pixel), cut into a tile with
     `geoJSONToTile` and encoded with vt-pbf, so MapLibre loads, caches and overzooms it like
     any vector source. Tiles are queried up to zoom 14. A tile with more features than one
@@ -89,6 +94,23 @@ It is a static single-page app on GitHub Pages; there is no server component.
     support GeoJSON even where the service says only JSON. The source is not limited to the
     layer's bounds: those are where the features were when the layer was added, and live
     data moves.
+  - WFS 2.0 and 1.1: a GetFeature per tile with the server's spelling of GeoJSON output
+    (`application/json` on GeoServer, `application/json; subtype=geojson` on MapServer),
+    at the GetFeature address its capabilities name. Axis order was tested on GeoServer
+    and MapServer: both write GeoJSON in longitude and latitude for `SRSNAME=EPSG:4326`,
+    but MapServer reads a plain `EPSG:4326` box latitude first (as WFS 2.0 says) and so
+    finds nothing in a longitude-first one. The box is therefore sent as
+    `lat,lon,lat,lon,urn:ogc:def:crs:EPSG::4326`, whose axis order both follow. Servers
+    list only their native CRS per type (GeoServer supports any), so the listed CRSs are
+    not used to decide anything. Types start at zoom 9: a feature count per type
+    (`resultType=hits`) would cost a request each, and services list up to hundreds of
+    types. The limit per tile is 2000, or the server's `CountDefault` where lower.
+  - OGC API – Features: read from a landing page (its `data` link), the collections list
+    or one collection; each feature collection is queried per tile with `bbox` (CRS84,
+    longitude first) and `limit` at its items link of type `application/geo+json`,
+    preferring the plain RFC 7946 profile where a server also offers JSON-FG. Requests for
+    the service description send `Accept: application/json`, since these servers answer
+    HTML to a browser's default.
   - XYZ: Leaflet and OpenLayers spellings are converted (`{s}` and `{a-c}` to one template
     per subdomain, `{-y}` to the TMS scheme, `{q}` to `{quadkey}`, `{r}` to `{ratio}`).
   - MapLibre style: sources and layers prefixed with the layer id, URLs made absolute

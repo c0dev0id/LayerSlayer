@@ -1,8 +1,8 @@
 # webmap
 
 A map viewer for the web that stacks base maps and overlays from many kinds of map
-services: WMS, WMTS, ArcGIS MapServer and FeatureServer, XYZ tile templates, MapLibre
-styles, GeoJSON and GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
+services: WMS, WMTS, WFS, OGC API – Features, ArcGIS MapServer and FeatureServer, XYZ tile
+templates, MapLibre styles, GeoJSON, GPX and GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
 documents, service descriptions, georeferencing in the PDF) and drawn with the MapLibre
 source that fits it, rather than turned into raster tiles by a proxy.
 
@@ -20,9 +20,10 @@ in the browser.
     *‹ Sources* goes back to the library as it was left. Tapping a group adds what of it
     is missing, or removes it when all of it is on the map. Layers a service cannot show
     in Web Mercator are listed with the reason.
-  - An **address** can be a WMS or WMTS capabilities URL, an ArcGIS MapServer or
-    FeatureServer (or one of its layers), a tile template with `{z}/{x}/{y}`, a GeoJSON
-    file, a MapLibre style or a GeoPDF. The kind of service is guessed from the address
+  - An **address** can be a WMS, WMTS or WFS capabilities URL, an OGC API – Features
+    landing page or collection, an ArcGIS MapServer or FeatureServer (or one of its
+    layers), a tile template with `{z}/{x}/{y}`, a GeoJSON file, a MapLibre style or a
+    GeoPDF. The kind of service is guessed from the address
     and can be changed. *Open* shows the source's layers.
   - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
     imported under Routes), and GeoPDFs with an ISO 32000 geospatial viewport, added as
@@ -61,6 +62,8 @@ files in IndexedDB, so the map is as it was after a restart.
 | WMTS 1.0.0 | GetCapabilities | Raster tiles from a tile matrix set that lines up with Web Mercator tiles; RESTful template or KVP |
 | ArcGIS MapServer | `?f=json` | Cached Web Mercator services as XYZ tiles, others as `export` images per tile, the whole map or one layer |
 | ArcGIS FeatureServer | `?f=json`, and each layer's own description and feature count | Vector tiles: one extent query per tile (a tile query where the layer supports it) answered as GeoJSON and cut into a vector tile in the browser |
+| WFS 2.0 / 1.1 | GetCapabilities | Vector tiles like the FeatureServer's: a GetFeature per tile for GeoJSON at the server's own GetFeature address |
+| OGC API – Features | landing page or `/collections` | Vector tiles: an items request with a `bbox` per tile, through the collection's GeoJSON items link |
 | XYZ template | the template | Raster tiles; `{s}`, `{a-c}`, `{-y}`, `{q}` and `{r}` spellings are converted |
 | GeoJSON | URL or file | GeoJSON source, drawn in the layer's colour |
 | GPX tracks | file | Converted to GeoJSON when imported, a line per track |
@@ -75,10 +78,13 @@ from the browser's Cache Storage for 24 hours. For layers with live data, such a
 untick *Keep tiles in this browser* in the layer's settings. Settings shows how many tiles
 are kept and their size, and clears them.
 
-At most four feature queries run at once per server. A feature layer whose features all fit
-in one query is shown at every zoom; a larger one starts at zoom 9, or at the service's own
-minimum zoom where that is higher, since at lower zooms each tile covers so much that the
-server returns its whole record limit for it. The zoom range of the layer widens that.
+At most four feature queries run at once per server. An ArcGIS feature layer whose features
+all fit in one query is shown at every zoom; a larger one starts at zoom 9, or at the
+service's own minimum zoom where that is higher, since at lower zooms each tile covers so
+much that the server returns its whole record limit for it. WFS and OGC API layers start
+at zoom 9, since counting the features of every type would cost a request each. The zoom
+range of the layer widens that. WFS servers that cannot answer in GeoJSON are listed with
+the reason; WFS 1.0 is not read.
 
 ## Routing
 
