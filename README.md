@@ -34,12 +34,14 @@ in the browser.
     layer takes the next colour of a palette, which its settings can change.
   - **OSM Query** makes a layer of OpenStreetMap features in the focus area, found with
     the Overpass API; without a focus area it offers to draw one, since Overpass answers
-    queries for limited areas only. Choose features from the list (drinking water, power
-    lines, camp sites, hiking routes and about a hundred more, each with the tags it
-    stands for), or type tags and *Add* them: `key=value`, or `key=*` for any value, with
-    tags separated by spaces all having to match, e.g. `power=generator
-    generator:source=wind`. *Query* finds everything chosen in one layer, named after it;
-    the result is kept in the browser as GeoJSON.
+    queries for limited areas only. Choose features from the list, which starts with
+    what matters off the road: tracks by grade, unpaved and rough ways, fords, trails
+    rated for mountain bikes and hikers, gates, barriers and ways closed to motor
+    vehicles, then roads, fuel and repair, water, camp sites and about a hundred more,
+    each with the tags it stands for. Or type tags and *Add* them: `key=value`, or
+    `key=*` for any value, with tags separated by spaces all having to match, e.g.
+    `highway=track tracktype=grade4`. *Query* finds everything chosen in one layer,
+    named after it; the result is kept in the browser as GeoJSON.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
   arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
   it, and the frame icon flies to the area the layer covers (layers that span most of the

@@ -348,7 +348,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
   data. The drawing hint bar moved below the search box.
 - **OSM queries without query code.** Layers of OpenStreetMap features are made with the
   Overpass API from tag filters, not Overpass QL: a curated list
-  (`library/osmFeatures.json`, each entry a name, a category and its filters) and a field
+  (`library/osmFeatures.json`, each entry a name, a category and its filters; off-road
+  riders being the main audience, tracks and trails, access and barriers, roads and
+  vehicle services come first) and a field
   for typed tags (`key=value`, `key=*`, several separated by spaces all having to match,
   quotes around spaces). Filters are parsed and written one way (`services/overpass.ts`),
   so a curated entry and typed tags are the same thing to the query, which joins every
@@ -416,7 +418,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
 - OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about
-  a hundred or typed as tags, queried with Overpass once and updated on demand.
+  140 led by what off-road riders look for (tracks, trails, surfaces, barriers, access)
+  or typed as tags, queried with Overpass once and updated on demand.
 - Optional CORS proxy, used per host.
 - A focus area: a polygon outside whose bounds no layer but the bottom one requests
   tiles, with the map around it dimmed.
