@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { FEATURE_MINZOOM, parseFeatureService, parseMapServer } from './arcgis';
+import { parseFeatureService, parseMapServer } from './arcgis';
+import { FEATURE_MINZOOM } from './types';
 import dynamic from './fixtures/arcgis-mapserver-dynamic.json';
 import tiled from './fixtures/arcgis-mapserver-tiled.json';
 import featureServer from './fixtures/arcgis-featureserver.json';

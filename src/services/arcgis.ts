@@ -1,6 +1,6 @@
 import { HALF_WORLD, mercatorToLngLat, scaleToZoom, tileZoom, validBounds } from '../geo/mercator';
 import type { Bounds, Geometry, LayerDraft } from '../model/layer';
-import type { Offer, ServiceInfo } from './types';
+import { FEATURE_MINZOOM, type Offer, type ServiceInfo } from './types';
 
 interface SpatialReference {
   wkid?: number;
@@ -70,12 +70,6 @@ export interface LayerDetails {
 
 const MERCATOR_WKIDS = new Set([3857, 102100, 102113, 900913]);
 
-/**
- * The lowest zoom a feature layer is shown at unless the service asks for more. Below it a
- * view needs few tiles, but each covers so much that the server returns its whole record
- * limit for it, slowly; the layer's zoom range can be widened in the panel.
- */
-export const FEATURE_MINZOOM = 9;
 /** Geographic coordinate systems whose degrees are close enough to WGS 84 for bounds. */
 const DEGREE_WKIDS = new Set([4326, 4269, 4258, 4283, 4617]);
 

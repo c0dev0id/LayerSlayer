@@ -9,6 +9,8 @@ export function detectServiceType(url: string): ServiceType | undefined {
   if (/\{(z|x|y|-y|q|quadkey|zoom|bbox-epsg-3857)\}/.test(lower)) return 'xyz';
   if (service === 'WMTS' || path.endsWith('wmtscapabilities.xml')) return 'wmts';
   if (service === 'WMS' || path.endsWith('/wmsserver')) return 'wms';
+  if (service === 'WFS' || path.endsWith('/wfsserver')) return 'wfs';
+  if (/\/collections(\/[^/]+(\/items)?)?$/.test(path)) return 'ogc-features';
   if (/\/featureserver(\/\d+)?$/.test(path) || /\/mapserver\/\d+$/.test(path)) return 'arcgis-features';
   if (path.endsWith('/mapserver')) return 'arcgis-mapserver';
   if (path.endsWith('.pdf')) return 'geopdf';

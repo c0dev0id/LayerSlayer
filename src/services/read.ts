@@ -1,8 +1,10 @@
 import { getParam, withParams } from '../map/urls';
 import { fetchResource } from '../state/net';
 import { parseFeatureService, parseMapServer, serviceUrl, type FeatureLayer, type LayerDetails } from './arcgis';
+import { collectionsAddress, landingPageCollections, parseCollections } from './ogcFeatures';
 import { loadStyle } from './style';
 import type { ServiceInfo, ServiceType } from './types';
+import { parseWfs } from './wfs';
 import { parseWms } from './wms';
 import { parseWmts } from './wmts';
 import { parseXyz } from './xyz';
@@ -19,6 +21,12 @@ export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: str
       const caps = restful || getParam(url, 'REQUEST') ? url : withParams(url, { SERVICE: 'WMTS', REQUEST: 'GetCapabilities' });
       return parseWmts(await (await fetchResource(caps)).text(), caps);
     }
+    case 'wfs': {
+      const caps = withParams(url, { SERVICE: 'WFS', REQUEST: 'GetCapabilities', ACCEPTVERSIONS: '2.0.0,1.1.0' });
+      return parseWfs(await (await fetchResource(caps)).text(), caps);
+    }
+    case 'ogc-features':
+      return readOgcFeatures(url);
     case 'arcgis-mapserver':
       return parseMapServer(await (await fetchResource(withParams(serviceUrl(url), { f: 'json' }))).json(), url);
     case 'arcgis-features':
@@ -48,6 +56,15 @@ export function wmsCapabilitiesUrl(url: string): string {
 
 async function fetchJson<T>(url: string): Promise<T> {
   return (await fetchResource(url)).json() as Promise<T>;
+}
+
+/** OGC APIs answer HTML to a browser's default Accept header. */
+const ACCEPT_JSON = { headers: { Accept: 'application/json' } };
+
+/** Reads an OGC API's collections from its landing page, its collections or one collection. */
+async function readOgcFeatures(url: string): Promise<ServiceInfo> {
+  const address = collectionsAddress(url) ?? { collections: landingPageCollections(await (await fetchResource(url, ACCEPT_JSON)).json(), url) };
+  return parseCollections(await (await fetchResource(address.collections, ACCEPT_JSON)).json(), address.collections, address.id);
 }
 
 /**
