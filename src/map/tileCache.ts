@@ -6,7 +6,7 @@
  */
 
 /** Bumped when what is kept for a tile changes, so old entries are not read back. */
-const CACHE_NAME = 'webmap-tiles-v1';
+const CACHE_NAME = 'webmap-tiles-v2';
 
 export const TILE_MAX_AGE_HOURS = 24;
 const MAX_AGE_MS = TILE_MAX_AGE_HOURS * 3600_000;
@@ -28,9 +28,11 @@ export async function cachedTile(key: string, caches = storage(), now = Date.now
   return response && fresh(response, now) ? response.arrayBuffer() : undefined;
 }
 
+/** Stores a tile with the time it was stored and its size, which lets the cache be measured without reading the tiles. */
 export async function storeTile(key: string, data: ArrayBuffer, caches = storage(), now = Date.now()): Promise<void> {
   if (!caches) return;
-  const response = new Response(data, { headers: { 'content-type': 'application/x-protobuf', [STORED_AT]: String(now) } });
+  const headers = { 'content-type': 'application/x-protobuf', 'content-length': String(data.byteLength), [STORED_AT]: String(now) };
+  const response = new Response(data, { headers });
   await (await caches.open(CACHE_NAME)).put(key, response);
 }
 
@@ -47,8 +49,17 @@ export async function sweepTileCache(caches = storage(), now = Date.now()): Prom
   }
 }
 
-export async function countCachedTiles(caches = storage()): Promise<number> {
-  return caches ? (await (await caches.open(CACHE_NAME)).keys()).length : 0;
+export interface TileCacheStats {
+  tiles: number;
+  bytes: number;
+}
+
+/** How many tiles are kept and their size, from the stored headers. */
+export async function tileCacheStats(caches = storage()): Promise<TileCacheStats> {
+  if (!caches) return { tiles: 0, bytes: 0 };
+  const responses = await (await caches.open(CACHE_NAME)).matchAll();
+  const bytes = responses.reduce((sum, r) => sum + (Number(r.headers.get('content-length')) || 0), 0);
+  return { tiles: responses.length, bytes };
 }
 
 export async function clearTileCache(caches = storage()): Promise<void> {
