@@ -1,5 +1,6 @@
 import type { Map as MapLibreMap, MapMouseEvent } from 'maplibre-gl';
 import { createEffect, onCleanup } from 'solid-js';
+import type { LngLat } from '../model/route';
 import { roundLngLat } from '../routing/legs';
 import {
   addFocusCorner,
@@ -19,10 +20,14 @@ import {
 } from '../state/drawing';
 import { appendPoint, redo, undo } from '../state/routes';
 import { fromMarker } from './markers';
+import { googleMapsUrl, latLonText, streetViewUrl } from './placeLinks';
 import { insertPointOnLine } from './routeTools';
 import { TapFilter, type PointerSample } from './tapFilter';
 
-/** Taps on the map and keys while a route or the focus area is drawn. */
+/**
+ * Taps on the map and keys while a route or the focus area is drawn, and the menu of a spot
+ * on the map (right-click or long press): its coordinates, Google Maps and Street View.
+ */
 export function Interactions(props: { map: MapLibreMap }) {
   const map = props.map;
 
@@ -39,6 +44,8 @@ export function Interactions(props: { map: MapLibreMap }) {
   // A press that closes an open menu only closes it: its click adds no route point.
   let pointerType = 'mouse';
   let swallowClick = false;
+  /** Where the right mouse button went down; a press that moved from there turned the map. */
+  let rightDown: { x: number; y: number } | undefined;
   // Clicks that come with dragging the map are no taps (a mouse button that bounces, a
   // browser's click after a touch pan): every tap waits a moment first.
   const taps = new TapFilter();
@@ -47,6 +54,7 @@ export function Interactions(props: { map: MapLibreMap }) {
   const sample = (e: MouseEvent): PointerSample => ({ x: e.clientX, y: e.clientY, t: e.timeStamp, touch: pointerType !== 'mouse' });
   const onPointerDown = (e: PointerEvent) => {
     pointerType = e.pointerType;
+    if (e.button === 2) rightDown = { x: e.clientX, y: e.clientY };
     swallowClick = menu() !== undefined && !(e.target instanceof Element && e.target.closest('.context-menu'));
     if (e.isPrimary) taps.down(sample(e));
   };
@@ -57,8 +65,26 @@ export function Interactions(props: { map: MapLibreMap }) {
     if (e.isPrimary) taps.up(sample(e));
   };
 
-  const onContextMenu = () => {
-    if (pointerType !== 'mouse') swallowClick = true;
+  const onContextMenu = (e: MapMouseEvent) => {
+    const touch = pointerType !== 'mouse';
+    if (touch) swallowClick = true;
+    // Route points and waypoints open their own menus.
+    if (fromMarker(e.originalEvent)) return;
+    // Windows sends the contextmenu event when the button comes up, also after turning the map.
+    const { clientX, clientY } = e.originalEvent;
+    if (!touch && rightDown && Math.hypot(clientX - rightDown.x, clientY - rightDown.y) > 5) return;
+    const { lng, lat } = e.lngLat.wrap();
+    const spot: LngLat = [lng, lat];
+    setMenu({
+      x: e.point.x,
+      y: e.point.y,
+      touch,
+      items: [
+        { label: 'Copy coordinates', run: () => void navigator.clipboard?.writeText(latLonText(spot)).catch(() => {}) },
+        { label: 'Open Google Maps', run: () => window.open(googleMapsUrl(spot), '_blank', 'noopener') },
+        { label: 'Open Street View', run: () => window.open(streetViewUrl(spot), '_blank', 'noopener') },
+      ],
+    });
   };
   const onClick = (e: MapMouseEvent) => {
     if (swallowClick) {

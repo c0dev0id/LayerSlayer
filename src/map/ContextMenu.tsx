@@ -2,7 +2,7 @@ import type { Map as MapLibreMap } from 'maplibre-gl';
 import { For, onCleanup, onMount, Show } from 'solid-js';
 import { menu, setMenu } from '../state/drawing';
 
-/** The context menu of route points and waypoints, kept inside the map container. */
+/** The context menu of route points, waypoints and spots on the map, kept inside the map container. */
 export function ContextMenu(props: { map: MapLibreMap }) {
   let list: HTMLUListElement | undefined;
 
