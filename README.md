@@ -2,7 +2,7 @@
 
 A map viewer for the web that stacks base maps and overlays from many kinds of map
 services: WMS, WMTS, WFS, OGC API – Features, ArcGIS MapServer and FeatureServer, XYZ tile
-templates, vector tiles, MapLibre styles, Cloud Optimized GeoTIFF, GeoJSON, GPX, KML and
+templates, vector tiles, PMTiles, MapLibre styles, Cloud Optimized GeoTIFF, GeoJSON, GPX, KML and
 GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
 documents, service descriptions, georeferencing in the PDF) and drawn with the MapLibre
 source that fits it, rather than turned into raster tiles by a proxy.
@@ -25,8 +25,8 @@ in the browser.
   - An **address** can be a WMS, WMTS or WFS capabilities URL, an OGC API – Features
     landing page or collection, an ArcGIS MapServer or FeatureServer (or one of its
     layers), a tile template with `{z}/{x}/{y}` (raster, or vector tiles ending in `.pbf`
-    or `.mvt`), a TileJSON, a GeoJSON file, a MapLibre style, a Cloud Optimized GeoTIFF
-    or a GeoPDF. The kind of service is guessed from the address
+    or `.mvt`), a TileJSON, a PMTiles archive (`.pmtiles`), a GeoJSON file, a MapLibre
+    style, a Cloud Optimized GeoTIFF or a GeoPDF. The kind of service is guessed from the address
     and can be changed. *Open* shows the source's layers.
   - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
     imported under Routes), the placemarks of KML and KMZ files, and GeoPDFs with an ISO
@@ -137,6 +137,7 @@ browser, since it may carry an account key; which servers go through it is saved
 | WFS 2.0 / 1.1 | GetCapabilities | Vector tiles like the FeatureServer's: a GetFeature per tile for GeoJSON at the server's own GetFeature address |
 | OGC API – Features | landing page or `/collections` | Vector tiles: an items request with a `bbox` per tile, through the collection's GeoJSON items link |
 | Vector tiles (MVT) | TileJSON, or a template and two of its tiles | One layer per tile layer, drawn plainly in the layer's colour; a template's layers are read from its zoom 0 tile and its zoom 14 tile where the map is |
+| PMTiles | the archive's header and metadata, by range requests | Tiles read from the archive by range requests: vector archives one layer per tile layer like vector tiles, image archives (PNG, JPEG, WebP, AVIF) as raster tiles of the size their tiles have. MapLibre styles that name archives as `pmtiles://` sources are drawn too |
 | XYZ template | the template | Raster tiles; `{s}`, `{a-c}`, `{-y}`, `{q}` and `{r}` spellings are converted |
 | GeoJSON | URL or file | GeoJSON source, drawn in the layer's colour |
 | OSM query | the Overpass API, within the focus area | Converted to GeoJSON (osmtogeojson) once and kept in the browser, drawn in the layer's colour |
@@ -149,7 +150,7 @@ browser, since it may carry an account key; which servers go through it is saved
 Only Web Mercator is drawn; services that offer no Web Mercator are refused with a reason.
 
 Slow servers often forbid caching too (ArcGIS Online allows five minutes), so tiled layers
-(XYZ, WMS, WMTS, ArcGIS) keep their tiles in the browser: tiles once loaded are answered
+(XYZ, WMS, WMTS, ArcGIS, vector tiles, PMTiles) keep their tiles in the browser: tiles once loaded are answered
 from the browser's Cache Storage for 24 hours. For layers with live data, such as radar,
 untick *Keep tiles in this browser* in the layer's settings. Settings shows how many tiles
 are kept and their size, and clears them.
@@ -183,6 +184,9 @@ unless their host goes through the proxy. A failed layer shows the reason the se
 the proxy gave. Free plans of public proxies often pass text only: corsproxy.io's free
 plan reads capabilities and feature data but refuses map images, which its paid plans
 pass. Keeping a proxied layer's tiles in the browser spares the proxy's request quota.
+PMTiles archives are read by range requests, so their server must allow CORS for them
+(GET with a `Range` header); a proxy for them has to pass range requests and binary
+answers, which corsproxy.io's free plan refuses.
 
 ## The library
 

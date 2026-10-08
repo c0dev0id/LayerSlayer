@@ -29,8 +29,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   are MapLibre's own dependencies).
 - @maplibre/maplibre-gl-style-spec (validating imported styles; loaded on demand).
 - @tmcw/togeojson and fflate (KML and KMZ import), @mapbox/vector-tile and pbf (reading a
-  vector tile's layer names), geotiff.js and @geomatico/maplibre-cog-protocol (COGs); all
-  loaded on demand.
+  vector tile's layer names), geotiff.js and @geomatico/maplibre-cog-protocol (COGs),
+  pmtiles (PMTiles archives); all loaded on demand.
 - pdf.js (legacy build) and @cantoo/pdf-lib (GeoPDF import; loaded on demand).
 - osmtogeojson (Overpass answers to GeoJSON, multipolygon and route relations included;
   loaded on demand). Its latest release is 3.0.0-beta.5; it pins a vulnerable
@@ -165,6 +165,20 @@ It is a static single-page app on GitHub Pages; there is no server component.
     applied, nodata left out), the one read that stays small however large the file. The
     file is fetched by the protocol itself, outside MapLibre's request transform, so the
     CORS proxy does not apply to COGs, and the tile cache does not either.
+  - PMTiles: the archive's tiles are the existing kinds, so a vector archive becomes
+    vector tile layers and an image archive an XYZ layer, with `pmtiles://<archive>/{z}/{x}/{y}`
+    as the template; colours, raster adjustments, the focus area and the tile cache
+    (`cache+pmtiles://`) then work as for any tile layer. The app's own protocol handler
+    reads them with the pmtiles library's `PMTiles` class rather than its `Protocol`,
+    whose archives fetch directly and so would bypass the CORS proxy: each archive is
+    opened through `requestUrl`, kept per request address so that routing a host through
+    the proxy opens it anew, and failed reads become the app's readable messages. The
+    addresses are those of the library's protocol, and a bare `pmtiles://<archive>`
+    answers its TileJSON, so styles written for PMTiles (Protomaps) draw unchanged. A
+    tile the archive lacks is answered empty, drawn as nothing rather than as an error.
+    The header has no tile size, so it is read from the image of one tile. Layers are
+    named after the file: tippecanoe writes the paths of its input files as the name and
+    description. MapLibre Tiles (MLT) archives are turned away.
   - XYZ: Leaflet and OpenLayers spellings are converted (`{s}` and `{a-c}` to one template
     per subdomain, `{-y}` to the TMS scheme, `{q}` to `{quadkey}`, `{r}` to `{ratio}`).
   - MapLibre style: sources and layers prefixed with the layer id, URLs made absolute
@@ -473,8 +487,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
 
 ## Core features
 
-- Layers from WMS, WMTS, ArcGIS MapServer and FeatureServer, XYZ templates, MapLibre
-  styles, GeoJSON (URL or file), GPX tracks (file) and GeoPDF (file or URL).
+- Layers from WMS, WMTS, ArcGIS MapServer and FeatureServer, XYZ templates, PMTiles
+  archives, MapLibre styles, GeoJSON (URL or file), GPX tracks (file) and GeoPDF (file or
+  URL).
 - A library of about a hundred services by region and category, with search.
 - An add-layer dialog that stays open: layers and groups toggle with a tap, what is on
   the map is highlighted, and the library and a service's layers can be switched between
