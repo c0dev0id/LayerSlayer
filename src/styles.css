@@ -359,7 +359,7 @@ input.swatch {
 
 .dialog {
   width: min(640px, calc(100vw - 32px));
-  max-height: calc(100vh - 64px);
+  height: min(720px, calc(100vh - 64px));
   padding: 12px 16px 16px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -369,20 +369,33 @@ input.swatch {
 .dialog[open] {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
+/* Light, so the map behind shows the layers as they are added. */
 .dialog::backdrop {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.15);
 }
 
-.dialog-title {
-  margin-bottom: 8px;
+/* The panes and tabs set their own display; hidden must still win. */
+[hidden] {
+  display: none !important;
+}
+
+.pane,
+.tab-panel,
+.library,
+.service {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
 }
 
 .tabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -396,14 +409,6 @@ input.swatch {
 .dialog .tabs button.selected {
   border-bottom-color: var(--accent);
   color: var(--accent);
-}
-
-.library,
-.service {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 0;
 }
 
 .filters {
@@ -422,18 +427,20 @@ input.swatch {
 }
 
 .entries,
-.offers {
+.offers,
+.imported {
+  flex: 1;
+  min-height: 0;
   list-style: none;
   margin: 0;
   padding: 0;
   overflow-y: auto;
-  max-height: 60vh;
 }
 
-.dialog button.entry {
-  display: grid;
+/* Sources and layers are rows to tap; what is on the map is highlighted. */
+.dialog button.entry,
+.dialog button.offer {
   width: 100%;
-  gap: 1px;
   padding: 6px 8px;
   border: none;
   border-bottom: 1px solid var(--border);
@@ -441,6 +448,76 @@ input.swatch {
   background: none;
   text-align: left;
   white-space: normal;
+}
+
+.dialog button.entry {
+  display: grid;
+  gap: 1px;
+}
+
+.dialog button.offer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dialog button.entry.added,
+.dialog button.offer.added,
+.dialog button.offer.partial {
+  background: var(--active);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.dialog button.entry.added:hover,
+.dialog button.offer.added:hover:not(:disabled),
+.dialog button.offer.partial:hover:not(:disabled) {
+  background: #d0ebff;
+}
+
+.dialog button.offer:disabled {
+  opacity: 1;
+  color: var(--muted);
+}
+
+.count {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* A check box drawn in CSS: empty, ticked when on the map, a dash when partly. */
+.mark {
+  flex: none;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #adb5bd;
+  border-radius: 3px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.offer:disabled .mark {
+  visibility: hidden;
+}
+
+.offer.added .mark,
+.offer.partial .mark {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.offer.added .mark::after {
+  content: '✓';
+}
+
+.offer.partial .mark::after {
+  content: '–';
 }
 
 .note-text {
@@ -453,14 +530,6 @@ input.swatch {
   background: #fff3bf;
   color: #8f5f00;
   font-size: 12px;
-}
-
-.offer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--border);
 }
 
 .offer .grow {
@@ -479,6 +548,19 @@ input.swatch {
 .address {
   display: grid;
   gap: 8px;
+}
+
+.imported li {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.imported li.added {
+  background: var(--active);
+}
+
+.imported .error {
+  color: #c92a2a;
 }
 
 @media (max-width: 720px) {

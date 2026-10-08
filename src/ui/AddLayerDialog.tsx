@@ -1,85 +1,122 @@
-import { createEffect, createMemo, createResource, createSignal, For, Show } from 'solid-js';
+import { createEffect, createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
 import { filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
 import { detectServiceType } from '../services/detect';
 import { importFile, importGeoPdfUrl } from '../services/importFile';
 import { readService } from '../services/read';
 import { SERVICE_TYPES, type Offer, type ServiceInfo, type ServiceType } from '../services/types';
 import { hostOf, isProxied } from '../state/net';
-import { addLayer, setHostProxied, state } from '../state/store';
+import { addLayer, removeLayersWhere, setHostProxied, state } from '../state/store';
 import { errorMessage } from '../state/ui';
 import { CloseIcon } from './icons';
+import { groupMembers, isFromSource, originOf, selection, type Selection } from './offers';
 
 type Tab = 'library' | 'address' | 'file';
 
 /** Most offers listed at once; services like NASA GIBS have over a thousand layers. */
 const MAX_LISTED = 300;
 
-interface Failure {
-  message: string;
-  /** The address that failed, for retrying it through the proxy. */
-  retry?: () => void;
-  host?: string;
+/** Adding more layers than this at once asks first: each is fetched and drawn on its own. */
+const CONFIRM_ABOVE = 20;
+
+/** A source to read: from the library, or an address typed in. */
+interface Source {
+  type: Exclude<ServiceType, 'geopdf'>;
+  url: string;
+  entry?: LibraryEntry;
 }
 
+interface Failure {
+  message: string;
+  /** What to read again, through the proxy. */
+  source?: Source;
+}
+
+/** What each source offers, read once per session; a failed read is tried again next time. */
+const reads = new Map<string, Promise<ServiceInfo>>();
+
+function read(source: Source): Promise<ServiceInfo> {
+  const key = `${source.type} ${source.url}`;
+  let info = reads.get(key);
+  if (!info) {
+    info = readService(source.type, source.url).then((i) => (source.entry ? withEntry(i, source.entry) : i));
+    info.catch(() => reads.delete(key));
+    reads.set(key, info);
+  }
+  return info;
+}
+
+/** The origins of the layers on the map, for marking what the lists offer as added. */
+const origins = createRoot(() =>
+  createMemo(() => new Set(state.layers.map((l) => l.origin).filter((o): o is string => o !== undefined))),
+);
+
+function isAdded(url: string, offer: Offer): boolean {
+  return origins().has(originOf(url, offer));
+}
+
+/** Adds the offer's layer, or removes it when it is on the map already. */
+function toggle(url: string, offer: Offer): void {
+  const origin = originOf(url, offer);
+  if (origins().has(origin)) removeLayersWhere((l) => l.origin === origin);
+  else if (offer.draft) addLayer({ ...offer.draft, origin });
+}
+
+/** Adds what of a group is not on the map yet, or removes the group when all of it is. */
+function toggleGroup(url: string, members: readonly Offer[]): void {
+  if (selection(members, (o) => isAdded(url, o)) === 'all') {
+    const remove = new Set(members.map((o) => originOf(url, o)));
+    removeLayersWhere((l) => l.origin !== undefined && remove.has(l.origin));
+    return;
+  }
+  const missing = members.filter((o) => !isAdded(url, o));
+  if (missing.length > CONFIRM_ABOVE && !confirm(`Add ${missing.length} layers? Each is fetched and drawn on its own.`)) return;
+  for (const offer of missing) addLayer({ ...offer.draft!, origin: originOf(url, offer) });
+}
+
+/**
+ * Adds layers without leaving: the source list (library, address, files) and a source's
+ * layer list take turns, and a tap adds or removes a layer in the background. The source
+ * list stays mounted while a layer list is open, so its search and scroll survive.
+ */
 export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
   let dialog!: HTMLDialogElement;
   const [tab, setTab] = createSignal<Tab>('library');
-  const [service, setService] = createSignal<ServiceInfo>();
-  const [busy, setBusy] = createSignal<string>();
+  const [opened, setOpened] = createSignal<{ source: Source; info: ServiceInfo }>();
+  const [busy, setBusy] = createSignal<ReadonlySet<string>>(new Set());
   const [failure, setFailure] = createSignal<Failure>();
+  /** How many layers a source offers, once it has been read. */
+  const [sizes, setSizes] = createSignal<ReadonlyMap<string, number>>(new Map());
 
   createEffect(() => {
     if (props.open && !dialog.open) dialog.showModal();
     if (!props.open && dialog.open) dialog.close();
   });
 
-  const reset = () => {
-    setService(undefined);
-    setFailure(undefined);
-    setBusy(undefined);
+  const setReading = (url: string, reading: boolean) => {
+    const next = new Set(busy());
+    if (reading) next.add(url);
+    else next.delete(url);
+    setBusy(next);
   };
 
-  /** Reads a service; one with a single layer is added at once, others are listed. */
-  async function open(type: ServiceType, url: string, entry?: LibraryEntry) {
-    const retry = () => void open(type, url, entry);
+  /**
+   * Reads a source and shows its layers. A library entry with a single layer is that
+   * layer: a tap adds or removes it in place, without a list of one.
+   */
+  async function open(source: Source) {
     setFailure(undefined);
-    setBusy(`Reading ${hostOf(url) ?? url}…`);
+    setReading(source.url, true);
     try {
-      if (type === 'geopdf') {
-        addLayer(await importGeoPdfUrl(url));
-        props.onClose();
-        return;
-      }
-      let info = await readService(type, url);
-      if (entry) info = withEntry(info, entry);
-      const only = info.offers.length === 1 ? info.offers[0]!.draft : undefined;
-      if (only) {
-        addLayer(only);
-        props.onClose();
-      } else {
-        setService(info);
-      }
+      const info = await read(source);
+      setSizes(new Map(sizes()).set(source.url, info.offers.filter((o) => o.draft).length));
+      const only = info.offers.length === 1 && info.offers[0]!.draft ? info.offers[0]! : undefined;
+      if (only && source.entry) toggle(source.url, only);
+      else setOpened({ source, info });
     } catch (error) {
-      setFailure({ message: errorMessage(error), retry, ...(hostOf(url) && { host: hostOf(url) }) });
+      setFailure({ message: `${source.entry?.name ?? hostOf(source.url) ?? source.url}: ${errorMessage(error)}`, source });
     } finally {
-      setBusy(undefined);
+      setReading(source.url, false);
     }
-  }
-
-  async function importFiles(files: File[]) {
-    setFailure(undefined);
-    const problems: string[] = [];
-    for (const file of files) {
-      setBusy(`Reading ${file.name}…`);
-      try {
-        addLayer(await importFile(file, file.name));
-      } catch (error) {
-        problems.push(`${file.name}: ${errorMessage(error)}`);
-      }
-    }
-    setBusy(undefined);
-    if (problems.length > 0) setFailure({ message: problems.join('\n') });
-    else props.onClose();
   }
 
   return (
@@ -87,64 +124,65 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
       ref={dialog}
       class="dialog add-layer"
       onClose={() => {
-        reset();
+        setOpened(undefined);
+        setFailure(undefined);
         props.onClose();
       }}
     >
       <div class="row dialog-title">
-        <h2 class="grow">Add layer</h2>
-        <button class="icon" aria-label="Close" onClick={() => props.onClose()}>
-          <CloseIcon />
+        <h2 class="grow">Add layers</h2>
+        <button class="primary" onClick={() => props.onClose()}>
+          Close
         </button>
       </div>
-      <Show
-        when={service()}
-        fallback={
-          <>
-            <div class="tabs" role="tablist">
-              <For each={[['library', 'Library'], ['address', 'Address'], ['file', 'File']] as const}>
-                {([value, label]) => (
-                  <button role="tab" aria-selected={tab() === value} classList={{ selected: tab() === value }} onClick={() => setTab(value)}>
-                    {label}
-                  </button>
-                )}
-              </For>
-            </div>
-            <Show when={tab() === 'library'}>
-              <LibraryTab onOpen={(entry) => void open(entry.type, entry.url, entry)} />
-            </Show>
-            <Show when={tab() === 'address'}>
-              <AddressTab onOpen={(type, url) => void open(type, url)} />
-            </Show>
-            <Show when={tab() === 'file'}>
-              <FileTab onFiles={(files) => void importFiles(files)} />
-            </Show>
-          </>
-        }
-      >
-        {(info) => <ServiceView info={info()} onBack={() => setService(undefined)} />}
+      <Show when={failure()}>{(f) => <FailureNote failure={f()} onRetry={(s) => void open(s)} onDismiss={() => setFailure(undefined)} />}</Show>
+      <div class="pane" hidden={opened() !== undefined}>
+        <div class="tabs" role="tablist">
+          <For each={[['library', 'Library'], ['address', 'Address'], ['file', 'Files']] as const}>
+            {([value, label]) => (
+              <button role="tab" aria-selected={tab() === value} classList={{ selected: tab() === value }} onClick={() => setTab(value)}>
+                {label}
+              </button>
+            )}
+          </For>
+        </div>
+        <div class="tab-panel" role="tabpanel" hidden={tab() !== 'library'}>
+          <LibraryTab busy={busy()} sizes={sizes()} onOpen={(entry) => void open({ type: entry.type as Source['type'], url: entry.url, entry })} />
+        </div>
+        <div class="tab-panel" role="tabpanel" hidden={tab() !== 'address'}>
+          <AddressTab busy={busy()} onOpen={(source) => void open(source)} onFailure={setFailure} />
+        </div>
+        <div class="tab-panel" role="tabpanel" hidden={tab() !== 'file'}>
+          <FileTab />
+        </div>
+      </div>
+      <Show when={opened()} keyed>
+        {(o) => <ServiceView url={o.source.url} info={o.info} onBack={() => setOpened(undefined)} />}
       </Show>
-      <Show when={busy()}>{(text) => <p class="note info">{text()}</p>}</Show>
-      <Show when={failure()}>{(f) => <FailureNote failure={f()} />}</Show>
     </dialog>
   );
 }
 
 /** What went wrong, with the way out where there is one: the CORS proxy for that host. */
-function FailureNote(props: { failure: Failure }) {
-  const host = () => props.failure.host;
+function FailureNote(props: { failure: Failure; onRetry: (source: Source) => void; onDismiss: () => void }) {
+  const host = () => (props.failure.source ? hostOf(props.failure.source.url) : undefined);
   const canProxy = () => {
     const h = host();
     return h !== undefined && state.settings.proxy !== '' && !isProxied(`https://${h}/`);
   };
   return (
     <div class="note error">
-      <p class="pre">{props.failure.message}</p>
+      <div class="row">
+        <p class="pre grow">{props.failure.message}</p>
+        <button class="icon" aria-label="Dismiss" onClick={() => props.onDismiss()}>
+          <CloseIcon />
+        </button>
+      </div>
       <Show when={canProxy()}>
         <button
           onClick={() => {
             setHostProxied(host()!, true);
-            props.failure.retry?.();
+            props.onRetry(props.failure.source!);
           }}
         >
           Fetch {host()} through the CORS proxy
@@ -157,7 +195,7 @@ function FailureNote(props: { failure: Failure }) {
   );
 }
 
-function LibraryTab(props: { onOpen: (entry: LibraryEntry) => void }) {
+function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<string, number>; onOpen: (entry: LibraryEntry) => void }) {
   const [library] = createResource(loadLibrary);
   const [query, setQuery] = createSignal('');
   const [region, setRegion] = createSignal('');
@@ -180,37 +218,61 @@ function LibraryTab(props: { onOpen: (entry: LibraryEntry) => void }) {
       </div>
       <ul class="entries">
         <For each={entries()} fallback={<li class="muted">{library.loading ? 'Loading…' : 'Nothing matches.'}</li>}>
-          {(entry) => (
-            <li>
-              <button class="entry" onClick={() => props.onOpen(entry)}>
-                <span class="row">
-                  <strong class="grow">{entry.name}</strong>
-                  <Show when={entry.cors === false}>
-                    <span class="badge" title="The server does not allow web pages to read it (no valid CORS header), so it needs a CORS proxy">
-                      proxy
-                    </span>
+          {(entry) => {
+            const onMap = () => state.layers.filter((l) => isFromSource(l.origin, entry.url)).length;
+            const size = () => props.sizes.get(entry.url);
+            return (
+              <li>
+                <button class="entry" classList={{ added: onMap() > 0 }} onClick={() => props.onOpen(entry)}>
+                  <span class="row">
+                    <strong class="grow">{entry.name}</strong>
+                    <Show when={props.busy.has(entry.url)}>
+                      <span class="muted">Reading…</span>
+                    </Show>
+                    <Show when={onMap() > 0}>
+                      <span class="count">{onMap()} on the map</span>
+                    </Show>
+                    <Show when={entry.cors === false}>
+                      <span class="badge" title="The server does not allow web pages to read it (no valid CORS header), so it needs a CORS proxy">
+                        proxy
+                      </span>
+                    </Show>
+                    <Show when={(size() ?? 0) > 1}>
+                      <span class="muted">{size()} layers ›</span>
+                    </Show>
+                  </span>
+                  <span class="muted">
+                    {entry.region} · {entry.category} · {SERVICE_TYPES.find((t) => t.value === entry.type)?.label}
+                  </span>
+                  <Show when={entry.note}>
+                    <span class="note-text">{entry.note}</span>
                   </Show>
-                </span>
-                <span class="muted">
-                  {entry.region} · {entry.category} · {SERVICE_TYPES.find((t) => t.value === entry.type)?.label}
-                </span>
-                <Show when={entry.note}>
-                  <span class="note-text">{entry.note}</span>
-                </Show>
-              </button>
-            </li>
-          )}
+                </button>
+              </li>
+            );
+          }}
         </For>
       </ul>
     </div>
   );
 }
 
-function AddressTab(props: { onOpen: (type: ServiceType, url: string) => void }) {
+function AddressTab(props: { busy: ReadonlySet<string>; onOpen: (source: Source) => void; onFailure: (failure: Failure) => void }) {
   const [url, setUrl] = createSignal('');
   const [chosen, setChosen] = createSignal<ServiceType | ''>('');
+  const [added, setAdded] = createSignal<string>();
   const detected = () => detectServiceType(url());
   const type = () => chosen() || detected();
+
+  async function importPdf(address: string) {
+    try {
+      const draft = await importGeoPdfUrl(address);
+      addLayer({ ...draft, origin: address });
+      setAdded(draft.name);
+    } catch (error) {
+      props.onFailure({ message: `${address}: ${errorMessage(error)}` });
+    }
+  }
 
   return (
     <form
@@ -218,7 +280,11 @@ function AddressTab(props: { onOpen: (type: ServiceType, url: string) => void })
       onSubmit={(e) => {
         e.preventDefault();
         const t = type();
-        if (t && url().trim()) props.onOpen(t, url().trim());
+        const address = url().trim();
+        if (!t || !address) return;
+        setAdded(undefined);
+        if (t === 'geopdf') void importPdf(address);
+        else props.onOpen({ type: t, url: address });
       }}
     >
       <p class="muted hint">
@@ -232,15 +298,38 @@ function AddressTab(props: { onOpen: (type: ServiceType, url: string) => void })
           <For each={SERVICE_TYPES}>{(t) => <option value={t.value}>{t.label}</option>}</For>
         </select>
         <span class="grow" />
-        <button class="primary" type="submit" disabled={!type() || !url().trim()}>
-          Open
+        <button class="primary" type="submit" disabled={!type() || !url().trim() || props.busy.has(url().trim())}>
+          {props.busy.has(url().trim()) ? 'Reading…' : 'Open'}
         </button>
       </div>
+      <Show when={added()}>{(name) => <p class="note info">Added {name()}.</p>}</Show>
     </form>
   );
 }
 
-function FileTab(props: { onFiles: (files: File[]) => void }) {
+interface Imported {
+  name: string;
+  error?: string;
+}
+
+/** Files are added as they are chosen and listed; removing one is done in the layer list. */
+function FileTab() {
+  const [imported, setImported] = createSignal<Imported[]>([]);
+  const [reading, setReading] = createSignal<string>();
+
+  async function importFiles(files: File[]) {
+    for (const file of files) {
+      setReading(file.name);
+      try {
+        addLayer(await importFile(file, file.name));
+        setImported([...imported(), { name: file.name }]);
+      } catch (error) {
+        setImported([...imported(), { name: file.name, error: errorMessage(error) }]);
+      }
+    }
+    setReading(undefined);
+  }
+
   return (
     <div class="file">
       <p class="muted hint">
@@ -256,28 +345,47 @@ function FileTab(props: { onFiles: (files: File[]) => void }) {
           onChange={(e) => {
             const files = [...(e.currentTarget.files ?? [])];
             e.currentTarget.value = '';
-            if (files.length > 0) props.onFiles(files);
+            if (files.length > 0) void importFiles(files);
           }}
         />
       </label>
+      <Show when={reading()}>{(name) => <p class="note info">Reading {name()}…</p>}</Show>
+      <ul class="imported">
+        <For each={imported()}>
+          {(item) => (
+            <li class="row" classList={{ added: !item.error }}>
+              <span class="grow name">{item.name}</span>
+              <span classList={{ muted: !item.error, error: !!item.error }}>{item.error ?? 'added'}</span>
+            </li>
+          )}
+        </For>
+      </ul>
     </div>
   );
 }
 
-/** The layers a service offers, each to be added; layers it cannot show say why. */
-function ServiceView(props: { info: ServiceInfo; onBack: () => void }) {
+/**
+ * The layers a source offers. A tap on a layer adds or removes it; a tap on a group adds
+ * what of it is missing, or removes it when all of it is on the map. Layers the source
+ * cannot show say why.
+ */
+function ServiceView(props: { url: string; info: ServiceInfo; onBack: () => void }) {
   const [query, setQuery] = createSignal('');
-  const [added, setAdded] = createSignal(new Set<Offer>());
+  const indexed = props.info.offers.map((offer, index) => ({ offer, index }));
   const matches = createMemo(() => {
     const words = query().toLowerCase().split(/\s+/).filter(Boolean);
-    return props.info.offers.filter((o) => words.every((w) => `${o.title} ${o.name ?? ''}`.toLowerCase().includes(w)));
+    return indexed.filter(({ offer: o }) => words.every((w) => `${o.title} ${o.name ?? ''}`.toLowerCase().includes(w)));
   });
+  const onMap = () => state.layers.filter((l) => isFromSource(l.origin, props.url)).length;
 
   return (
     <div class="service">
       <div class="row">
-        <button onClick={() => props.onBack()}>Back</button>
+        <button onClick={() => props.onBack()}>‹ Sources</button>
         <strong class="grow name">{props.info.title}</strong>
+        <Show when={onMap() > 0}>
+          <span class="count">{onMap()} on the map</span>
+        </Show>
       </div>
       <Show when={props.info.description}>
         <details>
@@ -289,43 +397,50 @@ function ServiceView(props: { info: ServiceInfo; onBack: () => void }) {
         <input type="search" placeholder={`Filter ${props.info.offers.length} layers`} aria-label="Filter layers" onInput={(e) => setQuery(e.currentTarget.value)} />
       </Show>
       <ul class="offers">
-        <For each={matches().slice(0, MAX_LISTED)}>
-          {(offer) => (
-            <li class="offer" classList={{ heading: !offer.draft && !offer.reason }} style={{ 'padding-left': `${offer.depth * 14}px` }}>
-              <span class="grow">
-                <span class="name" title={offer.description}>
-                  {offer.title}
-                </span>
-                <Show when={offer.name && offer.name !== offer.title}>
-                  <span class="muted id"> {offer.name}</span>
-                </Show>
-                <Show when={offer.reason}>
-                  <span class="muted reason">{offer.reason}</span>
-                </Show>
-              </span>
-              <Show when={offer.draft}>
-                {(draft) => (
-                  <Show when={!added().has(offer)} fallback={<span class="muted">Added</span>}>
-                    <button
-                      onClick={() => {
-                        addLayer(draft());
-                        setAdded(new Set([...added(), offer]));
-                      }}
-                    >
-                      Add
-                    </button>
-                  </Show>
-                )}
-              </Show>
-            </li>
-          )}
-        </For>
+        <Index each={matches().slice(0, MAX_LISTED)}>
+          {(item) => <OfferRow url={props.url} offers={props.info.offers} offer={item().offer} index={item().index} />}
+        </Index>
       </ul>
       <Show when={matches().length > MAX_LISTED}>
-        <p class="muted hint">
-          {matches().length - MAX_LISTED} more; narrow the filter to see them.
-        </p>
+        <p class="muted hint">{matches().length - MAX_LISTED} more; narrow the filter to see them.</p>
       </Show>
     </div>
+  );
+}
+
+function OfferRow(props: { url: string; offers: readonly Offer[]; offer: Offer; index: number }) {
+  const members = createMemo(() => (props.offer.draft ? [] : groupMembers(props.offers, props.index)));
+  /** On the map: all, some or none of what the row stands for; undefined where nothing can be added. */
+  const selected = (): Selection | undefined => {
+    if (props.offer.draft) return isAdded(props.url, props.offer) ? 'all' : 'none';
+    return members().length > 0 ? selection(members(), (o) => isAdded(props.url, o)) : undefined;
+  };
+  return (
+    <li>
+      <button
+        class="offer"
+        classList={{ added: selected() === 'all', partial: selected() === 'some', heading: !props.offer.draft }}
+        style={{ 'padding-left': `${8 + props.offer.depth * 14}px` }}
+        disabled={selected() === undefined}
+        aria-pressed={selected() === 'some' ? 'mixed' : selected() === 'all'}
+        onClick={() => (props.offer.draft ? toggle(props.url, props.offer) : toggleGroup(props.url, members()))}
+      >
+        <span class="mark" aria-hidden="true" />
+        <span class="grow">
+          <span class="name" title={props.offer.description}>
+            {props.offer.title}
+          </span>
+          <Show when={props.offer.name && props.offer.name !== props.offer.title}>
+            <span class="muted id"> {props.offer.name}</span>
+          </Show>
+          <Show when={members().length > 0}>
+            <span class="muted id"> · {members().length} layers</span>
+          </Show>
+          <Show when={props.offer.reason}>
+            <span class="muted reason">{props.offer.reason}</span>
+          </Show>
+        </span>
+      </button>
+    </li>
   );
 }
