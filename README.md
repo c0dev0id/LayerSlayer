@@ -77,7 +77,8 @@ layer, or use the button an error offers; library entries marked *proxy* use it 
 first request. On a page served over HTTPS, plain-HTTP addresses are upgraded to HTTPS
 unless their host goes through the proxy. A failed layer shows the reason the server or
 the proxy gave. Free plans of public proxies often pass text only: corsproxy.io's free
-plan reads capabilities and feature data but refuses map images.
+plan reads capabilities and feature data but refuses map images, which its paid plans
+pass. Keeping a proxied layer's tiles in the browser spares the proxy's request quota.
 
 ## The library
 

@@ -113,8 +113,12 @@ It is a static single-page app on GitHub Pages; there is no server component.
   errors name who answered (the server, or the proxy for it), the status and the reason
   the answer gives, and never the proxy's address, which holds any key it was given.
   Tested with corsproxy.io: its free plan passes text only (capabilities, JSON feature
-  data) and answers images with 403; as a Cloudflare worker it cannot reach hosts that
-  Cloudflare refuses (maps.geogratis.gc.ca gives Error 1000), whatever the plan.
+  data) and answers images with 403; the Hobby plan adds images, so Karlsruhe, BRGM and
+  DGT draw through it, but still refuses OGC types such as `application/vnd.ogc.wms_xml`.
+  MapServer sends 1.1.1 capabilities as that type, which is one reason WMS capabilities
+  are asked for as 1.3.0 (then `text/xml`), as other clients do. As a Cloudflare worker
+  the proxy cannot reach hosts that Cloudflare refuses (maps.geogratis.gc.ca gives Error
+  1000), whatever the plan.
 - **The library.** Generated once from WMSproxy's `library.json` and mappic's base maps;
   each entry names its type explicitly, and a unit test checks that address detection
   agrees with every entry. `npm run check-library` reads every entry with the app's own
