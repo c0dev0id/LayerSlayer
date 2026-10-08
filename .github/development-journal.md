@@ -231,6 +231,12 @@ It is a static single-page app on GitHub Pages; there is no server component.
     file, so the layer is an ordinary GeoJSON layer with a palette colour and the colour
     setting; several tracks on the map are told apart that way. Routes and waypoints stay
     with the route tool's import, which keeps routing out of the add-layer dialog.
+  - KML and KMZ files are layers the same way: their placemarks are converted with
+    @tmcw/togeojson (KMZ unzipped with fflate, `doc.kml` or the first KML file) and kept
+    as GeoJSON, drawn in the layer's colour. Ground overlays would need a picture placed
+    by a box, network links fetch other files, and KML styles would override the colour
+    that tells overlapping files apart, so all three are left out. Both libraries are
+    loaded when such a file is imported.
   - Requests to the routing server go out directly, not through the CORS proxy; it sends
     `Access-Control-Allow-Origin: *`.
 - **UI after mappic.** Top-first layer list with an active layer whose settings sit below

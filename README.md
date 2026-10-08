@@ -2,7 +2,7 @@
 
 A map viewer for the web that stacks base maps and overlays from many kinds of map
 services: WMS, WMTS, WFS, OGC API – Features, ArcGIS MapServer and FeatureServer, XYZ tile
-templates, MapLibre styles, GeoJSON, GPX and GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
+templates, MapLibre styles, GeoJSON, GPX, KML and GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
 documents, service descriptions, georeferencing in the PDF) and drawn with the MapLibre
 source that fits it, rather than turned into raster tiles by a proxy.
 
@@ -26,9 +26,9 @@ in the browser.
     GeoPDF. The kind of service is guessed from the address
     and can be changed. *Open* shows the source's layers.
   - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
-    imported under Routes), and GeoPDFs with an ISO 32000 geospatial viewport, added as
-    they are chosen. Each new GeoJSON or GPX layer takes the next colour of a palette,
-    which its settings can change.
+    imported under Routes), the placemarks of KML and KMZ files, and GeoPDFs with an ISO
+    32000 geospatial viewport, added as they are chosen. Each new GeoJSON, GPX or KML
+    layer takes the next colour of a palette, which its settings can change.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
   arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
   it, and the frame icon flies to the area the layer covers (layers that span most of the
@@ -69,6 +69,7 @@ files in IndexedDB, so the map is as it was after a restart.
 | XYZ template | the template | Raster tiles; `{s}`, `{a-c}`, `{-y}`, `{q}` and `{r}` spellings are converted |
 | GeoJSON | URL or file | GeoJSON source, drawn in the layer's colour |
 | GPX tracks | file | Converted to GeoJSON when imported, a line per track |
+| KML / KMZ | file | Placemarks converted to GeoJSON when imported; ground overlays, network links and KML styles are left out |
 | MapLibre style | style JSON | The style's own sources and layers |
 | GeoPDF | file or URL | The map area rendered once to a picture, placed by its corners |
 
