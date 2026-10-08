@@ -22,11 +22,12 @@ browser.
     and can be changed.
   - **Files**: GeoJSON, and GeoPDFs with an ISO 32000 geospatial viewport.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
-  arrow keys on it) to change the order; the eye hides it, × removes it. A layer shown in
-  grey italics is outside its zoom range at the current zoom; a red triangle carries the
-  last error loading it.
+  arrow keys on it) to change the order; the eye hides it, × removes it, and the frame
+  icon flies to the area the layer covers (layers that span most of the world have none).
+  A layer shown in grey italics is outside its zoom range at the current zoom; a red
+  triangle carries the last error loading it.
 - Below the list, the **active layer** (click a name) has its name, opacity, zoom range,
-  colour (vector layers), source and, where its bounds are known, *Zoom to layer*.
+  colour (vector layers) and source.
 
 Layers, their settings and the map view are kept in the browser's local storage, files
 in IndexedDB, so the map is as it was after a restart.
@@ -38,13 +39,20 @@ in IndexedDB, so the map is as it was after a restart.
 | WMS 1.1.1 / 1.3.0 | GetCapabilities | Raster tiles: a 512 px GetMap per tile with MapLibre's `{bbox-epsg-3857}`, in the service's name for Web Mercator (EPSG:3857, 900913, 102100, …) |
 | WMTS 1.0.0 | GetCapabilities | Raster tiles from a tile matrix set that lines up with Web Mercator tiles; RESTful template or KVP |
 | ArcGIS MapServer | `?f=json` | Cached Web Mercator services as XYZ tiles, others as `export` images per tile, the whole map or one layer |
-| ArcGIS FeatureServer | `?f=json` | Vector tiles: one extent query per tile answered as GeoJSON and cut into a vector tile in the browser |
+| ArcGIS FeatureServer | `?f=json` | Vector tiles: one extent query per tile answered as GeoJSON and cut into a vector tile in the browser, shown from zoom 9 unless widened |
 | XYZ template | the template | Raster tiles; `{s}`, `{a-c}`, `{-y}`, `{q}` and `{r}` spellings are converted |
 | GeoJSON | URL or file | GeoJSON source, drawn in the layer's colour |
 | MapLibre style | style JSON | The style's own sources and layers |
 | GeoPDF | file or URL | The map area rendered once to a picture, placed by its corners |
 
 Only Web Mercator is drawn; services that offer no Web Mercator are refused with a reason.
+
+Feature servers are slow and often forbid caching (ArcGIS Online allows five minutes), so
+feature tiles are kept in the browser's Cache Storage and answered from there for 24 hours;
+Settings shows how many are kept and clears them. At most four queries run at once per
+server. New feature layers are shown from zoom 9, or from the service's own minimum zoom
+where that is higher: at lower zooms each tile covers so much that the server returns its
+whole record limit for it. The zoom range of the layer widens that.
 
 ## CORS and the proxy
 

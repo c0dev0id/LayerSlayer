@@ -72,7 +72,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
     any vector source. Tiles are queried up to zoom 14. A tile with more features than one
     query returns is truncated (logged once per layer). The service's query formats are not
     checked at service level, since hosted layers support GeoJSON even where the service
-    says only JSON.
+    says only JSON. New feature layers start at zoom 9 (or the service's minimum where
+    higher), because a low-zoom tile makes the server return its whole record limit. The
+    source is not limited to the layer's bounds: those are where the features were when
+    the layer was added, and live data moves.
   - XYZ: Leaflet and OpenLayers spellings are converted (`{s}` and `{a-c}` to one template
     per subdomain, `{-y}` to the TMS scheme, `{q}` to `{quadkey}`, `{r}` to `{ratio}`).
   - MapLibre style: sources and layers prefixed with the layer id, URLs made absolute
@@ -115,6 +118,22 @@ It is a static single-page app on GitHub Pages; there is no server component.
   4096 px on the long side and 6× scale, and kept as WebP (PNG where the browser cannot
   encode WebP). pdf.js 6 uses `Map.prototype.getOrInsertComputed`, which current Chromium
   lacks, so its legacy build is used.
+- **Feature tiles are cached by the app.** Feature servers answer slowly and often forbid
+  HTTP caching (ArcGIS Online sends `max-age=300`), so the browser cache does not help.
+  Encoded feature tiles go into Cache Storage, keyed by their query URL, and are answered
+  from there for 24 hours; empty tiles are kept too, since they spare a query just the
+  same. Expired tiles are swept at start-up, and the cache name carries a version so a
+  change of encoding never reads old tiles back. Cache Storage was chosen over IndexedDB
+  because it holds HTTP responses by URL as it is, and the browser accounts for it in the
+  site's storage. Raster tiles are left to the HTTP cache. At most four feature queries
+  run at once per server; queued tiles that scroll out of view are dropped.
+- **Flying to a layer.** The layer row offers a frame icon when the layer's bounds span at
+  most half the Web Mercator world in width and in height; an area measure was tried first
+  and failed for a week of earthquakes, which spans every longitude but leaves out the
+  poles. Bounds the service does not give are found once per session and kept with the
+  layer: GeoJSON from MapLibre's `GeoJSONSource.getBounds()` after the data loads, ArcGIS
+  feature layers from a `returnExtentOnly` query, since FeatureServers often report the
+  whole world as their extent (WFIGS does).
 - **Imported styles are validated when fetched.** MapLibre validates the whole style on
   every `setStyle`, so one invalid layer of an imported style would stop all updates; with
   validation off, a skipped layer breaks the `before` positions of the diff. Failing layers
@@ -130,7 +149,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - A library of about a hundred services by region and category, with search.
 - Service browser listing every layer a service offers, with reasons for those it cannot
   show and a filter for services with hundreds of layers.
-- Layer list with drag and keyboard reordering, visibility, removal, opacity, zoom range,
-  colour for vector layers, zoom to layer, and per-layer error marks.
+- Layer list with drag and keyboard reordering, visibility, removal, flying to the layer's
+  area, opacity, zoom range, colour for vector layers, and per-layer error marks.
+- Feature tiles cached in the browser for a day, with a limit on parallel queries per
+  server.
 - Optional CORS proxy, used per host.
 - Layers, settings, view and imported files survive a browser restart.
