@@ -29,6 +29,10 @@
     "solid-js": "^1.9.17"
   },
   "devDependencies": {
+    "@mapbox/maki": "^8.2.0",
+    "@mdi/svg": "^7.4.47",
+    "@rapideditor/temaki": "^5.13.0",
+    "@types/node": "^26.6.4",
     "jsdom": "^29.1.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.3",

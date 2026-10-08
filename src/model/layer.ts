@@ -177,6 +177,8 @@ export interface Layer {
   adjust?: RasterAdjustments;
   /** An ArcGIS feature layer drawn with the service's own symbols instead of `color`. */
   ownStyle?: boolean;
+  /** The icon a vector layer's points and areas are marked with, on a disc of its colour. */
+  icon?: LayerIcon;
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;
@@ -188,6 +190,18 @@ export interface Layer {
    * add-layer lists show what is on the map.
    */
   origin?: string;
+}
+
+/**
+ * An icon as a layer keeps it: which one (`set:name`) and its shape, so that drawing it
+ * needs no icon set loaded.
+ */
+export interface LayerIcon {
+  id: string;
+  /** Width and height of its viewBox. */
+  size: [number, number];
+  /** SVG path data, each filled. */
+  paths: string[];
 }
 
 /**
@@ -211,7 +225,7 @@ export const NO_ADJUSTMENTS: RasterAdjustments = { hue: 0, saturation: 0, contra
 
 /** What a service offers to add: a layer before it gets an id and the user's settings. */
 export type LayerDraft = Pick<Layer, 'name' | 'source'> &
-  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin'>>;
+  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin' | 'icon'>>;
 
 /** New layers are half transparent, so what lies below them shows. */
 const DEFAULT_OPACITY = 0.5;
