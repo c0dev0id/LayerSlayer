@@ -111,6 +111,13 @@ It is a static single-page app on GitHub Pages; there is no server component.
     preferring the plain RFC 7946 profile where a server also offers JSON-FG. Requests for
     the service description send `Accept: application/json`, since these servers answer
     HTML to a browser's default.
+  - Vector tiles without a style: each tile layer (`source-layer`) is a layer of its own
+    with the plain vector style in its colour, so tile layers stack and colour like other
+    vector layers; a style is what reads a tile set as a map, and those are added as
+    styles. A TileJSON lists the tile layers and the zoom each begins at. A bare template
+    lists nothing, so its zoom 0 tile is read for layer names, and its zoom 14 tile where
+    the map is, since layers that begin at higher zooms (buildings, addresses) are absent
+    from the zoom 0 tile; its tiles are taken to end at zoom 14, where most tile sets do.
   - XYZ: Leaflet and OpenLayers spellings are converted (`{s}` and `{a-c}` to one template
     per subdomain, `{-y}` to the TMS scheme, `{q}` to `{quadkey}`, `{r}` to `{ratio}`).
   - MapLibre style: sources and layers prefixed with the layer id, URLs made absolute
