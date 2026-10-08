@@ -1,3 +1,4 @@
+import { createSignal } from 'solid-js';
 import { geojsonBounds } from '../geo/bounds';
 import type { GeoJsonSource } from '../model/layer';
 import type { LngLat } from '../model/route';
@@ -15,27 +16,52 @@ function focusArea(): LngLat[] {
   return state.focus;
 }
 
-async function keep(filters: readonly string[], geojson: GeoJSON.FeatureCollection): Promise<GeoJsonSource> {
+/** Stores the features as a GeoJSON file: turned to text at once, then written while the caller goes on. */
+async function keep(filters: string[], geojson: GeoJSON.FeatureCollection): Promise<GeoJsonSource> {
   const file = await storeFile(new Blob([JSON.stringify(geojson)], { type: 'application/geo+json' }));
-  return { type: 'geojson', data: { file, name: 'OpenStreetMap.geojson' }, query: { filters: [...filters], queried: new Date().toISOString() } };
+  return { type: 'geojson', data: { file, name: 'OpenStreetMap.geojson' }, query: { filters, queried: new Date().toISOString() } };
 }
 
 /** Adds a layer of the features the filters find in the focus area, unless none are found. Resolves to how many were. */
-export async function addOsmQueryLayer(name: string, filters: readonly string[]): Promise<number> {
+export async function addOsmQueryLayer(name: string, filters: string[]): Promise<number> {
   const geojson = await findOsmFeatures(filters, focusArea());
-  if (geojson.features.length > 0) {
+  const count = geojson.features.length;
+  if (count > 0) {
+    const source = keep(filters, geojson);
     const bounds = geojsonBounds(geojson);
-    addLayer({ name, source: await keep(filters, geojson), attribution: OSM_ATTRIBUTION, ...(bounds && { bounds }) });
+    addLayer({ name, source: await source, attribution: OSM_ATTRIBUTION, ...(bounds && { bounds }) });
   }
-  return geojson.features.length;
+  return count;
 }
 
-/** Runs an OSM query layer's query again in the focus area as it is now. Resolves to how many features it found. */
+/** The layers whose query is running again. */
+const [updating, setUpdating] = createSignal<ReadonlySet<string>>(new Set());
+
+export function isUpdating(id: string): boolean {
+  return updating().has(id);
+}
+
+function setUpdatingLayer(id: string, running: boolean): void {
+  const next = new Set(updating());
+  if (running) next.add(id);
+  else next.delete(id);
+  setUpdating(next);
+}
+
+/** Runs an OSM query layer's query again in the focus area as it is now, once at a time. Resolves to how many features it found. */
 export async function updateOsmQueryLayer(id: string): Promise<number> {
   const source = state.layers.find((l) => l.id === id)?.source;
   if (source?.type !== 'geojson' || !source.query) throw new Error('The layer is no OSM query.');
+  if (isUpdating(id)) throw new Error('The layer is being updated already.');
   const filters = [...source.query.filters];
-  const geojson = await findOsmFeatures(filters, focusArea());
-  replaceLayerSource(id, await keep(filters, geojson), geojsonBounds(geojson));
-  return geojson.features.length;
+  setUpdatingLayer(id, true);
+  try {
+    const geojson = await findOsmFeatures(filters, focusArea());
+    const updated = keep(filters, geojson);
+    const bounds = geojsonBounds(geojson);
+    replaceLayerSource(id, await updated, bounds);
+    return geojson.features.length;
+  } finally {
+    setUpdatingLayer(id, false);
+  }
 }

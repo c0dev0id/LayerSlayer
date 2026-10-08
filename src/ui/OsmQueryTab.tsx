@@ -4,11 +4,7 @@ import { startFocusDrawing } from '../state/drawing';
 import { addOsmQueryLayer } from '../state/osmQuery';
 import { state } from '../state/store';
 import { errorMessage } from '../state/ui';
-
-interface Outcome {
-  text: string;
-  error?: boolean;
-}
+import { createOutcome, OutcomeNote } from './outcome';
 
 /**
  * A layer of OpenStreetMap features found in the focus area: features chosen from the list
@@ -21,14 +17,15 @@ export function OsmQueryTab(props: { onClose: () => void }) {
   const [chosen, setChosen] = createSignal<OsmFeature[]>([]);
   const [tags, setTags] = createSignal('');
   const [tagError, setTagError] = createSignal<string>();
-  const [querying, setQuerying] = createSignal(false);
-  const [outcome, setOutcome] = createSignal<Outcome>();
+  const querying = createOutcome();
 
   /** The list by category, in the order of the list, with typed tags first. */
   const groups = createMemo(() => {
     const byCategory = new Map<string, OsmFeature[]>();
     for (const feature of [...typed(), ...filterOsmFeatures(features() ?? [], search())]) {
-      byCategory.set(feature.category, [...(byCategory.get(feature.category) ?? []), feature]);
+      const members = byCategory.get(feature.category);
+      if (members) members.push(feature);
+      else byCategory.set(feature.category, [feature]);
     }
     return [...byCategory];
   });
@@ -49,23 +46,15 @@ export function OsmQueryTab(props: { onClose: () => void }) {
     }
   }
 
-  async function query() {
+  function query() {
     const name = layerName();
-    setQuerying(true);
-    setOutcome(undefined);
-    try {
-      const count = await addOsmQueryLayer(name, [...new Set(chosen().flatMap((f) => f.filters))]);
-      if (count === 0) {
-        setOutcome({ text: 'Nothing was found in the focus area.' });
-      } else {
-        setOutcome({ text: `Added ${name}: ${count} ${count === 1 ? 'feature' : 'features'}.` });
-        setChosen([]);
-      }
-    } catch (error) {
-      setOutcome({ text: errorMessage(error), error: true });
-    } finally {
-      setQuerying(false);
-    }
+    const filters = [...new Set(chosen().flatMap((f) => f.filters))];
+    void querying.run(async () => {
+      const count = await addOsmQueryLayer(name, filters);
+      if (count === 0) return 'Nothing was found in the focus area.';
+      setChosen([]);
+      return `Added ${name}: ${count} ${count === 1 ? 'feature' : 'features'}.`;
+    });
   }
 
   return (
@@ -129,11 +118,11 @@ export function OsmQueryTab(props: { onClose: () => void }) {
         <span class="grow name" classList={{ muted: chosen().length === 0 }} title={layerName()}>
           {chosen().length > 0 ? layerName() : 'Choose features or add tags; together they form one layer.'}
         </span>
-        <button class="primary" disabled={!state.focus || chosen().length === 0 || querying()} onClick={() => void query()}>
-          {querying() ? 'Querying…' : 'Query'}
+        <button class="primary" disabled={!state.focus || chosen().length === 0 || querying.running()} onClick={query}>
+          {querying.running() ? 'Querying…' : 'Query'}
         </button>
       </div>
-      <Show when={outcome()}>{(o) => <p class="note" classList={{ error: !!o().error, info: !o().error }}>{o().text}</p>}</Show>
+      <OutcomeNote outcome={querying.outcome()} />
       <p class="muted hint">Data © OpenStreetMap contributors, found with the Overpass API.</p>
     </div>
   );

@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from 'solid-js';
+import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import {
@@ -16,10 +16,11 @@ import {
   type RasterAdjustments,
 } from '../model/layer';
 import { hostOf } from '../state/net';
-import { updateOsmQueryLayer } from '../state/osmQuery';
+import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { moveLayer, removeLayer, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
-import { errorMessage, layerErrors, showBounds, zoom } from '../state/ui';
+import { layerErrors, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
+import { createOutcome, OutcomeNote } from './outcome';
 import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
 import { reorderTarget } from './reorder';
 
@@ -293,22 +294,13 @@ function layerHost(layer: Layer): string | undefined {
 }
 
 /** What an OSM query layer asked for and when; Update asks again, in the focus area as it is now. */
-function OsmQueryRows(props: { layer: Layer; query: OsmQuery }) {
-  const [updating, setUpdating] = createSignal(false);
-  const [outcome, setOutcome] = createSignal<{ text: string; error?: boolean }>();
-
-  async function update() {
-    setUpdating(true);
-    setOutcome(undefined);
-    try {
-      const count = await updateOsmQueryLayer(props.layer.id);
-      setOutcome({ text: `Updated: ${count} ${count === 1 ? 'feature' : 'features'}.` });
-    } catch (error) {
-      setOutcome({ text: errorMessage(error), error: true });
-    } finally {
-      setUpdating(false);
-    }
-  }
+function OsmQueryRows(props: { id: string; query: OsmQuery }) {
+  const updated = createOutcome();
+  const update = () =>
+    updated.run(async () => {
+      const count = await updateOsmQueryLayer(props.id);
+      return `Updated: ${count} ${count === 1 ? 'feature' : 'features'}.`;
+    });
 
   return (
     <>
@@ -322,14 +314,14 @@ function OsmQueryRows(props: { layer: Layer; query: OsmQuery }) {
         <span class="muted label">Queried</span>
         <span class="grow">{new Date(props.query.queried).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</span>
         <button
-          disabled={updating() || !state.focus}
+          disabled={isUpdating(props.id) || !state.focus}
           title={state.focus ? 'Query the focus area again, as it is now' : 'Draw a focus area first'}
           onClick={() => void update()}
         >
-          {updating() ? 'Updating…' : 'Update'}
+          {isUpdating(props.id) ? 'Updating…' : 'Update'}
         </button>
       </div>
-      <Show when={outcome()}>{(o) => <p class="note" classList={{ error: !!o().error, info: !o().error }}>{o().text}</p>}</Show>
+      <OutcomeNote outcome={updated.outcome()} />
     </>
   );
 }
@@ -403,7 +395,7 @@ function ActiveLayer(props: { layer: Layer }) {
         </div>
       </Show>
       <Show when={layer.source.type === 'geojson' ? layer.source.query : undefined}>
-        {(query) => <OsmQueryRows layer={layer} query={query()} />}
+        {(query) => <OsmQueryRows id={layer.id} query={query()} />}
       </Show>
       <div class="row">
         <span class="muted label">Source</span>
