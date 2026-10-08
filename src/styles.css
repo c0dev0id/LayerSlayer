@@ -205,6 +205,46 @@ a {
   border-radius: 2px;
 }
 
+/* Icons are drawn in the text colour; a badge shows one as the map does, white on a disc. */
+.glyph {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.badge-disc {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.badge-disc .glyph {
+  width: 13px;
+  height: 13px;
+}
+
+.layer-summary .badge-disc {
+  width: 12px;
+  height: 12px;
+}
+
+.layer-summary .badge-disc .glyph {
+  width: 8px;
+  height: 8px;
+}
+
+:where(.panel, .dialog) button.icon-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+}
+
 .layer.active {
   background: var(--active);
   box-shadow: inset 3px 0 0 var(--accent);
@@ -412,6 +452,38 @@ input.swatch {
 /* Light, so the map behind shows the layers as they are added. */
 .dialog::backdrop {
   background: rgba(0, 0, 0, 0.15);
+}
+
+.dialog.icon-picker {
+  width: min(560px, calc(100vw - 32px));
+  height: min(640px, calc(100vh - 64px));
+}
+
+.icon-grid {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  grid-auto-rows: 44px;
+  align-content: start;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.dialog button.icon-choice {
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.dialog button.icon-choice .glyph {
+  width: 24px;
+  height: 24px;
+}
+
+.dialog button.icon-choice.selected {
+  border-color: var(--accent);
+  background: var(--active);
 }
 
 .dialog.add-layer {

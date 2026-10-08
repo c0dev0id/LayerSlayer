@@ -20,7 +20,9 @@ import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { moveLayer, removeLayer, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
+import { IconBadge } from './IconPicker';
 import { createOutcome, OutcomeNote } from './outcome';
+import { pickIcon } from './pickIcon';
 import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
 import { reorderTarget } from './reorder';
 
@@ -155,7 +157,9 @@ function LayerSummary(props: { layer: Layer }) {
     <div class="layer-summary">
       <span>{Math.round(layer.opacity * 100)}%</span>
       <Show when={isVector(layer.source) && !layer.ownStyle}>
-        <span class="layer-color" style={{ 'background-color': layerColor(layer) }} title={layerColor(layer)} />
+        <Show when={layer.icon} fallback={<span class="layer-color" style={{ 'background-color': layerColor(layer) }} title={layerColor(layer)} />}>
+          {(icon) => <IconBadge icon={icon()} color={layerColor(layer)} />}
+        </Show>
       </Show>
       <Show when={layer.ownStyle}>
         <span title="Drawn with the service's own symbols">own symbols</span>
@@ -392,6 +396,26 @@ function ActiveLayer(props: { layer: Layer }) {
             value={layerColor(layer)}
             onInput={(e) => updateLayer(layer.id, { color: e.currentTarget.value })}
           />
+        </div>
+        <div class="row" title="Marks points and areas with an icon on a disc of the layer's colour">
+          <span class="muted label">Icon</span>
+          <button
+            class="icon-pick"
+            aria-label={`Icon of ${layer.name}`}
+            onClick={async () => {
+              const choice = await pickIcon(layer.icon);
+              if (choice !== undefined) updateLayer(layer.id, { icon: choice ?? undefined });
+            }}
+          >
+            <Show when={layer.icon} fallback="None">
+              {(icon) => <IconBadge icon={icon()} color={layerColor(layer)} />}
+            </Show>
+          </button>
+          <Show when={layer.icon}>
+            <button class="icon" title="Back to dots" aria-label={`Remove the icon of ${layer.name}`} onClick={() => updateLayer(layer.id, { icon: undefined })}>
+              <CloseIcon />
+            </button>
+          </Show>
         </div>
       </Show>
       <Show when={layer.source.type === 'geojson' ? layer.source.query : undefined}>

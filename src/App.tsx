@@ -11,6 +11,7 @@ import { editingRouteId } from './state/drawing';
 import { map } from './state/ui';
 import { AddLayerDialog } from './ui/AddLayerDialog';
 import { ConfirmDialog } from './ui/ConfirmDialog';
+import { IconPicker } from './ui/IconPicker';
 import { FocusSection } from './ui/FocusSection';
 import { LayersSection } from './ui/LayersSection';
 import { ProjectSection } from './ui/ProjectSection';
@@ -53,6 +54,7 @@ export function App() {
       <AddLayerDialog open={adding()} onClose={() => setAdding(false)} />
       <WaypointDialog />
       <ConfirmDialog />
+      <IconPicker />
     </div>
   );
 }
