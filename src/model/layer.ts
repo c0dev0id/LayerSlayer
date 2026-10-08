@@ -162,6 +162,8 @@ export interface Layer {
   color?: string;
   /** Colour adjustments of a raster layer; none means the image as it comes. */
   adjust?: RasterAdjustments;
+  /** An ArcGIS feature layer drawn with the service's own symbols instead of `color`. */
+  ownStyle?: boolean;
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;

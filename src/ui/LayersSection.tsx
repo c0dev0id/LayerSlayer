@@ -136,8 +136,11 @@ function LayerSummary(props: { layer: Layer }) {
   return (
     <div class="layer-summary">
       <span>{Math.round(layer.opacity * 100)}%</span>
-      <Show when={isVector(layer.source)}>
+      <Show when={isVector(layer.source) && !layer.ownStyle}>
         <span class="layer-color" style={{ 'background-color': layerColor(layer) }} title={layerColor(layer)} />
+      </Show>
+      <Show when={layer.ownStyle}>
+        <span title="Drawn with the service's own symbols">own symbols</span>
       </Show>
       <span title={`Drawn from zoom ${layer.minzoom} to ${layer.maxzoom}`}>
         z{layer.minzoom}–{layer.maxzoom}
@@ -322,7 +325,13 @@ function ActiveLayer(props: { layer: Layer }) {
       <Show when={isRaster(layer.source)}>
         <Adjustments layer={layer} />
       </Show>
-      <Show when={isVector(layer.source)}>
+      <Show when={layer.source.type === 'arcgis-features'}>
+        <label class="row" title="The symbols the service draws this layer with, where Layer Slayer can draw them; otherwise its colour">
+          <input type="checkbox" checked={!!layer.ownStyle} onChange={(e) => updateLayer(layer.id, { ownStyle: e.currentTarget.checked || undefined })} />
+          <span>Draw with the service's own symbols</span>
+        </label>
+      </Show>
+      <Show when={isVector(layer.source) && !layer.ownStyle}>
         <div class="row">
           <span class="muted label">Colour</span>
           <input

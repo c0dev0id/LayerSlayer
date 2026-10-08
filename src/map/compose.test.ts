@@ -132,6 +132,32 @@ describe('composeStyle', () => {
     expect(style.layers[0]).toMatchObject({ 'source-layer': 'features' });
   });
 
+  it("draws an ArcGIS feature layer with its own symbology once loaded, and in its colour until then", () => {
+    const features = layer(
+      { name: 'f', source: { type: 'arcgis-features', url: 'https://a/FeatureServer/0', geometry: 'polygon', maxRecordCount: 2000 } },
+      { ownStyle: true, opacity: 0.8 },
+    );
+    expect(compose([features]).layers.map((l) => l.id)).toEqual(['L/fill', 'L/outline', 'L/line', 'L/point']);
+    const symbology = {
+      opacity: 0.5,
+      fillColor: ['match', ['to-string', ['get', 'KIND']], 'park', 'rgba(0,128,0,1)', 'rgba(0,0,0,0)'],
+      lineColor: 'rgba(0,0,0,1)',
+      lineWidth: 1,
+      lineDash: ['literal', [3, 2]],
+    };
+    const style = compose([features], { L: { symbology } });
+    expect(style.layers.map((l) => [l.id, l.type])).toEqual([
+      ['L/fill', 'fill'],
+      ['L/line', 'line'],
+    ]);
+    expect(style.layers[0]!.paint).toEqual({ 'fill-color': symbology.fillColor, 'fill-opacity': 0.4 });
+    expect(style.layers[1]).toMatchObject({ 'source-layer': 'features', paint: { 'line-dasharray': ['literal', [3, 2]], 'line-opacity': 0.4 } });
+    const points = compose([{ ...features, source: { ...features.source, geometry: 'point' } as never }], { L: { symbology: { opacity: 1, icon: 'L:0' } } });
+    expect(points.layers).toEqual([
+      expect.objectContaining({ type: 'symbol', layout: { 'icon-image': 'L:0', 'icon-allow-overlap': true, 'icon-ignore-placement': true } }),
+    ]);
+  });
+
   it('sends tiles through the tile cache unless the layer is set not to keep them', () => {
     const style = compose([
       layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, {}, 'X'),

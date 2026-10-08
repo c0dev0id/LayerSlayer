@@ -74,6 +74,13 @@ export function MapView() {
       if (id) void describeLoadError(event.error).then((message) => reportLayerError(id, message));
       else console.error(event.error);
     });
+    // Icons of ArcGIS symbols are not in any sprite; the map asks for each when it needs it.
+    map.on('styleimagemissing', (event: { id: string }) => {
+      for (const loaded of assets().values()) {
+        const icon = loaded.icons?.get(event.id);
+        if (icon) return map.addImage(event.id, icon.image, { pixelRatio: icon.pixelRatio });
+      }
+    });
     watchGeoJsonBounds(map);
     map.on('sourcedata', (event) => {
       const id = layerOf(event.sourceId);

@@ -20,16 +20,21 @@ import {
   type WmtsSource,
   type XyzSource,
 } from '../model/layer';
+import type { Symbology } from '../services/arcgisSymbology';
+import type { Icon } from './arcgisIcons';
 import { FEATURE_LAYER, FEATURE_PROTOCOL, FEATURE_TILE_MAXZOOM, featureTileUrl } from './featureTiles';
 import { parseProtocolTile, protocolTileUrl, resolveUrl, withParams } from './urls';
 
 /**
  * What a layer needs beyond its configuration before it can be drawn: the fetched style of
- * a style layer, or an object URL for a file kept in the browser.
+ * a style layer, an object URL for a file kept in the browser, or an ArcGIS feature layer's
+ * own symbology with the icons of its point symbols.
  */
 export interface Assets {
   style?: StyleSpecification;
   url?: string;
+  symbology?: Symbology;
+  icons?: ReadonlyMap<string, Icon>;
 }
 
 /** Tiles of dynamic services (WMS, ArcGIS export) are requested at this size. */
@@ -150,19 +155,18 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
     }
     case 'arcgis-features':
     case 'wfs':
-    case 'ogc-features':
+    case 'ogc-features': {
       // Not limited to the layer's bounds: they are where the features were when the layer
       // was added, and live data moves.
-      return vector(
-        layer,
-        {
-          type: 'vector',
-          tiles: cached(layer, [featureTileUrl(src)]),
-          maxzoom: FEATURE_TILE_MAXZOOM,
-          ...(layer.attribution && { attribution: layer.attribution }),
-        },
-        FEATURE_LAYER,
-      );
+      const source: SourceSpecification = {
+        type: 'vector',
+        tiles: cached(layer, [featureTileUrl(src)]),
+        maxzoom: FEATURE_TILE_MAXZOOM,
+        ...(layer.attribution && { attribution: layer.attribution }),
+      };
+      // The layer's colour stands in until its own symbology has loaded, or if it cannot.
+      return layer.ownStyle && assets?.symbology ? symbolized(layer, source, assets.symbology) : vector(layer, source, FEATURE_LAYER);
+    }
     case 'style':
       return assets?.style ? fromStyle(layer, assets.style, src.url) : undefined;
   }
@@ -345,6 +349,43 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
       },
     ],
   };
+}
+
+/**
+ * Features drawn with their service's own symbology: areas filled and outlined, lines, and
+ * points as the icons of their symbols, which the map adds when it asks for them.
+ */
+function symbolized(layer: Layer, source: SourceSpecification, symbology: Symbology): Fragment {
+  const base = { source: layer.id, 'source-layer': FEATURE_LAYER, ...zoomRange(layer) };
+  const opacity = layer.opacity * symbology.opacity;
+  const layers: LayerSpecification[] = [];
+  if (symbology.fillColor !== undefined) {
+    layers.push({ ...base, id: `${layer.id}/fill`, type: 'fill', paint: { 'fill-color': symbology.fillColor, 'fill-opacity': opacity } } as LayerSpecification);
+  }
+  if (symbology.lineColor !== undefined) {
+    layers.push({
+      ...base,
+      id: `${layer.id}/line`,
+      type: 'line',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: {
+        'line-color': symbology.lineColor,
+        'line-width': symbology.lineWidth,
+        'line-opacity': opacity,
+        ...(symbology.lineDash !== undefined && { 'line-dasharray': symbology.lineDash }),
+      },
+    } as LayerSpecification);
+  }
+  if (symbology.icon !== undefined) {
+    layers.push({
+      ...base,
+      id: `${layer.id}/point`,
+      type: 'symbol',
+      layout: { 'icon-image': symbology.icon, 'icon-allow-overlap': true, 'icon-ignore-placement': true },
+      paint: { 'icon-opacity': opacity },
+    } as LayerSpecification);
+  }
+  return { sources: { [layer.id]: source }, layers };
 }
 
 /**
