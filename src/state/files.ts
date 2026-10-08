@@ -26,7 +26,7 @@ export function deleteFile(key: string): Promise<void> {
   return del(key, db);
 }
 
-/** Deletes stored files that no layer refers to, left behind by an interrupted session. */
+/** Deletes stored files that no layer refers to, left behind by an interrupted session or query. */
 export async function collectFiles(referenced: ReadonlySet<string>): Promise<void> {
   for (const key of await keys(db)) {
     if (typeof key === 'string' && !referenced.has(key)) await del(key, db);

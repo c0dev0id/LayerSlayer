@@ -281,6 +281,11 @@ export function storedFile(source: LayerSource): string | undefined {
   return (source.type === 'geojson' || source.type === 'image') && 'file' in source.data ? source.data.file : undefined;
 }
 
+/** The files the layers keep in the browser. */
+export function storedFiles(layers: readonly Layer[]): Set<string> {
+  return new Set(layers.map((l) => storedFile(l.source)).filter((f): f is string => f !== undefined));
+}
+
 export function createLayer(draft: LayerDraft, existing: readonly Layer[], id: string = crypto.randomUUID()): Layer {
   const layer: Layer = {
     id,

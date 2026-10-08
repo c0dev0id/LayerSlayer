@@ -1,7 +1,7 @@
 import { createEffect, createMemo, createRoot } from 'solid-js';
 import { reconcile } from 'solid-js/store';
 import { cornersBounds } from '../geo/bounds';
-import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFile, type Bounds, type Layer, type LayerDraft, type LayerSource } from '../model/layer';
+import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFiles, type Bounds, type Layer, type LayerDraft, type LayerSource } from '../model/layer';
 import { isLngLat, type LngLat } from '../model/route';
 import { deleteFile } from './files';
 import { setProxy } from './net';
@@ -112,6 +112,14 @@ export { state };
 
 createRoot(() => {
   createEffect(() => setProxy(state.settings.proxy, [...state.settings.proxiedHosts]));
+  // A stored file goes with the last layer that uses it: removed, given other data, or
+  // replaced by an opened project.
+  let used = storedFiles(state.layers);
+  createEffect(() => {
+    const now = storedFiles(state.layers);
+    for (const file of used) if (!now.has(file)) void deleteFile(file);
+    used = now;
+  });
 });
 
 /** Replaces everything with a project's state, as when it is opened; the proxy address stays this browser's. */
@@ -135,30 +143,17 @@ export function updateLayer(id: string, patch: LayerSettings): void {
   setState('layers', (l) => l.id === id, patch);
 }
 
-/**
- * Gives a layer new data from where it came from, as updating an OSM query does. The file
- * it kept before is deleted; so is the new one if the layer has gone meanwhile.
- */
+/** Gives a layer new data from where it came from, as updating an OSM query does. */
 export function replaceLayerSource(id: string, source: LayerSource, bounds: Bounds | undefined): void {
-  const layer = state.layers.find((l) => l.id === id);
-  const file = storedFile(source);
-  if (!layer) {
-    if (file) void deleteFile(file);
-    return;
-  }
-  const previous = storedFile(layer.source);
   setState('layers', (l) => l.id === id, { source, bounds });
-  if (previous && previous !== file) void deleteFile(previous);
 }
 
 export function removeLayer(id: string): void {
   const index = state.layers.findIndex((l) => l.id === id);
   const layer = state.layers[index];
   if (!layer) return;
-  const file = storedFile(layer.source);
   setState('layers', (layers) => layers.filter((l) => l.id !== id));
   if (state.activeLayerId === id) setState('activeLayerId', state.layers[Math.min(index, state.layers.length - 1)]?.id);
-  if (file) void deleteFile(file);
 }
 
 /** Removes every layer that `matches`. */
