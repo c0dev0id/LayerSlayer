@@ -46,6 +46,9 @@ export function MapView() {
       attributionControl: { compact: true },
       transformRequest: (url) => ({ url: requestUrl(url) }),
     });
+    // MapLibre's default (1/450) zooms about 0.15 levels per wheel notch; this makes it about
+    // 0.55, two notches to a level.
+    map.scrollZoom.setWheelZoomRate(1 / 100);
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     map.addControl(new maplibregl.GeolocateControl({ fitBoundsOptions: { maxZoom: 15 } }), 'top-right');
     map.addControl(new maplibregl.ScaleControl(), 'bottom-left');
