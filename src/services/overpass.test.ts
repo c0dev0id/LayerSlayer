@@ -77,7 +77,7 @@ describe('checkAnswer', () => {
 
   it('reports a query that gave up, although it answered', () => {
     const remark = 'runtime error: Query timed out in "query" at line 1 after 91 seconds.';
-    expect(() => checkAnswer({ elements: [], remark })).toThrow(`The Overpass API gave up: ${remark} A smaller focus area`);
+    expect(() => checkAnswer({ elements: [], remark })).toThrow(`The Overpass API gave up: ${remark} A smaller area`);
   });
 });
 

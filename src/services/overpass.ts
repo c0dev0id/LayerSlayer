@@ -68,9 +68,29 @@ export function overpassQuery(filters: readonly string[], area: readonly LngLat[
   return `[out:json][timeout:${TIMEOUT_S}];(${statements.join('')});out geom;`;
 }
 
+/** A point of an element's geometry. */
+interface LatLon {
+  lat: number;
+  lon: number;
+}
+
+/** An element of an Overpass answer asked for with `out geom`: its tags and where it lies. */
+export interface OsmElement {
+  type: 'node' | 'way' | 'relation';
+  id: number;
+  tags?: Record<string, string>;
+  /** A node's position. */
+  lat?: number;
+  lon?: number;
+  /** A way's points. */
+  geometry?: LatLon[];
+  /** A relation's members, with their positions or points. */
+  members?: ({ type: string; ref?: number; role?: string } & Partial<LatLon> & { geometry?: LatLon[] })[];
+}
+
 /** An Overpass answer in OSM JSON. */
 interface OverpassAnswer {
-  elements: unknown[];
+  elements: OsmElement[];
   remark?: string;
 }
 
@@ -84,7 +104,7 @@ export function checkAnswer(json: unknown): OverpassAnswer {
     throw new Error('The Overpass API did not answer with OpenStreetMap data.');
   }
   if (typeof answer.remark === 'string' && /error/i.test(answer.remark)) {
-    throw new Error(`The Overpass API gave up: ${answer.remark.trim()} A smaller focus area or fewer features may work.`);
+    throw new Error(`The Overpass API gave up: ${answer.remark.trim()} A smaller area or fewer features may work.`);
   }
   return answer as OverpassAnswer;
 }
@@ -95,9 +115,13 @@ export async function toGeoJson(answer: OverpassAnswer): Promise<GeoJSON.Feature
   return osmtogeojson(answer, { flatProperties: true }) as GeoJSON.FeatureCollection;
 }
 
+/** Sends an Overpass QL query and checks the answer. */
+export async function askOverpass(query: string): Promise<OverpassAnswer> {
+  const response = await fetchResource(OVERPASS_URL, { method: 'POST', body: new URLSearchParams({ data: query }) });
+  return checkAnswer(await response.json());
+}
+
 /** The OSM features matching any of the filters within the polygon. */
 export async function findOsmFeatures(filters: readonly string[], area: readonly LngLat[]): Promise<GeoJSON.FeatureCollection> {
-  const body = new URLSearchParams({ data: overpassQuery(filters, area) });
-  const response = await fetchResource(OVERPASS_URL, { method: 'POST', body });
-  return toGeoJson(checkAnswer(await response.json()));
+  return toGeoJson(await askOverpass(overpassQuery(filters, area)));
 }
