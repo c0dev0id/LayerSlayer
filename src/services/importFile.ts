@@ -2,6 +2,7 @@ import { cornersBounds, geojsonBounds } from '../geo/bounds';
 import type { LayerDraft } from '../model/layer';
 import { storeFile } from '../state/files';
 import { fetchResource } from '../state/net';
+import { gpxTracksGeoJson } from '../routing/gpx';
 import { renderGeoPdf } from './geopdf';
 import { fileName } from './read';
 
@@ -21,9 +22,23 @@ function isPdf(blob: Blob, name: string): boolean {
   return blob.type === 'application/pdf' || /\.pdf$/i.test(name);
 }
 
-/** A layer from a file: GeoJSON is kept as it is, a GeoPDF as the picture of its map area. */
+function isGpx(blob: Blob, name: string): boolean {
+  return blob.type === 'application/gpx+xml' || /\.gpx$/i.test(name);
+}
+
+/**
+ * A layer from a file: GeoJSON is kept as it is, the tracks of a GPX file as GeoJSON, a
+ * GeoPDF as the picture of its map area.
+ */
 export async function importFile(file: Blob, name: string): Promise<LayerDraft> {
   const title = fileName(name);
+  if (isGpx(file, name)) {
+    const tracks = gpxTracksGeoJson(await file.text());
+    if (tracks.features.length === 0) throw new Error(`${name} holds no tracks; its routes and waypoints can be imported under Routes.`);
+    const key = await storeFile(new Blob([JSON.stringify(tracks)], { type: 'application/geo+json' }));
+    const bounds = geojsonBounds(tracks);
+    return { name: title, source: { type: 'geojson', data: { file: key, name } }, ...(bounds && { bounds }) };
+  }
   if (isPdf(file, name)) {
     const { blob, coordinates } = await renderGeoPdf(await file.arrayBuffer());
     const key = await storeFile(blob);

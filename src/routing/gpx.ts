@@ -70,11 +70,17 @@ function position(element: Element): LngLat | undefined {
 
 const positions = (elements: Element[]) => elements.map(position).filter((p): p is LngLat => p !== undefined);
 
-/** Reads a GPX 1.0 or 1.1 document. */
-export function parseGpx(xml: string): GpxContent {
+/** The root of a GPX 1.0 or 1.1 document. */
+function gpxRoot(xml: string): Element {
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
   const root = doc.documentElement;
   if (doc.getElementsByTagName('parsererror')[0] || root.localName !== 'gpx') throw new Error('This is not a GPX file.');
+  return root;
+}
+
+/** Reads a GPX 1.0 or 1.1 document. */
+export function parseGpx(xml: string): GpxContent {
+  const root = gpxRoot(xml);
   return {
     waypoints: children(root, 'wpt').flatMap((w) => {
       const lngLat = position(w);
@@ -83,6 +89,24 @@ export function parseGpx(xml: string): GpxContent {
     routes: children(root, 'rte').map((r) => ({ name: text(r, 'name'), points: positions(children(r, 'rtept')) })),
     tracks: children(root, 'trk').map((t) => ({ name: text(t, 'name'), points: positions(descendants(t, 'trkpt')) })),
   };
+}
+
+/**
+ * The tracks of a GPX document as GeoJSON, one feature per track named by its `name`:
+ * a line, or a multi-line where the track has several segments. Segments of fewer than
+ * two points are left out; routes and waypoints are not read.
+ */
+export function gpxTracksGeoJson(xml: string): GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.MultiLineString> {
+  const features = children(gpxRoot(xml), 'trk').flatMap((track) => {
+    const segments = children(track, 'trkseg')
+      .map((segment) => positions(children(segment, 'trkpt')))
+      .filter((line) => line.length >= 2);
+    if (segments.length === 0) return [];
+    const geometry: GeoJSON.LineString | GeoJSON.MultiLineString =
+      segments.length === 1 ? { type: 'LineString', coordinates: segments[0]! } : { type: 'MultiLineString', coordinates: segments };
+    return [{ type: 'Feature' as const, properties: { name: text(track, 'name') ?? null }, geometry }];
+  });
+  return { type: 'FeatureCollection', features };
 }
 
 /** A GPX route with more points than this is a track in disguise; routing each leg would take minutes. */

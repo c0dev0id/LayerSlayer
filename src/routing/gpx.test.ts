@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LngLat, Route } from '../model/route';
-import { gpxToRouteData, MAX_ROUTED_POINTS, MAX_TRACK_POINTS, parseGpx, routeTracks, toGpx } from './gpx';
+import { gpxToRouteData, gpxTracksGeoJson, MAX_ROUTED_POINTS, MAX_TRACK_POINTS, parseGpx, routeTracks, toGpx } from './gpx';
 
 const time = new Date('2026-10-05T12:00:00Z');
 
@@ -224,5 +224,52 @@ describe('gpxToRouteData', () => {
     );
     expect(data.routes[0]!.points.slice(1).every((p) => p.straight)).toBe(true);
     expect(data.routes[1]!.points.length).toBeLessThanOrEqual(MAX_TRACK_POINTS);
+  });
+});
+
+describe('gpxTracksGeoJson', () => {
+  it('turns each track into a line, several segments into a multi-line, and ignores the rest', () => {
+    const geojson = gpxTracksGeoJson(`<gpx xmlns="http://www.topografix.com/GPX/1/1">
+      <wpt lat="1" lon="1"/>
+      <rte><rtept lat="1" lon="1"/><rtept lat="2" lon="2"/></rte>
+      <trk><name>One</name><trkseg><trkpt lat="1" lon="2"/><trkpt lat="3" lon="4"/></trkseg></trk>
+      <trk><trkseg><trkpt lat="1" lon="2"/><trkpt lat="3" lon="4"/></trkseg><trkseg><trkpt lat="5" lon="6"/></trkseg>
+        <trkseg><trkpt lat="5" lon="6"/><trkpt lat="7" lon="8"/></trkseg></trk>
+      <trk><name>Empty</name><trkseg><trkpt lat="1" lon="2"/></trkseg></trk>
+    </gpx>`);
+    expect(geojson.features).toEqual([
+      {
+        type: 'Feature',
+        properties: { name: 'One' },
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [2, 1],
+            [4, 3],
+          ],
+        },
+      },
+      {
+        type: 'Feature',
+        properties: { name: null },
+        geometry: {
+          type: 'MultiLineString',
+          coordinates: [
+            [
+              [2, 1],
+              [4, 3],
+            ],
+            [
+              [6, 5],
+              [8, 7],
+            ],
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('turns away what is not GPX', () => {
+    expect(() => gpxTracksGeoJson('<kml/>')).toThrow('not a GPX file');
   });
 });
