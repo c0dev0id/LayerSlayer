@@ -28,6 +28,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - @maplibre/geojson-vt and @maplibre/vt-pbf (feature query results to vector tiles; both
   are MapLibre's own dependencies).
 - @maplibre/maplibre-gl-style-spec (validating imported styles; loaded on demand).
+- @tmcw/togeojson and fflate (KML and KMZ import), @mapbox/vector-tile and pbf (reading a
+  vector tile's layer names), geotiff.js and @geomatico/maplibre-cog-protocol (COGs); all
+  loaded on demand.
 - pdf.js (legacy build) and @cantoo/pdf-lib (GeoPDF import; loaded on demand).
 - idb-keyval (IndexedDB for imported files).
 - Vitest 5 with jsdom for unit tests of the pure modules.
@@ -118,6 +121,16 @@ It is a static single-page app on GitHub Pages; there is no server component.
     lists nothing, so its zoom 0 tile is read for layer names, and its zoom 14 tile where
     the map is, since layers that begin at higher zooms (buildings, addresses) are absent
     from the zoom 0 tile; its tiles are taken to end at zoom 14, where most tile sets do.
+  - Cloud Optimized GeoTIFF: drawn by @geomatico/maplibre-cog-protocol (`cog://`), which
+    reads tiles by range requests and serves a TileJSON for the source. It does not
+    reproject, and rejects only projected systems other than 3857, so a geographic
+    (EPSG:4326) GeoTIFF would be drawn misplaced: the reader checks the geokeys itself and
+    turns away anything but Web Mercator, naming the GDAL command. Imagery keeps its own
+    colours; single-band data of more than 8 bits would be drawn clipped as grey, so it
+    gets a spectral ramp over the value range of the smallest overview (scale and offset
+    applied, nodata left out), the one read that stays small however large the file. The
+    file is fetched by the protocol itself, outside MapLibre's request transform, so the
+    CORS proxy does not apply to COGs, and the tile cache does not either.
   - XYZ: Leaflet and OpenLayers spellings are converted (`{s}` and `{a-c}` to one template
     per subdomain, `{-y}` to the TMS scheme, `{q}` to `{quadkey}`, `{r}` to `{ratio}`).
   - MapLibre style: sources and layers prefixed with the layer id, URLs made absolute

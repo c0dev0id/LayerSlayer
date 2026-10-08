@@ -2,7 +2,8 @@
 
 A map viewer for the web that stacks base maps and overlays from many kinds of map
 services: WMS, WMTS, WFS, OGC API – Features, ArcGIS MapServer and FeatureServer, XYZ tile
-templates, MapLibre styles, GeoJSON, GPX, KML and GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
+templates, vector tiles, MapLibre styles, Cloud Optimized GeoTIFF, GeoJSON, GPX, KML and
+GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
 documents, service descriptions, georeferencing in the PDF) and drawn with the MapLibre
 source that fits it, rather than turned into raster tiles by a proxy.
 
@@ -23,7 +24,8 @@ in the browser.
   - An **address** can be a WMS, WMTS or WFS capabilities URL, an OGC API – Features
     landing page or collection, an ArcGIS MapServer or FeatureServer (or one of its
     layers), a tile template with `{z}/{x}/{y}` (raster, or vector tiles ending in `.pbf`
-    or `.mvt`), a TileJSON, a GeoJSON file, a MapLibre style or a GeoPDF. The kind of service is guessed from the address
+    or `.mvt`), a TileJSON, a GeoJSON file, a MapLibre style, a Cloud Optimized GeoTIFF
+    or a GeoPDF. The kind of service is guessed from the address
     and can be changed. *Open* shows the source's layers.
   - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
     imported under Routes), the placemarks of KML and KMZ files, and GeoPDFs with an ISO
@@ -72,6 +74,7 @@ files in IndexedDB, so the map is as it was after a restart.
 | GPX tracks | file | Converted to GeoJSON when imported, a line per track |
 | KML / KMZ | file | Placemarks converted to GeoJSON when imported; ground overlays, network links and KML styles are left out |
 | MapLibre style | style JSON | The style's own sources and layers |
+| Cloud Optimized GeoTIFF | the file's header, by range requests | Raster tiles cut from the file by range requests; imagery in its own colours, single-band data with a colour ramp over the values of its smallest overview. Web Mercator (EPSG:3857) only |
 | GeoPDF | file or URL | The map area rendered once to a picture, placed by its corners |
 
 Only Web Mercator is drawn; services that offer no Web Mercator are refused with a reason.
