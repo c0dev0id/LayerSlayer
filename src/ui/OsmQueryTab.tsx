@@ -106,7 +106,7 @@ export function OsmQueryTab(props: { onClose: () => void }) {
           addTags();
         }}
       >
-        <input class="grow" placeholder="Tags, e.g. power=generator generator:source=wind" aria-label="Tags" value={tags()} onInput={(e) => setTags(e.currentTarget.value)} />
+        <input class="grow" placeholder="Tags, e.g. highway=track surface=gravel" aria-label="Tags" value={tags()} onInput={(e) => setTags(e.currentTarget.value)} />
         <button type="submit" disabled={!tags().trim()}>
           Add
         </button>
