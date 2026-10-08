@@ -32,10 +32,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   vector tile's layer names), geotiff.js and @geomatico/maplibre-cog-protocol (COGs); all
   loaded on demand.
 - pdf.js (legacy build) and @cantoo/pdf-lib (GeoPDF import; loaded on demand).
-- idb-keyval (IndexedDB for imported files).
+- osmtogeojson (Overpass answers to GeoJSON, multipolygon and route relations included;
+  loaded on demand). Its latest release is 3.0.0-beta.5; it pins a vulnerable
+  `@xmldom/xmldom` that only its command-line tool uses, lifted by an npm override.
+- idb-keyval (IndexedDB for imported files and OSM query results).
 - Vitest 5 with jsdom for unit tests of the pure modules.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx`.
 - Routing by the FOSSGIS OSRM servers (routing.openstreetmap.de), car, bike and foot.
+- OSM queries by the Overpass API (overpass-api.de).
 - Deployment: GitHub Actions to GitHub Pages.
 
 ## Key decisions
@@ -341,6 +345,31 @@ It is a static single-page app on GitHub Pages; there is no server component.
   the map fitted to the place's extent up to zoom 17); the others stay listed until one is
   chosen, the map is moved by hand or Esc. The pin is not kept: it marks a search, not
   data. The drawing hint bar moved below the search box.
+- **OSM queries without query code.** Layers of OpenStreetMap features are made with the
+  Overpass API from tag filters, not Overpass QL: a curated list
+  (`library/osmFeatures.json`, each entry a name, a category and its filters) and a field
+  for typed tags (`key=value`, `key=*`, several separated by spaces all having to match,
+  quotes around spaces). Filters are parsed and written one way (`services/overpass.ts`),
+  so a curated entry and typed tags are the same thing to the query, which joins every
+  filter's `nwr` statement with the focus polygon (`poly:`, the polygon itself rather than
+  its bounds) and asks for `out geom`. The focus area is required, not just advised: a
+  query without one would be worldwide and time out anyway. Querying is done once; the
+  result is converted to GeoJSON and stored like an imported file, so it travels in
+  project files and costs Overpass nothing while the map is used. The layer keeps its
+  filters and the time it ran; *Update* runs them again in the focus area as it is then.
+  Overpass reports timeouts and memory exhaustion with status 200 and a `remark`, which is
+  treated as the failure it is, and its 429 and 504 pages are explained in words. One
+  layer has one colour; features that should look different go in separate layers.
+- **GeoJSON loaded from an address survives style diffs.** MapLibre 6 keeps the GeoJSON it
+  loaded from an address in place of the address, so every diffed `setStyle` saw such a
+  source as changed and fetched and indexed it again, on any change of any layer (each
+  step of an opacity slider). `map/geojsonDiff.ts` passes a `transformStyle` that
+  remembers each source's address and, where the next style gives the same one, puts the
+  address back into the current style the diff compares against. That relies on MapLibre
+  diffing against the very object it hands to `transformStyle`; carrying the loaded data
+  into the next style instead, the documented way, would have MapLibre compare and clone
+  all of it on every change. A layer whose file changes keeps its old object URL until
+  the new one has loaded, so the map never reads a revoked address.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
@@ -382,6 +411,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
+- OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about
+  a hundred or typed as tags, queried with Overpass once and updated on demand.
 - Optional CORS proxy, used per host.
 - A focus area: a polygon outside whose bounds no layer but the bottom one requests
   tiles, with the map around it dimmed.

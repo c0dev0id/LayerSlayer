@@ -14,7 +14,7 @@ in the browser.
 
 ## Using it
 
-- **Add layer** opens the library, an address field and a file picker. The dialog stays
+- **Add layer** opens the library, an address field, a file picker and OSM Query. The dialog stays
   open until *Close*: a tap adds a layer in the background and a second tap removes it,
   and what is on the map is highlighted.
   - The **library** lists services by region and category. A service with a single layer
@@ -32,6 +32,14 @@ in the browser.
     imported under Routes), the placemarks of KML and KMZ files, and GeoPDFs with an ISO
     32000 geospatial viewport, added as they are chosen. Each new GeoJSON, GPX or KML
     layer takes the next colour of a palette, which its settings can change.
+  - **OSM Query** makes a layer of OpenStreetMap features in the focus area, found with
+    the Overpass API; without a focus area it offers to draw one, since Overpass answers
+    queries for limited areas only. Choose features from the list (drinking water, power
+    lines, camp sites, hiking routes and about a hundred more, each with the tags it
+    stands for), or type tags and *Add* them: `key=value`, or `key=*` for any value, with
+    tags separated by spaces all having to match, e.g. `power=generator
+    generator:source=wind`. *Query* finds everything chosen in one layer, named after it;
+    the result is kept in the browser as GeoJSON.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
   arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
   it, and the frame icon flies to the area the layer covers (layers that span most of the
@@ -49,6 +57,8 @@ in the browser.
   inverts the image; with the hue turned 180° that gives a dark map that keeps its colours.
   ArcGIS feature layers can be *drawn with the service's own symbols* (simple, unique value
   and class breaks renderers with simple and picture symbols) instead of their colour.
+  OSM query layers show their tags and when they were queried; *Update* queries again in
+  the focus area as it is now and replaces the layer's data.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
   search, preferring those in view. Enter searches; the first place found gets a pin and the
   map flies to it, and the list below offers the other places found. × clears the search
@@ -97,6 +107,7 @@ browser, since it may carry an account key; which servers go through it is saved
 | Vector tiles (MVT) | TileJSON, or a template and two of its tiles | One layer per tile layer, drawn plainly in the layer's colour; a template's layers are read from its zoom 0 tile and its zoom 14 tile where the map is |
 | XYZ template | the template | Raster tiles; `{s}`, `{a-c}`, `{-y}`, `{q}` and `{r}` spellings are converted |
 | GeoJSON | URL or file | GeoJSON source, drawn in the layer's colour |
+| OSM query | the Overpass API, within the focus area | Converted to GeoJSON (osmtogeojson) once and kept in the browser, drawn in the layer's colour |
 | GPX tracks | file | Converted to GeoJSON when imported, a line per track |
 | KML / KMZ | file | Placemarks converted to GeoJSON when imported; ground overlays, network links and KML styles are left out |
 | MapLibre style | style JSON | The style's own sources and layers |
