@@ -12,6 +12,7 @@ import {
   updateLayer,
 } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
+import { EditableName } from './EditableName';
 import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
 import { reorderTarget } from './reorder';
 
@@ -82,14 +83,16 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
       >
         {layer.visible ? <EyeIcon /> : <EyeOffIcon />}
       </button>
-      <button
-        class="layer-select grow"
-        title={outOfRange(layer) ? `${layer.name} (not shown at this zoom)` : layer.name}
-        aria-pressed={isActive()}
-        onClick={() => setActiveLayer(layer.id)}
-      >
-        <span class="name">{layer.name}</span>
-      </button>
+      <EditableName value={layer.name} label="layer" onRename={(name) => updateLayer(layer.id, { name })}>
+        <button
+          class="layer-select grow"
+          title={outOfRange(layer) ? `${layer.name} (not shown at this zoom)` : layer.name}
+          aria-pressed={isActive()}
+          onClick={() => setActiveLayer(layer.id)}
+        >
+          <span class="name">{layer.name}</span>
+        </button>
+      </EditableName>
       <Show when={layer.bounds && !coversMostOfWorld(layer.bounds)}>
         <button
           class="icon"
@@ -219,14 +222,6 @@ function ActiveLayer(props: { layer: Layer }) {
 
   return (
     <div class="active-layer">
-      <div class="row">
-        <input
-          class="grow name-input"
-          aria-label="Layer name"
-          value={layer.name}
-          onChange={(e) => updateLayer(layer.id, { name: e.currentTarget.value.trim() || layer.name })}
-        />
-      </div>
       <div class="row">
         <span class="muted label">Opacity</span>
         <input

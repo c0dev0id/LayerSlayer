@@ -1,11 +1,12 @@
-import { createSignal, onMount, Show } from 'solid-js';
+import { createSignal, onMount, Show, type JSX } from 'solid-js';
 import { PencilIcon } from './icons';
 
 /**
- * A name shown as text with a rename button. Renaming edits it in place: Enter or leaving
- * the field keeps the new name, Esc or an empty field keeps the old one.
+ * A name shown as text (or as `children`, such as a button) with a rename button. Renaming
+ * edits it in place: Enter or leaving the field keeps the new name, Esc or an empty field
+ * keeps the old one.
  */
-export function EditableName(props: { value: string; label: string; onRename: (name: string) => void }) {
+export function EditableName(props: { value: string; label: string; onRename: (name: string) => void; children?: JSX.Element }) {
   const [editing, setEditing] = createSignal(false);
   const done = (name: string | undefined) => {
     setEditing(false);
@@ -16,9 +17,11 @@ export function EditableName(props: { value: string; label: string; onRename: (n
       when={editing()}
       fallback={
         <>
-          <span class="grow name" title={props.value}>
-            {props.value}
-          </span>
+          {props.children ?? (
+            <span class="grow name" title={props.value}>
+              {props.value}
+            </span>
+          )}
           <button class="icon" title={`Rename ${props.label}`} aria-label={`Rename ${props.label}`} onClick={() => setEditing(true)}>
             <PencilIcon />
           </button>
