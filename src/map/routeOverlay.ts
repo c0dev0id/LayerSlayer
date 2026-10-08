@@ -1,6 +1,6 @@
 import type { FilterSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl';
 import type { LngLat, Route } from '../model/route';
-import { legGeometry, routeLegs } from '../routing/legs';
+import { legCoordinates, legState, routeLegs } from '../routing/legs';
 import { decodePolyline } from '../routing/polyline';
 
 /** The source of the route tool's lines; no layer id has this form. */
@@ -50,24 +50,17 @@ let decoded = new Map<string, LngLat[]>();
  */
 export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<string>): GeoJSON.FeatureCollection<GeoJSON.LineString> {
   const cache = new Map<string, LngLat[]>();
+  const decode = (geometry: string) => {
+    const coordinates = decoded.get(geometry) ?? decodePolyline(geometry);
+    cache.set(geometry, coordinates);
+    return coordinates;
+  };
   const features: GeoJSON.Feature<GeoJSON.LineString>[] = [];
   for (const route of routes) {
     for (const leg of routeLegs(route)) {
-      const geometry = legGeometry(route, leg);
-      let coordinates: LngLat[];
-      let state: string;
-      if (geometry) {
-        coordinates = decoded.get(geometry) ?? decodePolyline(geometry);
-        cache.set(geometry, coordinates);
-        state = 'routed';
-      } else {
-        coordinates = [
-          [leg.from[0], leg.from[1]],
-          [leg.to[0], leg.to[1]],
-        ];
-        state = leg.straight ? 'straight' : failed.has(leg.key) ? 'failed' : 'pending';
-      }
-      features.push({ type: 'Feature', properties: { state, color: route.color }, geometry: { type: 'LineString', coordinates } });
+      const coordinates = legCoordinates(route, leg, decode).map((p): LngLat => [p[0], p[1]]);
+      const properties = { state: legState(route, leg, failed), color: route.color };
+      features.push({ type: 'Feature', properties, geometry: { type: 'LineString', coordinates } });
     }
   }
   decoded = cache;

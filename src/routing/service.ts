@@ -3,7 +3,7 @@ import { unwrap } from 'solid-js/store';
 import { editingRouteId } from '../state/drawing';
 import { routeData, setRouteLeg } from '../state/routes';
 import { errorMessage } from '../state/ui';
-import { nextMissingLeg, routedLegs, type LegJob } from './legs';
+import { legState, nextMissingLeg, routeLegs, type LegJob } from './legs';
 import { createPump, fetchLeg, ROUTING_MIN_INTERVAL_MS } from './osrm';
 
 const [failedLegs, setFailedLegs] = createSignal<ReadonlySet<string>>(new Set());
@@ -31,20 +31,27 @@ const pump = createPump<LegJob>({
 });
 
 const service = createRoot(() => {
-  const pendingLegs = createMemo(() => {
+  // Of the legs the routes have now; a failed leg whose point moved is no longer counted.
+  const counts = createMemo(() => {
     const failed = failedLegs();
-    let count = 0;
+    const count = { pending: 0, failed: 0 };
     for (const route of routeData.routes) {
-      for (const leg of routedLegs(route)) if (!(leg.key in route.legs) && !failed.has(leg.key)) count++;
+      for (const leg of routeLegs(route)) {
+        const state = legState(route, leg, failed);
+        if (state === 'pending' || state === 'failed') count[state]++;
+      }
     }
     return count;
   });
   // Tracks route points, profiles, cached legs and failures; starts the pump when work appears.
   createEffect(() => {
-    if (pendingLegs() > 0) void pump();
+    if (counts().pending > 0) void pump();
   });
-  return { pendingLegs };
+  return { counts };
 });
 
 /** Number of legs still waiting for routing. */
-export const pendingLegs = service.pendingLegs;
+export const pendingLegs = () => service.counts().pending;
+
+/** Number of legs whose routing failed. */
+export const failedLegCount = () => service.counts().failed;

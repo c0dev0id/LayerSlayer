@@ -1,7 +1,6 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { nearestLine, type XY } from '../geo/nearest';
-import { legGeometry, roundLngLat, routeLegs } from '../routing/legs';
-import { decodePolyline } from '../routing/polyline';
+import { legCoordinates, roundLngLat, routeLegs } from '../routing/legs';
 import { insertPoint, routeById } from '../state/routes';
 
 /**
@@ -12,13 +11,12 @@ import { insertPoint, routeById } from '../state/routes';
 export function insertPointOnLine(map: MapLibreMap, routeId: string, tap: XY, tolerance: number): boolean {
   const route = routeById(routeId);
   if (!route) return false;
-  const lines = routeLegs(route).map((leg) => {
-    const geometry = legGeometry(route, leg);
-    return (geometry ? decodePolyline(geometry) : [leg.from, leg.to]).map((c): XY => {
+  const lines = routeLegs(route).map((leg) =>
+    legCoordinates(route, leg).map((c): XY => {
       const { x, y } = map.project(c);
       return [x, y];
-    });
-  });
+    }),
+  );
   const hit = nearestLine(lines, tap);
   if (!hit || hit.distance > tolerance) return false;
   const { lng, lat } = map.unproject([hit.point[0], hit.point[1]]).wrap();

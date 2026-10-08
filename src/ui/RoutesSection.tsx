@@ -4,9 +4,8 @@ import { geojsonBounds } from '../geo/bounds';
 import { PROFILES, type Profile, type Route } from '../model/route';
 import { gpxToRouteData, parseGpx, routeTracks, toGpx } from '../routing/gpx';
 import { routePoints } from '../routing/legs';
-import { decodePolyline } from '../routing/polyline';
 import { nextRouteColor } from '../routing/routeEdit';
-import { failedLegs, lastError, pendingLegs, retryFailedLegs } from '../routing/service';
+import { failedLegCount, lastError, pendingLegs, retryFailedLegs } from '../routing/service';
 import { editingRouteId, startDrawing, stopDrawing } from '../state/drawing';
 import { addRoute, importRouteData, removeRoute, renameRoute, routeData, setRouteProfile } from '../state/routes';
 import { errorMessage, map } from '../state/ui';
@@ -45,14 +44,14 @@ async function importGpx(file: File): Promise<void> {
 }
 
 function exportGpx() {
-  const unrouted = pendingLegs() + failedLegs().size;
+  const unrouted = pendingLegs() + failedLegCount();
   if (
     unrouted > 0 &&
     !confirm(`${unrouted} ${unrouted === 1 ? 'leg is' : 'legs are'} not routed and will be exported as straight lines. Export anyway?`)
   ) {
     return;
   }
-  const tracks = routeTracks(unwrap(routeData.routes), (geometry) => decodePolyline(geometry));
+  const tracks = routeTracks(unwrap(routeData.routes));
   const gpx = toGpx('Routes', unwrap(routeData.waypoints), tracks, new Date());
   downloadBlob(new Blob([gpx], { type: 'application/gpx+xml' }), 'routes.gpx');
 }
@@ -60,7 +59,7 @@ function exportGpx() {
 /** Moves the view to show the whole route, detours of routed legs included. */
 function flyToRoute(route: Route) {
   const plain = unwrap(route);
-  const points = [...plain.points.map((p) => p.lngLat), ...routePoints(plain, decodePolyline)];
+  const points = [...plain.points.map((p) => p.lngLat), ...routePoints(plain)];
   const bounds = geojsonBounds({ type: 'MultiPoint', coordinates: points });
   if (bounds) map()?.fitBounds(bounds, { padding: 40, maxZoom: 16 });
 }
@@ -108,9 +107,9 @@ export function RoutesSection() {
           Routing… {pendingLegs()} {pendingLegs() === 1 ? 'leg' : 'legs'} left
         </p>
       </Show>
-      <Show when={failedLegs().size > 0}>
+      <Show when={failedLegCount() > 0}>
         <div class="note error">
-          Routing failed for {failedLegs().size} {failedLegs().size === 1 ? 'leg' : 'legs'}
+          Routing failed for {failedLegCount()} {failedLegCount() === 1 ? 'leg' : 'legs'}
           {lastError() ? `: ${lastError()}` : '.'} <button onClick={retryFailedLegs}>Retry routing</button>
         </div>
       </Show>

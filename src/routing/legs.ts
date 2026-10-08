@@ -1,4 +1,5 @@
 import type { LngLat, Profile, Route } from '../model/route';
+import { decodePolyline } from './polyline';
 
 /** Cache key of a routed leg: profile and both end points (exact coordinates). */
 export function legKey(profile: Profile, from: LngLat, to: LngLat): string {
@@ -31,25 +32,34 @@ export function routedLegs(route: RoutePath): Leg[] {
   return routeLegs(route).filter((leg) => !leg.straight);
 }
 
-/** The routed geometry of a leg, if it has arrived; a straight leg never has one. */
-export function legGeometry(route: Pick<Route, 'legs'>, leg: Leg): string | undefined {
-  return leg.straight ? undefined : route.legs[leg.key];
+/** Routed and straight legs are drawn as part of the route; pending and failed ones wait for routing. */
+export type LegState = 'routed' | 'straight' | 'pending' | 'failed';
+
+export function legState(route: Pick<Route, 'legs'>, leg: Leg, failed: ReadonlySet<string>): LegState {
+  if (leg.straight) return 'straight';
+  if (leg.key in route.legs) return 'routed';
+  return failed.has(leg.key) ? 'failed' : 'pending';
 }
 
-/**
- * The points of a route: routed legs in order, straight and unrouted legs as the straight
- * line shown on the map, with the shared point between consecutive legs only once.
- */
-export function routePoints(route: RoutePath & Pick<Route, 'legs'>, decode: (geometry: string) => LngLat[]): LngLat[] {
-  const points: LngLat[] = [];
-  for (const leg of routeLegs(route)) {
-    const geometry = legGeometry(route, leg);
-    for (const p of geometry ? decode(geometry) : [leg.from, leg.to]) {
-      const last = points.at(-1);
-      if (!last || last[0] !== p[0] || last[1] !== p[1]) points.push([p[0], p[1]]);
-    }
+/** The line of a leg: its routed geometry once it has arrived, the straight line between its ends otherwise. */
+export function legCoordinates(route: Pick<Route, 'legs'>, leg: Leg, decode = decodePolyline): LngLat[] {
+  const geometry = leg.straight ? undefined : route.legs[leg.key];
+  return geometry ? decode(geometry) : [leg.from, leg.to];
+}
+
+/** The points as plain pairs, without a point that repeats the one before it. */
+export function withoutRepeats(points: readonly LngLat[]): LngLat[] {
+  const result: LngLat[] = [];
+  for (const p of points) {
+    const last = result.at(-1);
+    if (!last || last[0] !== p[0] || last[1] !== p[1]) result.push([p[0], p[1]]);
   }
-  return points;
+  return result;
+}
+
+/** The points of a route as drawn on the map, with the shared point between consecutive legs only once. */
+export function routePoints(route: RoutePath & Pick<Route, 'legs'>, decode = decodePolyline): LngLat[] {
+  return withoutRepeats(routeLegs(route).flatMap((leg) => legCoordinates(route, leg, decode)));
 }
 
 /** The cached legs the route still needs; everything else, straight legs included, is dropped. */
@@ -67,9 +77,8 @@ export interface LegJob extends Leg {
 export function nextMissingLeg(routes: readonly Route[], failed: ReadonlySet<string>, preferRouteId?: string): LegJob | undefined {
   const ordered = [...routes].sort((a, b) => Number(b.id === preferRouteId) - Number(a.id === preferRouteId));
   for (const route of ordered) {
-    for (const leg of routedLegs(route)) {
-      if (!(leg.key in route.legs) && !failed.has(leg.key)) return { ...leg, routeId: route.id, profile: route.profile };
-    }
+    const leg = routeLegs(route).find((l) => legState(route, l, failed) === 'pending');
+    if (leg) return { ...leg, routeId: route.id, profile: route.profile };
   }
   return undefined;
 }

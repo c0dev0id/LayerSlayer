@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LngLat, Route } from '../model/route';
-import { legKey, nextMissingLeg, pruneLegs, roundLngLat, routeLegs, routePoints } from './legs';
+import { legKey, legState, nextMissingLeg, pruneLegs, roundLngLat, routeLegs, routePoints } from './legs';
 
 const route = (id: string, points: [number, number][], legs: Record<string, string> = {}): Route => ({
   id,
@@ -151,5 +151,23 @@ describe('straight legs', () => {
 
   it('keep no cached geometry', () => {
     expect(pruneLegs({ ...r, legs: { 'bike/1,1;2,2': 'a', 'bike/2,2;3,3': 'b' } })).toEqual({ 'bike/2,2;3,3': 'b' });
+  });
+});
+
+describe('legState', () => {
+  it('tells routed, straight, pending and failed legs apart', () => {
+    const r = route(
+      's',
+      [
+        [1, 1],
+        [2, 2],
+        [3, 3],
+        [4, 4],
+      ],
+      { 'bike/1,1;2,2': 'a' },
+    );
+    r.points[3]!.straight = true;
+    expect(routeLegs(r).map((leg) => legState(r, leg, new Set(['bike/2,2;3,3'])))).toEqual(['routed', 'failed', 'straight']);
+    expect(legState(r, routeLegs(r)[1]!, new Set())).toBe('pending');
   });
 });

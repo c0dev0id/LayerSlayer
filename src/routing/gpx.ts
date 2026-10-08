@@ -1,7 +1,8 @@
 import { simplifyToCount } from '../geo/simplify';
 import type { LngLat, Profile, Route, RouteData, Waypoint } from '../model/route';
 import { children, descendants, text } from '../services/xml';
-import { roundLngLat, routePoints } from './legs';
+import { roundLngLat, routePoints, withoutRepeats } from './legs';
+import { decodePolyline } from './polyline';
 import { nextRouteColor } from './routeEdit';
 
 /** GPX 1.1 out, and routes, tracks and waypoints in. */
@@ -49,7 +50,7 @@ export function toGpx(name: string, waypoints: readonly Waypoint[], tracks: read
 }
 
 /** Tracks for every route with at least two points. */
-export function routeTracks(routes: readonly Route[], decode: (geometry: string) => LngLat[]): Track[] {
+export function routeTracks(routes: readonly Route[], decode = decodePolyline): Track[] {
   return routes.filter((r) => r.points.length >= 2).map((r) => ({ name: r.name, points: routePoints(r, decode) }));
 }
 
@@ -115,14 +116,7 @@ export const MAX_ROUTED_POINTS = 100;
 export const MAX_TRACK_POINTS = 500;
 
 /** Rounded positions without consecutive repeats, which would make legs of no length. */
-function cleanPoints(points: readonly LngLat[]): LngLat[] {
-  const result: LngLat[] = [];
-  for (const p of points.map(roundLngLat)) {
-    const last = result.at(-1);
-    if (!last || last[0] !== p[0] || last[1] !== p[1]) result.push(p);
-  }
-  return result;
-}
+const cleanPoints = (points: readonly LngLat[]) => withoutRepeats(points.map(roundLngLat));
 
 /**
  * Routes and waypoints from a GPX file. A GPX route keeps its points and is routed with
