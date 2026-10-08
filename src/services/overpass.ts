@@ -1,5 +1,5 @@
 import type { LngLat } from '../model/route';
-import { fetchResource, HttpError } from '../state/net';
+import { fetchResource } from '../state/net';
 
 /**
  * OpenStreetMap features found with the Overpass API (wiki.openstreetmap.org/wiki/Overpass_API)
@@ -93,19 +93,9 @@ export async function toGeoJson(answer: OverpassAnswer): Promise<GeoJSON.Feature
   return osmtogeojson(answer, { flatProperties: true }) as GeoJSON.FeatureCollection;
 }
 
-/** Explains the busy answers of the Overpass API, which come as HTML pages. */
-function busyMessage(error: unknown): unknown {
-  if (!(error instanceof HttpError)) return error;
-  if (error.status === 429) return new Error('The Overpass API is still busy with earlier queries from this address. Try again in a minute.');
-  if (error.status === 504) return new Error('The Overpass API is overloaded right now. Try again later.');
-  return error;
-}
-
 /** The OSM features matching any of the filters within the polygon. */
 export async function findOsmFeatures(filters: readonly string[], area: readonly LngLat[]): Promise<GeoJSON.FeatureCollection> {
   const body = new URLSearchParams({ data: overpassQuery(filters, area) });
-  const response = await fetchResource(OVERPASS_URL, { method: 'POST', body }).catch((error: unknown) => {
-    throw busyMessage(error);
-  });
+  const response = await fetchResource(OVERPASS_URL, { method: 'POST', body });
   return toGeoJson(checkAnswer(await response.json()));
 }

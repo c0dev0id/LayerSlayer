@@ -51,6 +51,11 @@ describe('error messages', () => {
     expect(statusMessage('https://a.example/x', 500, '{"error":{"message":"Token required"}}')).toBe('a.example answered 500: Token required');
     expect(statusMessage('https://a.example/x', 404, 'Not found')).toBe('a.example answered 404: Not found');
     expect(statusMessage('https://a.example/x', 403, '<!DOCTYPE html><html>…')).toBe('a.example answered 403.');
+    expect(statusMessage('https://a.example/x', 429, '<html>rate_limited</html>')).toBe(
+      'a.example answered 429: too many requests from this address. Try again in a minute.',
+    );
+    expect(statusMessage('https://a.example/x', 504, '')).toBe('a.example answered 504: the service is overloaded or too slow to answer. Try again later.');
+    expect(statusMessage('https://a.example/x', 503, 'Down for maintenance')).toBe('a.example answered 503: Down for maintenance');
     const report = '<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1"><ows:Exception><ows:ExceptionText>TileRow out of range</ows:ExceptionText></ows:Exception></ows:ExceptionReport>';
     expect(statusMessage('https://a.example/x', 400, report)).toBe('a.example answered 400: TileRow out of range');
   });

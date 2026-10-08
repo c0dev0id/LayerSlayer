@@ -63,8 +63,9 @@ export function proxyTarget(url: string): string | undefined {
 /**
  * Why a request answered with an error status, in words: who answered (the server, or the
  * proxy on its behalf) and the reason the answer gives, where it gives one as text or as a
- * JSON `error` or `message`. HTML pages are left out. The proxy's own address, which holds
- * any key it was given, is never shown.
+ * JSON `error` or `message`; HTML pages are left out, and a busy server's status is put
+ * in words instead. The proxy's own address, which holds any key it was given, is never
+ * shown.
  */
 export function statusMessage(url: string, status: number, body: string): string {
   const target = proxyTarget(url);
@@ -76,9 +77,16 @@ export function statusMessage(url: string, status: number, body: string): string
       : `${host} could not be read: it is unreachable or does not allow this page to read it (CORS).`;
   }
   const who = target ? `The CORS proxy answered ${status} for ${host}` : `${host} answered ${status}`;
-  const reason = answerReason(body);
+  const reason = answerReason(body) ?? BUSY[status];
   return reason ? `${who}: ${reason}` : `${who}.`;
 }
+
+/** What the statuses of a busy server mean, for answers that do not say. */
+const BUSY: Partial<Record<number, string>> = {
+  429: 'too many requests from this address. Try again in a minute.',
+  503: 'the service is unavailable or overloaded. Try again later.',
+  504: 'the service is overloaded or too slow to answer. Try again later.',
+};
 
 function answerReason(body: string): string | undefined {
   const text = body.trim();
@@ -94,17 +102,6 @@ function answerReason(body: string): string | undefined {
   }
 }
 
-/** A request answered with an error status; the message says why in words. */
-export class HttpError extends Error {
-  readonly status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'HttpError';
-    this.status = status;
-  }
-}
-
 /** A readable message for a failed load, as the map reports it (MapLibre's AJAXError carries status, URL and body). */
 export async function describeLoadError(error: unknown): Promise<string> {
   const e = error as { status?: unknown; url?: unknown; body?: unknown; message?: unknown } | undefined;
@@ -115,7 +112,7 @@ export async function describeLoadError(error: unknown): Promise<string> {
   return typeof e?.message === 'string' ? e.message : 'The layer could not be loaded.';
 }
 
-/** Fetches through `requestUrl`; a failed request becomes a readable Error, an error status an HttpError. */
+/** Fetches through `requestUrl`; a failed request or an error status becomes a readable Error. */
 export async function fetchResource(url: string, init?: RequestInit): Promise<Response> {
   let response: Response;
   try {
@@ -133,7 +130,7 @@ export async function fetchResource(url: string, init?: RequestInit): Promise<Re
   }
   if (!response.ok) {
     const sent = requestUrl(url);
-    throw new HttpError(statusMessage(sent, response.status, await response.text().catch(() => '')), response.status);
+    throw new Error(statusMessage(sent, response.status, await response.text().catch(() => '')));
   }
   return response;
 }
