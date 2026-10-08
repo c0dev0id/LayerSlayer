@@ -8,7 +8,7 @@ import { focusBounds, setTerrain, setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
-import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, TERRAIN_SOURCE, WMTS_PROTOCOL } from './compose';
+import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, HILLSHADE_SOURCE, TERRAIN_SOURCE, WMTS_PROTOCOL } from './compose';
 import { FEATURE_PROTOCOL } from './featureTiles';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
@@ -77,7 +77,8 @@ export function MapView() {
     });
     map.on('error', (event: maplibregl.ErrorEvent & { sourceId?: string }) => {
       // Where finer elevation ends, its tiles are missing; the map keeps the coarser ground.
-      if (event.sourceId === TERRAIN_SOURCE && (event.error as { status?: number }).status === 404) return;
+      const elevation = event.sourceId === TERRAIN_SOURCE || event.sourceId === HILLSHADE_SOURCE;
+      if (elevation && (event.error as { status?: number }).status === 404) return;
       const id = layerOf(event.sourceId);
       if (id) void describeLoadError(event.error).then((message) => reportLayerError(id, message));
       else console.error(event.error);

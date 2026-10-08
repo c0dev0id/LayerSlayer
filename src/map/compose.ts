@@ -79,11 +79,19 @@ export interface MapOptions {
   focus?: Bounds;
   /** The colour the map is drawn on. */
   background?: string;
-  /** The ground in 3D, raised by its elevation, everywhere like the bottom layer. */
+  /**
+   * The ground in 3D, raised by its elevation and shaded by its relief, everywhere like the
+   * bottom layer. The shading lies on the bottom layer, under every layer above it.
+   */
   terrain?: boolean;
 }
 
 export const TERRAIN_SOURCE = 'terrain';
+/** The same elevation for the shading: MapLibre draws both better from sources of their own. */
+export const HILLSHADE_SOURCE = 'hillshade';
+const HILLSHADE_LAYER = 'terrain-hillshade';
+/** Lighter than MapLibre's default, which darkens a base map's labels in steep country. */
+const HILLSHADE_PAINT = { 'hillshade-exaggeration': 0.3, 'hillshade-shadow-color': 'rgba(0, 0, 0, 0.7)' };
 
 /**
  * Elevation from Mapterhorn: open terrain data, global at about 30 m and finer where
@@ -120,6 +128,8 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
   if (background) style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
   const sprites: { id: string; url: string }[] = [];
+  /** Where the layers above the bottom one begin, which the hillshading goes under. */
+  let aboveBottom = style.layers.length;
   for (const [index, layer] of layers.entries()) {
     if (!layer.visible) continue;
     const within = index > 0 ? focus : undefined;
@@ -141,12 +151,15 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     }
     for (const [id, source] of Object.entries(part.sources)) style.sources[id] = withinFocus(source, within);
     style.layers.push(...partLayers);
+    if (index === 0) aboveBottom = style.layers.length;
     if (part.glyphs && !style.glyphs) style.glyphs = part.glyphs;
   }
   if (sprites.length > 0) style.sprite = sprites;
   if (terrain) {
     style.sources[TERRAIN_SOURCE] = TERRAIN;
+    style.sources[HILLSHADE_SOURCE] = TERRAIN;
     style.terrain = { source: TERRAIN_SOURCE, exaggeration: 1 };
+    style.layers.splice(aboveBottom, 0, { id: HILLSHADE_LAYER, type: 'hillshade', source: HILLSHADE_SOURCE, paint: HILLSHADE_PAINT });
   }
   return style;
 }

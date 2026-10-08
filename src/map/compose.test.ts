@@ -8,6 +8,7 @@ import {
   rasterAdjustments,
   resolveWmtsTile,
   scaleOpacity,
+  HILLSHADE_SOURCE,
   TERRAIN_SOURCE,
   wmtsTileUrl,
   type Assets,
@@ -76,14 +77,19 @@ describe('composeStyle', () => {
     expect(rasterAdjustments(undefined)).toEqual({});
   });
 
-  it('raises the ground by its elevation in 3D', () => {
-    const xyz = layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } });
-    expect(compose([xyz])).not.toHaveProperty('terrain');
+  it('raises the ground by its elevation in 3D and shades the bottom layer by its relief', () => {
+    const xyz = (id: string) => layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 } }, {}, id);
+    expect(compose([xyz('A')])).not.toHaveProperty('terrain');
     // Like the bottom layer, the ground is not limited to the focus area.
-    const style = compose([xyz], {}, { terrain: true, focus: [8, 48, 9, 49] });
+    const style = compose([xyz('A'), xyz('B')], {}, { terrain: true, focus: [8, 48, 9, 49], background: '#1b2b44' });
     expect(style.terrain).toEqual({ source: TERRAIN_SOURCE, exaggeration: 1 });
     expect(style.sources[TERRAIN_SOURCE]).toMatchObject({ type: 'raster-dem', encoding: 'terrarium', tileSize: 512 });
     expect(style.sources[TERRAIN_SOURCE]).not.toHaveProperty('bounds');
+    expect(style.sources[HILLSHADE_SOURCE]).toEqual(style.sources[TERRAIN_SOURCE]);
+    expect(style.layers.map((l) => l.id)).toEqual(['map-background', 'A', 'terrain-hillshade', 'B']);
+    expect(style.layers[2]).toMatchObject({ type: 'hillshade', source: HILLSHADE_SOURCE });
+    // Without a bottom layer to lie on, the shading lies on the background.
+    expect(compose([], {}, { terrain: true }).layers.map((l) => l.id)).toEqual(['terrain-hillshade']);
   });
 
   it('draws the map on its background colour, under every layer', () => {
