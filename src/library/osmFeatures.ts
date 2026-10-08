@@ -1,17 +1,19 @@
+import type { LayerIcon } from '../model/layer';
 import { formatFilter, parseFilter } from '../services/overpass';
 
-/** A kind of OpenStreetMap feature to query: what it is called and the tag filters that find it. */
+/** A kind of OpenStreetMap feature to query: what it is called, the tag filters that find it, and its icon. */
 export interface OsmFeature {
   name: string;
   category: string;
   /** Filters as services/overpass reads them; a feature matching any of them is found. */
   filters: string[];
+  icon?: LayerIcon;
 }
 
-/** The kinds of features the OSM Query tab offers. */
+/** The kinds of features the OSM Query tab offers, with their icons. */
 export async function loadOsmFeatures(): Promise<OsmFeature[]> {
-  const { default: list } = await import('./osmFeatures.json');
-  return list.features;
+  const [{ default: list }, { default: icons }] = await Promise.all([import('./osmFeatures.json'), import('virtual:osm-feature-icons')]);
+  return list.features.map(({ icon, ...feature }) => ({ ...feature, ...(icons[icon] && { icon: icons[icon] }) }));
 }
 
 /** Features whose name, category or filters contain every word of the search. */

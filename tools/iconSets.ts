@@ -7,6 +7,9 @@ import type { Plugin } from 'vite';
  * served as virtual modules (`virtual:icons/maki`, …), one chunk each that loads when it is
  * first imported. An icon becomes its path data, its viewBox where it differs from the
  * set's, and words to find it by; the sets draw with plain <path> elements only.
+ *
+ * `virtual:osm-feature-icons` holds just the icons the OSM features list names, as layers
+ * keep them, so that the list can show them without loading whole sets.
  */
 
 interface IconData {
@@ -62,15 +65,44 @@ const SETS: Record<string, () => IconSet> = {
   },
 };
 
+const built = new Map<string, IconSet>();
+
+function iconSet(id: string): IconSet | undefined {
+  if (!built.has(id) && SETS[id]) built.set(id, SETS[id]());
+  return built.get(id);
+}
+
+const OSM_FEATURES = fileURLToPath(new URL('../src/library/osmFeatures.json', import.meta.url));
+
+/** The icons the OSM features name, by `set:name`, with their shapes. Unknown icons fail the build. */
+function osmFeatureIcons(): Record<string, { id: string; size: [number, number]; paths: string[] }> {
+  const { features } = JSON.parse(readFileSync(OSM_FEATURES, 'utf8')) as { features: { name: string; icon?: string }[] };
+  const icons: Record<string, { id: string; size: [number, number]; paths: string[] }> = {};
+  for (const { name, icon } of features) {
+    if (!icon || icon in icons) continue;
+    const [setId = '', iconName = ''] = icon.split(':');
+    const set = iconSet(setId);
+    const data = set?.icons[iconName];
+    if (!set || !data) throw new Error(`OSM feature "${name}" names the icon ${icon}, which no icon set has.`);
+    icons[icon] = { id: icon, size: data.size ?? [set.size, set.size], paths: data.paths };
+  }
+  return icons;
+}
+
 const PREFIX = 'virtual:icons/';
+const OSM_ICONS = 'virtual:osm-feature-icons';
 
 export function iconSets(): Plugin {
   return {
     name: 'icon-sets',
-    resolveId: (id) => (id.startsWith(PREFIX) && id.slice(PREFIX.length) in SETS ? `\0${id}` : undefined),
+    resolveId: (id) => ((id.startsWith(PREFIX) && id.slice(PREFIX.length) in SETS) || id === OSM_ICONS ? `\0${id}` : undefined),
     load(id) {
+      if (id === `\0${OSM_ICONS}`) {
+        this.addWatchFile(OSM_FEATURES);
+        return `export default ${JSON.stringify(osmFeatureIcons())};`;
+      }
       if (!id.startsWith(`\0${PREFIX}`)) return undefined;
-      return `export default ${JSON.stringify(SETS[id.slice(PREFIX.length + 1)]!())};`;
+      return `export default ${JSON.stringify(iconSet(id.slice(PREFIX.length + 1)))};`;
     },
     generateBundle() {
       // The Material Design Icons are under Apache 2.0, which asks for its notice to go along.

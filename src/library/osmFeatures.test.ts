@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { formatFilter, parseFilter } from '../services/overpass';
 import list from './osmFeatures.json';
-import { filterOsmFeatures, typedFeature, type OsmFeature } from './osmFeatures';
+import { filterOsmFeatures, loadOsmFeatures, typedFeature, type OsmFeature } from './osmFeatures';
 
-const features: OsmFeature[] = list.features;
+const features: OsmFeature[] = list.features.map(({ icon: _, ...feature }) => feature);
 
 describe('OSM features', () => {
   it('have unique names, a category and filters written the one way', () => {
@@ -13,6 +13,13 @@ describe('OSM features', () => {
       for (const filter of feature.filters) expect(formatFilter(parseFilter(filter)), feature.name).toBe(filter);
     }
     expect(new Set(features.map((f) => f.name)).size).toBe(features.length);
+  });
+
+  it('each come with an icon', async () => {
+    const loaded = await loadOsmFeatures();
+    expect(loaded).toHaveLength(features.length);
+    for (const feature of loaded) expect(feature.icon?.paths.length, feature.name).toBeGreaterThan(0);
+    expect(loaded.find((f) => f.name === 'Cattle grids')?.icon?.id).toBe('temaki:cattle_grid');
   });
 
   it('are found by name, category or tag', () => {
