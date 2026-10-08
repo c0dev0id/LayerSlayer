@@ -373,7 +373,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
   list and settings for each. A second click on the name closes them, and none are open
   after the open layer is removed. Names are renamed in place on the card, a summary line per card (opacity, colour, zoom
   range, cache, proxy) so the list answers which layer is set how without opening each, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
-  panel layout, and the panel below the map on narrow screens.
+  panel layout, and the panel below the map on narrow screens. There, everything on the
+  map competes for little room: the panel folds to its header (a flag in local storage,
+  as the panel width is), the search is a button until opened, and the route toolbar is
+  one bar of icons in one row (eight tools fit 360 px), its captions kept as the buttons'
+  accessible names while the hint bar says what the active tool does.
 - **Place search with Nominatim.** OpenStreetMap's geocoder needs no key and sends CORS
   headers, so the page asks it directly (through the proxy only if its host is proxied).
   Its usage policy forbids search as you type and allows one request per second, so a

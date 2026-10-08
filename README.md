@@ -126,6 +126,11 @@ in the browser.
     Its waypoints belong to the first of them, or to a route of their own, named after
     the file, if it has none. A leg the routing cannot find stays a red dashed line until
     one of its points is moved.
+- **Narrow screens** (phones): the panel lies under the map, and the chevron beside *Open*
+  folds it to its header for more map (it stays folded after a reload). The search is a
+  button at the top left that opens it; moving or tapping the map, or Esc, folds it again
+  with its pin kept. The route tools are one row of icons, the hint bar naming what the
+  active one does.
 
 Layers, their settings, the focus area, routes and the map view are kept in the browser's local storage,
 files in IndexedDB, so the map is as it was after a restart.

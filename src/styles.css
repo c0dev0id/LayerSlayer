@@ -1192,20 +1192,47 @@ button.panel-toggle {
     font-size: 12px;
   }
 
-  /* Above the attribution, which starts expanded over two lines on narrow screens. */
+  /*
+   * One bar in one row, above the attribution (expanded over two lines on narrow screens):
+   * the groups lose their own cards for dividers, and the captions stay as the buttons'
+   * names for assistive technology; the hint bar says what the active tool does.
+   */
   .toolbar {
     bottom: 64px;
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    pointer-events: auto;
   }
 
-  /* Smaller captions, so that the tools take at most two rows on phones. */
+  .toolbar-group {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .toolbar-group + .toolbar-group {
+    margin-left: 3px;
+    padding-left: 3px;
+    border-left: 1px solid var(--border);
+  }
+
   .tool {
-    min-width: 44px;
-    padding: 5px 4px 4px;
+    min-width: 38px;
+    padding: 8px 4px;
   }
 
   .tool-label {
-    font-size: 9px;
-    line-height: 11px;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
