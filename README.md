@@ -83,8 +83,8 @@ in the browser.
   the bounds the service gives.
 - **Routes**: *Draw route* starts a route and a toolbar over the map.
   - *Append* adds a point at the end with each tap on the map, *Insert* puts one into the
-    line where it is tapped, *Waypoint* places a named pin, and *Delete* removes the point
-    or waypoint tapped. Points and waypoints can be dragged; right-click or long-press one
+    line where it is tapped, *Waypoint* places a named pin (with an icon from the same
+    sets as layers, if wanted), and *Delete* removes the point or waypoint tapped. Points and waypoints can be dragged; right-click or long-press one
     for its menu.
   - New points are reached along the roads (*Route*, by OSRM with the route's car, bike or
     foot profile) or by a straight line (*Line*), for ways the routing does not know.

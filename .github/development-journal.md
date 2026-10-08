@@ -394,7 +394,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
   name no set has. Map images are named after icon and colour (`poi:set:name:#rrggbb`) and
   drawn when the map asks, through `setMissingStyleImageResolver`: in MapLibre 6 the
   `styleimagemissing` event fires only after the asking tile was laid out, so images added
-  there missed it, which ArcGIS symbols suffered from too.
+  there missed it, which ArcGIS symbols suffered from too. Waypoints keep an icon the
+  same way (`MapIcon`), shown white in their pin in place of the dot; GPX export leaves
+  it out, since GPX symbol names are device-specific.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
