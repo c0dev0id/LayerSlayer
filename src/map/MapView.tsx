@@ -8,12 +8,13 @@ import { setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
-import { composeStyle, FEATURE_PROTOCOL, WMTS_PROTOCOL } from './compose';
-import { loadFeatureTile, loadWmtsMatrixTile } from './protocols';
+import { CACHED_SCHEMES, composeStyle, FEATURE_PROTOCOL, WMTS_PROTOCOL } from './compose';
+import { loadCachedTile, loadTile } from './protocols';
 
 maplibregl.setWorkerUrl(workerUrl);
-maplibregl.addProtocol(FEATURE_PROTOCOL, loadFeatureTile);
-maplibregl.addProtocol(WMTS_PROTOCOL, loadWmtsMatrixTile);
+maplibregl.addProtocol(FEATURE_PROTOCOL, loadTile);
+maplibregl.addProtocol(WMTS_PROTOCOL, loadTile);
+for (const scheme of CACHED_SCHEMES) maplibregl.addProtocol(scheme, loadCachedTile);
 
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits;
 

@@ -106,6 +106,8 @@ export interface Layer {
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;
+  /** Keep the layer's tiles in the browser, for slow servers; see `canCache`. */
+  cache?: boolean;
   /**
    * Where the layer was added from: the source's address, followed by a space (which no
    * address contains) and the layer's name where the source names its layers. Lets the
@@ -129,6 +131,15 @@ export function isVector(source: LayerSource): boolean {
   return source.type === 'geojson' || source.type === 'arcgis-features';
 }
 
+/**
+ * Whether the source's tiles can be kept in the browser: tiled sources whose tiles the app
+ * can address. A style's tiles come from addresses inside the style; GeoJSON and images
+ * are single files.
+ */
+export function canCache(source: LayerSource): boolean {
+  return ['xyz', 'wms', 'wmts', 'arcgis-map', 'arcgis-features'].includes(source.type);
+}
+
 /** The file a layer keeps in the browser, if any. */
 export function storedFile(source: LayerSource): string | undefined {
   return (source.type === 'geojson' || source.type === 'image') && 'file' in source.data ? source.data.file : undefined;
@@ -147,5 +158,7 @@ export function createLayer(draft: LayerDraft, existing: readonly Layer[], id: s
     const used = existing.filter((l) => isVector(l.source)).length;
     layer.color = VECTOR_COLORS[used % VECTOR_COLORS.length];
   }
+  // Feature servers are the slow ones as a rule; other layers keep tiles where asked to.
+  if (draft.source.type === 'arcgis-features') layer.cache = true;
   return layer;
 }

@@ -113,6 +113,18 @@ describe('composeStyle', () => {
     expect(style.layers[0]).toMatchObject({ 'source-layer': 'features' });
   });
 
+  it('sends the tiles of a layer that keeps them through the tile cache', () => {
+    const style = compose([
+      layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, { cache: true }, 'X'),
+      layer({ name: 'f', source: { type: 'arcgis-features', url: 'https://a/FeatureServer/0', geometry: 'point', maxRecordCount: 1000 } }, {}, 'F'),
+      layer({ name: 'n', source: { type: 'xyz', tiles: ['https://n/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, {}, 'N'),
+    ]);
+    expect((style.sources.X as { tiles: string[] }).tiles).toEqual(['cache+https://t/{z}/{x}/{y}.png']);
+    // New feature layers keep their tiles.
+    expect((style.sources.F as { tiles: string[] }).tiles[0]).toMatch(/^cache\+arcgis-features:\/\//);
+    expect((style.sources.N as { tiles: string[] }).tiles).toEqual(['https://n/{z}/{x}/{y}.png']);
+  });
+
   it('places a georeferenced image by its corners', () => {
     const coordinates: [number, number][] = [[0, 1], [1, 1], [1, 0], [0, 0]];
     const style = compose(

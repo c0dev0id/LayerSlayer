@@ -3,7 +3,7 @@ import { clearTileCache, countCachedTiles, TILE_MAX_AGE_HOURS } from '../map/til
 import { setHostProxied, setProxyAddress, state } from '../state/store';
 import { CloseIcon } from './icons';
 
-/** The CORS proxy and the hosts that go through it, and the feature tile cache. */
+/** The CORS proxy and the hosts that go through it, and the tile cache. */
 export function SettingsSection() {
   const [opened, setOpened] = createSignal(false);
   // Counted each time the section opens, not on every tile.
@@ -15,7 +15,7 @@ export function SettingsSection() {
       </summary>
       <div class="row field-row">
         <span class="grow">
-          Feature tiles kept: {cached() ?? '…'} <span class="muted">(for {TILE_MAX_AGE_HOURS} hours)</span>
+          Tiles kept: {cached() ?? '…'} <span class="muted">(for {TILE_MAX_AGE_HOURS} hours, by layers that keep them)</span>
         </span>
         <button
           disabled={!cached()}

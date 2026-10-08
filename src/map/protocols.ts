@@ -3,7 +3,7 @@ import { fromGeojsonVt } from '@maplibre/vt-pbf';
 import { AJAXError, type AddProtocolAction } from 'maplibre-gl';
 import { HALF_WORLD, WORLD } from '../geo/mercator';
 import { hostOf, requestUrl } from '../state/net';
-import { FEATURE_LAYER, parseFeatureTileUrl, resolveWmtsTile } from './compose';
+import { CACHE_PREFIX, FEATURE_LAYER, FEATURE_PROTOCOL, parseFeatureTileUrl, resolveWmtsTile, WMTS_PROTOCOL } from './compose';
 import { createLimiter } from './limit';
 import { cachedTile, storeTile } from './tileCache';
 import { withParams } from './urls';
@@ -11,17 +11,11 @@ import { withParams } from './urls';
 const EXTENT = 4096;
 
 /** Fetches a tile; a missing one is reported as MapLibre's AJAXError, after which it shows the zoom below. */
-async function fetchTile(url: string, signal: AbortSignal): Promise<Response> {
+async function fetchTile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
   const response = await fetch(requestUrl(url), { signal });
   if (!response.ok) throw new AJAXError(response.status, response.statusText, url, await response.blob());
-  return response;
+  return response.arrayBuffer();
 }
-
-/** WMTS tiles whose matrix identifiers are not the zoom: the identifier is looked up per tile. */
-export const loadWmtsMatrixTile: AddProtocolAction = async (params, abort) => {
-  const response = await fetchTile(resolveWmtsTile(params.url), abort.signal);
-  return { data: await response.arrayBuffer() };
-};
 
 /**
  * The query for the features in one tile: its extent in Web Mercator, the answer as
@@ -60,18 +54,15 @@ function limiterFor(url: string): ReturnType<typeof createLimiter> {
 }
 
 /**
- * ArcGIS feature layer tiles: the features in the tile's extent, queried as GeoJSON and
+ * An ArcGIS feature layer tile: the features in the tile's extent, queried as GeoJSON and
  * cut into a vector tile, so the map loads, caches and draws them like any vector source.
- * Tiles come from the tile cache while they are fresh; queries to one server are limited.
+ * Queries to one server are limited.
  */
-export const loadFeatureTile: AddProtocolAction = async (params, abort) => {
-  const { z, x, y, layerUrl, maxRecordCount } = parseFeatureTileUrl(params.url);
+function featureTile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
+  const { z, x, y, layerUrl, maxRecordCount } = parseFeatureTileUrl(url);
   const query = featureQueryUrl(layerUrl, z, x, y, maxRecordCount);
-  const cached = await cachedTile(query).catch(() => undefined);
-  if (cached) return { data: cached };
-  const data = await limiterFor(query)(async () => {
-    const response = await fetchTile(query, abort.signal);
-    const json = (await response.json()) as GeoJSON.FeatureCollection & {
+  return limiterFor(query)(async () => {
+    const json = JSON.parse(new TextDecoder().decode(await fetchTile(query, signal))) as GeoJSON.FeatureCollection & {
       error?: { message?: string };
       exceededTransferLimit?: boolean;
       properties?: { exceededTransferLimit?: boolean };
@@ -82,9 +73,41 @@ export const loadFeatureTile: AddProtocolAction = async (params, abort) => {
       console.warn(`${layerUrl}: some tiles hold more features than one query returns; zoom in to see them all.`);
     }
     return encodeFeatures(json, z, x, y);
-  }, abort.signal);
+  }, signal);
+}
+
+/** Any tile the map asks for: a plain address, a WMTS matrix tile or a feature tile. */
+function tile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
+  if (url.startsWith(`${WMTS_PROTOCOL}://`)) return fetchTile(resolveWmtsTile(url), signal);
+  if (url.startsWith(`${FEATURE_PROTOCOL}://`)) return featureTile(url, signal);
+  return fetchTile(url, signal);
+}
+
+/** The address a tile is kept under in the cache: the request that answers it. */
+export function cacheKey(url: string): string {
+  if (url.startsWith(`${WMTS_PROTOCOL}://`)) return resolveWmtsTile(url);
+  if (url.startsWith(`${FEATURE_PROTOCOL}://`)) {
+    const { z, x, y, layerUrl, maxRecordCount } = parseFeatureTileUrl(url);
+    return featureQueryUrl(layerUrl, z, x, y, maxRecordCount);
+  }
+  return url;
+}
+
+/** WMTS tiles whose matrix identifiers are not the zoom, and ArcGIS feature tiles. */
+export const loadTile: AddProtocolAction = async (params, abort) => ({ data: await tile(params.url, abort.signal) });
+
+/**
+ * Tiles of layers that keep them: answered from the tile cache while fresh, otherwise
+ * fetched and kept. Errors are not kept, so a missing tile is asked for again next time.
+ */
+export const loadCachedTile: AddProtocolAction = async (params, abort) => {
+  const url = params.url.slice(CACHE_PREFIX.length);
+  const key = cacheKey(url);
+  const hit = await cachedTile(key).catch(() => undefined);
+  if (hit) return { data: hit };
+  const data = await tile(url, abort.signal);
   // A copy, since the map may hand the returned buffer to its worker and detach it.
-  void storeTile(query, data.slice(0)).catch(() => {});
+  void storeTile(key, data.slice(0)).catch(() => {});
   return { data };
 };
 

@@ -1,11 +1,12 @@
 /**
- * Feature tiles kept in the browser's Cache Storage across sessions. Feature servers answer
- * slowly and often forbid HTTP caching (ArcGIS Online sends max-age=300), so a tile that was
- * queried once is answered from here until it is a day old.
+ * Tiles of the layers that keep them, in the browser's Cache Storage across sessions. Slow
+ * servers often forbid HTTP caching too (ArcGIS Online sends max-age=300), so a tile that
+ * was fetched once is answered from here until it is a day old. Keys are the addresses that
+ * answer the tiles: the tile URL, or for a feature tile its query.
  */
 
-/** Bumped when the encoding of cached tiles changes, so old tiles are not read back. */
-const CACHE_NAME = 'webmap-feature-tiles-v1';
+/** Bumped when what is kept for a tile changes, so old entries are not read back. */
+const CACHE_NAME = 'webmap-tiles-v1';
 
 export const TILE_MAX_AGE_HOURS = 24;
 const MAX_AGE_MS = TILE_MAX_AGE_HOURS * 3600_000;
@@ -33,11 +34,11 @@ export async function storeTile(key: string, data: ArrayBuffer, caches = storage
   await (await caches.open(CACHE_NAME)).put(key, response);
 }
 
-/** Deletes tiles past the maximum age, and caches of older encodings. */
+/** Deletes tiles past the maximum age, and tile caches of earlier versions. */
 export async function sweepTileCache(caches = storage(), now = Date.now()): Promise<void> {
   if (!caches) return;
   for (const name of await caches.keys()) {
-    if (name.startsWith('webmap-feature-tiles') && name !== CACHE_NAME) await caches.delete(name);
+    if (name.startsWith('webmap-') && name.includes('tiles') && name !== CACHE_NAME) await caches.delete(name);
   }
   const cache = await caches.open(CACHE_NAME);
   for (const request of await cache.keys()) {

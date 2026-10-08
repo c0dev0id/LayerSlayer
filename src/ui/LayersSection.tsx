@@ -1,6 +1,7 @@
 import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
-import { isVector, MAX_ZOOM, MIN_ZOOM, type Layer } from '../model/layer';
+import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
+import { canCache, isVector, MAX_ZOOM, MIN_ZOOM, type Layer } from '../model/layer';
 import { hostOf } from '../state/net';
 import {
   moveLayer,
@@ -277,6 +278,12 @@ function ActiveLayer(props: { layer: Layer }) {
             <span>Fetch {h()} through the CORS proxy</span>
           </label>
         )}
+      </Show>
+      <Show when={canCache(layer.source)}>
+        <label class="row" title="For slow servers: tiles once loaded are answered from the browser">
+          <input type="checkbox" checked={layer.cache === true} onChange={(e) => updateLayer(layer.id, { cache: e.currentTarget.checked })} />
+          <span>Keep tiles in this browser for {TILE_MAX_AGE_HOURS} hours</span>
+        </label>
       </Show>
       <Show when={layerErrors[layer.id]}>{(message) => <p class="note error">{message()}</p>}</Show>
     </div>

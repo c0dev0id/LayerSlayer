@@ -28,6 +28,20 @@ export const FEATURE_LAYER = 'features';
 export const FEATURE_PROTOCOL = 'arcgis-features';
 export const WMTS_PROTOCOL = 'wmts-matrix';
 
+/**
+ * Put in front of a tile address of a layer that keeps its tiles (`cache+https://…`), so
+ * the tile goes through the tile cache, which answers it or fetches it and keeps it.
+ */
+export const CACHE_PREFIX = 'cache+';
+
+/** The schemes a cached tile address can have. */
+export const CACHED_SCHEMES = ['https', 'http', WMTS_PROTOCOL, FEATURE_PROTOCOL].map((s) => CACHE_PREFIX + s);
+
+/** The layer's tile addresses, through the tile cache where the layer keeps its tiles. */
+function cached(layer: Layer, tiles: string[]): string[] {
+  return layer.cache ? tiles.map((t) => CACHE_PREFIX + t) : tiles;
+}
+
 /** One user layer as MapLibre sources and layers, plus what a style layer brings along. */
 interface Fragment {
   sources: Record<string, SourceSpecification>;
@@ -80,7 +94,7 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
     case 'arcgis-map':
       return raster(layer, {
         type: 'raster',
-        tiles: rasterTiles(src),
+        tiles: cached(layer, rasterTiles(src)),
         tileSize: src.type === 'xyz' || src.type === 'wmts' ? src.tileSize : DYNAMIC_TILE_SIZE,
         ...(src.type === 'xyz' && src.scheme === 'tms' && { scheme: 'tms' }),
         ...tileZooms(src),
@@ -103,7 +117,7 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
         layer,
         {
           type: 'vector',
-          tiles: [featureTileUrl(src.url, src.maxRecordCount)],
+          tiles: cached(layer, [featureTileUrl(src.url, src.maxRecordCount)]),
           maxzoom: FEATURE_TILE_MAXZOOM,
           ...(layer.attribution && { attribution: layer.attribution }),
         },

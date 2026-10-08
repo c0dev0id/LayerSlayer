@@ -123,7 +123,7 @@ export function addLayer(draft: LayerDraft): Layer {
   return layer;
 }
 
-export type LayerSettings = Partial<Pick<Layer, 'name' | 'visible' | 'opacity' | 'minzoom' | 'maxzoom' | 'color' | 'bounds'>>;
+export type LayerSettings = Partial<Pick<Layer, 'name' | 'visible' | 'opacity' | 'minzoom' | 'maxzoom' | 'color' | 'bounds' | 'cache'>>;
 
 export function updateLayer(id: string, patch: LayerSettings): void {
   if (patch.minzoom !== undefined) patch.minzoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, patch.minzoom));

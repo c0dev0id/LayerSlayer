@@ -2,7 +2,8 @@ import { VectorTile } from '@mapbox/vector-tile';
 import { PbfReader } from 'pbf';
 import { describe, expect, it } from 'vitest';
 import { getParam } from './urls';
-import { encodeFeatures, featureQueryUrl } from './protocols';
+import { featureTileUrl, wmtsTileUrl } from './compose';
+import { cacheKey, encodeFeatures, featureQueryUrl } from './protocols';
 
 describe('featureQueryUrl', () => {
   it('asks for the features in the tile extent as GeoJSON', () => {
@@ -13,6 +14,17 @@ describe('featureQueryUrl', () => {
     expect(getParam(url, 'outSR')).toBe('4326');
     expect(getParam(url, 'f')).toBe('geojson');
     expect(getParam(url, 'resultRecordCount')).toBe('2000');
+  });
+});
+
+describe('cacheKey', () => {
+  const tile = (template: string) => template.replace('{z}', '9').replace('{x}', '2').replace('{y}', '3');
+
+  it('keeps tiles under the address that answers them', () => {
+    expect(cacheKey('https://t.example/9/2/3.png')).toBe('https://t.example/9/2/3.png');
+    const wmts = wmtsTileUrl({ type: 'wmts', template: 'https://w/{TileMatrix}/{TileRow}/{TileCol}.png', matrices: { '9': '09', '10': '10' }, tileSize: 256 });
+    expect(cacheKey(tile(wmts))).toBe('https://w/09/3/2.png');
+    expect(cacheKey(tile(featureTileUrl('https://a/FeatureServer/0', 2000)))).toBe(featureQueryUrl('https://a/FeatureServer/0', 9, 2, 3, 2000));
   });
 });
 
