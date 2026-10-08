@@ -198,6 +198,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
     simplified with Douglas–Peucker to at most 500 points joined by straight lines, since
     every point is a marker while the route is drawn and an undo step copies all routes.
     Straight legs keep their shape when the profile changes.
+  - A GPX file can also be a layer (Add layer > Files), for tracks to look at rather than
+    edit. Only its tracks are read, converted to GeoJSON at import and kept as a GeoJSON
+    file, so the layer is an ordinary GeoJSON layer with a palette colour and the colour
+    setting; several tracks on the map are told apart that way. Routes and waypoints stay
+    with the route tool's import, which keeps routing out of the add-layer dialog.
   - Requests to the routing server go out directly, not through the CORS proxy; it sends
     `Access-Control-Allow-Origin: *`.
 - **UI after mappic.** Top-first layer list with an active layer whose settings sit below
@@ -219,7 +224,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
 ## Core features
 
 - Layers from WMS, WMTS, ArcGIS MapServer and FeatureServer, XYZ templates, MapLibre
-  styles, GeoJSON (URL or file) and GeoPDF (file or URL).
+  styles, GeoJSON (URL or file), GPX tracks (file) and GeoPDF (file or URL).
 - A library of about a hundred services by region and category, with search.
 - An add-layer dialog that stays open: layers and groups toggle with a tap, what is on
   the map is highlighted, and the library and a service's layers can be switched between

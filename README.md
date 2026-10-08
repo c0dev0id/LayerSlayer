@@ -24,8 +24,10 @@ in the browser.
     FeatureServer (or one of its layers), a tile template with `{z}/{x}/{y}`, a GeoJSON
     file, a MapLibre style or a GeoPDF. The kind of service is guessed from the address
     and can be changed. *Open* shows the source's layers.
-  - **Files**: GeoJSON, and GeoPDFs with an ISO 32000 geospatial viewport, added as they
-    are chosen.
+  - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
+    imported under Routes), and GeoPDFs with an ISO 32000 geospatial viewport, added as
+    they are chosen. Each new GeoJSON or GPX layer takes the next colour of a palette,
+    which its settings can change.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
   arrow keys on it) to change the order; the eye hides it, × removes it, and the frame
   icon flies to the area the layer covers (layers that span most of the world have none).
@@ -61,6 +63,7 @@ files in IndexedDB, so the map is as it was after a restart.
 | ArcGIS FeatureServer | `?f=json`, and each layer's own description and feature count | Vector tiles: one extent query per tile (a tile query where the layer supports it) answered as GeoJSON and cut into a vector tile in the browser |
 | XYZ template | the template | Raster tiles; `{s}`, `{a-c}`, `{-y}`, `{q}` and `{r}` spellings are converted |
 | GeoJSON | URL or file | GeoJSON source, drawn in the layer's colour |
+| GPX tracks | file | Converted to GeoJSON when imported, a line per track |
 | MapLibre style | style JSON | The style's own sources and layers |
 | GeoPDF | file or URL | The map area rendered once to a picture, placed by its corners |
 
