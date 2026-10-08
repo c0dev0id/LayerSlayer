@@ -1,3 +1,5 @@
+import type { MapIcon } from './icon';
+
 /** A position as longitude and latitude in degrees. */
 export type LngLat = [number, number];
 
@@ -38,6 +40,8 @@ export interface Waypoint {
   lngLat: LngLat;
   name: string;
   description?: string;
+  /** Shown in the pin in place of its dot. */
+  icon?: MapIcon;
 }
 
 /** What the route tool draws, keeps and exports. */

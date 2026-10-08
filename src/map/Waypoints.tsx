@@ -21,7 +21,7 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
 
   const content = (
     <div class="waypoint" title={waypoint()?.description ?? ''}>
-      <WaypointPin />
+      <WaypointPin icon={waypoint()?.icon} />
       <span class="waypoint-name">{waypoint()?.name}</span>
     </div>
   ) as HTMLElement;
@@ -48,7 +48,7 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
     return [
       {
         label: 'Edit waypoint…',
-        run: () => setWaypointDraft({ id, lngLat: w.lngLat, name: w.name, description: w.description ?? '' }),
+        run: () => setWaypointDraft({ id, lngLat: w.lngLat, name: w.name, description: w.description ?? '', ...(w.icon && { icon: w.icon }) }),
       },
       { label: 'Delete waypoint', run: () => removeWaypoint(id) },
     ];

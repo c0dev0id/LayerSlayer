@@ -152,12 +152,13 @@ export function addWaypoint(waypoint: Waypoint): void {
   setRouteData('waypoints', (list) => [...list, waypoint]);
 }
 
-/** Changes a waypoint's position, name or description; an empty description is dropped. */
+/** Changes a waypoint's position, name, description or icon; an empty description or icon is dropped. */
 export function updateWaypoint(id: string, change: Partial<Omit<Waypoint, 'id'>>, label: string): void {
   const index = routeData.waypoints.findIndex((w) => w.id === id);
   if (index < 0) return;
   const next: Waypoint = { ...unwrap(routeData.waypoints[index]!), ...change };
   if (!next.description) delete next.description;
+  if (!next.icon) delete next.icon;
   recordEdit(label);
   setRouteData('waypoints', index, reconcile(next, { merge: false }));
 }

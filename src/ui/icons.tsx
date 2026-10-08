@@ -1,6 +1,7 @@
 // Shapes from or composed of Tabler Icons (https://tabler.io/icons).
 // Copyright (c) 2020-2026 Paweł Kuna, MIT License: see tabler-icons-license.txt.
-import type { JSX } from 'solid-js';
+import { For, Show, type JSX } from 'solid-js';
+import type { MapIcon } from '../model/icon';
 
 /** Line icons on Tabler's 24 × 24 grid, drawn in the text colour. */
 function Icon(props: { children: JSX.Element }) {
@@ -172,7 +173,7 @@ export const PencilIcon = () => (
 );
 
 /** The map pin of a waypoint; its tip marks the place. */
-export function WaypointPin() {
+export function WaypointPin(props: { icon?: MapIcon | undefined }) {
   return (
     <svg viewBox="0 0 22 28" width="22" height="28" aria-hidden="true">
       <path
@@ -181,7 +182,13 @@ export function WaypointPin() {
         stroke="#fff"
         stroke-width="1.5"
       />
-      <circle cx="11" cy="11" r="3.5" fill="#fff" />
+      <Show when={props.icon} fallback={<circle cx="11" cy="11" r="3.5" fill="#fff" />}>
+        {(icon) => (
+          <svg x="5.5" y="5.5" width="11" height="11" viewBox={`0 0 ${icon().size[0]} ${icon().size[1]}`} fill="#fff">
+            <For each={icon().paths}>{(d) => <path d={d} />}</For>
+          </svg>
+        )}
+      </Show>
     </svg>
   );
 }
