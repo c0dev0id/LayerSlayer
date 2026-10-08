@@ -315,7 +315,7 @@ function AddressTab(props: { busy: ReadonlySet<string>; onOpen: (source: Source)
     >
       <p class="muted hint">
         A WMS or WMTS capabilities address, an ArcGIS MapServer or FeatureServer, a tile template with {'{z}/{x}/{y}'},
-        a GeoJSON file, a MapLibre style or a GeoPDF.
+        a PMTiles archive, a GeoJSON file, a MapLibre style or a GeoPDF.
       </p>
       <input type="url" required placeholder="https://…" aria-label="Address" value={url()} onInput={(e) => setUrl(e.currentTarget.value)} />
       <div class="row">

@@ -28,7 +28,7 @@ import type { Symbology } from '../services/arcgisSymbology';
 import type { Icon } from './icon';
 import { POI_DISC, POI_RING, poiImageId } from './poiIcons';
 import { FEATURE_LAYER, FEATURE_PROTOCOL, FEATURE_TILE_MAXZOOM, featureTileUrl } from './featureTiles';
-import { parseProtocolTile, protocolTileUrl, resolveUrl, withParams } from './urls';
+import { parseProtocolTile, PMTILES_PROTOCOL, protocolTileUrl, resolveUrl, withParams } from './urls';
 
 /**
  * What a layer needs beyond its configuration before it can be drawn: the fetched style of
@@ -63,7 +63,7 @@ const COG_RAMP = 'BrewerSpectral11';
 export const CACHE_PREFIX = 'cache+';
 
 /** The schemes a cached tile address can have. */
-export const CACHED_SCHEMES = ['https', 'http', WMTS_PROTOCOL, FEATURE_PROTOCOL].map((s) => CACHE_PREFIX + s);
+export const CACHED_SCHEMES = ['https', 'http', WMTS_PROTOCOL, FEATURE_PROTOCOL, PMTILES_PROTOCOL].map((s) => CACHE_PREFIX + s);
 
 /** The layer's tile addresses, through the tile cache where the layer keeps its tiles. */
 function cached(layer: Layer, tiles: string[]): string[] {

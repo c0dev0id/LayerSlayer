@@ -15,13 +15,15 @@ import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
 import { withOverlays } from './overlays';
 import { drawDisc, drawGlyph, parsePoiImageId, POI_DISC } from './poiIcons';
-import { loadCachedTile, loadTile } from './protocols';
+import { loadCachedTile, loadPmtiles, loadTile } from './protocols';
 import { routeOverlay } from './routeOverlay';
 import { TerrainControl } from './terrainControl';
+import { PMTILES_PROTOCOL } from './urls';
 
 maplibregl.setWorkerUrl(workerUrl);
 maplibregl.addProtocol(FEATURE_PROTOCOL, loadTile);
 maplibregl.addProtocol(WMTS_PROTOCOL, loadTile);
+maplibregl.addProtocol(PMTILES_PROTOCOL, loadPmtiles);
 for (const scheme of CACHED_SCHEMES) maplibregl.addProtocol(scheme, loadCachedTile);
 // geotiff.js and the protocol load with the first COG.
 maplibregl.addProtocol(COG_PROTOCOL, async (params) => (await import('@geomatico/maplibre-cog-protocol')).cogProtocol(params));

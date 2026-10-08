@@ -1,6 +1,7 @@
 import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
+import { parsePmtilesUrl } from '../map/urls';
 import {
   canCache,
   isRaster,
@@ -284,7 +285,7 @@ function sourceUrl(layer: Layer): string | undefined {
   switch (source.type) {
     case 'xyz':
     case 'vector-tiles':
-      return source.tiles[0];
+      return parsePmtilesUrl(source.tiles[0]!)?.archive ?? source.tiles[0];
     case 'wmts':
       return source.template;
     case 'geojson':

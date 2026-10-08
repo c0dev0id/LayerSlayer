@@ -65,3 +65,28 @@ export function parseProtocolTile(url: string): { z: number; x: number; y: numbe
   if (!match) throw new Error(`Not a protocol tile address: ${url}`);
   return { z: Number(match[1]), x: Number(match[2]), y: Number(match[3]), params: new URLSearchParams(match[4]) };
 }
+
+/**
+ * The scheme of tiles read from PMTiles archives, with the addresses the pmtiles library's
+ * own protocol has, so that MapLibre styles written for it work too: the archive's address
+ * follows the scheme, then the tile (`pmtiles://https://…/a.pmtiles/{z}/{x}/{y}`); the
+ * archive alone (`pmtiles://https://…/a.pmtiles`) asks for its TileJSON.
+ */
+export const PMTILES_PROTOCOL = 'pmtiles';
+
+/** The tile address of the tiles in a PMTiles archive. */
+export function pmtilesTiles(archive: string): string {
+  return `${PMTILES_PROTOCOL}://${archive}/{z}/{x}/{y}`;
+}
+
+/**
+ * The archive a PMTiles address reads from, and the tile it asks for unless it is a template
+ * or the archive's TileJSON. A tile may end in a file extension, as the library's TileJSON
+ * writes them.
+ */
+export function parsePmtilesUrl(url: string): { archive: string; tile?: [z: number, x: number, y: number] } | undefined {
+  const match = /^pmtiles:\/\/(.+?)(?:\/(\d+|\{z\})\/(\d+|\{x\})\/(\d+|\{y\})(?:\.\w+)?)?$/.exec(url);
+  if (!match) return undefined;
+  const tile = match.slice(2, 5).map(Number);
+  return { archive: match[1]!, ...(tile.every(Number.isInteger) && { tile: tile as [number, number, number] }) };
+}

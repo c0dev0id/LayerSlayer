@@ -12,6 +12,7 @@ export const SERVICE_TYPES = [
   { value: 'vector-tiles', label: 'Vector tiles (MVT)' },
   { value: 'geojson', label: 'GeoJSON' },
   { value: 'style', label: 'MapLibre style' },
+  { value: 'pmtiles', label: 'PMTiles' },
   { value: 'cog', label: 'Cloud Optimized GeoTIFF' },
   { value: 'geopdf', label: 'GeoPDF' },
 ] as const;

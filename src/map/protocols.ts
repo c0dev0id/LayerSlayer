@@ -5,6 +5,7 @@ import { CACHE_PREFIX, resolveWmtsTile, WMTS_PROTOCOL } from './compose';
 import { encodeFeatures, FEATURE_PROTOCOL, featureQueryUrl, featureSourceName, parseFeatureTileUrl, readFeatureAnswer } from './featureTiles';
 import { createLimiter } from './limit';
 import { cachedTile, storeTile } from './tileCache';
+import { PMTILES_PROTOCOL } from './urls';
 
 /**
  * Fetches a tile; a missing one is reported as MapLibre's AJAXError, after which it shows
@@ -53,10 +54,11 @@ function featureTile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
   }, signal);
 }
 
-/** Any tile the map asks for: a plain address, a WMTS matrix tile or a feature tile. */
-function tile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
+/** Any tile the map asks for: a plain address, a WMTS matrix tile, a feature tile or a tile of a PMTiles archive. */
+async function tile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
   if (url.startsWith(`${WMTS_PROTOCOL}://`)) return fetchTile(resolveWmtsTile(url), signal);
   if (url.startsWith(`${FEATURE_PROTOCOL}://`)) return featureTile(url, signal);
+  if (url.startsWith(`${PMTILES_PROTOCOL}://`)) return (await import('../services/pmtiles')).pmtilesTile(url, signal);
   return fetchTile(url, signal);
 }
 
@@ -69,6 +71,10 @@ export function cacheKey(url: string): string {
 
 /** WMTS tiles whose matrix identifiers are not the zoom, and feature tiles. */
 export const loadTile: AddProtocolAction = async (params, abort) => ({ data: await tile(params.url, abort.signal) });
+
+/** Tiles of PMTiles archives, and the TileJSON that styles written for PMTiles ask for. */
+export const loadPmtiles: AddProtocolAction = async (params, abort) =>
+  params.type === 'json' ? { data: await (await import('../services/pmtiles')).pmtilesTileJson(params.url) } : loadTile(params, abort);
 
 /**
  * Tiles of layers that keep them: answered from the tile cache while fresh, otherwise

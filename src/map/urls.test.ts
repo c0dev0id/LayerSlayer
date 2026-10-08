@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getParam, resolveUrl, withParams } from './urls';
+import { getParam, parsePmtilesUrl, pmtilesTiles, resolveUrl, withParams } from './urls';
 
 describe('withParams', () => {
   it('replaces GetCapabilities parameters regardless of case and keeps the rest', () => {
@@ -38,5 +38,21 @@ describe('resolveUrl', () => {
   it('leaves absolute URLs alone', () => {
     expect(resolveUrl('https://b.example/{z}', 'https://a.example/')).toBe('https://b.example/{z}');
     expect(resolveUrl('pmtiles://x', 'https://a.example/')).toBe('pmtiles://x');
+  });
+});
+
+describe('PMTiles addresses', () => {
+  const archive = 'https://data.example/maps/roads.pmtiles';
+
+  it('put the archive behind the scheme and the tile after it', () => {
+    expect(pmtilesTiles(archive)).toBe('pmtiles://https://data.example/maps/roads.pmtiles/{z}/{x}/{y}');
+  });
+
+  it('tell the archive and the tile, with or without an extension', () => {
+    expect(parsePmtilesUrl(`pmtiles://${archive}/9/270/180`)).toEqual({ archive, tile: [9, 270, 180] });
+    expect(parsePmtilesUrl(`pmtiles://${archive}/9/270/180.mvt`)).toEqual({ archive, tile: [9, 270, 180] });
+    expect(parsePmtilesUrl(pmtilesTiles(archive))).toEqual({ archive });
+    expect(parsePmtilesUrl(`pmtiles://${archive}`)).toEqual({ archive });
+    expect(parsePmtilesUrl(archive)).toBeUndefined();
   });
 });
