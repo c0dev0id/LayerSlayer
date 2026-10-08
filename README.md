@@ -45,6 +45,8 @@ in the browser.
   WMTS, ArcGIS MapServer, GeoTIFF, placed images) have *Colour adjustments*: hue, saturation,
   contrast, and the brightness black and white become. Black at 100% and white at 0%
   inverts the image; with the hue turned 180° that gives a dark map that keeps its colours.
+  ArcGIS feature layers can be *drawn with the service's own symbols* (simple, unique value
+  and class breaks renderers with simple and picture symbols) instead of their colour.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
   search, preferring those in view. Enter searches; the first place found gets a pin and the
   map flies to it, and the list below offers the other places found. × clears the search

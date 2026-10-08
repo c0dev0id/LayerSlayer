@@ -71,6 +71,18 @@ It is a static single-page app on GitHub Pages; there is no server component.
   levels, so tinting toward a chosen colour is not possible. Every layer is composited
   with plain alpha blending (`ColorMode.alphaBlended`). Vector layers and imported styles
   have no such properties; adjusting them would mean rewriting the colours in the style.
+- **ArcGIS symbology as a per-layer choice.** Vector layers without a style are drawn in
+  one colour each (5 px dots with a white rim, 2.5 px lines, areas filled at a quarter of
+  the opacity), which keeps overlapping layers apart. ArcGIS feature layers describe their
+  own look (`drawingInfo`), so they can opt into it. The description is read as an asset
+  when the option is on, not stored with the layer, as picture markers carry their images.
+  Simple, unique value (one to three fields, joined with the delimiter) and class breaks
+  renderers become a value, a `match` or a `step`; points become icons (simple markers drawn
+  on a canvas at the screen's pixel ratio, picture markers decoded from their image data),
+  which the map asks for through `styleimagemissing`, so the composed style stays plain
+  data. Hatched fills are a light wash of their colour; CIM symbols, visual variables,
+  labels and other renderers are not drawn, and such a layer keeps its colour with the
+  reason shown. KML styles are still dropped on import.
 - **Each service kind maps to a native source.**
   - WMS: a raster source with `{bbox-epsg-3857}` in a GetMap URL, 512 px tiles, the
     service's name for Web Mercator. Scale denominators become zoom ranges.
