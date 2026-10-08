@@ -94,6 +94,17 @@ function answerReason(body: string): string | undefined {
   }
 }
 
+/** A request answered with an error status; the message says why in words. */
+export class HttpError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'HttpError';
+    this.status = status;
+  }
+}
+
 /** A readable message for a failed load, as the map reports it (MapLibre's AJAXError carries status, URL and body). */
 export async function describeLoadError(error: unknown): Promise<string> {
   const e = error as { status?: unknown; url?: unknown; body?: unknown; message?: unknown } | undefined;
@@ -104,7 +115,7 @@ export async function describeLoadError(error: unknown): Promise<string> {
   return typeof e?.message === 'string' ? e.message : 'The layer could not be loaded.';
 }
 
-/** Fetches through `requestUrl`; a failed request or an error status becomes a readable Error. */
+/** Fetches through `requestUrl`; a failed request becomes a readable Error, an error status an HttpError. */
 export async function fetchResource(url: string, init?: RequestInit): Promise<Response> {
   let response: Response;
   try {
@@ -122,7 +133,7 @@ export async function fetchResource(url: string, init?: RequestInit): Promise<Re
   }
   if (!response.ok) {
     const sent = requestUrl(url);
-    throw new Error(statusMessage(sent, response.status, await response.text().catch(() => '')));
+    throw new HttpError(statusMessage(sent, response.status, await response.text().catch(() => '')), response.status);
   }
   return response;
 }
