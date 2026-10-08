@@ -10,6 +10,7 @@ import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
 import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, WMTS_PROTOCOL } from './compose';
 import { FEATURE_PROTOCOL } from './featureTiles';
+import { FOCUS_SOURCE, focusLines, withFocus } from './focusOverlay';
 import { loadCachedTile, loadTile } from './protocols';
 import { routeLines, ROUTES_SOURCE, withRoutes } from './routeOverlay';
 
@@ -80,10 +81,14 @@ export function MapView() {
       // Composing reads every layer setting, so any change recomposes. The style goes to
       // MapLibre as plain data: store proxies cannot be sent to its workers.
       const layers = createMemo(() => JSON.parse(JSON.stringify(composeStyle(state.layers, assets(), focusBounds()))));
-      // A layer change carries the route lines as they are; a route change only replaces their data.
-      createEffect(() => map.setStyle(withRoutes(layers(), untrack(routeLines)), { diff: true }));
+      // A layer change carries the focus area and the route lines as they are; a change of
+      // either only replaces its data.
+      createEffect(() => map.setStyle(withRoutes(withFocus(layers(), untrack(focusLines)), untrack(routeLines)), { diff: true }));
       createEffect(
         on(routeLines, (lines) => map.getSource<maplibregl.GeoJSONSource>(ROUTES_SOURCE)?.setData(lines), { defer: true }),
+      );
+      createEffect(
+        on(focusLines, (lines) => map.getSource<maplibregl.GeoJSONSource>(FOCUS_SOURCE)?.setData(lines), { defer: true }),
       );
     });
     onCleanup(() => {

@@ -1,10 +1,11 @@
 import { createEffect, createRoot, createSignal } from 'solid-js';
 import type { LngLat } from '../model/route';
 import { routeById } from './routes';
+import { setFocus } from './store';
 
 /**
- * Transient state of the route tool; never kept. A route is being drawn while
- * `editingRouteId` is set.
+ * Transient state of drawing on the map; never kept. A route is being drawn while
+ * `editingRouteId` is set, the focus area while `focusDraft` is. One excludes the other.
  */
 
 /** Tools while a route is drawn: add at the end, insert on the line, place a waypoint, delete. */
@@ -43,6 +44,7 @@ export const [waypointDraft, setWaypointDraft] = createSignal<WaypointDraft>();
 
 /** Starts drawing a route: appending, reached by routing. */
 export function startDrawing(routeId: string): void {
+  stopFocusDrawing();
   setMenu(undefined);
   setEditingRouteId(routeId);
   setTool('append');
@@ -52,6 +54,39 @@ export function startDrawing(routeId: string): void {
 export function stopDrawing(): void {
   setMenu(undefined);
   setEditingRouteId(undefined);
+}
+
+/** The corners of the focus area being drawn, in order; none while it is not drawn. */
+export const [focusDraft, setFocusDraft] = createSignal<LngLat[]>();
+
+/** Where the mouse is while the focus area is drawn, for the line on to the next corner. */
+export const [focusCursor, setFocusCursor] = createSignal<LngLat>();
+
+/** Starts drawing a focus area; the current one stays until the new one is closed. */
+export function startFocusDrawing(): void {
+  stopDrawing();
+  setFocusDraft([]);
+}
+
+export function stopFocusDrawing(): void {
+  setFocusDraft(undefined);
+  setFocusCursor(undefined);
+}
+
+export function addFocusCorner(lngLat: LngLat): void {
+  setFocusDraft((corners) => corners && [...corners, lngLat]);
+}
+
+export function removeLastFocusCorner(): void {
+  setFocusDraft((corners) => corners?.slice(0, -1));
+}
+
+/** Makes the drawn corners the focus area, once there are enough for one. */
+export function closeFocusArea(): void {
+  const corners = focusDraft();
+  if (!corners || corners.length < 3) return;
+  setFocus(corners);
+  stopFocusDrawing();
 }
 
 // Drawing ends when its route goes, however it goes: deleted, undone or replaced.

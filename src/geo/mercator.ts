@@ -8,7 +8,7 @@ export const WORLD = 2 * HALF_WORLD;
 const SCALE_256_Z0 = WORLD / 256 / 0.00028;
 
 /** The latitude Web Mercator ends at. */
-const MAX_LATITUDE = 85.0511287798;
+export const MAX_LATITUDE = 85.0511287798;
 
 /** EPSG codes (and ESRI and old aliases) of Web Mercator, the usual one first. */
 export const WEB_MERCATOR_CODES = [3857, 900913, 102100, 102113, 3785] as const;
