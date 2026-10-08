@@ -1,0 +1,140 @@
+import { createMemo, createResource, createSignal, For, Show } from 'solid-js';
+import { filterOsmFeatures, loadOsmFeatures, typedFeature, type OsmFeature } from '../library/osmFeatures';
+import { startFocusDrawing } from '../state/drawing';
+import { addOsmQueryLayer } from '../state/osmQuery';
+import { state } from '../state/store';
+import { errorMessage } from '../state/ui';
+
+interface Outcome {
+  text: string;
+  error?: boolean;
+}
+
+/**
+ * A layer of OpenStreetMap features found in the focus area: features chosen from the list
+ * or typed in as tags, queried together. Tags typed in join the list at the top.
+ */
+export function OsmQueryTab(props: { onClose: () => void }) {
+  const [features] = createResource(loadOsmFeatures);
+  const [search, setSearch] = createSignal('');
+  const [typed, setTyped] = createSignal<OsmFeature[]>([]);
+  const [chosen, setChosen] = createSignal<OsmFeature[]>([]);
+  const [tags, setTags] = createSignal('');
+  const [tagError, setTagError] = createSignal<string>();
+  const [querying, setQuerying] = createSignal(false);
+  const [outcome, setOutcome] = createSignal<Outcome>();
+
+  /** The list by category, in the order of the list, with typed tags first. */
+  const groups = createMemo(() => {
+    const byCategory = new Map<string, OsmFeature[]>();
+    for (const feature of [...typed(), ...filterOsmFeatures(features() ?? [], search())]) {
+      byCategory.set(feature.category, [...(byCategory.get(feature.category) ?? []), feature]);
+    }
+    return [...byCategory];
+  });
+  const isChosen = (feature: OsmFeature) => chosen().some((c) => c.name === feature.name);
+  const toggle = (feature: OsmFeature) =>
+    setChosen(isChosen(feature) ? chosen().filter((c) => c.name !== feature.name) : [...chosen(), feature]);
+  const layerName = () => chosen().map((f) => f.name).join(', ');
+
+  function addTags() {
+    try {
+      const feature = typedFeature(tags());
+      if (!typed().some((t) => t.name === feature.name)) setTyped([...typed(), feature]);
+      if (!isChosen(feature)) setChosen([...chosen(), feature]);
+      setTags('');
+      setTagError(undefined);
+    } catch (error) {
+      setTagError(errorMessage(error));
+    }
+  }
+
+  async function query() {
+    const name = layerName();
+    setQuerying(true);
+    setOutcome(undefined);
+    try {
+      const count = await addOsmQueryLayer(name, [...new Set(chosen().flatMap((f) => f.filters))]);
+      if (count === 0) {
+        setOutcome({ text: 'Nothing was found in the focus area.' });
+      } else {
+        setOutcome({ text: `Added ${name}: ${count} ${count === 1 ? 'feature' : 'features'}.` });
+        setChosen([]);
+      }
+    } catch (error) {
+      setOutcome({ text: errorMessage(error), error: true });
+    } finally {
+      setQuerying(false);
+    }
+  }
+
+  return (
+    <div class="osm-query">
+      <Show when={!state.focus}>
+        <div class="note info">
+          <p>OSM queries look within the focus area: the Overpass API answers queries for limited areas only.</p>
+          <button
+            onClick={() => {
+              props.onClose();
+              startFocusDrawing();
+            }}
+          >
+            Draw a focus area
+          </button>
+        </div>
+      </Show>
+      <input type="search" placeholder="Search features" aria-label="Search OSM features" onInput={(e) => setSearch(e.currentTarget.value)} />
+      <ul class="offers">
+        <For each={groups()} fallback={<li class="muted">{features.loading ? 'Loading…' : 'Nothing matches.'}</li>}>
+          {([category, members]) => (
+            <li>
+              <h3 class="group">{category}</h3>
+              <ul>
+                <For each={members}>
+                  {(feature) => (
+                    <li>
+                      <button class="offer" classList={{ added: isChosen(feature) }} aria-pressed={isChosen(feature)} onClick={() => toggle(feature)}>
+                        <span class="mark" aria-hidden="true" />
+                        <span class="grow">
+                          <span class="name">{feature.name}</span>
+                          <Show when={feature.category !== 'Tags'}>
+                            <span class="muted id">{feature.filters.join(', ')}</span>
+                          </Show>
+                        </span>
+                      </button>
+                    </li>
+                  )}
+                </For>
+              </ul>
+            </li>
+          )}
+        </For>
+      </ul>
+      <form
+        class="row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          addTags();
+        }}
+      >
+        <input class="grow" placeholder="Tags, e.g. power=generator generator:source=wind" aria-label="Tags" value={tags()} onInput={(e) => setTags(e.currentTarget.value)} />
+        <button type="submit" disabled={!tags().trim()}>
+          Add
+        </button>
+      </form>
+      <Show when={tagError()} fallback={<p class="muted hint">key=value, or key=* for any value. Tags separated by spaces must all match.</p>}>
+        {(message) => <p class="note error">{message()}</p>}
+      </Show>
+      <div class="row">
+        <span class="grow name" classList={{ muted: chosen().length === 0 }} title={layerName()}>
+          {chosen().length > 0 ? layerName() : 'Choose features or add tags; together they form one layer.'}
+        </span>
+        <button class="primary" disabled={!state.focus || chosen().length === 0 || querying()} onClick={() => void query()}>
+          {querying() ? 'Querying…' : 'Query'}
+        </button>
+      </div>
+      <Show when={outcome()}>{(o) => <p class="note" classList={{ error: !!o().error, info: !o().error }}>{o().text}</p>}</Show>
+      <p class="muted hint">Data © OpenStreetMap contributors, found with the Overpass API.</p>
+    </div>
+  );
+}

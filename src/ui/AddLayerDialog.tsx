@@ -12,9 +12,10 @@ import { errorMessage } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { CloseIcon } from './icons';
 import { showModalWhile } from './modal';
+import { OsmQueryTab } from './OsmQueryTab';
 import { groupMembers, isFromSource, originOf, selection, type Selection } from './offers';
 
-type Tab = 'library' | 'address' | 'file';
+type Tab = 'library' | 'address' | 'file' | 'osm';
 
 /** Most offers listed at once; services like NASA GIBS have over a thousand layers. */
 const MAX_LISTED = 300;
@@ -90,7 +91,7 @@ async function toggleGroup(url: string, members: readonly Offer[]): Promise<void
 }
 
 /**
- * Adds layers without leaving: the source list (library, address, files) and a source's
+ * Adds layers without leaving: the source list (library, address, files, OSM query) and a source's
  * layer list take turns, and a tap adds or removes a layer in the background. The source
  * list stays mounted while a layer list is open, so its search and scroll survive.
  */
@@ -154,7 +155,7 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
       <Show when={failure()}>{(f) => <FailureNote failure={f()} onRetry={(s) => void open(s)} onDismiss={() => setFailure(undefined)} />}</Show>
       <div class="pane" hidden={opened() !== undefined}>
         <div class="tabs" role="tablist">
-          <For each={[['library', 'Library'], ['address', 'Address'], ['file', 'Files']] as const}>
+          <For each={[['library', 'Library'], ['address', 'Address'], ['file', 'Files'], ['osm', 'OSM Query']] as const}>
             {([value, label]) => (
               <button role="tab" aria-selected={tab() === value} classList={{ selected: tab() === value }} onClick={() => setTab(value)}>
                 {label}
@@ -170,6 +171,9 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
         </div>
         <div class="tab-panel" role="tabpanel" hidden={tab() !== 'file'}>
           <FileTab />
+        </div>
+        <div class="tab-panel" role="tabpanel" hidden={tab() !== 'osm'}>
+          <OsmQueryTab onClose={() => props.onClose()} />
         </div>
       </div>
       <Show when={opened()} keyed>

@@ -297,7 +297,8 @@ a {
 .name-input,
 .field input,
 .address input[type='url'],
-.service input[type='search'] {
+.service input[type='search'],
+.osm-query input {
   box-sizing: border-box;
   padding: 3px 6px;
   border: 1px solid #ced4da;
@@ -425,7 +426,8 @@ input.swatch {
 .pane,
 .tab-panel,
 .library,
-.service {
+.service,
+.osm-query {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -594,6 +596,21 @@ input.swatch {
 .address {
   display: grid;
   gap: 8px;
+}
+
+.osm-query .offers ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.osm-query .group {
+  margin: 8px 0 0;
+  padding: 2px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .imported li {
