@@ -2,7 +2,6 @@ import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import { parsePmtilesUrl } from '../map/urls';
-import { MAX_ICON_SIZE, MIN_ICON_SIZE } from '../model/icon';
 import {
   canCache,
   isRaster,
@@ -26,6 +25,7 @@ import { moveLayer, removeLayer, setActiveLayer, setBackground, setHostProxied, 
 import { layerErrors, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
+import { IconSizeSlider } from './IconSizeSlider';
 import { createOutcome, OutcomeNote } from './outcome';
 import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon, IconBadge } from './icons';
 import { reorderTarget } from './reorder';
@@ -435,17 +435,7 @@ function ActiveLayer(props: { layer: Layer }) {
         <Show when={layer.icon}>
           <div class="row" title="How large the icon is drawn">
             <span class="muted label">Size</span>
-            <input
-              class="grow"
-              type="range"
-              aria-label={`Icon size of ${layer.name}`}
-              min={MIN_ICON_SIZE}
-              max={MAX_ICON_SIZE}
-              step="0.25"
-              value={layer.iconSize ?? 1}
-              onInput={(e) => updateLayer(layer.id, { iconSize: e.currentTarget.valueAsNumber })}
-            />
-            <span class="value">{layer.iconSize ?? 1}×</span>
+            <IconSizeSlider label={`Icon size of ${layer.name}`} value={layer.iconSize} onInput={(iconSize) => updateLayer(layer.id, { iconSize })} />
           </div>
         </Show>
       </Show>

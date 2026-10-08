@@ -1,4 +1,4 @@
-import { iconSize, type MapIcon } from './icon';
+import type { MapIcon } from './icon';
 
 /** West, south, east, north in degrees. */
 export type Bounds = [number, number, number, number];
@@ -231,10 +231,6 @@ export type LineDash = 'dashed' | 'long-dashed' | 'dotted';
 export const MIN_LINE_WIDTH = 0.5;
 export const MAX_LINE_WIDTH = 10;
 
-/** The size a layer's icon is drawn at, within the bounds whatever a project file says. */
-export function layerIconSize(layer: Layer): number {
-  return iconSize(layer.iconSize);
-}
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;

@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from 'solid-js';
+import { createMemo, createSignal, For, Show } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { geojsonBounds } from '../geo/bounds';
 import { PROFILES, type LngLat, type Profile, type Route } from '../model/route';
@@ -7,7 +7,6 @@ import { routePoints } from '../routing/legs';
 import { nextRouteColor } from '../routing/routeEdit';
 import { failedLegCount, lastError, pendingLegs, retryFailedLegs } from '../routing/service';
 import { editingRouteId, startDrawing, stopDrawing } from '../state/drawing';
-import { MAX_ICON_SIZE, MIN_ICON_SIZE } from '../model/icon';
 import { addRoute, endGesture, importRouteData, removeRoute, renameRoute, routeData, routeWaypoints, setRouteColor, setRouteProfile, setWaypointSize } from '../state/routes';
 import { parseGpx, toGpx } from '../services/gpx';
 import { fileName } from '../services/read';
@@ -15,7 +14,11 @@ import { errorMessage, showBounds } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { downloadBlob } from './download';
 import { EditableName } from './EditableName';
+import { IconSizeSlider } from './IconSizeSlider';
 import { AreaIcon, CloseIcon } from './icons';
+
+/** A number with the word it counts, as `3 points`. */
+const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 /** New routes and imported GPX routes use the profile of the last route. */
 const lastProfile = (): Profile => routeData.routes.at(-1)?.profile ?? 'car';
@@ -52,7 +55,7 @@ function showPoints(points: LngLat[]) {
 
 async function exportGpx() {
   const unrouted = pendingLegs() + failedLegCount();
-  const message = `${unrouted} ${unrouted === 1 ? 'leg is' : 'legs are'} not routed and will be exported as straight lines.`;
+  const message = `${count(unrouted, 'leg is', 'legs are')} not routed and will be exported as straight lines.`;
   if (unrouted > 0 && !(await askConfirmation(message, 'Export anyway'))) return;
   const tracks = routeTracks(unwrap(routeData.routes));
   const gpx = toGpx('Routes', unwrap(routeData.waypoints), tracks, new Date());
@@ -65,7 +68,6 @@ function flyToRoute(route: Route) {
   showPoints([...plain.points.map((p) => p.lngLat), ...routePoints(plain), ...routeWaypoints(route.id).map((w) => w.lngLat)]);
 }
 
-const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 /** The routes drawn on the map: draw, edit, import and export them as GPX. */
 export function RoutesSection() {
@@ -107,12 +109,12 @@ export function RoutesSection() {
       </ul>
       <Show when={pendingLegs() > 0}>
         <p class="muted hint">
-          Routing… {pendingLegs()} {pendingLegs() === 1 ? 'leg' : 'legs'} left
+          Routing… {count(pendingLegs(), 'leg', 'legs')} left
         </p>
       </Show>
       <Show when={failedLegCount() > 0}>
         <div class="note error">
-          Routing failed for {failedLegCount()} {failedLegCount() === 1 ? 'leg' : 'legs'}
+          Routing failed for {count(failedLegCount(), 'leg', 'legs')}
           {lastError() ? `: ${lastError()}` : '.'} <button onClick={retryFailedLegs}>Retry routing</button>
         </div>
       </Show>
@@ -128,7 +130,7 @@ export function RoutesSection() {
 function RouteRow(props: { route: Route }) {
   const route = props.route;
   const editing = () => editingRouteId() === route.id;
-  const waypoints = () => routeWaypoints(route.id).length;
+  const waypoints = createMemo(() => routeWaypoints(route.id).length);
   return (
     <li class="route" classList={{ active: editing() }}>
       <div class="row">
@@ -176,18 +178,12 @@ function RouteRow(props: { route: Route }) {
       <Show when={waypoints() > 0}>
         <div class="row" title="How large the route's waypoints are drawn">
           <span class="muted label">Waypoints</span>
-          <input
-            class="grow"
-            type="range"
-            aria-label={`Waypoint size of ${route.name}`}
-            min={MIN_ICON_SIZE}
-            max={MAX_ICON_SIZE}
-            step="0.25"
-            value={route.waypointSize ?? 1}
-            onInput={(e) => setWaypointSize(route.id, e.currentTarget.valueAsNumber)}
+          <IconSizeSlider
+            label={`Waypoint size of ${route.name}`}
+            value={route.waypointSize}
+            onInput={(size) => setWaypointSize(route.id, size)}
             onChange={endGesture}
           />
-          <span class="value">{route.waypointSize ?? 1}×</span>
         </div>
       </Show>
     </li>

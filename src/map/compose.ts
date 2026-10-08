@@ -6,11 +6,10 @@ import type {
   StyleSpecification,
 } from 'maplibre-gl';
 import { intersectBounds } from '../geo/bounds';
-import type { MapIcon } from '../model/icon';
+import { iconSize, type MapIcon } from '../model/icon';
 import {
   keepsTiles,
   layerColor,
-  layerIconSize,
   MAX_ZOOM,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
@@ -431,7 +430,7 @@ function dots(layer: Layer, base: LayerBase, color: string): LayerSpecification 
 
 /** Points, and areas at their middle, marked with the icon on a disc of the layer's colour. */
 function poiLayers(layer: Layer, icon: MapIcon, base: LayerBase, color: string): LayerSpecification[] {
-  const size = layerIconSize(layer);
+  const size = iconSize(layer.iconSize);
   const placement = { 'icon-allow-overlap': true, 'icon-ignore-placement': true };
   const filter = ['any', POINT, POLYGON] as never;
   return [
