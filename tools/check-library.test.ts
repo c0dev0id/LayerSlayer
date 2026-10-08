@@ -20,7 +20,8 @@ import { parseWfs } from '../src/services/wfs';
 import { parseXyz } from '../src/services/xyz';
 
 const LIBRARY = 'src/library/library.json';
-const ORIGIN = 'https://c0dev0id.github.io';
+/** Where the app is served from: GitHub Pages redirects c0dev0id.github.io/webmap there. */
+const ORIGIN = 'https://shagen.me';
 
 interface Entry {
   name: string;
