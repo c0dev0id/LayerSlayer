@@ -7,7 +7,7 @@ import { routePoints } from '../routing/legs';
 import { nextRouteColor } from '../routing/routeEdit';
 import { failedLegCount, lastError, pendingLegs, retryFailedLegs } from '../routing/service';
 import { editingRouteId, startDrawing, stopDrawing } from '../state/drawing';
-import { addRoute, importRouteData, removeRoute, renameRoute, routeData, routeWaypoints, setRouteProfile } from '../state/routes';
+import { addRoute, endGesture, importRouteData, removeRoute, renameRoute, routeData, routeWaypoints, setRouteColor, setRouteProfile } from '../state/routes';
 import { parseGpx, toGpx } from '../services/gpx';
 import { fileName } from '../services/read';
 import { errorMessage, showBounds } from '../state/ui';
@@ -131,7 +131,15 @@ function RouteRow(props: { route: Route }) {
   return (
     <li class="route" classList={{ active: editing() }}>
       <div class="row">
-        <span class="route-swatch" style={{ 'background-color': route.color }} />
+        <input
+          type="color"
+          class="swatch"
+          aria-label={`Colour of ${route.name}`}
+          title="Colour of the route"
+          value={route.color}
+          onInput={(e) => setRouteColor(route.id, e.currentTarget.value)}
+          onChange={endGesture}
+        />
         <EditableName value={route.name} label="route" onRename={(name) => renameRoute(route.id, name)} />
         <button
           class="icon"

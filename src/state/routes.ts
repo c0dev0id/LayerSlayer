@@ -62,10 +62,23 @@ const [historyVersion, setHistoryVersion] = createSignal(0);
 
 const snapshot = (): RouteData => structuredClone(unwrap(routeData));
 
-/** Records the current routes as an undo step; call right before an edit. */
-function recordEdit(label: string): void {
+/** The gesture the last edit was part of; its further edits join that undo step. */
+let gesture: string | undefined;
+
+/**
+ * Records the current routes as an undo step; call right before an edit. Edits of one
+ * gesture, such as a slider being dragged, make a single step: the first is recorded.
+ */
+function recordEdit(label: string, ofGesture?: string): void {
+  if (ofGesture !== undefined && ofGesture === gesture) return;
+  gesture = ofGesture;
   history.record(snapshot(), label);
   setHistoryVersion((v) => v + 1);
+}
+
+/** Ends a gesture: its next edit is an undo step of its own. */
+export function endGesture(): void {
+  gesture = undefined;
 }
 
 /** Label of the edit that undo would revert (reactive). */
@@ -90,6 +103,7 @@ export function redo(): void {
 
 function restore(state: RouteData | undefined): void {
   if (!state) return;
+  gesture = undefined;
   setRouteData(reconcile(state, { key: 'id', merge: false }));
   setHistoryVersion((v) => v + 1);
 }
@@ -127,14 +141,19 @@ export function renameRoute(id: string, name: string): void {
  * Applies a pure edit to a route; reconciling by id keeps unchanged points' identity.
  * Edits with a label are undo steps; routing results come without one.
  */
-function updateRoute(id: string, change: (route: Route) => Route, label?: string): void {
+function updateRoute(id: string, change: (route: Route) => Route, label?: string, ofGesture?: string): void {
   const index = routeData.routes.findIndex((r) => r.id === id);
   if (index < 0) return;
   const current = unwrap(routeData.routes[index]!);
   const next = change(current);
   if (next === current) return;
-  if (label) recordEdit(label);
+  if (label) recordEdit(label, ofGesture);
   setRouteData('routes', index, reconcile(next, { key: 'id', merge: false }));
+}
+
+/** Sets a route's colour; the colours picked while the picker is open make one undo step. */
+export function setRouteColor(id: string, color: string): void {
+  updateRoute(id, (r) => (r.color === color ? r : { ...r, color }), 'Change route colour', `colour ${id}`);
 }
 
 export function setRouteProfile(id: string, profile: Profile): void {
