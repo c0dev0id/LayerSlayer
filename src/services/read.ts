@@ -11,7 +11,7 @@ import { parseXyz } from './xyz';
 export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: string): Promise<ServiceInfo> {
   switch (type) {
     case 'wms': {
-      const caps = withParams(url, { SERVICE: 'WMS', REQUEST: 'GetCapabilities' });
+      const caps = wmsCapabilitiesUrl(url);
       return parseWms(await (await fetchResource(caps)).text(), caps);
     }
     case 'wmts': {
@@ -35,6 +35,15 @@ export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: str
       return { title: name, offers: [{ title: name, depth: 0, draft: { name, source: { type: 'style', url } } }] };
     }
   }
+}
+
+/**
+ * A WMS capabilities request. Version 1.3.0 is asked for unless the address names one, as
+ * other clients do: a server without it answers in 1.1.1, and some (MapServer) send 1.1.1
+ * documents as application/vnd.ogc.wms_xml, which CORS proxies treat as binary.
+ */
+export function wmsCapabilitiesUrl(url: string): string {
+  return withParams(url, { SERVICE: 'WMS', REQUEST: 'GetCapabilities', ...(!getParam(url, 'VERSION') && { VERSION: '1.3.0' }) });
 }
 
 async function fetchJson<T>(url: string): Promise<T> {

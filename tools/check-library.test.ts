@@ -12,6 +12,7 @@ import { parseFeatureService, parseMapServer, serviceUrl } from '../src/services
 import type { ServiceInfo } from '../src/services/types';
 import { parseWms } from '../src/services/wms';
 import { parseWmts } from '../src/services/wmts';
+import { wmsCapabilitiesUrl } from '../src/services/read';
 import { parseXyz } from '../src/services/xyz';
 
 const LIBRARY = 'src/library/library.json';
@@ -28,7 +29,7 @@ interface Entry {
 function documentUrl(entry: Entry): string {
   switch (entry.type) {
     case 'wms':
-      return withParams(entry.url, { SERVICE: 'WMS', REQUEST: 'GetCapabilities' });
+      return wmsCapabilitiesUrl(entry.url);
     case 'wmts':
       return /wmtscapabilities\.xml/i.test(entry.url) || getParam(entry.url, 'REQUEST')
         ? entry.url
