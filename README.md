@@ -65,7 +65,9 @@ in the browser.
   marked with it, white on a disc of the layer's colour. The picker searches about 7,900
   icons by name and keyword: Maki and Temaki, drawn for maps and named after OpenStreetMap's
   features (bollard, cattle grid, lift gate, water tap, fuel), and Material Design Icons
-  for nearly everything else. × goes back to dots.
+  for nearly everything else. *Size* draws the icon up to three times larger; × goes back
+  to dots. Layers that come with an icon, such as OSM queries of a preset, start at 100%
+  opacity instead of 50%.
   OSM query layers show their tags and when they were queried; *Update* queries again in
   the focus area as it is now and replaces the layer's data.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's

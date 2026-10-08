@@ -389,7 +389,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
   `<path>` elements, so an icon is its viewBox and path data, drawn with `Path2D`. The
   plugin turns each package into a virtual module (MDI about 800 kB gzipped), loaded when
   the picker opens. A layer keeps its icon's shape, not just its id, so drawing it needs no
-  set loaded and a project file carries it. The OSM feature presets each name an icon; the
+  set loaded and a project file carries it. Its size (1× to 3×) is drawn, not scaled: the
+  image is rendered at that many times the display's resolution and handed to the map at
+  the display's pixel ratio. Layers created with an icon start opaque, the exception to
+  the half-transparent default, since icons on see-through discs read poorly. The OSM feature presets each name an icon; the
   plugin serves just those (`virtual:osm-feature-icons`, 30 kB) and fails the build on a
   name no set has. Map images are named after icon and colour (`poi:set:name:#rrggbb`) and
   drawn when the map asks, through `setMissingStyleImageResolver`: in MapLibre 6 the
