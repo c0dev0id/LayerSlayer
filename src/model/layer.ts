@@ -217,7 +217,7 @@ export const NO_ADJUSTMENTS: RasterAdjustments = { hue: 0, saturation: 0, contra
 export type LayerDraft = Pick<Layer, 'name' | 'source'> &
   Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin' | 'icon'>>;
 
-/** New layers are half transparent, so what lies below them shows. */
+/** New layers are half transparent, so what lies below them shows; layers with an icon start opaque, as icons read best that way. */
 const DEFAULT_OPACITY = 0.5;
 
 export const MIN_ZOOM = 0;
@@ -294,7 +294,7 @@ export function createLayer(draft: LayerDraft, existing: readonly Layer[], id: s
   const layer: Layer = {
     id,
     visible: true,
-    opacity: DEFAULT_OPACITY,
+    opacity: draft.icon ? 1 : DEFAULT_OPACITY,
     minzoom: MIN_ZOOM,
     maxzoom: MAX_ZOOM,
     ...draft,
