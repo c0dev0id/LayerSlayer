@@ -1,7 +1,7 @@
 import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
-import { canCache, isVector, keepsTiles, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, type Layer } from '../model/layer';
+import { canCache, isVector, keepsTiles, layerColor, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, type Layer } from '../model/layer';
 import { hostOf } from '../state/net';
 import { moveLayer, removeLayer, setActiveLayer, setHostProxied, state, updateLayer } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
@@ -119,15 +119,14 @@ function LayerSummary(props: { layer: Layer }) {
   const zoomRange = () => (layer.minzoom > MIN_ZOOM || layer.maxzoom < MAX_ZOOM ? `zoom ${layer.minzoom}–${layer.maxzoom}` : undefined);
   // From the settings rather than net.ts, so the tag follows the proxy checkbox.
   const proxied = () => {
-    const url = sourceUrl(layer);
-    const host = url ? hostOf(url) : undefined;
+    const host = layerHost(layer);
     return !!state.settings.proxy && host !== undefined && state.settings.proxiedHosts.includes(host);
   };
   return (
     <div class="layer-summary">
       <span>{Math.round(layer.opacity * 100)}%</span>
       <Show when={isVector(layer.source)}>
-        <span class="layer-color" style={{ 'background-color': layer.color ?? '#e8590c' }} title={layer.color} />
+        <span class="layer-color" style={{ 'background-color': layerColor(layer) }} title={layerColor(layer)} />
       </Show>
       <Show when={zoomRange()}>{(range) => <span>{range()}</span>}</Show>
       <Show when={keepsTiles(layer)}>
@@ -206,13 +205,16 @@ function sourceUrl(layer: Layer): string | undefined {
   }
 }
 
+/** The server a layer's data comes from, for the proxy setting. */
+function layerHost(layer: Layer): string | undefined {
+  const url = sourceUrl(layer);
+  return url ? hostOf(url) : undefined;
+}
+
 /** Opacity, zoom range, colour and source of the active layer. */
 function ActiveLayer(props: { layer: Layer }) {
   const layer = props.layer;
-  const host = () => {
-    const url = sourceUrl(layer);
-    return url ? hostOf(url) : undefined;
-  };
+  const host = () => layerHost(layer);
   const fileName = () => ('data' in layer.source && 'file' in layer.source.data ? layer.source.data.name : undefined);
   const zoomInput = (key: 'minzoom' | 'maxzoom', label: string) => (
     <input
@@ -263,7 +265,7 @@ function ActiveLayer(props: { layer: Layer }) {
             type="color"
             class="swatch"
             aria-label={`Colour of ${layer.name}`}
-            value={layer.color ?? '#e8590c'}
+            value={layerColor(layer)}
             onInput={(e) => updateLayer(layer.id, { color: e.currentTarget.value })}
           />
         </div>

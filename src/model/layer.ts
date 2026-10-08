@@ -178,13 +178,18 @@ export type LayerDraft = Pick<Layer, 'name' | 'source'> &
   Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin'>>;
 
 /** New layers are half transparent, so what lies below them shows. */
-export const DEFAULT_OPACITY = 0.5;
+const DEFAULT_OPACITY = 0.5;
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
 
 /** Colours handed out to vector layers in turn; they read on light and dark base maps. */
 export const VECTOR_COLORS = ['#e8590c', '#1c7ed6', '#2f9e44', '#ae3ec9', '#f08c00', '#0c8599', '#e03131'];
+
+/** The colour a vector layer is drawn in. */
+export function layerColor(layer: Layer): string {
+  return layer.color ?? VECTOR_COLORS[0]!;
+}
 
 interface SourceKind {
   /** Its name in the panel. */

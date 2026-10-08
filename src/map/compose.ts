@@ -6,6 +6,7 @@ import type {
 } from 'maplibre-gl';
 import {
   keepsTiles,
+  layerColor,
   MAX_ZOOM,
   MIN_ZOOM,
   type ArcGisMapSource,
@@ -275,7 +276,7 @@ const FILL_SHARE = 0.25;
 
 /** Features drawn in the layer's colour: polygons filled and outlined, lines, and points as dots. */
 function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string): Fragment {
-  const color = layer.color ?? '#e8590c';
+  const color = layerColor(layer);
   const base = { source: layer.id, ...(sourceLayer && { 'source-layer': sourceLayer }), ...zoomRange(layer) };
   const opacity = layer.opacity;
   return {
