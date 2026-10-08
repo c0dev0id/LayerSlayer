@@ -921,6 +921,55 @@
       "region": "United States",
       "category": "Weather",
       "note": "Contours of the latest air quality index, ozone and fine particles combined."
+    },
+    {
+      "name": "Baden-Württemberg — MobiData BW (WFS)",
+      "type": "wfs",
+      "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "Traffic",
+      "note": "Roadworks, charging points, bike parking, sharing vehicles, stops and stations as features, from zoom 9."
+    },
+    {
+      "name": "Karlsruhe region — traffic and roadworks (WFS)",
+      "type": "wfs",
+      "url": "https://mobil.trk.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "Traffic",
+      "note": "The roadworks and traffic layers of the Karlsruhe WMS as features, from zoom 9.",
+      "cors": false
+    },
+    {
+      "name": "DWD — weather observations and warnings (WFS)",
+      "type": "wfs",
+      "url": "https://maps.dwd.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "Weather",
+      "note": "Station observations and warning areas of the Deutscher Wetterdienst as features."
+    },
+    {
+      "name": "France — Sandre water reference data (WFS)",
+      "type": "wfs",
+      "url": "https://services.sandre.eaufrance.fr/geo/sandre?SERVICE=WFS&REQUEST=GetCapabilities",
+      "region": "France",
+      "category": "Waterways",
+      "note": "Rivers, catchments, monitoring stations and water bodies; several hundred feature types."
+    },
+    {
+      "name": "North Rhine-Westphalia — hospitals (OGC API)",
+      "type": "ogc-features",
+      "url": "https://ogc-api.nrw.de/inspire-us-krankenhaus/v1/collections",
+      "region": "Germany",
+      "category": "POI",
+      "note": "Hospitals of North Rhine-Westphalia from an OGC API – Features service."
+    },
+    {
+      "name": "VersaTiles — vector tile layers",
+      "type": "vector-tiles",
+      "url": "https://tiles.versatiles.org/tiles/osm/tiles.json",
+      "region": "Global",
+      "category": "Basemap",
+      "note": "OpenStreetMap in the Shortbread schema, each tile layer a layer of its own in one colour."
     }
   ]
 }

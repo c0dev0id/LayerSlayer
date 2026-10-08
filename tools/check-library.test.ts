@@ -9,10 +9,13 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { it } from 'vitest';
 import { getParam, withParams } from '../src/map/urls';
 import { parseFeatureService, parseMapServer, serviceUrl } from '../src/services/arcgis';
+import { collectionsAddress, parseCollections } from '../src/services/ogcFeatures';
 import type { ServiceInfo } from '../src/services/types';
 import { parseWms } from '../src/services/wms';
 import { parseWmts } from '../src/services/wmts';
 import { wmsCapabilitiesUrl } from '../src/services/read';
+import { parseTileJson } from '../src/services/vectorTiles';
+import { parseWfs } from '../src/services/wfs';
 import { parseXyz } from '../src/services/xyz';
 
 const LIBRARY = 'src/library/library.json';
@@ -34,6 +37,8 @@ function documentUrl(entry: Entry): string {
       return /wmtscapabilities\.xml/i.test(entry.url) || getParam(entry.url, 'REQUEST')
         ? entry.url
         : withParams(entry.url, { SERVICE: 'WMTS', REQUEST: 'GetCapabilities' });
+    case 'wfs':
+      return withParams(entry.url, { SERVICE: 'WFS', REQUEST: 'GetCapabilities', ACCEPTVERSIONS: '2.0.0,1.1.0' });
     case 'arcgis-mapserver':
     case 'arcgis-features':
       return withParams(serviceUrl(entry.url), { f: 'json' });
@@ -54,6 +59,14 @@ async function parse(entry: Entry, body: string, url: string): Promise<ServiceIn
       return parseMapServer(JSON.parse(body), entry.url);
     case 'arcgis-features':
       return parseFeatureService(JSON.parse(body), entry.url);
+    case 'wfs':
+      return parseWfs(body, url);
+    case 'ogc-features': {
+      const address = collectionsAddress(entry.url);
+      return address ? parseCollections(JSON.parse(body), address.collections, address.id) : undefined;
+    }
+    case 'vector-tiles':
+      return parseTileJson(JSON.parse(body), entry.url);
     case 'xyz':
       return parseXyz(entry.url);
     default:
@@ -64,7 +77,13 @@ async function parse(entry: Entry, body: string, url: string): Promise<ServiceIn
 async function check(entry: Entry): Promise<string> {
   const url = documentUrl(entry).replace(/^http:/, 'https:');
   try {
-    const response = await fetch(url, { headers: { Origin: ORIGIN }, signal: AbortSignal.timeout(30_000) });
+    // OGC APIs answer HTML without Accept; a COG is read only as far as its header.
+    const headers = {
+      Origin: ORIGIN,
+      ...(entry.type === 'ogc-features' && { Accept: 'application/json' }),
+      ...(entry.type === 'cog' && { Range: 'bytes=0-65535' }),
+    };
+    const response = await fetch(url, { headers, signal: AbortSignal.timeout(30_000) });
     // An error answer says nothing about CORS (servers rarely add the header to errors), so
     // the entry keeps what it had.
     if (!response.ok) return `HTTP ${response.status}, CORS not checked`;
@@ -73,7 +92,7 @@ async function check(entry: Entry): Promise<string> {
     const allowed = response.headers.get('access-control-allow-origin');
     entry.cors = allowed === '*' || allowed === ORIGIN;
     const header = entry.cors ? '' : ` [Access-Control-Allow-Origin: ${allowed ?? 'none'}]`;
-    const info = await parse(entry, entry.type === 'xyz' ? '' : await response.text(), url);
+    const info = await parse(entry, entry.type === 'xyz' || entry.type === 'cog' ? '' : await response.text(), url);
     if (!info) return `ok${header}`;
     const usable = info.offers.filter((o) => o.draft).length;
     const refused = info.offers.filter((o) => o.reason).length;
