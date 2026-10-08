@@ -3,7 +3,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createEffect, onCleanup, onMount } from 'solid-js';
 import { unwrap } from 'solid-js/store';
-import { requestUrl } from '../state/net';
+import { describeLoadError, requestUrl } from '../state/net';
 import { setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
@@ -55,7 +55,7 @@ export function MapView() {
     });
     map.on('error', (event: maplibregl.ErrorEvent & { sourceId?: string }) => {
       const id = layerOf(event.sourceId);
-      if (id) reportLayerError(id, event.error?.message ?? 'The layer could not be loaded.');
+      if (id) void describeLoadError(event.error).then((message) => reportLayerError(id, message));
       else console.error(event.error);
     });
     watchGeoJsonBounds(map);
