@@ -186,7 +186,7 @@ function LibraryTab(props: { onOpen: (entry: LibraryEntry) => void }) {
                 <span class="row">
                   <strong class="grow">{entry.name}</strong>
                   <Show when={entry.cors === false}>
-                    <span class="badge" title="The server sends no CORS headers; it needs a CORS proxy">
+                    <span class="badge" title="The server does not allow web pages to read it (no valid CORS header), so it needs a CORS proxy">
                       proxy
                     </span>
                   </Show>

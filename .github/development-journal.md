@@ -94,10 +94,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   app's own fetches and protocols: plain HTTP is upgraded on an HTTPS page, and hosts the
   user marks go through a CORS proxy of their choice (`{url}` template). Proxying is per
   host because a server either sends CORS headers or does not. No proxy is built in.
+  The header must hold exactly one value: mobil.trk.de sends `Access-Control-Allow-Origin: *`
+  twice when a request carries an Origin, and Chromium refuses that for fetches and for
+  `crossorigin` images, while a plain `<img>` (Leaflet's tiles) still loads. Such servers
+  work in DOM-based viewers but need the proxy here.
 - **The library.** Generated once from WMSproxy's `library.json` and mappic's base maps;
   each entry names its type explicitly, and a unit test checks that address detection
   agrees with every entry. `npm run check-library` reads every entry with the app's own
-  parsers and records `cors: false` for servers without CORS headers; it reads live
+  parsers and records `cors: false` for servers without a valid CORS header; it reads live
   services, so it is run by hand. Esri World Imagery (in mappic) was left out: its keyless
   endpoint is only licensed with Esri software.
 - **GeoPDF georeferencing.** Only ISO 32000-2 geospatial viewports (Adobe's extension:

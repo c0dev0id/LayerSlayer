@@ -9,7 +9,7 @@ export interface LibraryEntry {
   region: string;
   category: string;
   note?: string;
-  /** False where the server sends no CORS headers, so a browser needs a proxy to use it. */
+  /** False where the server sends no valid CORS header, so a browser needs a proxy to use it. */
   cors?: false;
   /** For a single tile template: what the template cannot say itself. */
   attribution?: string;

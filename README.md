@@ -49,7 +49,9 @@ Only Web Mercator is drawn; services that offer no Web Mercator are refused with
 ## CORS and the proxy
 
 A WebGL map can only draw images from servers that allow it (CORS headers). Most public
-map services do; some do not. For those, Settings takes the address of a CORS proxy you
+map services do; some do not. Libraries that draw tiles as plain `<img>` elements, as
+Leaflet and OpenLayers do by default, need no CORS, so a service can work there and still
+be refused here. For those, Settings takes the address of a CORS proxy you
 run, with `{url}` where the target address goes (percent-encoded), e.g.
 `https://proxy.example/?url={url}`; without `{url}` the target is appended as it is.
 Only the hosts you choose go through it: tick *Fetch … through the CORS proxy* on a
@@ -63,7 +65,7 @@ addresses are upgraded to HTTPS unless their host goes through the proxy.
 [mappic](https://github.com/c0dev0id/mappic), each with its type, region and category.
 
 `npm run check-library` reads every entry with the app's own parsers, prints how many
-layers each offers and can show, and marks entries whose server sends no CORS headers
+layers each offers and can show, and marks entries whose server sends no valid CORS header
 with `"cors": false`, which the library shows as needing a proxy. It reads live services,
 so it runs by hand rather than in CI.
 
