@@ -788,9 +788,10 @@ input.swatch {
 }
 
 /* The waypoint dialog: a small form rather than the add-layer dialog's panes. */
+/* fit-content as browsers size dialogs: auto would stretch a modal dialog, which is pinned top and bottom. */
 .dialog.form-dialog {
   width: min(360px, calc(100vw - 32px));
-  height: auto;
+  height: fit-content;
 }
 
 .form-dialog form {
