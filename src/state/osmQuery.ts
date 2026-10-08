@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 import { geojsonBounds } from '../geo/bounds';
-import type { GeoJsonSource } from '../model/layer';
+import type { GeoJsonSource, LayerIcon } from '../model/layer';
 import type { LngLat } from '../model/route';
 import { findOsmFeatures, OSM_ATTRIBUTION } from '../services/overpass';
 import { storeFile } from './files';
@@ -23,13 +23,13 @@ async function keep(filters: string[], geojson: GeoJSON.FeatureCollection): Prom
 }
 
 /** Adds a layer of the features the filters find in the focus area, unless none are found. Resolves to how many were. */
-export async function addOsmQueryLayer(name: string, filters: string[]): Promise<number> {
+export async function addOsmQueryLayer(name: string, filters: string[], icon?: LayerIcon): Promise<number> {
   const geojson = await findOsmFeatures(filters, focusArea());
   const count = geojson.features.length;
   if (count > 0) {
     const source = keep(filters, geojson);
     const bounds = geojsonBounds(geojson);
-    addLayer({ name, source: await source, attribution: OSM_ATTRIBUTION, ...(bounds && { bounds }) });
+    addLayer({ name, source: await source, attribution: OSM_ATTRIBUTION, ...(bounds && { bounds }), ...(icon && { icon }) });
   }
   return count;
 }

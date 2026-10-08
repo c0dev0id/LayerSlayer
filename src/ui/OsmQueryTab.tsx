@@ -1,14 +1,18 @@
 import { createMemo, createResource, createSignal, For, Show } from 'solid-js';
 import { filterOsmFeatures, loadOsmFeatures, typedFeature, type OsmFeature } from '../library/osmFeatures';
+import type { LayerIcon } from '../model/layer';
 import { startFocusDrawing } from '../state/drawing';
 import { addOsmQueryLayer } from '../state/osmQuery';
 import { state } from '../state/store';
 import { errorMessage } from '../state/ui';
+import { IconGlyph } from './IconPicker';
 import { createOutcome, OutcomeNote } from './outcome';
+import { pickIcon } from './pickIcon';
 
 /**
  * A layer of OpenStreetMap features found in the focus area: features chosen from the list
- * or typed in as tags, queried together. Tags typed in join the list at the top.
+ * or typed in as tags, queried together. Tags typed in join the list at the top. The layer
+ * takes the icon of the first chosen feature that has one, unless another is picked.
  */
 export function OsmQueryTab(props: { onClose: () => void }) {
   const [features] = createResource(loadOsmFeatures);
@@ -17,6 +21,8 @@ export function OsmQueryTab(props: { onClose: () => void }) {
   const [chosen, setChosen] = createSignal<OsmFeature[]>([]);
   const [tags, setTags] = createSignal('');
   const [tagError, setTagError] = createSignal<string>();
+  /** The icon picked for the layer, null for none; undefined takes the chosen features'. */
+  const [picked, setPicked] = createSignal<LayerIcon | null>();
   const querying = createOutcome();
 
   /** The list by category, in the order of the list, with typed tags first. */
@@ -33,6 +39,10 @@ export function OsmQueryTab(props: { onClose: () => void }) {
   const toggle = (feature: OsmFeature) =>
     setChosen(isChosen(feature) ? chosen().filter((c) => c.name !== feature.name) : [...chosen(), feature]);
   const layerName = () => chosen().map((f) => f.name).join(', ');
+  const icon = () => {
+    const choice = picked();
+    return choice === undefined ? chosen().find((f) => f.icon)?.icon : (choice ?? undefined);
+  };
 
   function addTags() {
     try {
@@ -49,10 +59,12 @@ export function OsmQueryTab(props: { onClose: () => void }) {
   function query() {
     const name = layerName();
     const filters = [...new Set(chosen().flatMap((f) => f.filters))];
+    const layerIcon = icon();
     void querying.run(async () => {
-      const count = await addOsmQueryLayer(name, filters);
+      const count = await addOsmQueryLayer(name, filters, layerIcon);
       if (count === 0) return 'Nothing was found in the focus area.';
       setChosen([]);
+      setPicked(undefined);
       return `Added ${name}: ${count} ${count === 1 ? 'feature' : 'features'}.`;
     });
   }
@@ -84,6 +96,7 @@ export function OsmQueryTab(props: { onClose: () => void }) {
                     <li>
                       <button class="offer" classList={{ added: isChosen(feature) }} aria-pressed={isChosen(feature)} onClick={() => toggle(feature)}>
                         <span class="mark" aria-hidden="true" />
+                        <Show when={feature.icon}>{(glyph) => <IconGlyph icon={glyph()} />}</Show>
                         <span class="grow">
                           <span class="name">{feature.name}</span>
                           <Show when={feature.category !== 'Tags'}>
@@ -115,6 +128,19 @@ export function OsmQueryTab(props: { onClose: () => void }) {
         {(message) => <p class="note error">{message()}</p>}
       </Show>
       <div class="row">
+        <button
+          class="icon-pick"
+          title="The layer's icon; tap for another"
+          aria-label="Icon of the new layer"
+          onClick={async () => {
+            const choice = await pickIcon(icon());
+            if (choice !== undefined) setPicked(choice);
+          }}
+        >
+          <Show when={icon()} fallback="No icon">
+            {(glyph) => <IconGlyph icon={glyph()} />}
+          </Show>
+        </button>
         <span class="grow name" classList={{ muted: chosen().length === 0 }} title={layerName()}>
           {chosen().length > 0 ? layerName() : 'Choose features or add tags; together they form one layer.'}
         </span>
