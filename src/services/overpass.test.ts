@@ -50,7 +50,7 @@ describe('overpassQuery', () => {
   ];
 
   it('asks for every filter within the polygon, in latitude–longitude order', () => {
-    expect(overpassQuery(['amenity=drinking_water', 'power=generator generator:source=wind', 'shop=*', 'amenity=drinking_water'], area)).toBe(
+    expect(overpassQuery(['amenity=drinking_water', 'power=generator generator:source=wind', 'shop=*'], area)).toBe(
       '[out:json][timeout:90];(' +
         'nwr["amenity"="drinking_water"](poly:"49 8.38 49 8.42 49.02 8.4");' +
         'nwr["power"="generator"]["generator:source"="wind"](poly:"49 8.38 49 8.42 49.02 8.4");' +

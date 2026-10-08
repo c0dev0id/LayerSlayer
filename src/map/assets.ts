@@ -51,10 +51,10 @@ createRoot(() => {
       if (!key) continue;
       present.add(layer.id);
       if (entries.get(layer.id)?.key === key) continue;
-      // What the layer had stays drawn until its replacement has loaded: the map may read
-      // a released file address again before it gets the new one.
+      // What the layer had stays drawn until its replacement has loaded, instead of the
+      // layer vanishing meanwhile.
       const previous = entries.get(layer.id);
-      const entry: Entry = { key, ...(previous?.assets && { assets: previous.assets }) };
+      const entry: Entry = { key, assets: previous?.assets };
       entries.set(layer.id, entry);
       const id = layer.id;
       load(layer).then(

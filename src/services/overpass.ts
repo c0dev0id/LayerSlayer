@@ -1,4 +1,5 @@
 import type { LngLat } from '../model/route';
+import { roundLngLat } from '../routing/legs';
 import { fetchResource } from '../state/net';
 
 /**
@@ -14,7 +15,7 @@ export const OSM_ATTRIBUTION = '© <a href="https://www.openstreetmap.org/copyri
 const TIMEOUT_S = 90;
 
 /** A tag a feature must have: the key with this value, or with any value where none is given. */
-export interface TagCondition {
+interface TagCondition {
   key: string;
   value?: string;
 }
@@ -51,15 +52,16 @@ export function formatFilter(conditions: readonly TagCondition[]): string {
 /** A string in Overpass QL. */
 const ql = (s: string) => `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 
-const round = (degrees: number) => Math.round(degrees * 1e6) / 1e6;
-
 /**
  * The query for the nodes, ways and relations matching any of the filters within the
  * polygon, answered as JSON with the geometry of each.
  */
 export function overpassQuery(filters: readonly string[], area: readonly LngLat[]): string {
-  const poly = area.map(([lng, lat]) => `${round(lat)} ${round(lng)}`).join(' ');
-  const statements = [...new Set(filters)].map((filter) => {
+  const poly = area
+    .map(roundLngLat)
+    .map(([lng, lat]) => `${lat} ${lng}`)
+    .join(' ');
+  const statements = filters.map((filter) => {
     const tags = parseFilter(filter).map(({ key, value }) => (value === undefined ? `[${ql(key)}]` : `[${ql(key)}=${ql(value)}]`));
     return `nwr${tags.join('')}(poly:"${poly}");`;
   });
@@ -67,7 +69,7 @@ export function overpassQuery(filters: readonly string[], area: readonly LngLat[
 }
 
 /** An Overpass answer in OSM JSON. */
-export interface OverpassAnswer {
+interface OverpassAnswer {
   elements: unknown[];
   remark?: string;
 }

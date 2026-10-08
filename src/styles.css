@@ -63,7 +63,8 @@ a {
 }
 
 .section h2,
-.dialog h2 {
+.dialog h2,
+.osm-query .group {
   margin: 0;
   font-size: 13px;
   text-transform: uppercase;
@@ -607,10 +608,6 @@ input.swatch {
 .osm-query .group {
   margin: 8px 0 0;
   padding: 2px 8px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
 }
 
 .imported li {
