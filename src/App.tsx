@@ -9,6 +9,7 @@ import { Waypoints } from './map/Waypoints';
 import { editingRouteId } from './state/drawing';
 import { map } from './state/ui';
 import { AddLayerDialog } from './ui/AddLayerDialog';
+import { FocusSection } from './ui/FocusSection';
 import { LayersSection } from './ui/LayersSection';
 import { RoutesSection } from './ui/RoutesSection';
 import { SettingsSection } from './ui/SettingsSection';
@@ -22,6 +23,7 @@ export function App() {
         <header class="section">
           <h1>webmap</h1>
         </header>
+        <FocusSection />
         <LayersSection onAdd={() => setAdding(true)} />
         <RoutesSection />
         <SettingsSection />
@@ -41,8 +43,8 @@ export function App() {
             </>
           )}
         </Show>
+        <HintBar />
         <Show when={editingRouteId()}>
-          <HintBar />
           <Toolbar />
         </Show>
       </main>

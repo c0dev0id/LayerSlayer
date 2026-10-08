@@ -755,6 +755,11 @@ input.swatch {
   font-size: 13px;
 }
 
+/* Plain buttons keep dark text on their light face; the bar's text is white. */
+.hint-bar button:not(.primary) {
+  color: #212529;
+}
+
 .context-menu {
   position: absolute;
   z-index: 10;
