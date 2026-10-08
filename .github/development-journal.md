@@ -393,9 +393,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
   distance field allows, and is drawn into the icon image, rendered at that many times
   the display's resolution and handed to the map at the display's pixel ratio. Layers created with an icon start opaque, the exception to
   the half-transparent default, since icons on see-through discs read poorly. The OSM
-  feature presets each name an icon; the plugin serves just those
-  (`virtual:osm-feature-icons`, 30 kB, loaded when the OSM tab is first shown) and fails
-  the build on a name no set has. The disc is one signed distance field image for all
+  feature presets each name an icon, except the 36 found as lines (`"lines": true`): icons
+  mark points and areas, never lines, so roads or fences get none. The plugin serves just
+  those icons (`virtual:osm-feature-icons`, 30 kB, loaded when the OSM tab is first shown)
+  and fails the build on a name no set has. The disc is one signed distance field image for all
   layers, tinted with `icon-color` and ringed by a white `icon-halo`: colour and opacity
   stay paint properties, so dragging the colour picker neither lays out tiles again nor
   adds images. The icon is a second symbol layer, one image per icon and size

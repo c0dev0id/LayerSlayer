@@ -42,7 +42,9 @@ in the browser.
     `key=*` for any value, with tags separated by spaces all having to match, e.g.
     `highway=track tracktype=grade4`. *Query* finds everything chosen in one layer,
     named after it, with the icon of the first chosen feature that has one; the icon
-    button next to the name picks another, or none. The result is kept in the browser as
+    button next to the name picks another, or none. Features found as lines (roads,
+    tracks, paths, routes, fences, rivers, power lines) show a line symbol instead of an
+    icon and give their layer none, since icons mark points and areas only. The result is kept in the browser as
     GeoJSON.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
   arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
