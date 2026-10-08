@@ -10,6 +10,12 @@ export async function storeFile(blob: Blob): Promise<string> {
   return key;
 }
 
+/** Stores a file under a key it already has, as in a project being opened. */
+export async function putFile(key: string, blob: Blob): Promise<void> {
+  await set(key, blob, db);
+  requestPersistentStorage();
+}
+
 export async function loadFile(key: string): Promise<Blob> {
   const blob = await get<Blob>(key, db);
   if (!(blob instanceof Blob)) throw new Error('The file is no longer stored in this browser.');

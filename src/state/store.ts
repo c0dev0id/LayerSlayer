@@ -1,4 +1,5 @@
 import { createEffect, createRoot } from 'solid-js';
+import { reconcile } from 'solid-js/store';
 import { cornersBounds } from '../geo/bounds';
 import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFile, type Bounds, type Layer, type LayerDraft } from '../model/layer';
 import { isLngLat, type LngLat } from '../model/route';
@@ -109,6 +110,11 @@ export { state };
 createRoot(() => {
   createEffect(() => setProxy(state.settings.proxy, [...state.settings.proxiedHosts]));
 });
+
+/** Replaces everything with a project's state, as when it is opened; the proxy address stays this browser's. */
+export function replaceState(next: AppState): void {
+  setState(reconcile({ ...next, settings: { ...next.settings, proxy: state.settings.proxy } }, { key: 'id', merge: false }));
+}
 
 /** Adds a layer on top of the others and makes it the active one. */
 export function addLayer(draft: LayerDraft): Layer {

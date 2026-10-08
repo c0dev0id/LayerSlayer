@@ -168,6 +168,13 @@ export function removeWaypoint(id: string): void {
   setRouteData('waypoints', (list) => list.filter((w) => w.id !== id));
 }
 
+/** Replaces all routes and waypoints, as when a project is opened; nothing before it can be undone. */
+export function replaceRouteData(data: RouteData): void {
+  history.clear();
+  setHistoryVersion((v) => v + 1);
+  setRouteData(reconcile(data, { key: 'id', merge: false }));
+}
+
 /** Adds routes and waypoints read from a file, as one undo step. */
 export function importRouteData(data: RouteData, label: string): void {
   if (data.routes.length === 0 && data.waypoints.length === 0) return;

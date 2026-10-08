@@ -33,6 +33,11 @@ export class History<T> {
     return entry.state;
   }
 
+  clear(): void {
+    this.past = [];
+    this.future = [];
+  }
+
   get undoLabel(): string | undefined {
     return this.past.at(-1)?.label;
   }

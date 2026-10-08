@@ -12,6 +12,7 @@ import { AddLayerDialog } from './ui/AddLayerDialog';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { FocusSection } from './ui/FocusSection';
 import { LayersSection } from './ui/LayersSection';
+import { ProjectSection } from './ui/ProjectSection';
 import { RoutesSection } from './ui/RoutesSection';
 import { SettingsSection } from './ui/SettingsSection';
 import { WaypointDialog } from './ui/WaypointDialog';
@@ -21,15 +22,13 @@ export function App() {
   return (
     <div class="app">
       <aside class="panel">
-        <header class="section">
-          <h1>webmap</h1>
-        </header>
+        <ProjectSection />
         <FocusSection />
         <LayersSection onAdd={() => setAdding(true)} />
         <RoutesSection />
         <SettingsSection />
         <footer class="footer">
-          Layers, routes and settings are kept in this browser. <a href="https://github.com/c0dev0id/webmap">Source</a>
+          Layers, routes and settings are kept in this browser; Save takes them to another. <a href="https://github.com/c0dev0id/webmap">Source</a>
         </footer>
       </aside>
       <main class="map-wrap">
