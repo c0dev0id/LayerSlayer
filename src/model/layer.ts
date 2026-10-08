@@ -186,9 +186,33 @@ export const MAX_ZOOM = 24;
 /** Colours handed out to vector layers in turn; they read on light and dark base maps. */
 export const VECTOR_COLORS = ['#e8590c', '#1c7ed6', '#2f9e44', '#ae3ec9', '#f08c00', '#0c8599', '#e03131'];
 
-/** Whether the source is drawn with the app's own vector style, coloured by `color`. */
+interface SourceKind {
+  /** Its name in the panel. */
+  label: string;
+  /** Drawn with the app's own vector style, coloured by the layer's `color`. */
+  vector?: boolean;
+  /** Its tiles can be kept in the browser. */
+  cache?: boolean;
+}
+
+/** What the app knows of each kind of source; every kind is listed, so a new one cannot be missed. */
+export const SOURCE_KINDS: Record<LayerSource['type'], SourceKind> = {
+  xyz: { label: 'XYZ tiles', cache: true },
+  wms: { label: 'WMS', cache: true },
+  wmts: { label: 'WMTS', cache: true },
+  'arcgis-map': { label: 'ArcGIS MapServer', cache: true },
+  'arcgis-features': { label: 'ArcGIS features', vector: true, cache: true },
+  'vector-tiles': { label: 'Vector tiles', vector: true, cache: true },
+  wfs: { label: 'WFS', vector: true, cache: true },
+  'ogc-features': { label: 'OGC API – Features', vector: true, cache: true },
+  geojson: { label: 'GeoJSON', vector: true },
+  style: { label: 'MapLibre style' },
+  cog: { label: 'Cloud Optimized GeoTIFF' },
+  image: { label: 'Georeferenced image' },
+};
+
 export function isVector(source: LayerSource): boolean {
-  return source.type === 'geojson' || source.type === 'vector-tiles' || isFeatureSource(source);
+  return SOURCE_KINDS[source.type].vector === true;
 }
 
 /**
@@ -202,7 +226,7 @@ export function keepsTiles(layer: Layer): boolean {
 }
 
 export function canCache(source: LayerSource): boolean {
-  return ['xyz', 'wms', 'wmts', 'arcgis-map', 'vector-tiles'].includes(source.type) || isFeatureSource(source);
+  return SOURCE_KINDS[source.type].cache === true;
 }
 
 /** The file a layer keeps in the browser, if any. */

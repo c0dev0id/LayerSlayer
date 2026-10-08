@@ -1,5 +1,5 @@
 import { createEffect, createRoot } from 'solid-js';
-import { createLayer, MAX_ZOOM, MIN_ZOOM, storedFile, type Layer, type LayerDraft } from '../model/layer';
+import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFile, type Layer, type LayerDraft } from '../model/layer';
 import { deleteFile } from './files';
 import { setProxy } from './net';
 import { persistedStore } from './persist';
@@ -28,8 +28,6 @@ export interface AppState {
 }
 
 const STORAGE_KEY = 'webmap';
-
-const SOURCE_TYPES = new Set(['xyz', 'wms', 'wmts', 'arcgis-map', 'arcgis-features', 'vector-tiles', 'wfs', 'ogc-features', 'geojson', 'style', 'cog', 'image']);
 
 /** What a first visit starts with: a vector base map that needs no key. */
 const FIRST_LAYER: LayerDraft = {
@@ -64,7 +62,7 @@ function isLayer(value: unknown): value is Layer {
     typeof l.maxzoom === 'number' &&
     typeof l.source === 'object' &&
     l.source !== null &&
-    SOURCE_TYPES.has(l.source.type)
+    Object.hasOwn(SOURCE_KINDS, l.source.type)
   );
 }
 

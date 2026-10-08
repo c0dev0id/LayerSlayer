@@ -1,21 +1,7 @@
 import type { LayerDraft } from '../model/layer';
 
 /** The kinds of address a layer can be added from. */
-export type ServiceType =
-  | 'wms'
-  | 'wmts'
-  | 'wfs'
-  | 'ogc-features'
-  | 'arcgis-mapserver'
-  | 'arcgis-features'
-  | 'xyz'
-  | 'vector-tiles'
-  | 'geojson'
-  | 'style'
-  | 'cog'
-  | 'geopdf';
-
-export const SERVICE_TYPES: readonly { value: ServiceType; label: string }[] = [
+export const SERVICE_TYPES = [
   { value: 'wms', label: 'WMS' },
   { value: 'wmts', label: 'WMTS' },
   { value: 'wfs', label: 'WFS' },
@@ -28,7 +14,9 @@ export const SERVICE_TYPES: readonly { value: ServiceType; label: string }[] = [
   { value: 'style', label: 'MapLibre style' },
   { value: 'cog', label: 'Cloud Optimized GeoTIFF' },
   { value: 'geopdf', label: 'GeoPDF' },
-];
+] as const;
+
+export type ServiceType = (typeof SERVICE_TYPES)[number]['value'];
 
 /**
  * The lowest zoom a feature layer is shown at unless the service asks for more. Below it a

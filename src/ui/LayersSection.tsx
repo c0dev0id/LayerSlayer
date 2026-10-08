@@ -1,7 +1,7 @@
 import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
-import { canCache, isVector, keepsTiles, MAX_ZOOM, MIN_ZOOM, type Layer } from '../model/layer';
+import { canCache, isVector, keepsTiles, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, type Layer } from '../model/layer';
 import { hostOf } from '../state/net';
 import { moveLayer, removeLayer, setActiveLayer, setHostProxied, state, updateLayer } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
@@ -189,21 +189,6 @@ function dragToReorder(e: PointerEvent, layer: Layer, entry: HTMLLIElement, list
   handle.addEventListener('pointercancel', end);
 }
 
-const SOURCE_LABELS: Record<Layer['source']['type'], string> = {
-  xyz: 'XYZ tiles',
-  wms: 'WMS',
-  wmts: 'WMTS',
-  'arcgis-map': 'ArcGIS MapServer',
-  'arcgis-features': 'ArcGIS features',
-  'vector-tiles': 'Vector tiles',
-  wfs: 'WFS',
-  'ogc-features': 'OGC API – Features',
-  geojson: 'GeoJSON',
-  style: 'MapLibre style',
-  cog: 'Cloud Optimized GeoTIFF',
-  image: 'Georeferenced image',
-};
-
 /** The address a layer's data comes from, for showing and for the proxy setting. */
 function sourceUrl(layer: Layer): string | undefined {
   const source = layer.source;
@@ -286,7 +271,7 @@ function ActiveLayer(props: { layer: Layer }) {
       <div class="row">
         <span class="muted label">Source</span>
         <span class="grow name" title={sourceUrl(layer) ?? fileName()}>
-          {SOURCE_LABELS[layer.source.type]} · {host() ?? fileName() ?? ''}
+          {SOURCE_KINDS[layer.source.type].label} · {host() ?? fileName() ?? ''}
         </span>
       </div>
       <Show when={host()}>

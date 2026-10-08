@@ -4,7 +4,17 @@ import type {
   SpriteSpecification,
   StyleSpecification,
 } from 'maplibre-gl';
-import { keepsTiles, MAX_ZOOM, MIN_ZOOM, type FeatureSource, type Layer, type LayerSource, type WmtsSource } from '../model/layer';
+import {
+  keepsTiles,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  type ArcGisMapSource,
+  type Layer,
+  type LayerSource,
+  type WmsSource,
+  type WmtsSource,
+  type XyzSource,
+} from '../model/layer';
 import { FEATURE_PROTOCOL, featureTileUrl } from './featureTiles';
 import { resolveUrl, withParams } from './urls';
 
@@ -184,7 +194,7 @@ function raster(layer: Layer, source: SourceSpecification): Fragment {
   };
 }
 
-export function rasterTiles(src: Exclude<LayerSource, FeatureSource | { type: 'geojson' | 'style' | 'image' | 'vector-tiles' | 'cog' }>): string[] {
+export function rasterTiles(src: XyzSource | WmsSource | WmtsSource | ArcGisMapSource): string[] {
   switch (src.type) {
     case 'xyz':
       return src.tiles;
