@@ -3,14 +3,7 @@ import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import { canCache, isVector, keepsTiles, MAX_ZOOM, MIN_ZOOM, type Layer } from '../model/layer';
 import { hostOf } from '../state/net';
-import {
-  moveLayer,
-  removeLayer,
-  setActiveLayer,
-  setHostProxied,
-  state,
-  updateLayer,
-} from '../state/store';
+import { moveLayer, removeLayer, setActiveLayer, setHostProxied, state, updateLayer } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
@@ -60,60 +53,90 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
 
   return (
     <li ref={entry} class="layer" classList={{ active: isActive(), hidden: !layer.visible, 'out-of-range': outOfRange(layer) }}>
-      <button
-        class="icon grip"
-        title="Drag to reorder (or use the arrow keys)"
-        aria-label={`Reorder ${layer.name}`}
-        onPointerDown={(e) => dragToReorder(e, layer, entry, props.list())}
-        onKeyDown={(e) => {
-          // Up in the list is up in the stack (a higher index).
-          const step = e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0;
-          if (!step) return;
-          e.preventDefault();
-          moveLayer(layer.id, state.layers.indexOf(layer) + step);
-        }}
-      >
-        <GripIcon />
-      </button>
-      <button
-        class="icon"
-        title={layer.visible ? 'Hide layer' : 'Show layer'}
-        aria-label={layer.visible ? `Hide ${layer.name}` : `Show ${layer.name}`}
-        onClick={() => updateLayer(layer.id, { visible: !layer.visible })}
-      >
-        {layer.visible ? <EyeIcon /> : <EyeOffIcon />}
-      </button>
-      <EditableName value={layer.name} label="layer" onRename={(name) => updateLayer(layer.id, { name })}>
+      <div class="layer-main">
         <button
-          class="layer-select grow"
-          title={outOfRange(layer) ? `${layer.name} (not shown at this zoom)` : layer.name}
-          aria-pressed={isActive()}
-          onClick={() => setActiveLayer(layer.id)}
+          class="icon grip"
+          title="Drag to reorder (or use the arrow keys)"
+          aria-label={`Reorder ${layer.name}`}
+          onPointerDown={(e) => dragToReorder(e, layer, entry, props.list())}
+          onKeyDown={(e) => {
+            // Up in the list is up in the stack (a higher index).
+            const step = e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0;
+            if (!step) return;
+            e.preventDefault();
+            moveLayer(layer.id, state.layers.indexOf(layer) + step);
+          }}
         >
-          <span class="name">{layer.name}</span>
+          <GripIcon />
         </button>
-      </EditableName>
-      <Show when={layer.bounds && !coversMostOfWorld(layer.bounds)}>
         <button
           class="icon"
-          title={`Fly to the area of ${layer.name}`}
-          aria-label={`Fly to the area of ${layer.name}`}
-          onClick={() => flyTo(layer)}
+          title={layer.visible ? 'Hide layer' : 'Show layer'}
+          aria-label={layer.visible ? `Hide ${layer.name}` : `Show ${layer.name}`}
+          onClick={() => updateLayer(layer.id, { visible: !layer.visible })}
         >
-          <AreaIcon />
+          {layer.visible ? <EyeIcon /> : <EyeOffIcon />}
         </button>
-      </Show>
-      <Show when={layerErrors[layer.id]}>
-        {(message) => (
-          <span class="error-mark" title={message()} role="img" aria-label={message()}>
-            <AlertIcon />
-          </span>
-        )}
-      </Show>
-      <button class="icon" title="Remove layer" aria-label={`Remove ${layer.name}`} onClick={() => removeLayer(layer.id)}>
-        <CloseIcon />
-      </button>
+        <EditableName value={layer.name} label="layer" onRename={(name) => updateLayer(layer.id, { name })}>
+          <button
+            class="layer-select grow"
+            title={outOfRange(layer) ? `${layer.name} (not shown at this zoom)` : layer.name}
+            aria-pressed={isActive()}
+            onClick={() => setActiveLayer(layer.id)}
+          >
+            <span class="name">{layer.name}</span>
+          </button>
+        </EditableName>
+        <Show when={layer.bounds && !coversMostOfWorld(layer.bounds)}>
+          <button
+            class="icon"
+            title={`Fly to the area of ${layer.name}`}
+            aria-label={`Fly to the area of ${layer.name}`}
+            onClick={() => flyTo(layer)}
+          >
+            <AreaIcon />
+          </button>
+        </Show>
+        <Show when={layerErrors[layer.id]}>
+          {(message) => (
+            <span class="error-mark" title={message()} role="img" aria-label={message()}>
+              <AlertIcon />
+            </span>
+          )}
+        </Show>
+        <button class="icon" title="Remove layer" aria-label={`Remove ${layer.name}`} onClick={() => removeLayer(layer.id)}>
+          <CloseIcon />
+        </button>
+      </div>
+      <LayerSummary layer={layer} />
     </li>
+  );
+}
+
+/** The layer's settings at a glance: opacity, colour, zoom range and the options that are on. Edited below the list. */
+function LayerSummary(props: { layer: Layer }) {
+  const layer = props.layer;
+  const zoomRange = () => (layer.minzoom > MIN_ZOOM || layer.maxzoom < MAX_ZOOM ? `zoom ${layer.minzoom}–${layer.maxzoom}` : undefined);
+  // From the settings rather than net.ts, so the tag follows the proxy checkbox.
+  const proxied = () => {
+    const url = sourceUrl(layer);
+    const host = url ? hostOf(url) : undefined;
+    return !!state.settings.proxy && host !== undefined && state.settings.proxiedHosts.includes(host);
+  };
+  return (
+    <div class="layer-summary">
+      <span>{Math.round(layer.opacity * 100)}%</span>
+      <Show when={isVector(layer.source)}>
+        <span class="layer-color" style={{ 'background-color': layer.color ?? '#e8590c' }} title={layer.color} />
+      </Show>
+      <Show when={zoomRange()}>{(range) => <span>{range()}</span>}</Show>
+      <Show when={keepsTiles(layer)}>
+        <span title={`Keeps its tiles in this browser for ${TILE_MAX_AGE_HOURS} hours`}>cache</span>
+      </Show>
+      <Show when={proxied()}>
+        <span title="Fetched through the CORS proxy">proxy</span>
+      </Show>
+    </div>
   );
 }
 

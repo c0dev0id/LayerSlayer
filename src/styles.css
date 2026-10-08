@@ -169,12 +169,33 @@ a {
 }
 
 .layer {
-  display: flex;
-  align-items: center;
-  gap: 2px;
   margin: 0 -6px 2px;
   padding: 2px 4px 2px 2px;
   border-radius: 6px;
+}
+
+.layer-main {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* The layer's settings at a glance, under its name. */
+.layer-summary {
+  display: flex;
+  align-items: center;
+  gap: 4px 8px;
+  flex-wrap: wrap;
+  padding: 0 0 2px 58px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted);
+}
+
+.layer-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
 }
 
 .layer.active {
