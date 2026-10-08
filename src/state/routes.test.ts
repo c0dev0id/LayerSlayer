@@ -80,12 +80,17 @@ describe('route history', () => {
     expect(s.routeWaypoints('a').map((w) => w.id)).toEqual(['wa']);
   });
 
-  it('makes one undo step of the colours picked in one gesture', async () => {
+  it('makes one undo step of a colour picked or a size dragged in one gesture', async () => {
     const s = await freshStore();
     s.addRoute(route('r'));
     for (const color of ['#111111', '#222222', '#333333']) s.setRouteColor('r', color);
     s.endGesture();
     s.setRouteColor('r', '#444444');
+    for (const size of [1.25, 1.5, 2]) s.setWaypointSize('r', size);
+    expect(s.routeById('r')).toMatchObject({ color: '#444444', waypointSize: 2 });
+    s.undo();
+    expect(s.routeById('r')).toMatchObject({ color: '#444444' });
+    expect(s.routeById('r')?.waypointSize).toBeUndefined();
     s.undo();
     expect(s.routeById('r')?.color).toBe('#333333');
     s.undo();

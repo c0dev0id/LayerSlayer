@@ -156,6 +156,11 @@ export function setRouteColor(id: string, color: string): void {
   updateRoute(id, (r) => (r.color === color ? r : { ...r, color }), 'Change route colour', `colour ${id}`);
 }
 
+/** Sets how large a route's waypoints are drawn; dragging the slider makes one undo step. */
+export function setWaypointSize(id: string, size: number): void {
+  updateRoute(id, (r) => (r.waypointSize === size ? r : { ...r, waypointSize: size }), 'Change waypoint size', `waypoint size ${id}`);
+}
+
 export function setRouteProfile(id: string, profile: Profile): void {
   updateRoute(id, (r) => (r.profile === profile ? r : edit.changeProfile(r, profile)), 'Change routing profile');
 }

@@ -313,6 +313,12 @@ It is a static single-page app on GitHub Pages; there is no server component.
     still what a GPX file holds, the line with its waypoints, so a route's deletion takes
     its waypoints along in the same undo step, and only the route being drawn has its
     waypoints draggable. Stored waypoints whose route is missing are dropped when read.
+  - A route's colour and waypoint size are route edits like its name, so they are undo
+    steps: left out of the history, an undo of an earlier edit would restore the snapshot
+    taken before it and quietly revert them. A colour picker and a slider send an input
+    per movement, so edits of one gesture (`recordEdit(label, gesture)`) make one step;
+    the input's change event (`endGesture`) closes it. The waypoint size shares the
+    1–3× range of layer icons (`model/icon.ts`); pins are 27 px wide at 1×.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all

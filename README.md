@@ -112,6 +112,9 @@ in the browser.
     is placed: the route's entry counts it, *Fly to* includes it, and deleting the route
     deletes it. The points and waypoints of the route being drawn can be dragged;
     right-click or long-press one for its menu.
+  - A route's swatch picks its colour, and the *Waypoints* slider of a route with
+    waypoints draws them up to three times their size, like the icons of a layer. Both
+    are undo steps, one per pick or drag.
   - New points are reached along the roads (*Route*, by OSRM with the route's car, bike or
     foot profile) or by a straight line (*Line*), for ways the routing does not know.
   - *Undo* and *Redo* (Ctrl+Z, Ctrl+Shift+Z) step through route and waypoint edits; layer

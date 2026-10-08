@@ -7,7 +7,8 @@ import { routePoints } from '../routing/legs';
 import { nextRouteColor } from '../routing/routeEdit';
 import { failedLegCount, lastError, pendingLegs, retryFailedLegs } from '../routing/service';
 import { editingRouteId, startDrawing, stopDrawing } from '../state/drawing';
-import { addRoute, endGesture, importRouteData, removeRoute, renameRoute, routeData, routeWaypoints, setRouteColor, setRouteProfile } from '../state/routes';
+import { MAX_ICON_SIZE, MIN_ICON_SIZE } from '../model/icon';
+import { addRoute, endGesture, importRouteData, removeRoute, renameRoute, routeData, routeWaypoints, setRouteColor, setRouteProfile, setWaypointSize } from '../state/routes';
 import { parseGpx, toGpx } from '../services/gpx';
 import { fileName } from '../services/read';
 import { errorMessage, showBounds } from '../state/ui';
@@ -172,6 +173,23 @@ function RouteRow(props: { route: Route }) {
         </select>
         <button onClick={() => (editing() ? stopDrawing() : startDrawing(route.id))}>{editing() ? 'Done' : 'Edit'}</button>
       </div>
+      <Show when={waypoints() > 0}>
+        <div class="row" title="How large the route's waypoints are drawn">
+          <span class="muted label">Waypoints</span>
+          <input
+            class="grow"
+            type="range"
+            aria-label={`Waypoint size of ${route.name}`}
+            min={MIN_ICON_SIZE}
+            max={MAX_ICON_SIZE}
+            step="0.25"
+            value={route.waypointSize ?? 1}
+            onInput={(e) => setWaypointSize(route.id, e.currentTarget.valueAsNumber)}
+            onChange={endGesture}
+          />
+          <span class="value">{route.waypointSize ?? 1}×</span>
+        </div>
+      </Show>
     </li>
   );
 }

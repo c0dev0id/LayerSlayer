@@ -32,6 +32,8 @@ export interface Route {
   points: RoutePoint[];
   /** Routed geometry per leg as polyline6, keyed by profile and both end points; straight legs have none. */
   legs: Record<string, string>;
+  /** How many times their normal size the route's waypoints are drawn, MIN_ICON_SIZE to MAX_ICON_SIZE; 1 where unset. */
+  waypointSize?: number;
 }
 
 /**
