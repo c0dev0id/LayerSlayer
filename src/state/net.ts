@@ -1,3 +1,5 @@
+import { exceptionText } from '../services/xml';
+
 /**
  * How the app reaches other servers. Everything a layer loads goes through `requestUrl`:
  * the map's own requests by its transformRequest, the app's by `fetchResource`.
@@ -80,7 +82,9 @@ export function statusMessage(url: string, status: number, body: string): string
 
 function answerReason(body: string): string | undefined {
   const text = body.trim();
-  if (!text || text.startsWith('<')) return undefined;
+  if (!text) return undefined;
+  // OGC services report errors in XML; other markup is an HTML error page, of no use here.
+  if (text.startsWith('<')) return exceptionText(text);
   try {
     const json = JSON.parse(text) as { error?: string | { message?: string }; message?: string };
     const reason = typeof json.error === 'string' ? json.error : (json.error?.message ?? json.message);
