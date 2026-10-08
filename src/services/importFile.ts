@@ -18,20 +18,27 @@ const GEOJSON_TYPES = new Set([
   'GeometryCollection',
 ]);
 
-function isPdf(blob: Blob, name: string): boolean {
-  return blob.type === 'application/pdf' || /\.pdf$/i.test(name);
-}
+/** The kinds of file a layer is imported from, by extension and media type; GeoJSON is the fallback, so last. */
+const FILE_KINDS = {
+  pdf: { extensions: ['pdf'], types: ['application/pdf'] },
+  gpx: { extensions: ['gpx'], types: ['application/gpx+xml'] },
+  kml: { extensions: ['kml'], types: ['application/vnd.google-earth.kml+xml'] },
+  kmz: { extensions: ['kmz'], types: ['application/vnd.google-earth.kmz'] },
+  geojson: { extensions: ['geojson', 'json'], types: ['application/geo+json', 'application/json'] },
+} satisfies Record<string, { extensions: string[]; types: string[] }>;
 
-function isGpx(blob: Blob, name: string): boolean {
-  return blob.type === 'application/gpx+xml' || /\.gpx$/i.test(name);
-}
+type FileKind = keyof typeof FILE_KINDS;
 
-function isKml(blob: Blob, name: string): boolean {
-  return blob.type === 'application/vnd.google-earth.kml+xml' || /\.kml$/i.test(name);
-}
+/** What the file chooser offers. */
+export const IMPORT_ACCEPT = Object.values(FILE_KINDS)
+  .flatMap((kind) => [...kind.extensions.map((e) => `.${e}`), ...kind.types])
+  .join(',');
 
-function isKmz(blob: Blob, name: string): boolean {
-  return blob.type === 'application/vnd.google-earth.kmz' || /\.kmz$/i.test(name);
+/** A file's kind by its media type or extension; GeoJSON where neither says otherwise. */
+function fileKind(blob: Blob, name: string): FileKind {
+  const extension = /\.([a-z0-9]+)$/i.exec(name)?.[1]?.toLowerCase() ?? '';
+  const kinds = Object.keys(FILE_KINDS) as FileKind[];
+  return kinds.find((k) => FILE_KINDS[k].types.includes(blob.type) || FILE_KINDS[k].extensions.includes(extension)) ?? 'geojson';
 }
 
 /**
@@ -40,13 +47,14 @@ function isKmz(blob: Blob, name: string): boolean {
  */
 export async function importFile(file: Blob, name: string): Promise<LayerDraft> {
   const title = fileName(name);
-  if (isPdf(file, name)) {
+  const kind = fileKind(file, name);
+  if (kind === 'pdf') {
     const { blob, coordinates } = await renderGeoPdf(await file.arrayBuffer());
     const key = await storeFile(blob);
     const bounds = cornersBounds(coordinates);
     return { name: title, source: { type: 'image', data: { file: key, name }, coordinates }, ...(bounds && { bounds }) };
   }
-  const [geojson, blob] = await readFeatures(file, name);
+  const [geojson, blob] = await readFeatures(file, name, kind);
   const key = await storeFile(blob);
   const bounds = geojsonBounds(geojson);
   return { name: title, source: { type: 'geojson', data: { file: key, name } }, ...(bounds && { bounds }) };
@@ -65,13 +73,13 @@ async function readGeoJson(file: Blob, name: string): Promise<[GeoJSON.GeoJSON, 
 }
 
 /** The features of a file, and what is kept of it: a GeoJSON file as it is, other formats converted to GeoJSON. */
-async function readFeatures(file: Blob, name: string): Promise<[GeoJSON.GeoJSON, Blob]> {
-  if (isGpx(file, name)) {
+async function readFeatures(file: Blob, name: string, kind: Exclude<FileKind, 'pdf'>): Promise<[GeoJSON.GeoJSON, Blob]> {
+  if (kind === 'gpx') {
     return converted(gpxTracksGeoJson(await file.text()), `${name} holds no tracks; its routes and waypoints can be imported under Routes.`);
   }
-  if (isKml(file, name) || isKmz(file, name)) {
+  if (kind === 'kml' || kind === 'kmz') {
     const { kmlPlacemarks, kmzDocument } = await import('./kml');
-    const text = isKmz(file, name) ? kmzDocument(new Uint8Array(await file.arrayBuffer())) : await file.text();
+    const text = kind === 'kmz' ? kmzDocument(new Uint8Array(await file.arrayBuffer())) : await file.text();
     return converted(kmlPlacemarks(text), `${name} holds no placemarks with a geometry.`);
   }
   return readGeoJson(file, name);

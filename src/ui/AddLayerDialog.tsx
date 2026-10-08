@@ -1,7 +1,7 @@
 import { createEffect, createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
 import { filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
 import { detectServiceType } from '../services/detect';
-import { importFile, importGeoPdfUrl } from '../services/importFile';
+import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
 import { readService } from '../services/read';
 import { SERVICE_TYPES, type Offer, type ServiceInfo, type ServiceType } from '../services/types';
 import { hostOf, isProxied } from '../state/net';
@@ -348,7 +348,7 @@ function FileTab() {
           type="file"
           hidden
           multiple
-          accept=".geojson,.json,.gpx,.kml,.kmz,.pdf,application/geo+json,application/json,application/gpx+xml,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz,application/pdf"
+          accept={IMPORT_ACCEPT}
           onChange={(e) => {
             const files = [...(e.currentTarget.files ?? [])];
             e.currentTarget.value = '';
