@@ -19,8 +19,8 @@ import {
   tool,
 } from '../state/drawing';
 import { searchRadius } from '../services/osmDetails';
+import { showDetails } from '../state/details';
 import { appendPoint, redo, undo } from '../state/routes';
-import { showDetails } from '../ui/DetailsDialog';
 import { fromMarker } from './markers';
 import { googleMapsUrl, latLonText, streetViewUrl } from './placeLinks';
 import { insertPointOnLine } from './routeTools';

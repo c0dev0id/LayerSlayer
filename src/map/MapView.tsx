@@ -10,6 +10,7 @@ import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
 import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, HILLSHADE_SOURCE, TERRAIN_SOURCE, WMTS_PROTOCOL } from './compose';
 import { FEATURE_PROTOCOL } from './featureTiles';
+import { detailsOverlay } from './detailsOverlay';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
 import { withOverlays } from './overlays';
@@ -26,7 +27,7 @@ for (const scheme of CACHED_SCHEMES) maplibregl.addProtocol(scheme, loadCachedTi
 maplibregl.addProtocol(COG_PROTOCOL, async (params) => (await import('@geomatico/maplibre-cog-protocol')).cogProtocol(params));
 
 /** What the app draws over the layers, bottom to top. */
-const OVERLAYS = [focusAreaOverlay, focusDraftOverlay, routeOverlay];
+const OVERLAYS = [focusAreaOverlay, focusDraftOverlay, detailsOverlay, routeOverlay];
 
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits;
 

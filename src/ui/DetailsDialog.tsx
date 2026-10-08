@@ -1,9 +1,10 @@
-import { createResource, createSignal, For, Match, Show, Switch, type JSX } from 'solid-js';
+import { createEffect, createResource, For, Match, on, Show, Switch, type JSX } from 'solid-js';
 import { loadOsmFeatures, matchingFeature, type OsmFeature } from '../library/osmFeatures';
 import { latLonText } from '../map/placeLinks';
 import type { LngLat } from '../model/route';
-import { findDetails, type DetailKind, type Details, type RowIcon } from '../services/osmDetails';
-import { errorMessage } from '../state/ui';
+import type { DetailKind, Details, RowIcon } from '../services/osmDetails';
+import { closeDetails, details, detailsRequest } from '../state/details';
+import { errorMessage, map } from '../state/ui';
 import {
   BarrierIcon,
   BothWaysIcon,
@@ -23,15 +24,7 @@ import {
   WaveIcon,
   WorldIcon,
 } from './icons';
-import { showModalWhile } from './modal';
-
-/** The spot whose details are asked for, and how far around it to look. */
-const [request, setRequest] = createSignal<{ spot: LngLat; radius: number }>();
-
-/** Opens the details of what lies at a spot: the nearest road or trail, place and barrier. */
-export function showDetails(spot: LngLat, radius: number): void {
-  setRequest({ spot, radius });
-}
+import { showWhile } from './modal';
 
 const ROW_ICONS: Record<RowIcon, () => JSX.Element> = {
   ref: TagIcon,
@@ -53,25 +46,37 @@ const ROW_ICONS: Record<RowIcon, () => JSX.Element> = {
 const KIND_ICONS: Record<DetailKind, () => JSX.Element> = { road: RoadIcon, poi: MapPinIcon, barrier: BarrierIcon };
 
 /**
- * What OpenStreetMap knows of a spot, in a modal dialog: the nearest road or trail, place
- * and barrier, nearest first, each in words with the link to all its tags.
+ * What OpenStreetMap knows of a spot, in a sheet beside the map, which stays usable: the
+ * nearest road or trail, place and barrier, nearest first, each in words with the link to
+ * all its tags. The map highlights them meanwhile, and another spot's details replace these.
  */
 export function DetailsDialog() {
   let dialog!: HTMLDialogElement;
-  showModalWhile(() => dialog, () => request() !== undefined);
-  const [found] = createResource(request, ({ spot, radius }) => findDetails(spot, radius));
+  showWhile(() => dialog, () => detailsRequest() !== undefined);
   // The OSM presets give places and barriers their icons.
-  const [presets] = createResource(() => request() !== undefined || undefined, loadOsmFeatures);
+  const [presets] = createResource(() => detailsRequest() !== undefined || undefined, loadOsmFeatures);
+  // A spot under the sheet comes out beside it, so that its highlight shows.
+  createEffect(on(detailsRequest, (request) => request && requestAnimationFrame(() => keepInView(request.spot, dialog))));
 
   return (
-    <dialog ref={dialog} class="dialog details-dialog" aria-label="Details" onClose={() => setRequest(undefined)}>
+    <dialog
+      ref={dialog}
+      class="dialog details-dialog"
+      aria-label="Details"
+      onClose={closeDetails}
+      onKeyDown={(e) => {
+        if (e.key !== 'Escape') return;
+        e.preventDefault();
+        closeDetails();
+      }}
+    >
       <div class="row dialog-title">
         <h2 class="grow">Details</h2>
-        <button class="primary" onClick={() => setRequest(undefined)}>
+        <button class="primary" onClick={closeDetails}>
           Close
         </button>
       </div>
-      <Show when={request()}>
+      <Show when={detailsRequest()}>
         {(r) => (
           <p class="muted hint">
             Near {latLonText(r().spot)}, within {Math.round(r().radius)} m
@@ -80,21 +85,36 @@ export function DetailsDialog() {
       </Show>
       <div class="details">
         <Switch>
-          <Match when={found.loading}>
+          <Match when={details.loading}>
             <p class="muted">Looking at OpenStreetMap…</p>
           </Match>
-          <Match when={found.error as unknown}>
-            <p class="note error">{errorMessage(found.error)}</p>
+          <Match when={details.error as unknown}>
+            <p class="note error">{errorMessage(details.error)}</p>
           </Match>
-          <Match when={found()?.length === 0}>
+          <Match when={details()?.length === 0}>
             <p class="muted">No road or trail, place or barrier here. Zoom in closer, or right-click nearer to one.</p>
           </Match>
-          <Match when={found()}>{(list) => <For each={list()}>{(details) => <DetailCard details={details} presets={presets()} />}</For>}</Match>
+          <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={presets()} />}</For>}</Match>
         </Switch>
       </div>
       <p class="muted hint">Data © OpenStreetMap contributors, found with the Overpass API.</p>
     </dialog>
   );
+}
+
+/**
+ * Pans the map so that the spot lies beside the sheet, where it lies in the sheet's column:
+ * the sheet grows down as its results come in, so its height now says little.
+ */
+function keepInView(spot: LngLat, sheet: HTMLElement): void {
+  const m = map();
+  if (!m || !sheet.isConnected) return;
+  const box = sheet.getBoundingClientRect();
+  const canvas = m.getCanvas().getBoundingClientRect();
+  const x = canvas.left + m.project(spot).x;
+  if (x > box.right + 24) return;
+  // Into the middle of the map to the right of the sheet.
+  m.panBy([x - (box.right + canvas.right) / 2, 0]);
 }
 
 function DetailCard(props: { details: Details; presets: OsmFeature[] | undefined }) {

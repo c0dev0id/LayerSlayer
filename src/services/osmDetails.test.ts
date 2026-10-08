@@ -1,6 +1,6 @@
 import { describe as group, expect, it } from 'vitest';
 import type { OsmElement } from './overpass';
-import { describe, detailsQuery, distanceTo, kindOf, nearestByKind, searchRadius, words } from './osmDetails';
+import { describe, detailsQuery, distanceTo, geometryOf, kindOf, nearestByKind, searchRadius, words } from './osmDetails';
 
 const spot: [number, number] = [8.4, 49.0];
 /** A point `east` and `north` metres from the spot. */
@@ -35,6 +35,17 @@ group('distanceTo', () => {
     expect(distanceTo(way(1, [[-10, -10], [10, -10], [10, 10], [-10, 10], [-10, -10]], {}), spot)).toBe(0);
     expect(distanceTo({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [at(5, -50), at(5, 50)] }] }, spot)).toBeCloseTo(5, 0);
     expect(distanceTo({ type: 'way', id: 1 }, spot)).toBeUndefined();
+  });
+});
+
+group('geometryOf', () => {
+  it('gives nodes as points, ways as lines and relations as their members', () => {
+    expect(geometryOf({ type: 'node', id: 1, lat: 49, lon: 8 })).toEqual({ type: 'Point', coordinates: [8, 49] });
+    expect(geometryOf({ type: 'way', id: 1, geometry: [{ lat: 49, lon: 8 }, { lat: 49.1, lon: 8.1 }] })).toEqual({ type: 'LineString', coordinates: [[8, 49], [8.1, 49.1]] });
+    expect(geometryOf({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [{ lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }] }, { type: 'node', lat: 49.05, lon: 8.05 }] })).toEqual({
+      type: 'MultiLineString',
+      coordinates: [[[8, 49], [8.1, 49]]],
+    });
   });
 });
 

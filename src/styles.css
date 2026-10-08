@@ -480,9 +480,15 @@ input.swatch {
   background: rgba(0, 0, 0, 0.15);
 }
 
+/* A sheet beside the map, below the search box, rather than a modal over it. */
 .dialog.details-dialog {
-  width: min(480px, calc(100vw - 32px));
-  max-height: min(680px, calc(100vh - 64px));
+  position: fixed;
+  top: 60px;
+  left: calc(var(--panel-width, 320px) + 12px);
+  z-index: 6;
+  width: min(400px, calc(100vw - var(--panel-width, 320px) - 24px));
+  max-height: calc(100vh - 120px);
+  margin: 0;
 }
 
 .details {
@@ -1132,6 +1138,13 @@ input.swatch {
 
   .panel-resizer {
     display: none;
+  }
+
+  /* The panel lies under the map here. */
+  .dialog.details-dialog {
+    left: 12px;
+    width: calc(100vw - 24px);
+    max-height: 40vh;
   }
 
   .panel {

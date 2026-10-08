@@ -181,6 +181,18 @@ export interface Details {
   /** The element on openstreetmap.org, with all its tags. */
   url: string;
   tags: Record<string, string>;
+  /** Where it lies, for the map to show: a node as a point, a way as a line, a relation as its members' lines. */
+  geometry: GeoJSON.Geometry;
+}
+
+/** An element's geometry as GeoJSON: areas as their outlines, which is what a highlight draws. */
+export function geometryOf(element: OsmElement): GeoJSON.Geometry {
+  if (element.lat !== undefined && element.lon !== undefined) return { type: 'Point', coordinates: [element.lon, element.lat] };
+  if (element.geometry) return { type: 'LineString', coordinates: element.geometry.map((p) => [p.lon, p.lat]) };
+  const members = element.members ?? [];
+  const lines = members.flatMap((m) => (m.geometry ? [m.geometry.map((p) => [p.lon, p.lat])] : []));
+  if (lines.length > 0) return { type: 'MultiLineString', coordinates: lines };
+  return { type: 'MultiPoint', coordinates: members.flatMap((m) => (m.lat !== undefined && m.lon !== undefined ? [[m.lon, m.lat]] : [])) };
 }
 
 /** A tag value in words: `lift_gate` becomes "Lift gate". */
@@ -324,6 +336,7 @@ export function describe({ kind, element, distance }: { kind: DetailKind; elemen
     rows,
     url: `https://www.openstreetmap.org/${element.type}/${element.id}`,
     tags,
+    geometry: geometryOf(element),
   };
 }
 
