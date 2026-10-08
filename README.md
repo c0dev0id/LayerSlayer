@@ -41,7 +41,10 @@ in the browser.
   tiles are kept or its server goes through the CORS proxy.
 - Below the list, the **active layer** (click a name) has its opacity, zoom range, colour
   (vector layers), source, the CORS proxy for its server and, for tiled layers, whether it
-  keeps its tiles in the browser. New layers start at 50% opacity.
+  keeps its tiles in the browser. New layers start at 50% opacity. Raster layers (XYZ, WMS,
+  WMTS, ArcGIS MapServer, GeoTIFF, placed images) have *Colour adjustments*: hue, saturation,
+  contrast, and the brightness black and white become. Black at 100% and white at 0%
+  inverts the image; with the hue turned 180° that gives a dark map that keeps its colours.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
   search, preferring those in view. Enter searches; the first place found gets a pin and the
   map flies to it, and the list below offers the other places found. × clears the search

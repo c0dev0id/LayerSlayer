@@ -63,6 +63,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   layers below the first 3D layer draw their opaque fills in an earlier top-down pass. Custom
   layers are not serialised, so `setStyle` diffs leave them alone and they can be put back
   in place after each diff.
+- **Colour adjustments instead of blend modes.** What MapLibre offers within its own
+  rendering is five raster paint properties, applied per pixel in this order: hue
+  rotation, saturation, contrast, then a brightness range (black and white become
+  `brightness-min` and `-max`; min above max inverts). They are raw sliders on raster
+  layers, without presets, since no preset fits every map; the brightness ends are grey
+  levels, so tinting toward a chosen colour is not possible. Every layer is composited
+  with plain alpha blending (`ColorMode.alphaBlended`). Vector layers and imported styles
+  have no such properties; adjusting them would mean rewriting the colours in the style.
 - **Each service kind maps to a native source.**
   - WMS: a raster source with `{bbox-epsg-3857}` in a GetMap URL, 512 px tiles, the
     service's name for Web Mercator. Scale denominators become zoom ranges.
