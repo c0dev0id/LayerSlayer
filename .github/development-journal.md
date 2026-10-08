@@ -142,9 +142,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
   4096 px on the long side and 6× scale, and kept as WebP (PNG where the browser cannot
   encode WebP). pdf.js 6 uses `Map.prototype.getOrInsertComputed`, which current Chromium
   lacks, so its legacy build is used.
-- **Tile caching is a per-layer choice.** Slow servers often forbid HTTP caching too
+- **Tile caching is on by default, per layer.** Slow servers often forbid HTTP caching too
   (ArcGIS Online sends `max-age=300`), so the browser cache does not help. A tiled layer
-  (XYZ, WMS, WMTS, ArcGIS export and features) with `cache` set has its tile addresses
+  (XYZ, WMS, WMTS, ArcGIS export and features) whose `cache` is not false has its tile addresses
   prefixed with `cache+` (`cache+https://…`, `cache+wmts-matrix://…`); MapLibre hands
   every scheme it does not know to the protocol registered for it, and one protocol
   answers them all from Cache Storage or fetches the tile and keeps it for 24 hours.
@@ -152,11 +152,13 @@ It is a static single-page app on GitHub Pages; there is no server component.
   Tiles are kept under the address that answers them (the tile URL, a WMTS tile's resolved
   URL, a feature tile's query); empty feature tiles are kept too, errors are not, so a
   missing tile is asked for again. Expired tiles are swept at start-up, and the cache name
-  carries a version so a change in what is kept never reads old entries back. Cache
-  Storage was chosen over IndexedDB because it holds HTTP responses by URL as it is, and
-  the browser accounts for it in the site's storage. It is opt-in because it serves stale
-  tiles for up to a day, which is fine for slow, static maps and wrong for radar; new
-  feature layers have it on, since feature servers are the slow ones as a rule. Styles
+  carries a version so a change in what is kept never reads old entries back. Each tile is
+  stored with its length in `content-length`, so Settings sums the cache's size from the
+  headers (`matchAll`) without reading tile bodies. Cache Storage was chosen over IndexedDB
+  because it holds HTTP responses by URL as it is, and the browser accounts for it in the
+  site's storage. It is on unless switched off because most tiled services are static and
+  slow enough for kept tiles to pay off; it serves tiles up to a day old, so layers with
+  live data (radar, traffic) should have it switched off. Styles
   are left out: their tiles come from addresses inside the style. At most four feature
   queries run at once per server; queued tiles that scroll out of view are dropped.
 - **Flying to a layer.** The layer row offers a frame icon when the layer's bounds span at

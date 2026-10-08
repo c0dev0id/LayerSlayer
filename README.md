@@ -53,11 +53,11 @@ in IndexedDB, so the map is as it was after a restart.
 
 Only Web Mercator is drawn; services that offer no Web Mercator are refused with a reason.
 
-Slow servers often forbid caching too (ArcGIS Online allows five minutes). A tiled layer
-(XYZ, WMS, WMTS, ArcGIS) can keep its tiles in the browser: tick *Keep tiles in this
-browser* in its settings, and tiles once loaded are answered from the browser's Cache
-Storage for 24 hours. New feature layers keep their tiles from the start. Settings shows
-how many tiles are kept and clears them.
+Slow servers often forbid caching too (ArcGIS Online allows five minutes), so tiled layers
+(XYZ, WMS, WMTS, ArcGIS) keep their tiles in the browser: tiles once loaded are answered
+from the browser's Cache Storage for 24 hours. For layers with live data, such as radar,
+untick *Keep tiles in this browser* in the layer's settings. Settings shows how many tiles
+are kept and their size, and clears them.
 
 At most four feature queries run at once per server. A feature layer whose features all fit
 in one query is shown at every zoom; a larger one starts at zoom 9, or at the service's own
