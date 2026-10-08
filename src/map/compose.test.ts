@@ -127,6 +127,18 @@ describe('composeStyle', () => {
   });
 
 
+  it('marks points and areas with the layer icon on a disc of its colour', () => {
+    const icon = { id: 'maki:fuel', size: [15, 15] as [number, number], paths: ['M0 0h15v15z'] };
+    const style = compose([layer({ name: 'g', source: { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } }, { icon, opacity: 0.8 })]);
+    expect(style.layers.map((l) => l.id)).toEqual(['L/fill', 'L/outline', 'L/line', 'L/point']);
+    expect(style.layers[3]).toMatchObject({
+      type: 'symbol',
+      layout: { 'icon-image': 'poi:maki:fuel:#e8590c', 'icon-allow-overlap': true },
+      paint: { 'icon-opacity': 0.8 },
+    });
+    expect(JSON.stringify(style.layers[3])).toContain('Polygon');
+  });
+
   it('queries feature layers as vector tiles through the feature protocol', () => {
     const style = compose([
       layer({

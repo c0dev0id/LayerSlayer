@@ -13,6 +13,7 @@ import { FEATURE_PROTOCOL } from './featureTiles';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
 import { withOverlays } from './overlays';
+import { drawPoi, parsePoiImageId } from './poiIcons';
 import { loadCachedTile, loadTile } from './protocols';
 import { routeOverlay } from './routeOverlay';
 
@@ -75,8 +76,16 @@ export function MapView() {
       if (id) void describeLoadError(event.error).then((message) => reportLayerError(id, message));
       else console.error(event.error);
     });
-    // Icons of ArcGIS symbols are not in any sprite; the map asks for each when it needs it.
+    // Layer icons and the icons of ArcGIS symbols are not in any sprite; the map asks for
+    // each when it needs it.
     map.on('styleimagemissing', (event: { id: string }) => {
+      const poi = parsePoiImageId(event.id);
+      if (poi) {
+        const icon = state.layers.find((l) => l.icon?.id === poi.icon)?.icon;
+        if (!icon) return;
+        const drawn = drawPoi(icon, poi.color);
+        return map.addImage(event.id, drawn.image, { pixelRatio: drawn.pixelRatio });
+      }
       for (const loaded of assets().values()) {
         const icon = loaded.icons?.get(event.id);
         if (icon) return map.addImage(event.id, icon.image, { pixelRatio: icon.pixelRatio });

@@ -21,7 +21,8 @@ import {
   type XyzSource,
 } from '../model/layer';
 import type { Symbology } from '../services/arcgisSymbology';
-import type { Icon } from './arcgisIcons';
+import type { Icon } from './icon';
+import { poiImageId } from './poiIcons';
 import { FEATURE_LAYER, FEATURE_PROTOCOL, FEATURE_TILE_MAXZOOM, featureTileUrl } from './featureTiles';
 import { parseProtocolTile, protocolTileUrl, resolveUrl, withParams } from './urls';
 
@@ -313,7 +314,10 @@ const POINT = ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]] as
 /** Share of a polygon's fill against its outline, so what lies below stays readable. */
 const FILL_SHARE = 0.25;
 
-/** Features drawn in the layer's colour: polygons filled and outlined, lines, and points as dots. */
+/**
+ * Features drawn in the layer's colour: polygons filled and outlined, lines, and points as
+ * dots, or, where the layer has an icon, points and areas marked with it.
+ */
 function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string): Fragment {
   const color = layerColor(layer);
   const base = { source: layer.id, ...(sourceLayer && { 'source-layer': sourceLayer }), ...zoomRange(layer) };
@@ -343,20 +347,29 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': color, 'line-width': 2.5, 'line-opacity': opacity },
       },
-      {
-        ...base,
-        id: `${layer.id}/point`,
-        type: 'circle',
-        filter: POINT as never,
-        paint: {
-          'circle-color': color,
-          'circle-radius': 5,
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 1.5,
-          'circle-opacity': opacity,
-          'circle-stroke-opacity': opacity,
-        },
-      },
+      layer.icon
+        ? {
+            ...base,
+            id: `${layer.id}/point`,
+            type: 'symbol',
+            filter: ['any', POINT, POLYGON] as never,
+            layout: { 'icon-image': poiImageId(layer.icon, color), 'icon-allow-overlap': true, 'icon-ignore-placement': true },
+            paint: { 'icon-opacity': opacity },
+          }
+        : {
+            ...base,
+            id: `${layer.id}/point`,
+            type: 'circle',
+            filter: POINT as never,
+            paint: {
+              'circle-color': color,
+              'circle-radius': 5,
+              'circle-stroke-color': '#ffffff',
+              'circle-stroke-width': 1.5,
+              'circle-opacity': opacity,
+              'circle-stroke-opacity': opacity,
+            },
+          },
     ],
   };
 }

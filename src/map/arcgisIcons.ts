@@ -1,13 +1,8 @@
 import { PX_PER_PT, readSymbology, type DrawingInfo, type Marker, type PictureMarker, type SimpleMarker, type Symbology } from '../services/arcgisSymbology';
 import type { ArcGisFeatureSource } from '../model/layer';
 import { fetchResource } from '../state/net';
+import { iconPixelRatio, type Icon } from './icon';
 import { resolveUrl, withParams } from './urls';
-
-/** An icon for the map's addImage, drawn at `pixelRatio` device pixels per CSS pixel. */
-export interface Icon {
-  image: ImageData | ImageBitmap;
-  pixelRatio: number;
-}
 
 function cssColor(color: SimpleMarker['color']): string | undefined {
   if (!Array.isArray(color) || color.length < 3 || (color[3] ?? 255) === 0) return undefined;
@@ -86,7 +81,7 @@ async function drawPicture(marker: PictureMarker, layerUrl: string): Promise<Ico
 }
 
 async function drawMarkers(markers: Record<string, Marker>, layerUrl: string): Promise<Map<string, Icon>> {
-  const ratio = Math.min(2, globalThis.devicePixelRatio || 1);
+  const ratio = iconPixelRatio();
   const entries = await Promise.all(
     Object.entries(markers).map(async ([name, marker]): Promise<[string, Icon]> => [
       name,
