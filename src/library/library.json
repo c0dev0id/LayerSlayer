@@ -767,6 +767,46 @@
       "note": "Campgrounds, boat ramps, day-use areas and other recreation sites on Bureau of Land Management land."
     },
     {
+      "name": "BLM — land managers",
+      "type": "arcgis-mapserver",
+      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_SMA_Cached_without_PriUnk/MapServer?f=json",
+      "region": "United States",
+      "category": "POI",
+      "note": "Public land coloured by the agency that manages its surface: Bureau of Land Management, Forest Service, Park Service, Fish and Wildlife Service, Reclamation, Indian Affairs, military, state and local. Private land is left blank. Served as cached tiles, so it appears quickly."
+    },
+    {
+      "name": "BLM — wilderness and wilderness study areas",
+      "type": "arcgis-mapserver",
+      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_NLCS_WLD_WSA/MapServer?f=json",
+      "region": "United States",
+      "category": "POI",
+      "note": "Wilderness and wilderness study areas on Bureau of Land Management land. Wilderness is closed to motor vehicles; in study areas they are limited to the routes the BLM allows."
+    },
+    {
+      "name": "NPS — park roads",
+      "type": "arcgis-mapserver",
+      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Roads/MapServer?f=json",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Public roads in national parks and other National Park Service units."
+    },
+    {
+      "name": "NPS — park trails",
+      "type": "arcgis-mapserver",
+      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Trails/MapServer?f=json",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Public trails in national parks and other National Park Service units; trails closed to the public are left out."
+    },
+    {
+      "name": "USGS — mines and mineral resources",
+      "type": "wms",
+      "url": "https://mrdata.usgs.gov/services/mrds?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "United States",
+      "category": "POI",
+      "note": "Mines, prospects and mineral occurrences from the USGS Mineral Resource Data System, which the USGS no longer updates."
+    },
+    {
       "name": "USGS — aerial imagery",
       "type": "arcgis-mapserver",
       "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer?f=json",
@@ -1037,6 +1077,14 @@
       "region": "United States",
       "category": "Weather",
       "note": "Contours of the latest air quality index, ozone and fine particles combined."
+    },
+    {
+      "name": "NOAA — wildfire smoke forecast",
+      "type": "wms",
+      "url": "https://mapservices.weather.noaa.gov/raster/services/air_quality/ndgd_smoke_sfc_1hr_avg_time/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "United States",
+      "category": "Weather",
+      "note": "Near-surface smoke from wildfires, from NOAA air quality forecast guidance that runs about two days ahead. The map shows the hour the service shows by default."
     },
     {
       "name": "Baden-Württemberg — MobiData BW (WFS)",

@@ -490,7 +490,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Layers from WMS, WMTS, ArcGIS MapServer and FeatureServer, XYZ templates, PMTiles
   archives, MapLibre styles, GeoJSON (URL or file), GPX tracks (file) and GeoPDF (file or
   URL).
-- A library of about a hundred services by region and category, with search.
+- A library of about 130 services by region and category, with search.
 - An add-layer dialog that stays open: layers and groups toggle with a tap, what is on
   the map is highlighted, and the library and a service's layers can be switched between
   freely. Every layer a service offers is listed, with reasons for those it cannot show
