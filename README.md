@@ -107,17 +107,21 @@ in the browser.
 - **Routes**: *Draw route* starts a route and a toolbar over the map.
   - *Append* adds a point at the end with each tap on the map, *Insert* puts one into the
     line where it is tapped, *Waypoint* places a named pin (with an icon from the same
-    sets as layers, if wanted), and *Delete* removes the point or waypoint tapped. Points and waypoints can be dragged; right-click or long-press one
-    for its menu.
+    sets as layers, if wanted), and *Delete* removes the point or waypoint tapped. A
+    waypoint is none of the route's points, but belongs to the route being drawn when it
+    is placed: the route's entry counts it, *Fly to* includes it, and deleting the route
+    deletes it. The points and waypoints of the route being drawn can be dragged;
+    right-click or long-press one for its menu.
   - New points are reached along the roads (*Route*, by OSRM with the route's car, bike or
     foot profile) or by a straight line (*Line*), for ways the routing does not know.
   - *Undo* and *Redo* (Ctrl+Z, Ctrl+Shift+Z) step through route and waypoint edits; layer
     changes are not part of it. *Done* or Esc ends drawing.
   - *Export GPX* writes the waypoints and one track per route. *Import GPX* adds a file's
-    waypoints, its routes (`<rte>`) with every point routed, and its tracks (`<trk>`)
-    simplified to at most 500 points joined by straight lines, so they keep their shape
-    and stay editable. A leg the routing cannot find stays a red dashed line until one of
-    its points is moved.
+    routes (`<rte>`) with every point routed, and its tracks (`<trk>`) simplified to at
+    most 500 points joined by straight lines, so they keep their shape and stay editable.
+    Its waypoints belong to the first of them, or to a route of their own, named after
+    the file, if it has none. A leg the routing cannot find stays a red dashed line until
+    one of its points is moved.
 
 Layers, their settings, the focus area, routes and the map view are kept in the browser's local storage,
 files in IndexedDB, so the map is as it was after a restart.

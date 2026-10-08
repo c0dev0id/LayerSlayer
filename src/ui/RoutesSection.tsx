@@ -7,7 +7,7 @@ import { routePoints } from '../routing/legs';
 import { nextRouteColor } from '../routing/routeEdit';
 import { failedLegCount, lastError, pendingLegs, retryFailedLegs } from '../routing/service';
 import { editingRouteId, startDrawing, stopDrawing } from '../state/drawing';
-import { addRoute, importRouteData, removeRoute, renameRoute, routeData, setRouteProfile } from '../state/routes';
+import { addRoute, importRouteData, removeRoute, renameRoute, routeData, routeWaypoints, setRouteProfile } from '../state/routes';
 import { parseGpx, toGpx } from '../services/gpx';
 import { fileName } from '../services/read';
 import { errorMessage, showBounds } from '../state/ui';
@@ -58,11 +58,13 @@ async function exportGpx() {
   downloadBlob(new Blob([gpx], { type: 'application/gpx+xml' }), 'routes.gpx');
 }
 
-/** Moves the view to show the whole route, detours of routed legs included. */
+/** Moves the view to show the whole route, detours of routed legs and its waypoints included. */
 function flyToRoute(route: Route) {
   const plain = unwrap(route);
-  showPoints([...plain.points.map((p) => p.lngLat), ...routePoints(plain)]);
+  showPoints([...plain.points.map((p) => p.lngLat), ...routePoints(plain), ...routeWaypoints(route.id).map((w) => w.lngLat)]);
 }
+
+const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 /** The routes drawn on the map: draw, edit, import and export them as GPX. */
 export function RoutesSection() {
@@ -125,6 +127,7 @@ export function RoutesSection() {
 function RouteRow(props: { route: Route }) {
   const route = props.route;
   const editing = () => editingRouteId() === route.id;
+  const waypoints = () => routeWaypoints(route.id).length;
   return (
     <li class="route" classList={{ active: editing() }}>
       <div class="row">
@@ -134,7 +137,7 @@ function RouteRow(props: { route: Route }) {
           class="icon"
           title={`Fly to ${route.name}`}
           aria-label={`Fly to ${route.name}`}
-          disabled={route.points.length === 0}
+          disabled={route.points.length === 0 && waypoints() === 0}
           onClick={() => flyToRoute(route)}
         >
           <AreaIcon />
@@ -144,7 +147,8 @@ function RouteRow(props: { route: Route }) {
           title="Delete route"
           aria-label={`Delete ${route.name}`}
           onClick={async () => {
-            if (await askConfirmation(`Delete the route "${route.name}"?`, 'Delete')) removeRoute(route.id);
+            const question = waypoints() > 0 ? `Delete the route "${route.name}" and its ${count(waypoints(), 'waypoint', 'waypoints')}?` : `Delete the route "${route.name}"?`;
+            if (await askConfirmation(question, 'Delete')) removeRoute(route.id);
           }}
         >
           <CloseIcon />
@@ -152,7 +156,8 @@ function RouteRow(props: { route: Route }) {
       </div>
       <div class="row">
         <span class="grow muted">
-          {route.points.length} {route.points.length === 1 ? 'point' : 'points'}
+          {count(route.points.length, 'point', 'points')}
+          {waypoints() > 0 && `, ${count(waypoints(), 'waypoint', 'waypoints')}`}
         </span>
         <select aria-label="Routing profile" value={route.profile} onChange={(e) => setRouteProfile(route.id, e.currentTarget.value as Profile)}>
           <For each={PROFILES}>{(p) => <option value={p.value}>{p.label}</option>}</For>

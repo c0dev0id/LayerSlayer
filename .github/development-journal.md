@@ -307,7 +307,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
     undo steps; an undo restores the cached legs with the points.
   - The GPX format, reading and writing, is `services/gpx.ts`; reading keeps track
     segments, which the layer import draws apart and the route import joins.
-  - GPX import goes into the route editor. Waypoints stay waypoints; a `<rte>` keeps all
+  - Waypoints belong to a route (`routeId`): the one being drawn when the waypoint is
+    placed. They are no route points, which stay what the routing joins, so they are a
+    list of their own beside the routes rather than part of a route; a route entry is
+    still what a GPX file holds, the line with its waypoints, so a route's deletion takes
+    its waypoints along in the same undo step, and only the route being drawn has its
+    waypoints draggable. Stored waypoints whose route is missing are dropped when read.
+  - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
+    waypoints belong to its first route or track, or to a route without points named
+    after the file when it has none. A `<rte>` keeps all
     its points and every leg is routed with the profile of the last route, however long
     that takes at one request per second; a leg that fails stays unrouted (red dashed)
     until a point of it moves, which gives it a new key. A `<trk>` is simplified with

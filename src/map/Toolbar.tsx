@@ -42,7 +42,7 @@ export function Toolbar() {
       <div class="toolbar-group" role="group" aria-label="Route">
         {button('append', 'Append', 'Tap the map to add points at the end of the route', <AppendIcon />)}
         {button('insert', 'Insert', 'Tap the route line to insert a point there', <InsertIcon />)}
-        {button('waypoint', 'Waypoint', 'Tap the map to place a waypoint: a named place of its own, such as a viewpoint or a warning', <WaypointIcon />)}
+        {button('waypoint', 'Waypoint', 'Tap the map to place a waypoint of this route, such as a viewpoint or a warning: exported and deleted with it', <WaypointIcon />)}
         {button('delete', 'Delete', 'Tap a route point or a waypoint to delete it', <DeleteIcon />)}
       </div>
       <div class="toolbar-group" role="group" aria-label="Reach new points by">
