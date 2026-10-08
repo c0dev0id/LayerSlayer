@@ -78,6 +78,8 @@ in the browser.
   Mapterhorn's open terrain tiles: about 30 m worldwide, and finer (down to a metre or so)
   where countries publish detailed elevation, such as much of Europe. Tilt and turn the
   map with the right mouse button, Ctrl and drag, or two fingers.
+- **Right-click** a spot on the map (long press on touch screens) to copy its coordinates
+  as `lat,lon`, or to open it in Google Maps or Google Street View in a new tab.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
   search, preferring those in view. Enter searches; the first place found gets a pin and the
   map flies to it, and the list below offers the other places found. × clears the search

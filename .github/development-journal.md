@@ -461,6 +461,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
+- A menu for any spot on the map: copy its coordinates, open it in Google Maps or Street
+  View (Google's documented Maps URLs, no key).
 - 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched by a button
   on the map.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
