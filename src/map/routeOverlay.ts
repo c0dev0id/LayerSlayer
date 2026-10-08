@@ -1,4 +1,4 @@
-import type { FilterSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl';
+import type { FilterSpecification, LayerSpecification } from 'maplibre-gl';
 import { createMemo, createRoot } from 'solid-js';
 import type { LngLat, Route } from '../model/route';
 import { legCoordinates, legState, routeLegs } from '../routing/legs';
@@ -6,11 +6,11 @@ import { ROUTING_ATTRIBUTION } from '../routing/osrm';
 import { decodePolyline } from '../routing/polyline';
 import { failedLegs } from '../routing/service';
 import { routeData } from '../state/routes';
+import { ROUND_LINE, type Overlay } from './overlays';
 
 /** The source of the route tool's lines. */
-export const ROUTES_SOURCE = 'route-tool';
+const ROUTES_SOURCE = 'route-tool';
 
-const round = { 'line-join': 'round', 'line-cap': 'round' } as const;
 /** Legs drawn as part of the route: routed, or straight by choice. Pending and failed legs are dashed. */
 const DRAWN: FilterSpecification = ['in', ['get', 'state'], ['literal', ['routed', 'straight']]];
 
@@ -20,7 +20,7 @@ const ROUTE_LAYERS: LayerSpecification[] = [
     type: 'line',
     source: ROUTES_SOURCE,
     filter: DRAWN,
-    layout: round,
+    layout: ROUND_LINE,
     paint: { 'line-color': '#ffffff', 'line-width': 7, 'line-opacity': 0.85 },
   },
   {
@@ -28,7 +28,7 @@ const ROUTE_LAYERS: LayerSpecification[] = [
     type: 'line',
     source: ROUTES_SOURCE,
     filter: DRAWN,
-    layout: round,
+    layout: ROUND_LINE,
     paint: { 'line-color': ['get', 'color'], 'line-width': 4 },
   },
   {
@@ -72,16 +72,6 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
 }
 
 /** The route lines as they are now, as plain data for the map. */
-export const routeLines = createRoot(() => createMemo(() => routeFeatures(routeData.routes, failedLegs())));
+const routeLines = createRoot(() => createMemo(() => routeFeatures(routeData.routes, failedLegs())));
 
-/**
- * The style with the route lines on top of every layer. The lines are part of the style
- * rather than added to the map, so that applying the next composed style keeps them.
- */
-export function withRoutes(style: StyleSpecification, lines: GeoJSON.FeatureCollection): StyleSpecification {
-  return {
-    ...style,
-    sources: { ...style.sources, [ROUTES_SOURCE]: { type: 'geojson', data: lines, attribution: ROUTING_ATTRIBUTION } },
-    layers: [...style.layers, ...ROUTE_LAYERS],
-  };
-}
+export const routeOverlay: Overlay = { id: ROUTES_SOURCE, data: routeLines, layers: ROUTE_LAYERS, attribution: ROUTING_ATTRIBUTION };

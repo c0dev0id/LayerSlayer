@@ -93,7 +93,8 @@ export function Interactions(props: { map: MapLibreMap }) {
     }
   };
   const onMouseMove = (e: MapMouseEvent) => {
-    if (!focusDraft()) return;
+    // Before the first corner there is no line to the pointer.
+    if (!focusDraft()?.length) return;
     const { lng, lat } = e.lngLat.wrap();
     setFocusCursor([lng, lat]);
   };

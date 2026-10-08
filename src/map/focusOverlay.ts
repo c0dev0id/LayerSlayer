@@ -1,35 +1,47 @@
-import type { LayerSpecification, StyleSpecification } from 'maplibre-gl';
+import type { LayerSpecification } from 'maplibre-gl';
 import { createMemo, createRoot } from 'solid-js';
 import { MAX_LATITUDE } from '../geo/mercator';
 import type { LngLat } from '../model/route';
 import { focusCursor, focusDraft } from '../state/drawing';
 import { state } from '../state/store';
+import { ROUND_LINE, type Overlay } from './overlays';
 
-/** The source of the focus area: the dimmed world around it, its outline, and an area being drawn. */
-export const FOCUS_SOURCE = 'focus-area';
+/**
+ * The focus area over the map, and the one being drawn. They are sources of their own,
+ * so that moving the pointer while drawing does not re-tile the mask over the world.
+ */
 
 const FOCUS_COLOR = '#1c7ed6';
 
-const FOCUS_LAYERS: LayerSpecification[] = [
+const AREA_SOURCE = 'focus-area';
+const DRAFT_SOURCE = 'focus-draft';
+
+const lineLayer = (source: string): LayerSpecification => ({
+  id: `${source}-line`,
+  type: 'line',
+  source,
+  filter: ['==', ['geometry-type'], 'LineString'],
+  layout: ROUND_LINE,
+  paint: { 'line-color': FOCUS_COLOR, 'line-width': 2 },
+});
+
+const AREA_LAYERS: LayerSpecification[] = [
   {
-    id: `${FOCUS_SOURCE}-mask`,
+    id: `${AREA_SOURCE}-mask`,
     type: 'fill',
-    source: FOCUS_SOURCE,
+    source: AREA_SOURCE,
     filter: ['==', ['geometry-type'], 'Polygon'],
     paint: { 'fill-color': '#000000', 'fill-opacity': 0.4 },
   },
+  lineLayer(AREA_SOURCE),
+];
+
+const DRAFT_LAYERS: LayerSpecification[] = [
+  lineLayer(DRAFT_SOURCE),
   {
-    id: `${FOCUS_SOURCE}-line`,
-    type: 'line',
-    source: FOCUS_SOURCE,
-    filter: ['==', ['geometry-type'], 'LineString'],
-    layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': FOCUS_COLOR, 'line-width': 2 },
-  },
-  {
-    id: `${FOCUS_SOURCE}-corner`,
+    id: `${DRAFT_SOURCE}-corner`,
     type: 'circle',
-    source: FOCUS_SOURCE,
+    source: DRAFT_SOURCE,
     filter: ['==', ['geometry-type'], 'Point'],
     paint: {
       // The first corner closes the area, so it is the larger target.
@@ -60,9 +72,12 @@ function signedArea(ring: readonly LngLat[]): number {
   return sum;
 }
 
-const closed = (corners: readonly LngLat[]): LngLat[] => [...corners, corners[0]!];
+/** Positions copied out of the store, so that the map gets plain data. */
+const copy = (points: readonly LngLat[]): LngLat[] => points.map((p) => [p[0], p[1]]);
 
-const feature = <G extends GeoJSON.Geometry>(geometry: G, properties: GeoJSON.GeoJsonProperties = {}): GeoJSON.Feature<G> => ({
+const collection = (features: GeoJSON.Feature[]): GeoJSON.FeatureCollection => ({ type: 'FeatureCollection', features });
+
+const feature = (geometry: GeoJSON.Geometry, properties: GeoJSON.GeoJsonProperties = {}): GeoJSON.Feature => ({
   type: 'Feature',
   properties,
   geometry,
@@ -70,35 +85,37 @@ const feature = <G extends GeoJSON.Geometry>(geometry: G, properties: GeoJSON.Ge
 
 /**
  * The focus area as map features: the world with the area cut out, to dim what lies
- * outside, and the area's outline; and the area being drawn, its corners joined in order
- * up to the pointer. MapLibre takes a ring wound like the first as a polygon of its own,
- * so the cut-out runs clockwise, against the world. Coordinates are copied, so the result
- * holds no store proxies.
+ * outside, and the area's outline. MapLibre takes a ring wound like the first as a polygon
+ * of its own, so the cut-out runs clockwise, against the world.
  */
-export function focusFeatures(focus: readonly LngLat[] | undefined, draft?: readonly LngLat[], cursor?: LngLat): GeoJSON.FeatureCollection {
-  const features: GeoJSON.Feature[] = [];
-  if (focus && focus.length >= 3) {
-    const corners = focus.map((p): LngLat => [p[0], p[1]]);
-    const hole = signedArea(corners) > 0 ? [...corners].reverse() : corners;
-    features.push(feature({ type: 'Polygon', coordinates: [WORLD, closed(hole)] }));
-    features.push(feature({ type: 'LineString', coordinates: closed(corners) }));
-  }
-  if (draft && draft.length > 0) {
-    const line = cursor ? [...draft, cursor] : draft;
-    if (line.length >= 2) features.push(feature({ type: 'LineString', coordinates: line.map((p) => [p[0], p[1]]) }));
-    draft.forEach((p, i) => features.push(feature({ type: 'Point', coordinates: [p[0], p[1]] }, { first: i === 0 })));
-  }
-  return { type: 'FeatureCollection', features };
+export function focusAreaFeatures(focus: readonly LngLat[] | undefined): GeoJSON.FeatureCollection {
+  if (!focus || focus.length < 3) return collection([]);
+  const corners = copy(focus);
+  const hole = signedArea(corners) > 0 ? [...corners].reverse() : corners;
+  return collection([
+    feature({ type: 'Polygon', coordinates: [WORLD, [...hole, hole[0]!]] }),
+    feature({ type: 'LineString', coordinates: [...corners, corners[0]!] }),
+  ]);
 }
 
-/** The focus area and the one being drawn as they are now, as plain data for the map. */
-export const focusLines = createRoot(() => createMemo(() => focusFeatures(state.focus, focusDraft(), focusCursor())));
-
-/** The style with the focus area over every layer, a part of the style like the route lines. */
-export function withFocus(style: StyleSpecification, data: GeoJSON.FeatureCollection): StyleSpecification {
-  return {
-    ...style,
-    sources: { ...style.sources, [FOCUS_SOURCE]: { type: 'geojson', data } },
-    layers: [...style.layers, ...FOCUS_LAYERS],
-  };
+/** The corners of an area being drawn, joined in order up to the pointer; the first one marked. */
+export function focusDraftFeatures(draft: readonly LngLat[] | undefined, cursor?: LngLat): GeoJSON.FeatureCollection {
+  if (!draft || draft.length === 0) return collection([]);
+  const line = copy(cursor ? [...draft, cursor] : draft);
+  return collection([
+    ...(line.length >= 2 ? [feature({ type: 'LineString', coordinates: line })] : []),
+    ...draft.map((p, i) => feature({ type: 'Point', coordinates: [p[0], p[1]] }, { first: i === 0 })),
+  ]);
 }
+
+export const focusAreaOverlay: Overlay = {
+  id: AREA_SOURCE,
+  data: createRoot(() => createMemo(() => focusAreaFeatures(state.focus))),
+  layers: AREA_LAYERS,
+};
+
+export const focusDraftOverlay: Overlay = {
+  id: DRAFT_SOURCE,
+  data: createRoot(() => createMemo(() => focusDraftFeatures(focusDraft(), focusCursor()))),
+  layers: DRAFT_LAYERS,
+};

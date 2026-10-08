@@ -10,9 +10,10 @@ import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
 import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, WMTS_PROTOCOL } from './compose';
 import { FEATURE_PROTOCOL } from './featureTiles';
-import { FOCUS_SOURCE, focusLines, withFocus } from './focusOverlay';
+import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
+import { withOverlays } from './overlays';
 import { loadCachedTile, loadTile } from './protocols';
-import { routeLines, ROUTES_SOURCE, withRoutes } from './routeOverlay';
+import { routeOverlay } from './routeOverlay';
 
 maplibregl.setWorkerUrl(workerUrl);
 maplibregl.addProtocol(FEATURE_PROTOCOL, loadTile);
@@ -20,6 +21,9 @@ maplibregl.addProtocol(WMTS_PROTOCOL, loadTile);
 for (const scheme of CACHED_SCHEMES) maplibregl.addProtocol(scheme, loadCachedTile);
 // geotiff.js and the protocol load with the first COG.
 maplibregl.addProtocol(COG_PROTOCOL, async (params) => (await import('@geomatico/maplibre-cog-protocol')).cogProtocol(params));
+
+/** What the app draws over the layers, bottom to top. */
+const OVERLAYS = [focusAreaOverlay, focusDraftOverlay, routeOverlay];
 
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits;
 
@@ -81,15 +85,15 @@ export function MapView() {
       // Composing reads every layer setting, so any change recomposes. The style goes to
       // MapLibre as plain data: store proxies cannot be sent to its workers.
       const layers = createMemo(() => JSON.parse(JSON.stringify(composeStyle(state.layers, assets(), focusBounds()))));
-      // A layer change carries the focus area and the route lines as they are; a change of
-      // either only replaces its data.
-      createEffect(() => map.setStyle(withRoutes(withFocus(layers(), untrack(focusLines)), untrack(routeLines)), { diff: true }));
-      createEffect(
-        on(routeLines, (lines) => map.getSource<maplibregl.GeoJSONSource>(ROUTES_SOURCE)?.setData(lines), { defer: true }),
-      );
-      createEffect(
-        on(focusLines, (lines) => map.getSource<maplibregl.GeoJSONSource>(FOCUS_SOURCE)?.setData(lines), { defer: true }),
-      );
+      // A layer change carries the overlays' data as it is; a change of an overlay's data
+      // only replaces it.
+      createEffect(() => {
+        const style = layers();
+        map.setStyle(untrack(() => withOverlays(style, OVERLAYS)), { diff: true });
+      });
+      for (const overlay of OVERLAYS) {
+        createEffect(on(overlay.data, (data) => map.getSource<maplibregl.GeoJSONSource>(overlay.id)?.setData(data), { defer: true }));
+      }
     });
     onCleanup(() => {
       setMap(undefined);

@@ -1,7 +1,6 @@
-import { validateStyleMin } from '@maplibre/maplibre-gl-style-spec';
 import { describe, expect, it } from 'vitest';
 import type { Route } from '../model/route';
-import { ROUTES_SOURCE, routeFeatures, withRoutes } from './routeOverlay';
+import { routeFeatures } from './routeOverlay';
 
 const route: Route = {
   id: 'r',
@@ -32,16 +31,5 @@ describe('routeFeatures', () => {
       [2, 2],
     ]);
     expect(routeFeatures([route], new Set()).features[1]!.properties).toMatchObject({ state: 'pending' });
-  });
-});
-
-describe('withRoutes', () => {
-  it('adds the lines on top of the composed style without changing it', () => {
-    const style = { version: 8 as const, sources: {}, layers: [{ id: 'bg', type: 'background' as const }] };
-    const result = withRoutes(style, routeFeatures([route], new Set()));
-    expect(validateStyleMin(result)).toEqual([]);
-    expect(result.layers[0]!.id).toBe('bg');
-    expect(result.layers.slice(1).every((l) => 'source' in l && l.source === ROUTES_SOURCE)).toBe(true);
-    expect(style.layers).toHaveLength(1);
   });
 });
