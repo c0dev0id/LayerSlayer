@@ -1,13 +1,16 @@
 import { getParam, withParams } from '../map/urls';
+import { tileAt } from '../geo/mercator';
 import { fetchResource } from '../state/net';
+import { state } from '../state/store';
 import { parseFeatureService, parseMapServer, serviceUrl, type FeatureLayer, type LayerDetails } from './arcgis';
 import { collectionsAddress, landingPageCollections, parseCollections } from './ogcFeatures';
 import { loadStyle } from './style';
+import { parseTemplate, parseTileJson, TEMPLATE_MAXZOOM, type TileJson } from './vectorTiles';
 import type { ServiceInfo, ServiceType } from './types';
 import { parseWfs } from './wfs';
 import { parseWms } from './wms';
 import { parseWmts } from './wmts';
-import { parseXyz } from './xyz';
+import { parseXyz, xyzSource } from './xyz';
 
 /** Reads what a service offers. GeoPDF addresses are imported as files instead. */
 export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: string): Promise<ServiceInfo> {
@@ -33,6 +36,8 @@ export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: str
       return readFeatureService(url);
     case 'xyz':
       return parseXyz(url);
+    case 'vector-tiles':
+      return readVectorTiles(url);
     case 'geojson': {
       const name = fileName(url);
       return { title: name, offers: [{ title: name, depth: 0, draft: { name, source: { type: 'geojson', data: { url } } } }] };
@@ -58,12 +63,49 @@ async function fetchJson<T>(url: string): Promise<T> {
   return (await fetchResource(url)).json() as Promise<T>;
 }
 
+/**
+ * Reads vector tiles from a TileJSON, or from a tile template by the layers of two of its
+ * tiles: the one at zoom 0, which every tile set has, and the one at TEMPLATE_MAXZOOM where
+ * the map is, which holds the layers that only begin at higher zooms, if the area has them.
+ */
+async function readVectorTiles(url: string): Promise<ServiceInfo> {
+  if (!url.includes('{z}')) return parseTileJson(await fetchJson<TileJson>(url), url);
+  const { tiles, scheme } = xyzSource(url);
+  const tileUrl = (z: number, x: number, y: number) =>
+    tiles[0]!
+      .replace('{z}', String(z))
+      .replace('{x}', String(x))
+      .replace('{y}', String(scheme === 'tms' ? 2 ** z - 1 - y : y));
+  const [lng, lat] = state.view.center;
+  const near = tileAt(lng, lat, TEMPLATE_MAXZOOM);
+  const [{ tileLayerNames }, world, here] = await Promise.all([
+    import('./mvt'),
+    fetchResource(tileUrl(0, 0, 0)).then((r) => r.arrayBuffer()),
+    fetchResource(tileUrl(TEMPLATE_MAXZOOM, near.x, near.y))
+      .then((r) => r.arrayBuffer())
+      .catch(() => undefined),
+  ]);
+  // The layer names in a tile, or none for a tile that is not a vector tile.
+  const read = (data: ArrayBuffer | undefined): string[] | undefined => {
+    try {
+      return data && tileLayerNames(data);
+    } catch {
+      return undefined;
+    }
+  };
+  const names = read(world);
+  if (!names) throw new Error('The tile at zoom 0 is not a vector tile; the address of its TileJSON may work instead.');
+  return parseTemplate(url, [...new Set([...names, ...(read(here) ?? [])])], fileName(url.split('{z}')[0]!) || 'Vector tiles');
+}
+
 /** OGC APIs answer HTML to a browser's default Accept header. */
 const ACCEPT_JSON = { headers: { Accept: 'application/json' } };
 
 /** Reads an OGC API's collections from its landing page, its collections or one collection. */
 async function readOgcFeatures(url: string): Promise<ServiceInfo> {
-  const address = collectionsAddress(url) ?? { collections: landingPageCollections(await (await fetchResource(url, ACCEPT_JSON)).json(), url) };
+  const address = collectionsAddress(url) ?? {
+    collections: landingPageCollections(await (await fetchResource(url, ACCEPT_JSON)).json(), url),
+  };
   return parseCollections(await (await fetchResource(address.collections, ACCEPT_JSON)).json(), address.collections, address.id);
 }
 

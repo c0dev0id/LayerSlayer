@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { coversMostOfWorld, HALF_WORLD, mercatorToLngLat, scaleToZoom, tileZoom, validBounds } from './mercator';
+import { HALF_WORLD, coversMostOfWorld, mercatorToLngLat, scaleToZoom, tileAt, tileZoom, validBounds } from './mercator';
 
 describe('mercator', () => {
   it('converts scale denominators to map zooms', () => {
@@ -37,5 +37,14 @@ describe('mercator', () => {
     expect(validBounds(-180, -90, 180, 90)).toEqual([-180, -85.0511287798, 180, 85.0511287798]);
     expect(validBounds(-180, -90, 427603, 4285332)).toBeUndefined();
     expect(validBounds(10, 50, 5, 51)).toBeUndefined();
+  });
+});
+
+describe('tileAt', () => {
+  it('finds the tile that holds a position, rows from the north', () => {
+    expect(tileAt(0, 0, 0)).toEqual({ x: 0, y: 0 });
+    expect(tileAt(11.575, 48.137, 14)).toEqual({ x: 8718, y: 5685 });
+    expect(tileAt(-180, 89, 2)).toEqual({ x: 0, y: 0 });
+    expect(tileAt(180, -89, 2)).toEqual({ x: 3, y: 3 });
   });
 });

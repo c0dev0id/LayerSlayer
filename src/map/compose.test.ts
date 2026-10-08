@@ -122,6 +122,20 @@ describe('composeStyle', () => {
     expect((style.sources.N as { tiles: string[] }).tiles).toEqual(['https://n/{z}/{x}/{y}.png']);
   });
 
+  it('draws one layer of a vector tile set in the layer colour', () => {
+    const style = compose([
+      layer(
+        {
+          name: 'roads',
+          source: { type: 'vector-tiles', tiles: ['https://t/{z}/{x}/{y}.pbf'], layer: 'transportation', maxzoom: 14 },
+        },
+        { cache: false },
+      ),
+    ]);
+    expect(style.sources.L).toEqual({ type: 'vector', tiles: ['https://t/{z}/{x}/{y}.pbf'], maxzoom: 14 });
+    expect(style.layers.every((l) => 'source-layer' in l && l['source-layer'] === 'transportation')).toBe(true);
+  });
+
   it('places a georeferenced image by its corners', () => {
     const coordinates: [number, number][] = [[0, 1], [1, 1], [1, 0], [0, 0]];
     const style = compose(

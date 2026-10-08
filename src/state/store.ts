@@ -29,7 +29,7 @@ export interface AppState {
 
 const STORAGE_KEY = 'webmap';
 
-const SOURCE_TYPES = new Set(['xyz', 'wms', 'wmts', 'arcgis-map', 'arcgis-features', 'wfs', 'ogc-features', 'geojson', 'style', 'image']);
+const SOURCE_TYPES = new Set(['xyz', 'wms', 'wmts', 'arcgis-map', 'arcgis-features', 'vector-tiles', 'wfs', 'ogc-features', 'geojson', 'style', 'image']);
 
 /** What a first visit starts with: a vector base map that needs no key. */
 const FIRST_LAYER: LayerDraft = {

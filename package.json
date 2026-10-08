@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@cantoo/pdf-lib": "^2.11.1",
+    "@mapbox/vector-tile": "^3.0.0",
     "@maplibre/geojson-vt": "^6.1.2",
     "@maplibre/maplibre-gl-style-spec": "^26.4.4",
     "@maplibre/vt-pbf": "^4.3.2",
@@ -20,13 +21,12 @@
     "fflate": "^0.8.3",
     "idb-keyval": "^6.3.0",
     "maplibre-gl": "^6.13.0",
+    "pbf": "^5.1.2",
     "pdfjs-dist": "^6.4.299",
     "solid-js": "^1.9.17"
   },
   "devDependencies": {
-    "@mapbox/vector-tile": "^3.0.0",
     "jsdom": "^29.1.1",
-    "pbf": "^5.1.2",
     "typescript": "^7.0.2",
     "vite": "^8.3.3",
     "vite-plugin-solid": "^2.11.14",

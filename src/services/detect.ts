@@ -6,7 +6,10 @@ export function detectServiceType(url: string): ServiceType | undefined {
   const lower = url.trim().toLowerCase();
   const path = lower.split(/[?#]/)[0]!.replace(/\/+$/, '');
   const service = getParam(url, 'SERVICE')?.toUpperCase();
-  if (/\{(z|x|y|-y|q|quadkey|zoom|bbox-epsg-3857)\}/.test(lower)) return 'xyz';
+  const template = /\{(z|x|y|-y|q|quadkey|zoom|bbox-epsg-3857)\}/.test(lower);
+  if (template && /\.(pbf|mvt)$/.test(path)) return 'vector-tiles';
+  if (template) return 'xyz';
+  if (/\/tiles?\.json$/.test(path)) return 'vector-tiles';
   if (service === 'WMTS' || path.endsWith('wmtscapabilities.xml')) return 'wmts';
   if (service === 'WMS' || path.endsWith('/wmsserver')) return 'wms';
   if (service === 'WFS' || path.endsWith('/wfsserver')) return 'wfs';

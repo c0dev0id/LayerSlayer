@@ -195,6 +195,7 @@ const SOURCE_LABELS: Record<Layer['source']['type'], string> = {
   wmts: 'WMTS',
   'arcgis-map': 'ArcGIS MapServer',
   'arcgis-features': 'ArcGIS features',
+  'vector-tiles': 'Vector tiles',
   wfs: 'WFS',
   'ogc-features': 'OGC API – Features',
   geojson: 'GeoJSON',
@@ -207,6 +208,7 @@ function sourceUrl(layer: Layer): string | undefined {
   const source = layer.source;
   switch (source.type) {
     case 'xyz':
+    case 'vector-tiles':
       return source.tiles[0];
     case 'wmts':
       return source.template;

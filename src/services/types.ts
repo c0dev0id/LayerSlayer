@@ -9,6 +9,7 @@ export type ServiceType =
   | 'arcgis-mapserver'
   | 'arcgis-features'
   | 'xyz'
+  | 'vector-tiles'
   | 'geojson'
   | 'style'
   | 'geopdf';
@@ -21,6 +22,7 @@ export const SERVICE_TYPES: readonly { value: ServiceType; label: string }[] = [
   { value: 'arcgis-mapserver', label: 'ArcGIS MapServer' },
   { value: 'arcgis-features', label: 'ArcGIS FeatureServer' },
   { value: 'xyz', label: 'XYZ tiles' },
+  { value: 'vector-tiles', label: 'Vector tiles (MVT)' },
   { value: 'geojson', label: 'GeoJSON' },
   { value: 'style', label: 'MapLibre style' },
   { value: 'geopdf', label: 'GeoPDF' },

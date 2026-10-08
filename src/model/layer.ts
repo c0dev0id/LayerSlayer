@@ -65,6 +65,18 @@ export interface ArcGisFeatureSource {
   tileQueries?: boolean;
 }
 
+/** One layer of a vector tile set (MVT) that brings no style, drawn in the layer's colour. */
+export interface VectorTilesSource {
+  type: 'vector-tiles';
+  tiles: string[];
+  scheme?: 'tms';
+  /** The tile layer drawn (`source-layer`). */
+  layer: string;
+  /** Tile zooms the server has; the map enlarges the highest one beyond it. */
+  minzoom?: number;
+  maxzoom?: number;
+}
+
 /** A WFS feature type, queried per vector tile for GeoJSON. */
 export interface WfsSource {
   type: 'wfs';
@@ -118,6 +130,7 @@ export type LayerSource =
   | WmtsSource
   | ArcGisMapSource
   | ArcGisFeatureSource
+  | VectorTilesSource
   | WfsSource
   | OgcFeaturesSource
   | GeoJsonSource
@@ -164,7 +177,7 @@ export const VECTOR_COLORS = ['#e8590c', '#1c7ed6', '#2f9e44', '#ae3ec9', '#f08c
 
 /** Whether the source is drawn with the app's own vector style, coloured by `color`. */
 export function isVector(source: LayerSource): boolean {
-  return source.type === 'geojson' || isFeatureSource(source);
+  return source.type === 'geojson' || source.type === 'vector-tiles' || isFeatureSource(source);
 }
 
 /**
@@ -178,7 +191,7 @@ export function keepsTiles(layer: Layer): boolean {
 }
 
 export function canCache(source: LayerSource): boolean {
-  return ['xyz', 'wms', 'wmts', 'arcgis-map'].includes(source.type) || isFeatureSource(source);
+  return ['xyz', 'wms', 'wmts', 'arcgis-map', 'vector-tiles'].includes(source.type) || isFeatureSource(source);
 }
 
 /** The file a layer keeps in the browser, if any. */

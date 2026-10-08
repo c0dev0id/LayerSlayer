@@ -31,6 +31,14 @@ export function lngLatToMercator(lng: number, lat: number): [number, number] {
   return [x, y];
 }
 
+/** The XYZ tile at zoom `z` that holds a position, rows counted from the north. */
+export function tileAt(lng: number, lat: number, z: number): { x: number; y: number } {
+  const [mx, my] = lngLatToMercator(lng, Math.max(-85.0511, Math.min(85.0511, lat)));
+  const n = 2 ** z;
+  const clamp = (v: number) => Math.max(0, Math.min(n - 1, Math.floor(v)));
+  return { x: clamp(((mx + HALF_WORLD) / WORLD) * n), y: clamp(((HALF_WORLD - my) / WORLD) * n) };
+}
+
 export function mercatorToLngLat(x: number, y: number): [number, number] {
   const lng = (x / HALF_WORLD) * 180;
   const lat = (Math.atan(Math.exp((y / HALF_WORLD) * Math.PI)) * 360) / Math.PI - 90;

@@ -110,6 +110,18 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
       if (!data) return undefined;
       return vector(layer, { type: 'geojson', data, ...(layer.attribution && { attribution: layer.attribution }) });
     }
+    case 'vector-tiles':
+      return vector(
+        layer,
+        {
+          type: 'vector',
+          tiles: cached(layer, src.tiles),
+          ...(src.scheme && { scheme: src.scheme }),
+          ...tileZooms(src),
+          ...common(layer),
+        },
+        src.layer,
+      );
     case 'arcgis-features':
     case 'wfs':
     case 'ogc-features':
@@ -161,7 +173,7 @@ function raster(layer: Layer, source: SourceSpecification): Fragment {
   };
 }
 
-export function rasterTiles(src: Exclude<LayerSource, FeatureSource | { type: 'geojson' | 'style' | 'image' }>): string[] {
+export function rasterTiles(src: Exclude<LayerSource, FeatureSource | { type: 'geojson' | 'style' | 'image' | 'vector-tiles' }>): string[] {
   switch (src.type) {
     case 'xyz':
       return src.tiles;
@@ -201,7 +213,7 @@ export function rasterTiles(src: Exclude<LayerSource, FeatureSource | { type: 'g
 
 /** The tile zooms a source has, where it says. */
 function tileZooms(src: LayerSource): { minzoom?: number; maxzoom?: number } {
-  if (src.type === 'xyz') {
+  if (src.type === 'xyz' || src.type === 'vector-tiles') {
     return {
       ...(src.minzoom !== undefined && { minzoom: src.minzoom }),
       ...(src.maxzoom !== undefined && { maxzoom: src.maxzoom }),
