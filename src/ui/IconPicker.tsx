@@ -1,27 +1,39 @@
 import { createMemo, createResource, createSignal, For, Show } from 'solid-js';
 import { ICON_SETS, searchIcons } from '../icons/iconSets';
 import type { IconSet, MapIcon } from '../model/icon';
+import { CloseIcon, IconBadge, IconGlyph } from './icons';
 import { showModalWhile } from './modal';
-import { answerIconRequest, iconRequest } from './pickIcon';
+import { answerIconRequest, iconRequest, pickIcon } from './pickIcon';
 
 /** Most icons shown at once; the sets hold about 7900. */
 const LIMIT = 300;
 
-/** An icon as it is drawn: its paths in the current text colour. */
-export function IconGlyph(props: { icon: MapIcon }) {
+/**
+ * The icon of a layer, a waypoint or a layer to come: a tap opens the picker, × takes the
+ * icon away. With a colour the icon shows as the map draws it, white on a disc.
+ */
+export function IconPickButton(props: { icon: MapIcon | undefined; color?: string; of: string; onChange: (icon: MapIcon | undefined) => void }) {
   return (
-    <svg class="glyph" viewBox={`0 0 ${props.icon.size[0]} ${props.icon.size[1]}`} aria-hidden="true">
-      <For each={props.icon.paths}>{(d) => <path d={d} />}</For>
-    </svg>
-  );
-}
-
-/** An icon as the map shows it: white on a disc of the layer's colour. */
-export function IconBadge(props: { icon: MapIcon; color: string }) {
-  return (
-    <span class="badge-disc" style={{ 'background-color': props.color }} title={props.icon.id}>
-      <IconGlyph icon={props.icon} />
-    </span>
+    <>
+      <button
+        type="button"
+        class="icon-pick"
+        aria-label={`Icon of ${props.of}`}
+        onClick={async () => {
+          const icon = await pickIcon(props.icon);
+          if (icon) props.onChange(icon);
+        }}
+      >
+        <Show when={props.icon} fallback="None">
+          {(icon) => (props.color ? <IconBadge icon={icon()} color={props.color} /> : <IconGlyph icon={icon()} />)}
+        </Show>
+      </button>
+      <Show when={props.icon}>
+        <button type="button" class="icon" title="No icon" aria-label={`Remove the icon of ${props.of}`} onClick={() => props.onChange(undefined)}>
+          <CloseIcon />
+        </button>
+      </Show>
+    </>
   );
 }
 
@@ -47,7 +59,6 @@ export function IconPicker() {
     <dialog ref={dialog} class="dialog icon-picker" aria-label="Choose an icon" onClose={() => answerIconRequest(undefined)}>
       <div class="row dialog-title">
         <h2 class="grow">Icon</h2>
-        <button onClick={() => answerIconRequest(null)}>No icon</button>
         <button class="primary" onClick={() => answerIconRequest(undefined)}>
           Close
         </button>

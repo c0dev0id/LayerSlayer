@@ -5,9 +5,9 @@ import { startFocusDrawing } from '../state/drawing';
 import { addOsmQueryLayer } from '../state/osmQuery';
 import { state } from '../state/store';
 import { errorMessage } from '../state/ui';
-import { IconGlyph } from './IconPicker';
+import { IconPickButton } from './IconPicker';
+import { IconGlyph } from './icons';
 import { createOutcome, OutcomeNote } from './outcome';
-import { pickIcon } from './pickIcon';
 
 /**
  * A layer of OpenStreetMap features found in the focus area: features chosen from the list
@@ -128,19 +128,7 @@ export function OsmQueryTab(props: { onClose: () => void }) {
         {(message) => <p class="note error">{message()}</p>}
       </Show>
       <div class="row">
-        <button
-          class="icon-pick"
-          title="The layer's icon; tap for another"
-          aria-label="Icon of the new layer"
-          onClick={async () => {
-            const choice = await pickIcon(icon());
-            if (choice !== undefined) setPicked(choice);
-          }}
-        >
-          <Show when={icon()} fallback="No icon">
-            {(glyph) => <IconGlyph icon={glyph()} />}
-          </Show>
-        </button>
+        <IconPickButton icon={icon()} of="the new layer" onChange={(choice) => setPicked(choice ?? null)} />
         <span class="grow name" classList={{ muted: chosen().length === 0 }} title={layerName()}>
           {chosen().length > 0 ? layerName() : 'Choose features or add tags; together they form one layer.'}
         </span>

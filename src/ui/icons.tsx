@@ -1,6 +1,6 @@
 // Shapes from or composed of Tabler Icons (https://tabler.io/icons).
 // Copyright (c) 2020-2026 Paweł Kuna, MIT License: see tabler-icons-license.txt.
-import { For, Show, type JSX } from 'solid-js';
+import { For, Show, splitProps, type JSX } from 'solid-js';
 import type { MapIcon } from '../model/icon';
 
 /** Line icons on Tabler's 24 × 24 grid, drawn in the text colour. */
@@ -183,12 +183,27 @@ export function WaypointPin(props: { icon?: MapIcon | undefined }) {
         stroke-width="1.5"
       />
       <Show when={props.icon} fallback={<circle cx="11" cy="11" r="3.5" fill="#fff" />}>
-        {(icon) => (
-          <svg x="5.5" y="5.5" width="11" height="11" viewBox={`0 0 ${icon().size[0]} ${icon().size[1]}`} fill="#fff">
-            <For each={icon().paths}>{(d) => <path d={d} />}</For>
-          </svg>
-        )}
+        {(icon) => <IconGlyph icon={icon()} class="pin-glyph" x="5.5" y="5.5" width="11" height="11" fill="#fff" />}
       </Show>
     </svg>
+  );
+}
+
+/** An icon of the icon sets in an <svg> of its viewBox, filled in the text colour unless given a fill. */
+export function IconGlyph(props: { icon: MapIcon } & JSX.SvgSVGAttributes<SVGSVGElement>) {
+  const [local, attributes] = splitProps(props, ['icon']);
+  return (
+    <svg class="glyph" aria-hidden="true" {...attributes} viewBox={`0 0 ${local.icon.size[0]} ${local.icon.size[1]}`}>
+      <For each={local.icon.paths}>{(d) => <path d={d} />}</For>
+    </svg>
+  );
+}
+
+/** An icon as the map shows it on a layer: white on a disc of the layer's colour. */
+export function IconBadge(props: { icon: MapIcon; color: string }) {
+  return (
+    <span class="badge-disc" style={{ 'background-color': props.color }} title={props.icon.id}>
+      <IconGlyph icon={props.icon} />
+    </span>
   );
 }

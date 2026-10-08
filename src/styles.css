@@ -461,13 +461,10 @@ input.swatch {
 
 .icon-grid {
   display: grid;
-  flex: 1;
-  min-height: 0;
   grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
   grid-auto-rows: 44px;
   align-content: start;
   gap: 4px;
-  overflow-y: auto;
 }
 
 .dialog button.icon-choice {
@@ -543,7 +540,8 @@ input.swatch {
 
 .entries,
 .offers,
-.imported {
+.imported,
+.icon-grid {
   flex: 1;
   min-height: 0;
   list-style: none;

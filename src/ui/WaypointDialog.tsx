@@ -2,10 +2,8 @@ import { createSignal, Show } from 'solid-js';
 import type { MapIcon } from '../model/icon';
 import { setWaypointDraft, waypointDraft } from '../state/drawing';
 import { addWaypoint, updateWaypoint } from '../state/routes';
-import { IconGlyph } from './IconPicker';
-import { CloseIcon } from './icons';
+import { IconPickButton } from './IconPicker';
 import { showModalWhile } from './modal';
-import { pickIcon } from './pickIcon';
 
 /**
  * Name, description and icon of a waypoint, in the browser's modal dialog: Esc or Cancel
@@ -52,24 +50,7 @@ export function WaypointDialog() {
                 <span class="grow">
                   Icon <span class="muted">(optional)</span>
                 </span>
-                <button
-                  type="button"
-                  class="icon-pick"
-                  aria-label="Icon of the waypoint"
-                  onClick={async () => {
-                    const choice = await pickIcon(icon());
-                    if (choice !== undefined) setIcon(choice ?? undefined);
-                  }}
-                >
-                  <Show when={icon()} fallback="None">
-                    {(glyph) => <IconGlyph icon={glyph()} />}
-                  </Show>
-                </button>
-                <Show when={icon()}>
-                  <button type="button" class="icon" aria-label="Remove the icon of the waypoint" onClick={() => setIcon(undefined)}>
-                    <CloseIcon />
-                  </button>
-                </Show>
+                <IconPickButton icon={icon()} of="the waypoint" onChange={setIcon} />
               </div>
               <div class="row end">
                 <button type="button" onClick={() => setWaypointDraft(undefined)}>
