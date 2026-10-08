@@ -1,6 +1,6 @@
 import { createMemo, createResource, createSignal, For, Show } from 'solid-js';
 import { ICON_SET_IDS, loadIconSet, searchIcons } from '../icons/iconSets';
-import type { LayerIcon } from '../model/layer';
+import type { MapIcon } from '../model/icon';
 import { showModalWhile } from './modal';
 import { answerIconRequest, iconRequest } from './pickIcon';
 
@@ -8,7 +8,7 @@ import { answerIconRequest, iconRequest } from './pickIcon';
 const LIMIT = 300;
 
 /** An icon as it is drawn: its paths in the current text colour. */
-export function IconGlyph(props: { icon: LayerIcon }) {
+export function IconGlyph(props: { icon: MapIcon }) {
   return (
     <svg class="glyph" viewBox={`0 0 ${props.icon.size[0]} ${props.icon.size[1]}`} aria-hidden="true">
       <For each={props.icon.paths}>{(d) => <path d={d} />}</For>
@@ -17,7 +17,7 @@ export function IconGlyph(props: { icon: LayerIcon }) {
 }
 
 /** An icon as the map shows it: white on a disc of the layer's colour. */
-export function IconBadge(props: { icon: LayerIcon; color: string }) {
+export function IconBadge(props: { icon: MapIcon; color: string }) {
   return (
     <span class="badge-disc" style={{ 'background-color': props.color }} title={props.icon.id}>
       <IconGlyph icon={props.icon} />

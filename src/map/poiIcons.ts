@@ -1,4 +1,4 @@
-import type { LayerIcon } from '../model/layer';
+import type { MapIcon } from '../model/icon';
 import { iconPixelRatio, type Icon } from './icon';
 
 /**
@@ -13,7 +13,7 @@ const GLYPH = 13;
 const RING = 1.5;
 
 /** The map image of an icon on a disc of `color` (#rrggbb). */
-export function poiImageId(icon: LayerIcon, color: string): string {
+export function poiImageId(icon: MapIcon, color: string): string {
   return `poi:${icon.id}:${color}`;
 }
 
@@ -23,7 +23,7 @@ export function parsePoiImageId(id: string): { icon: string; color: string } | u
   return match ? { icon: match[1]!, color: match[2]! } : undefined;
 }
 
-export function drawPoi(icon: LayerIcon, color: string): Icon {
+export function drawPoi(icon: MapIcon, color: string): Icon {
   const ratio = iconPixelRatio();
   const extent = Math.ceil((DISC + 2 * RING) * ratio) + 2;
   const canvas = document.createElement('canvas');

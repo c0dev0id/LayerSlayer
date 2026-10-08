@@ -1,4 +1,4 @@
-import type { LayerIcon } from '../model/layer';
+import type { MapIcon } from '../model/icon';
 import { formatFilter, parseFilter } from '../services/overpass';
 
 /** A kind of OpenStreetMap feature to query: what it is called, the tag filters that find it, and its icon. */
@@ -7,7 +7,7 @@ export interface OsmFeature {
   category: string;
   /** Filters as services/overpass reads them; a feature matching any of them is found. */
   filters: string[];
-  icon?: LayerIcon;
+  icon?: MapIcon;
 }
 
 /** The kinds of features the OSM Query tab offers, with their icons. */

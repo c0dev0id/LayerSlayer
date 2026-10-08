@@ -1,3 +1,5 @@
+import type { MapIcon } from './icon';
+
 /** West, south, east, north in degrees. */
 export type Bounds = [number, number, number, number];
 
@@ -178,7 +180,7 @@ export interface Layer {
   /** An ArcGIS feature layer drawn with the service's own symbols instead of `color`. */
   ownStyle?: boolean;
   /** The icon a vector layer's points and areas are marked with, on a disc of its colour. */
-  icon?: LayerIcon;
+  icon?: MapIcon;
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;
@@ -190,18 +192,6 @@ export interface Layer {
    * add-layer lists show what is on the map.
    */
   origin?: string;
-}
-
-/**
- * An icon as a layer keeps it: which one (`set:name`) and its shape, so that drawing it
- * needs no icon set loaded.
- */
-export interface LayerIcon {
-  id: string;
-  /** Width and height of its viewBox. */
-  size: [number, number];
-  /** SVG path data, each filled. */
-  paths: string[];
 }
 
 /**

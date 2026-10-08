@@ -1,6 +1,6 @@
 import { createMemo, createResource, createSignal, For, Show } from 'solid-js';
 import { filterOsmFeatures, loadOsmFeatures, typedFeature, type OsmFeature } from '../library/osmFeatures';
-import type { LayerIcon } from '../model/layer';
+import type { MapIcon } from '../model/icon';
 import { startFocusDrawing } from '../state/drawing';
 import { addOsmQueryLayer } from '../state/osmQuery';
 import { state } from '../state/store';
@@ -22,7 +22,7 @@ export function OsmQueryTab(props: { onClose: () => void }) {
   const [tags, setTags] = createSignal('');
   const [tagError, setTagError] = createSignal<string>();
   /** The icon picked for the layer, null for none; undefined takes the chosen features'. */
-  const [picked, setPicked] = createSignal<LayerIcon | null>();
+  const [picked, setPicked] = createSignal<MapIcon | null>();
   const querying = createOutcome();
 
   /** The list by category, in the order of the list, with typed tags first. */

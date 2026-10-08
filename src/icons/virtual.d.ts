@@ -6,6 +6,6 @@ declare module 'virtual:icons/*' {
 
 /** The icons the OSM features list names, by `set:name`. */
 declare module 'virtual:osm-feature-icons' {
-  const icons: Record<string, import('../model/layer').LayerIcon>;
+  const icons: Record<string, import('../model/icon').MapIcon>;
   export default icons;
 }
