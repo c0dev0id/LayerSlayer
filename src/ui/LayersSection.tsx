@@ -2,16 +2,15 @@ import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import { parsePmtilesUrl } from '../map/urls';
+import { MAX_ICON_SIZE, MIN_ICON_SIZE } from '../model/icon';
 import {
   canCache,
   isRaster,
   isVector,
   keepsTiles,
   layerColor,
-  MAX_ICON_SIZE,
   MAX_LINE_WIDTH,
   MAX_ZOOM,
-  MIN_ICON_SIZE,
   MIN_LINE_WIDTH,
   MIN_ZOOM,
   NO_ADJUSTMENTS,

@@ -10,6 +10,15 @@ export interface MapIcon {
   paths: string[];
 }
 
+/** How many times its normal size an icon is drawn: a layer's icons, a route's waypoints. */
+export const MIN_ICON_SIZE = 1;
+export const MAX_ICON_SIZE = 3;
+
+/** An icon size within the bounds, whatever a project file says; 1 where unset. */
+export function iconSize(size: number | undefined): number {
+  return Math.min(MAX_ICON_SIZE, Math.max(MIN_ICON_SIZE, size ?? 1));
+}
+
 /** An icon set as the build makes it from its package (tools/iconSets.ts). */
 export interface IconSet {
   id: string;
