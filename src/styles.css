@@ -213,6 +213,11 @@ a {
   fill: currentColor;
 }
 
+.lines-mark {
+  display: inline-grid;
+  flex: none;
+}
+
 .badge-disc {
   display: inline-grid;
   flex: none;

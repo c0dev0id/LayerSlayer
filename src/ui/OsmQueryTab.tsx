@@ -6,13 +6,14 @@ import { addOsmQueryLayer } from '../state/osmQuery';
 import { state } from '../state/store';
 import { errorMessage } from '../state/ui';
 import { IconPickButton } from './IconPicker';
-import { IconGlyph } from './icons';
+import { IconGlyph, RouteIcon } from './icons';
 import { createOutcome, OutcomeNote } from './outcome';
 
 /**
  * A layer of OpenStreetMap features found in the focus area: features chosen from the list
  * or typed in as tags, queried together. Tags typed in join the list at the top. The layer
- * takes the icon of the first chosen feature that has one, unless another is picked.
+ * takes the icon of the first chosen feature that has one, unless another is picked; a layer
+ * of features found as lines only has none, as icons do not mark lines.
  */
 export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
   // The list and its icons load the first time the tab is shown, not with the app.
@@ -41,8 +42,10 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
   const toggle = (feature: OsmFeature) =>
     setChosen(isChosen(feature) ? chosen().filter((c) => c.name !== feature.name) : [...chosen(), feature]);
   const layerName = () => chosen().map((f) => f.name).join(', ');
+  const linesOnly = () => chosen().length > 0 && chosen().every((f) => f.lines);
   const icon = () => {
     const choice = picked();
+    if (linesOnly()) return undefined;
     return choice === undefined ? chosen().find((f) => f.icon)?.icon : (choice ?? undefined);
   };
 
@@ -98,7 +101,18 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
                     <li>
                       <button class="offer" classList={{ added: isChosen(feature) }} aria-pressed={isChosen(feature)} onClick={() => toggle(feature)}>
                         <span class="mark" aria-hidden="true" />
-                        <Show when={feature.icon}>{(glyph) => <IconGlyph icon={glyph()} />}</Show>
+                        <Show
+                          when={feature.icon}
+                          fallback={
+                            <Show when={feature.lines}>
+                              <span class="muted lines-mark" title="Found as lines, which icons do not mark">
+                                <RouteIcon />
+                              </span>
+                            </Show>
+                          }
+                        >
+                          {(glyph) => <IconGlyph icon={glyph()} />}
+                        </Show>
                         <span class="grow">
                           <span class="name">{feature.name}</span>
                           <Show when={feature.category !== 'Tags'}>
@@ -130,7 +144,9 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
         {(message) => <p class="note error">{message()}</p>}
       </Show>
       <div class="row">
-        <IconPickButton icon={icon()} of="the new layer" onChange={(choice) => setPicked(choice ?? null)} />
+        <Show when={!linesOnly()}>
+          <IconPickButton icon={icon()} of="the new layer" onChange={(choice) => setPicked(choice ?? null)} />
+        </Show>
         <span class="grow name" classList={{ muted: chosen().length === 0 }} title={layerName()}>
           {chosen().length > 0 ? layerName() : 'Choose features or add tags; together they form one layer.'}
         </span>

@@ -15,11 +15,15 @@ describe('OSM features', () => {
     expect(new Set(features.map((f) => f.name)).size).toBe(features.length);
   });
 
-  it('each come with an icon', async () => {
+  it('come with an icon, except those found as lines, which icons do not mark', async () => {
     const loaded = await loadOsmFeatures();
     expect(loaded).toHaveLength(features.length);
-    for (const feature of loaded) expect(feature.icon?.paths.length, feature.name).toBeGreaterThan(0);
+    for (const feature of loaded) {
+      if (feature.lines) expect(feature.icon, feature.name).toBeUndefined();
+      else expect(feature.icon?.paths.length, feature.name).toBeGreaterThan(0);
+    }
     expect(loaded.find((f) => f.name === 'Cattle grids')?.icon?.id).toBe('temaki:cattle_grid');
+    expect(loaded.find((f) => f.name === 'Main roads')?.lines).toBe(true);
   });
 
   it('are found by name, category or tag', () => {

@@ -70,10 +70,10 @@ const OSM_FEATURES = fileURLToPath(new URL('../src/library/osmFeatures.json', im
 
 /** The icons the OSM features name, by `set:name`, with their shapes. Unknown icons fail the build. */
 function osmFeatureIcons(): Record<string, MapIcon> {
-  const { features } = JSON.parse(readFileSync(OSM_FEATURES, 'utf8')) as { features: { name: string; icon: string }[] };
+  const { features } = JSON.parse(readFileSync(OSM_FEATURES, 'utf8')) as { features: { name: string; icon?: string }[] };
   const icons: Record<string, MapIcon> = {};
   for (const { name, icon } of features) {
-    if (icon in icons) continue;
+    if (!icon || icon in icons) continue;
     const [setId = '', iconName = ''] = icon.split(':');
     const set = iconSet(setId);
     if (!set?.icons[iconName]) throw new Error(`OSM feature "${name}" names the icon ${icon}, which no icon set has.`);
