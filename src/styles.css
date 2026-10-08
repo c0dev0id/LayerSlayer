@@ -997,3 +997,8 @@ input.swatch {
     font-size: 12px;
   }
 }
+
+/* The map's background colour, under the last layer of the list. */
+.row.background {
+  padding: 0 0 0 4px;
+}

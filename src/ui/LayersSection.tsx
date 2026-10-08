@@ -15,7 +15,7 @@ import {
   type RasterAdjustments,
 } from '../model/layer';
 import { hostOf } from '../state/net';
-import { moveLayer, removeLayer, setActiveLayer, setHostProxied, state, updateLayer } from '../state/store';
+import { moveLayer, removeLayer, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
@@ -41,6 +41,21 @@ export function LayersSection(props: { onAdd: () => void }) {
       <ul class="layers" ref={list}>
         <For each={topFirst()}>{(layer) => <LayerEntry layer={layer} list={() => list} />}</For>
       </ul>
+      <div class="row background" title="The colour the map is drawn on, under every layer">
+        <span class="muted grow">Background</span>
+        <input
+          type="color"
+          class="swatch"
+          aria-label="Background colour of the map"
+          value={state.settings.background ?? '#ffffff'}
+          onInput={(e) => setBackground(e.currentTarget.value)}
+        />
+        <Show when={state.settings.background}>
+          <button class="icon" title="Back to white" aria-label="Reset the background colour" onClick={() => setBackground(undefined)}>
+            <CloseIcon />
+          </button>
+        </Show>
+      </div>
       <Show when={active()} keyed>
         {(layer) => <ActiveLayer layer={layer} />}
       </Show>
