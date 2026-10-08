@@ -155,6 +155,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
   storage keys (local storage, IndexedDB, the tile cache) and the project file format
   (`.webmap`, `"app": "webmap"`) keep the code name, so browsers keep what they hold and
   project files saved before the rename still open.
+- **The logo** (a globe cut by a sword) came as raster pieces of a generated prototype. The
+  sword and globe were put back together on a transparent background and traced with
+  VTracer into `public/logo.svg`: 21 flat shapes, about 25 KB, with a viewBox so it serves
+  as the browser tab icon, the panel header mark and the README image alike. The name is
+  page text, not part of the image.
 - **Project files, as in mappic.** *Save* writes a ZIP (`.webmap`): `project.json` with
   the layers, view, focus area, proxied hosts, routes and waypoints, and each stored file
   as `files/<key>` under the key its layer refers to, so nothing needs rewriting. Reading

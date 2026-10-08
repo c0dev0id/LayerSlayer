@@ -1,4 +1,4 @@
-# Layer Slayer
+# <img src="public/logo.svg" alt="" width="40" align="top"> Layer Slayer
 
 A map viewer for the web that stacks base maps and overlays from many kinds of map
 services: WMS, WMTS, WFS, OGC API – Features, ArcGIS MapServer and FeatureServer, XYZ tile

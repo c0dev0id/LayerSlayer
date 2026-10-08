@@ -56,6 +56,11 @@ a {
   font-size: 18px;
 }
 
+.logo {
+  width: 28px;
+  height: 28px;
+}
+
 .section h2,
 .dialog h2 {
   margin: 0;
