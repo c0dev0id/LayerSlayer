@@ -35,6 +35,8 @@ const SOURCE_TYPES = new Set(['xyz', 'wms', 'wmts', 'arcgis-map', 'arcgis-featur
 const FIRST_LAYER: LayerDraft = {
   name: 'OpenFreeMap Liberty',
   source: { type: 'style', url: 'https://tiles.openfreemap.org/styles/liberty' },
+  // As if added from its library entry, which then shows it as on the map.
+  origin: 'https://tiles.openfreemap.org/styles/liberty',
 };
 
 export function defaultState(): AppState {
@@ -137,6 +139,11 @@ export function removeLayer(id: string): void {
   setState('layers', (layers) => layers.filter((l) => l.id !== id));
   if (state.activeLayerId === id) setState('activeLayerId', state.layers[Math.min(index, state.layers.length - 1)]?.id);
   if (file) void deleteFile(file);
+}
+
+/** Removes every layer that `matches`. */
+export function removeLayersWhere(matches: (layer: Layer) => boolean): void {
+  for (const layer of state.layers.filter(matches)) removeLayer(layer.id);
 }
 
 /** Moves a layer to `index` in drawing order (0 is the bottom). */

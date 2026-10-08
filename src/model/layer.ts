@@ -103,14 +103,20 @@ export interface Layer {
   maxzoom: number;
   /** Colour of a vector layer that brings no style of its own, as #rrggbb. */
   color?: string;
-  /** Where the source has data; nothing is fetched outside. */
+  /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;
+  /**
+   * Where the layer was added from: the source's address, followed by a space (which no
+   * address contains) and the layer's name where the source names its layers. Lets the
+   * add-layer lists show what is on the map.
+   */
+  origin?: string;
 }
 
 /** What a service offers to add: a layer before it gets an id and the user's settings. */
 export type LayerDraft = Pick<Layer, 'name' | 'source'> &
-  Partial<Pick<Layer, 'minzoom' | 'maxzoom' | 'bounds' | 'attribution'>>;
+  Partial<Pick<Layer, 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin'>>;
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;

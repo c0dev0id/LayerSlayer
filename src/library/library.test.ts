@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { detectServiceType } from '../services/detect';
 import { SERVICE_TYPES } from '../services/types';
 import { parseXyz } from '../services/xyz';
+import { defaultState } from '../state/store';
 import library from './library.json';
 import { filterLibrary, withEntry, type LibraryEntry } from './library';
 
@@ -22,6 +23,10 @@ describe('library', () => {
 
   it('names types the address detection agrees with', () => {
     for (const entry of entries) expect(detectServiceType(entry.url), entry.name).toBe(entry.type);
+  });
+
+  it('holds the default layer, so its entry shows it as on the map', () => {
+    expect(entries.map((e) => e.url)).toContain(defaultState().layers[0]!.origin);
   });
 
   it('filters by words, region and category', () => {
