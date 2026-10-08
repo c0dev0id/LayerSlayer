@@ -515,15 +515,6 @@
       "note": "Recent aerial photography."
     },
     {
-      "name": "Amsterdam — travel times on main roads",
-      "type": "geojson",
-      "url": "http://web.redant.net/~amsterdam/ndw/data/reistijdenAmsterdam.geojson",
-      "region": "Netherlands",
-      "category": "Traffic",
-      "note": "Current travel time per road stretch of the main road network, refreshed every five minutes. The server speaks plain HTTP only, so it needs the CORS proxy.",
-      "cors": false
-    },
-    {
       "name": "Kartverket",
       "type": "wmts",
       "url": "https://cache.kartverket.no/v1/wmts/1.0.0/WMTSCapabilities.xml",
