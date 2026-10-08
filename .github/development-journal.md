@@ -260,6 +260,24 @@ It is a static single-page app on GitHub Pages; there is no server component.
     loaded when such a file is imported.
   - Requests to the routing server go out directly, not through the CORS proxy; it sends
     `Access-Control-Allow-Origin: *`.
+- **The focus area limits requests through source bounds.** The area is a polygon kept
+  with the layers. Its bounding box, intersected with each layer's bounds, becomes the
+  `bounds` of the layer's source, which MapLibre uses to skip tiles outside; explicit
+  bounds take precedence over a TileJSON's, so this also covers COGs and the tiled
+  sources of styles. Feature layers, otherwise not limited to their bounds, get the box
+  too. Whole-file sources (GeoJSON, images) cannot be limited and are only left out, like
+  every other layer, when their bounds miss the box. The bottom layer of the stack is
+  exempt, so the area keeps its surroundings for orientation.
+  - Tiles that meet the box load whole, so an upper layer still draws past the polygon up
+    to the edges of those tiles. The overlay dims everything outside the polygon: a world
+    polygon with the area as its hole, wound against the world ring, since MapLibre takes
+    a ring wound like the first as a polygon of its own. It sits between the layers and
+    the route lines.
+  - A new area changes the sources' bounds, which the style diff applies by replacing the
+    sources, so their tiles load again.
+  - Drawing it goes through the route tool's `Interactions` and tap filter; drawing a
+    route and drawing the area exclude each other. The previous area stays until a new
+    one is closed.
 - **UI after mappic.** Top-first layer list with an active layer whose settings sit below
   it, names renamed in place on the card, a summary line per card (opacity, colour, zoom
   range, cache, proxy) so the list answers which layer is set how without opening each, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
@@ -291,6 +309,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Optional CORS proxy, used per host.
+- A focus area: a polygon outside whose bounds no layer but the bottom one requests
+  tiles, with the map around it dimmed.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
   waypoints, undo and redo, car, bike and foot profiles, GPX export and import.
 - Layers, routes, settings, view and imported files survive a browser restart.

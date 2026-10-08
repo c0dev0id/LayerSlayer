@@ -41,6 +41,13 @@ in the browser.
 - Below the list, the **active layer** (click a name) has its opacity, zoom range, colour
   (vector layers), source, the CORS proxy for its server and, for tiled layers, whether it
   keeps its tiles in the browser. New layers start at 50% opacity.
+- **Focus area**, above the layers: *Draw* starts a polygon over the map. Each tap places
+  a corner and a tap on the first corner closes it; Backspace or *Undo* takes the last
+  corner back, Esc or *Cancel* stops. Every layer but the bottom one then requests tiles
+  only within the bounds of the area, and a layer that lies entirely outside them is not
+  loaded at all. The bottom layer, usually the base map, loads everywhere for
+  orientation, and the map outside the polygon is dimmed. *Redraw* replaces the area, ×
+  removes it.
 - **Routes**: *Draw route* starts a route and a toolbar over the map.
   - *Append* adds a point at the end with each tap on the map, *Insert* puts one into the
     line where it is tapped, *Waypoint* places a named pin, and *Delete* removes the point
@@ -56,7 +63,7 @@ in the browser.
     and stay editable. A leg the routing cannot find stays a red dashed line until one of
     its points is moved.
 
-Layers, their settings, routes and the map view are kept in the browser's local storage,
+Layers, their settings, the focus area, routes and the map view are kept in the browser's local storage,
 files in IndexedDB, so the map is as it was after a restart.
 
 ## How each source is drawn
