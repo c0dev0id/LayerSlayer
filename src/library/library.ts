@@ -22,6 +22,8 @@ export interface LibraryEntry {
   maxzoom?: number;
   /** The tile layers of a vector tile template, which sample tiles may not all show. */
   layers?: string[];
+  /** ArcGIS feature layers drawn with the service's own symbols from the start: where their colours are the data. */
+  ownStyle?: true;
 }
 
 export async function loadLibrary(): Promise<LibraryEntry[]> {
@@ -52,8 +54,8 @@ export function entryService(entry: LibraryEntry): ServiceInfo | undefined {
 
 /**
  * What a service read from the library offers, with what the entry knows on top: a
- * service with a single layer takes the entry's name, and a tile template its
- * attribution, bounds and zooms.
+ * service with a single layer takes the entry's name, a tile template its attribution,
+ * bounds and zooms, and feature layers the service's own symbols where the entry says so.
  */
 export function withEntry(info: ServiceInfo, entry: LibraryEntry): ServiceInfo {
   const single = info.offers.length === 1;
@@ -66,6 +68,7 @@ export function withEntry(info: ServiceInfo, entry: LibraryEntry): ServiceInfo {
       if (single) draft.name = entry.name;
       if (entry.attribution) draft.attribution = entry.attribution;
       if (entry.bounds) draft.bounds = entry.bounds;
+      if (entry.ownStyle && draft.source.type === 'arcgis-features') draft.ownStyle = true;
       if (draft.source.type === 'xyz' || draft.source.type === 'vector-tiles') {
         draft.source = {
           ...draft.source,

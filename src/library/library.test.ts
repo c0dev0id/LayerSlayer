@@ -66,6 +66,15 @@ describe('library', () => {
     expect(filterLibrary(entries, '', 'Germany', 'Aerial').every((e) => e.region === 'Germany' && e.category === 'Aerial')).toBe(true);
   });
 
+  it('draws feature layers with their own symbols where the entry says so', () => {
+    const entry: LibraryEntry = { name: 'AQI forecast', type: 'arcgis-features', url: 'https://x.example/FeatureServer', region: 'United States', category: 'Weather', ownStyle: true };
+    const source = { type: 'arcgis-features' as const, url: `${entry.url}/0`, geometry: 'polygon' as const, maxRecordCount: 2000 };
+    const info = withEntry({ title: 'Forecast', offers: [{ title: 'Today', depth: 0, draft: { name: 'Today', source } }] }, entry);
+    expect(info.offers[0]!.draft).toMatchObject({ ownStyle: true });
+    const plain = withEntry({ title: 'Forecast', offers: [{ title: 'Today', depth: 0, draft: { name: 'Today', source } }] }, { ...entry, ownStyle: undefined });
+    expect(plain.offers[0]!.draft).not.toHaveProperty('ownStyle');
+  });
+
   it('adds what the entry knows to a tile template', () => {
     const entry = entries.find((e) => e.name === 'OpenTopoMap')!;
     const info = withEntry(parseXyz(entry.url), entry);

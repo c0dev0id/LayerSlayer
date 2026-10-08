@@ -221,7 +221,7 @@ export const NO_ADJUSTMENTS: RasterAdjustments = { hue: 0, saturation: 0, contra
 
 /** What a service offers to add: a layer before it gets an id and the user's settings. */
 export type LayerDraft = Pick<Layer, 'name' | 'source'> &
-  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin' | 'icon'>>;
+  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin' | 'icon' | 'ownStyle'>>;
 
 /** New layers are half transparent, so what lies below them shows; layers with an icon start opaque, as icons read best that way. */
 const DEFAULT_OPACITY = 0.5;

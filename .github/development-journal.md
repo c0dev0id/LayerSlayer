@@ -95,7 +95,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
   which the map asks for through `styleimagemissing`, so the composed style stays plain
   data. Hatched fills are a light wash of their colour; CIM symbols, visual variables,
   labels and other renderers are not drawn, and such a layer keeps its colour with the
-  reason shown. KML styles are still dropped on import.
+  reason shown. KML styles are still dropped on import. A library entry can turn the
+  option on from the start (`ownStyle`) where the service's colours are the data, as the
+  AQI categories of EPA AirNow are; one colour would make such a layer meaningless.
 - **Each service kind maps to a native source.**
   - WMS: a raster source with `{bbox-epsg-3857}` in a GetMap URL, 512 px tiles, the
     service's name for Web Mercator. Scale denominators become zoom ranges.
