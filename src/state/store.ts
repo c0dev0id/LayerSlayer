@@ -37,6 +37,8 @@ const FIRST_LAYER: LayerDraft = {
   source: { type: 'style', url: 'https://tiles.openfreemap.org/styles/liberty' },
   // As if added from its library entry, which then shows it as on the map.
   origin: 'https://tiles.openfreemap.org/styles/liberty',
+  // The map a first visit sees, so not see-through like layers added to it.
+  opacity: 1,
 };
 
 export function defaultState(): AppState {

@@ -151,7 +151,10 @@ export interface Layer {
 
 /** What a service offers to add: a layer before it gets an id and the user's settings. */
 export type LayerDraft = Pick<Layer, 'name' | 'source'> &
-  Partial<Pick<Layer, 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin'>>;
+  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin'>>;
+
+/** New layers are half transparent, so what lies below them shows. */
+export const DEFAULT_OPACITY = 0.5;
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -187,7 +190,7 @@ export function createLayer(draft: LayerDraft, existing: readonly Layer[], id: s
   const layer: Layer = {
     id,
     visible: true,
-    opacity: 1,
+    opacity: DEFAULT_OPACITY,
     minzoom: MIN_ZOOM,
     maxzoom: MAX_ZOOM,
     ...draft,
