@@ -32,7 +32,8 @@ browser.
   A layer shown in grey italics is outside its zoom range at the current zoom; a red
   triangle carries the last error loading it.
 - Below the list, the **active layer** (click a name) has its name, opacity, zoom range,
-  colour (vector layers) and source.
+  colour (vector layers), source, the CORS proxy for its server and, for tiled layers,
+  whether it keeps its tiles in the browser.
 
 Layers, their settings and the map view are kept in the browser's local storage, files
 in IndexedDB, so the map is as it was after a restart.
@@ -52,12 +53,16 @@ in IndexedDB, so the map is as it was after a restart.
 
 Only Web Mercator is drawn; services that offer no Web Mercator are refused with a reason.
 
-Feature servers are slow and often forbid caching (ArcGIS Online allows five minutes), so
-feature tiles are kept in the browser's Cache Storage and answered from there for 24 hours;
-Settings shows how many are kept and clears them. At most four queries run at once per
-server. New feature layers are shown from zoom 9, or from the service's own minimum zoom
-where that is higher: at lower zooms each tile covers so much that the server returns its
-whole record limit for it. The zoom range of the layer widens that.
+Slow servers often forbid caching too (ArcGIS Online allows five minutes). A tiled layer
+(XYZ, WMS, WMTS, ArcGIS) can keep its tiles in the browser: tick *Keep tiles in this
+browser* in its settings, and tiles once loaded are answered from the browser's Cache
+Storage for 24 hours. New feature layers keep their tiles from the start. Settings shows
+how many tiles are kept and clears them.
+
+At most four feature queries run at once per server. New feature layers are shown from
+zoom 9, or from the service's own minimum zoom where that is higher: at lower zooms each
+tile covers so much that the server returns its whole record limit for it. The zoom range
+of the layer widens that.
 
 ## CORS and the proxy
 

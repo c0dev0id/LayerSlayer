@@ -118,15 +118,23 @@ It is a static single-page app on GitHub Pages; there is no server component.
   4096 px on the long side and 6× scale, and kept as WebP (PNG where the browser cannot
   encode WebP). pdf.js 6 uses `Map.prototype.getOrInsertComputed`, which current Chromium
   lacks, so its legacy build is used.
-- **Feature tiles are cached by the app.** Feature servers answer slowly and often forbid
-  HTTP caching (ArcGIS Online sends `max-age=300`), so the browser cache does not help.
-  Encoded feature tiles go into Cache Storage, keyed by their query URL, and are answered
-  from there for 24 hours; empty tiles are kept too, since they spare a query just the
-  same. Expired tiles are swept at start-up, and the cache name carries a version so a
-  change of encoding never reads old tiles back. Cache Storage was chosen over IndexedDB
-  because it holds HTTP responses by URL as it is, and the browser accounts for it in the
-  site's storage. Raster tiles are left to the HTTP cache. At most four feature queries
-  run at once per server; queued tiles that scroll out of view are dropped.
+- **Tile caching is a per-layer choice.** Slow servers often forbid HTTP caching too
+  (ArcGIS Online sends `max-age=300`), so the browser cache does not help. A tiled layer
+  (XYZ, WMS, WMTS, ArcGIS export and features) with `cache` set has its tile addresses
+  prefixed with `cache+` (`cache+https://…`, `cache+wmts-matrix://…`); MapLibre hands
+  every scheme it does not know to the protocol registered for it, and one protocol
+  answers them all from Cache Storage or fetches the tile and keeps it for 24 hours.
+  Caching is thereby a wrapper around fetching rather than part of each source kind.
+  Tiles are kept under the address that answers them (the tile URL, a WMTS tile's resolved
+  URL, a feature tile's query); empty feature tiles are kept too, errors are not, so a
+  missing tile is asked for again. Expired tiles are swept at start-up, and the cache name
+  carries a version so a change in what is kept never reads old entries back. Cache
+  Storage was chosen over IndexedDB because it holds HTTP responses by URL as it is, and
+  the browser accounts for it in the site's storage. It is opt-in because it serves stale
+  tiles for up to a day, which is fine for slow, static maps and wrong for radar; new
+  feature layers have it on, since feature servers are the slow ones as a rule. Styles
+  are left out: their tiles come from addresses inside the style. At most four feature
+  queries run at once per server; queued tiles that scroll out of view are dropped.
 - **Flying to a layer.** The layer row offers a frame icon when the layer's bounds span at
   most half the Web Mercator world in width and in height; an area measure was tried first
   and failed for a week of earthquakes, which spans every longitude but leaves out the
@@ -165,7 +173,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
   and a filter for services with hundreds of layers.
 - Layer list with drag and keyboard reordering, visibility, removal, flying to the layer's
   area, opacity, zoom range, colour for vector layers, and per-layer error marks.
-- Feature tiles cached in the browser for a day, with a limit on parallel queries per
-  server.
+- Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
+  feature queries per server.
 - Optional CORS proxy, used per host.
 - Layers, settings, view and imported files survive a browser restart.
