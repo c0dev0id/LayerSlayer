@@ -161,7 +161,8 @@ a {
 
 /* Layer list: drag handle, visibility, name (selects the layer), error, remove. */
 
-.layers {
+.layers,
+.routes {
   list-style: none;
   margin: 6px 0 0;
   padding: 0;
@@ -564,12 +565,6 @@ input.swatch {
 }
 
 /* Route tool: routes in the panel, markers, toolbar, hint bar and menu over the map. */
-
-.routes {
-  list-style: none;
-  margin: 6px 0 0;
-  padding: 0;
-}
 
 .route {
   padding: 4px 6px;

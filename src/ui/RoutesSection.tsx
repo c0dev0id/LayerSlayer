@@ -1,7 +1,7 @@
 import { createSignal, For, Show } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { geojsonBounds } from '../geo/bounds';
-import { PROFILES, type Profile, type Route } from '../model/route';
+import { PROFILES, type LngLat, type Profile, type Route } from '../model/route';
 import { gpxToRouteData, routeTracks } from '../routing/gpx';
 import { routePoints } from '../routing/legs';
 import { nextRouteColor } from '../routing/routeEdit';
@@ -10,7 +10,7 @@ import { editingRouteId, startDrawing, stopDrawing } from '../state/drawing';
 import { addRoute, importRouteData, removeRoute, renameRoute, routeData, setRouteProfile } from '../state/routes';
 import { parseGpx, toGpx } from '../services/gpx';
 import { fileName } from '../services/read';
-import { errorMessage, map } from '../state/ui';
+import { errorMessage, showBounds } from '../state/ui';
 import { downloadBlob } from './download';
 import { EditableName } from './EditableName';
 import { AreaIcon, CloseIcon } from './icons';
@@ -40,9 +40,12 @@ async function importGpx(file: File): Promise<void> {
   });
   if (data.routes.length === 0 && data.waypoints.length === 0) throw new Error(`${file.name} holds no routes, tracks or waypoints.`);
   importRouteData(data, 'Import GPX');
-  const points = [...data.routes.flatMap((r) => r.points.map((p) => p.lngLat)), ...data.waypoints.map((w) => w.lngLat)];
+  showPoints([...data.routes.flatMap((r) => r.points.map((p) => p.lngLat)), ...data.waypoints.map((w) => w.lngLat)]);
+}
+
+function showPoints(points: LngLat[]) {
   const bounds = geojsonBounds({ type: 'MultiPoint', coordinates: points });
-  if (bounds) map()?.fitBounds(bounds, { padding: 40, maxZoom: 16 });
+  if (bounds) showBounds(bounds);
 }
 
 function exportGpx() {
@@ -61,9 +64,7 @@ function exportGpx() {
 /** Moves the view to show the whole route, detours of routed legs included. */
 function flyToRoute(route: Route) {
   const plain = unwrap(route);
-  const points = [...plain.points.map((p) => p.lngLat), ...routePoints(plain)];
-  const bounds = geojsonBounds({ type: 'MultiPoint', coordinates: points });
-  if (bounds) map()?.fitBounds(bounds, { padding: 40, maxZoom: 16 });
+  showPoints([...plain.points.map((p) => p.lngLat), ...routePoints(plain)]);
 }
 
 /** The routes drawn on the map: draw, edit, import and export them as GPX. */

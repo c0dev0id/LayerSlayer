@@ -1,7 +1,7 @@
 import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
-import { canCache, isVector, MAX_ZOOM, MIN_ZOOM, type Layer } from '../model/layer';
+import { canCache, isVector, keepsTiles, MAX_ZOOM, MIN_ZOOM, type Layer } from '../model/layer';
 import { hostOf } from '../state/net';
 import {
   moveLayer,
@@ -11,7 +11,7 @@ import {
   state,
   updateLayer,
 } from '../state/store';
-import { layerErrors, map, zoom } from '../state/ui';
+import { layerErrors, showBounds, zoom } from '../state/ui';
 import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
 import { reorderTarget } from './reorder';
 
@@ -44,7 +44,7 @@ export function LayersSection(props: { onAdd: () => void }) {
 
 /** Flies to the layer's bounds, no closer than the layer is drawn. */
 function flyTo(layer: Layer): void {
-  if (layer.bounds) map()?.fitBounds(layer.bounds, { padding: 40, maxZoom: Math.min(layer.maxzoom, 16) });
+  if (layer.bounds) showBounds(layer.bounds, Math.min(layer.maxzoom, 16));
 }
 
 function outOfRange(layer: Layer): boolean {
@@ -281,7 +281,7 @@ function ActiveLayer(props: { layer: Layer }) {
       </Show>
       <Show when={canCache(layer.source)}>
         <label class="row" title="For slow servers: tiles once loaded are answered from the browser">
-          <input type="checkbox" checked={layer.cache !== false} onChange={(e) => updateLayer(layer.id, { cache: e.currentTarget.checked })} />
+          <input type="checkbox" checked={keepsTiles(layer)} onChange={(e) => updateLayer(layer.id, { cache: e.currentTarget.checked })} />
           <span>Keep tiles in this browser for {TILE_MAX_AGE_HOURS} hours</span>
         </label>
       </Show>

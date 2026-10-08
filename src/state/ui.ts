@@ -1,9 +1,15 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
+import type { Bounds } from '../model/layer';
 
 /** The map once it exists, for actions like zooming to a layer. */
 export const [map, setMap] = createSignal<MapLibreMap>();
+
+/** Moves the map to show the bounds, coming no closer than `maxZoom`. */
+export function showBounds(bounds: Bounds, maxZoom = 16): void {
+  map()?.fitBounds(bounds, { padding: 40, maxZoom });
+}
 
 /** The map's current zoom, shown next to a layer's zoom range. */
 export const [zoom, setZoom] = createSignal(0);

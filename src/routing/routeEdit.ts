@@ -1,3 +1,4 @@
+import { VECTOR_COLORS } from '../model/layer';
 import type { LngLat, Profile, Route, RoutePoint } from '../model/route';
 import { pruneLegs, routedLegs } from './legs';
 
@@ -35,10 +36,8 @@ export function addLeg(route: Route, key: string, geometry: string): Route {
   return { ...route, legs: { ...route.legs, [key]: geometry } };
 }
 
-const PALETTE = ['#e8590c', '#1971c2', '#2f9e44', '#ae3ec9', '#f08c00', '#0c8599', '#e03131', '#5f3dc4'];
-
-/** The first palette colour not used by another route. */
+/** The first colour of the vector layers' palette not used by another route. */
 export function nextRouteColor(routes: readonly Pick<Route, 'color'>[]): string {
   const used = new Set(routes.map((r) => r.color));
-  return PALETTE.find((c) => !used.has(c)) ?? PALETTE[routes.length % PALETTE.length]!;
+  return VECTOR_COLORS.find((c) => !used.has(c)) ?? VECTOR_COLORS[routes.length % VECTOR_COLORS.length]!;
 }

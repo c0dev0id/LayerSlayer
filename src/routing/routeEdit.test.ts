@@ -86,6 +86,6 @@ describe('route edits', () => {
 describe('nextRouteColor', () => {
   it('picks the first unused colour', () => {
     expect(nextRouteColor([])).toBe('#e8590c');
-    expect(nextRouteColor([{ color: '#e8590c' }])).toBe('#1971c2');
+    expect(nextRouteColor([{ color: '#e8590c' }])).toBe('#1c7ed6');
   });
 });

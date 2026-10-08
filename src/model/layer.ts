@@ -108,7 +108,7 @@ export interface Layer {
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;
-  /** Whether the layer keeps its tiles in the browser (`canCache`); on unless false. */
+  /** Whether the layer keeps its tiles in the browser where it can; see `keepsTiles`. */
   cache?: boolean;
   /**
    * Where the layer was added from: the source's address, followed by a space (which no
@@ -138,6 +138,11 @@ export function isVector(source: LayerSource): boolean {
  * can address. A style's tiles come from addresses inside the style; GeoJSON and images
  * are single files.
  */
+/** Whether the layer keeps its tiles in the browser: where its source allows, unless switched off. */
+export function keepsTiles(layer: Layer): boolean {
+  return canCache(layer.source) && layer.cache !== false;
+}
+
 export function canCache(source: LayerSource): boolean {
   return ['xyz', 'wms', 'wmts', 'arcgis-map', 'arcgis-features'].includes(source.type);
 }
