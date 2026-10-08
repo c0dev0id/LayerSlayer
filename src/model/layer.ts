@@ -220,16 +220,16 @@ export function isVector(source: LayerSource): boolean {
   return SOURCE_KINDS[source.type].vector === true;
 }
 
-/**
- * Whether the source's tiles can be kept in the browser: tiled sources whose tiles the app
- * can address. A style's tiles come from addresses inside the style; GeoJSON and images
- * are single files.
- */
 /** Whether the layer keeps its tiles in the browser: where its source allows, unless switched off. */
 export function keepsTiles(layer: Layer): boolean {
   return canCache(layer.source) && layer.cache !== false;
 }
 
+/**
+ * Whether the source's tiles can be kept in the browser: tiled sources whose tiles the app
+ * can address. A style's tiles come from addresses inside the style; GeoJSON and images
+ * are single files.
+ */
 export function canCache(source: LayerSource): boolean {
   return SOURCE_KINDS[source.type].cache === true;
 }
