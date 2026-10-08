@@ -62,23 +62,16 @@ const [historyVersion, setHistoryVersion] = createSignal(0);
 
 const snapshot = (): RouteData => structuredClone(unwrap(routeData));
 
-/** The gesture the last edit was part of; its further edits join that undo step. */
-let gesture: string | undefined;
-
-/**
- * Records the current routes as an undo step; call right before an edit. Edits of one
- * gesture, such as a slider being dragged, make a single step: the first is recorded.
- */
-function recordEdit(label: string, ofGesture?: string): void {
-  if (ofGesture !== undefined && ofGesture === gesture) return;
-  gesture = ofGesture;
-  history.record(snapshot(), label);
+/** Records the current routes as an undo step; call right before an edit. Edits of one `gesture` make one step. */
+function recordEdit(label: string, gesture?: string): void {
+  if (history.continues(gesture)) return;
+  history.record(snapshot(), label, gesture);
   setHistoryVersion((v) => v + 1);
 }
 
-/** Ends a gesture: its next edit is an undo step of its own. */
+/** Ends a gesture, such as a slider let go: its next edit is an undo step of its own. */
 export function endGesture(): void {
-  gesture = undefined;
+  history.endGesture();
 }
 
 /** Label of the edit that undo would revert (reactive). */
@@ -103,7 +96,6 @@ export function redo(): void {
 
 function restore(state: RouteData | undefined): void {
   if (!state) return;
-  gesture = undefined;
   setRouteData(reconcile(state, { key: 'id', merge: false }));
   setHistoryVersion((v) => v + 1);
 }
@@ -130,36 +122,42 @@ export function removeRoute(id: string): void {
   setRouteData('waypoints', (list) => list.filter((w) => w.routeId !== id));
 }
 
-export function renameRoute(id: string, name: string): void {
+/** Sets a property of a route as an undo step; with `gesture`, the values set until the gesture ends make one step. */
+function setRouteProperty<K extends 'name' | 'color' | 'waypointSize'>(id: string, key: K, value: Route[K], label: string, gesture = false): void {
   const index = routeData.routes.findIndex((r) => r.id === id);
-  if (index < 0 || routeData.routes[index]!.name === name) return;
-  recordEdit('Rename route');
-  setRouteData('routes', index, 'name', name);
+  if (index < 0 || routeData.routes[index]![key] === value) return;
+  recordEdit(label, gesture ? `${key} ${id}` : undefined);
+  setRouteData('routes', index, { [key]: value } as Partial<Route>);
+}
+
+export function renameRoute(id: string, name: string): void {
+  setRouteProperty(id, 'name', name, 'Rename route');
+}
+
+/** Sets a route's colour; the colours picked while the picker is open make one undo step. */
+export function setRouteColor(id: string, color: string): void {
+  setRouteProperty(id, 'color', color, 'Change route colour', true);
+}
+
+/** Sets how large a route's waypoints are drawn; dragging the slider makes one undo step. */
+export function setWaypointSize(id: string, size: number): void {
+  setRouteProperty(id, 'waypointSize', size, 'Change waypoint size', true);
 }
 
 /**
  * Applies a pure edit to a route; reconciling by id keeps unchanged points' identity.
  * Edits with a label are undo steps; routing results come without one.
  */
-function updateRoute(id: string, change: (route: Route) => Route, label?: string, ofGesture?: string): void {
+function updateRoute(id: string, change: (route: Route) => Route, label?: string): void {
   const index = routeData.routes.findIndex((r) => r.id === id);
   if (index < 0) return;
   const current = unwrap(routeData.routes[index]!);
   const next = change(current);
   if (next === current) return;
-  if (label) recordEdit(label, ofGesture);
+  if (label) recordEdit(label);
   setRouteData('routes', index, reconcile(next, { key: 'id', merge: false }));
 }
 
-/** Sets a route's colour; the colours picked while the picker is open make one undo step. */
-export function setRouteColor(id: string, color: string): void {
-  updateRoute(id, (r) => (r.color === color ? r : { ...r, color }), 'Change route colour', `colour ${id}`);
-}
-
-/** Sets how large a route's waypoints are drawn; dragging the slider makes one undo step. */
-export function setWaypointSize(id: string, size: number): void {
-  updateRoute(id, (r) => (r.waypointSize === size ? r : { ...r, waypointSize: size }), 'Change waypoint size', `waypoint size ${id}`);
-}
 
 export function setRouteProfile(id: string, profile: Profile): void {
   updateRoute(id, (r) => (r.profile === profile ? r : edit.changeProfile(r, profile)), 'Change routing profile');

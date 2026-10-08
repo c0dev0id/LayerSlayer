@@ -26,6 +26,18 @@ describe('History', () => {
     expect(history.undo(5)).toBe(0);
   });
 
+  it('makes one step of a gesture until it ends, or is undone', () => {
+    const history = new History<number>();
+    history.record(0, 'drag', 'slider');
+    history.record(1, 'drag', 'slider');
+    expect(history.continues('slider')).toBe(true);
+    history.endGesture();
+    history.record(2, 'drag', 'slider');
+    expect(history.undo(3)).toBe(2);
+    expect(history.continues('slider')).toBe(false);
+    expect(history.undo(2)).toBe(0);
+  });
+
   it('keeps at most the configured number of steps', () => {
     const history = new History<number>(2);
     history.record(0, 'a');
