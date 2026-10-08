@@ -10,10 +10,12 @@ import {
   layerColor,
   MAX_ZOOM,
   MIN_ZOOM,
+  NO_ADJUSTMENTS,
   type ArcGisMapSource,
   type Bounds,
   type Layer,
   type LayerSource,
+  type RasterAdjustments,
   type WmsSource,
   type WmtsSource,
   type XyzSource,
@@ -191,10 +193,25 @@ function raster(layer: Layer, source: SourceSpecification): Fragment {
         type: 'raster',
         source: layer.id,
         ...zoomRange(layer),
-        paint: { 'raster-opacity': layer.opacity, 'raster-fade-duration': 0 },
+        paint: { 'raster-opacity': layer.opacity, 'raster-fade-duration': 0, ...rasterAdjustments(layer.adjust) },
       },
     ],
   };
+}
+
+/** The raster paint properties of colour adjustments, within MapLibre's ranges, leaving out defaults. */
+export function rasterAdjustments(adjust: RasterAdjustments | undefined): Record<string, number> {
+  if (!adjust) return {};
+  const within = (value: unknown, min: number, max: number, fallback: number) =>
+    typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+  const paint: [string, number, number][] = [
+    ['raster-hue-rotate', within(adjust.hue, 0, 360, 0), NO_ADJUSTMENTS.hue],
+    ['raster-saturation', within(adjust.saturation, -1, 1, 0), NO_ADJUSTMENTS.saturation],
+    ['raster-contrast', within(adjust.contrast, -1, 1, 0), NO_ADJUSTMENTS.contrast],
+    ['raster-brightness-min', within(adjust.brightnessMin, 0, 1, 0), NO_ADJUSTMENTS.brightnessMin],
+    ['raster-brightness-max', within(adjust.brightnessMax, 0, 1, 1), NO_ADJUSTMENTS.brightnessMax],
+  ];
+  return Object.fromEntries(paint.filter(([, value, none]) => value !== none).map(([name, value]) => [name, value]));
 }
 
 export function rasterTiles(src: XyzSource | WmsSource | WmtsSource | ArcGisMapSource): string[] {

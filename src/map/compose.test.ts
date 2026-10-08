@@ -5,6 +5,7 @@ import { createLayer, type Bounds, type Layer, type LayerDraft } from '../model/
 import {
   composeStyle,
   prefixImage,
+  rasterAdjustments,
   resolveWmtsTile,
   scaleOpacity,
   wmtsTileUrl,
@@ -51,6 +52,26 @@ describe('composeStyle', () => {
         paint: { 'raster-opacity': 0.5, 'raster-fade-duration': 0 },
       },
     ]);
+  });
+
+  it('adds the colour adjustments of a raster layer, within their ranges, leaving out defaults', () => {
+    const style = compose([
+      layer(
+        { name: 'r', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } },
+        { adjust: { hue: 180, saturation: -1, contrast: 2, brightnessMin: 1, brightnessMax: 0 }, cache: false },
+      ),
+    ]);
+    expect(style.layers[0]!.paint).toEqual({
+      'raster-opacity': 0.5,
+      'raster-fade-duration': 0,
+      'raster-hue-rotate': 180,
+      'raster-saturation': -1,
+      'raster-contrast': 1,
+      'raster-brightness-min': 1,
+      'raster-brightness-max': 0,
+    });
+    expect(rasterAdjustments({ hue: 0, saturation: 0, contrast: 0, brightnessMin: 0, brightnessMax: 1 })).toEqual({});
+    expect(rasterAdjustments(undefined)).toEqual({});
   });
 
   it('leaves hidden layers and layers waiting for their file out', () => {

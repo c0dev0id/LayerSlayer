@@ -160,6 +160,8 @@ export interface Layer {
   maxzoom: number;
   /** Colour of a vector layer that brings no style of its own, as #rrggbb. */
   color?: string;
+  /** Colour adjustments of a raster layer; none means the image as it comes. */
+  adjust?: RasterAdjustments;
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;
@@ -172,6 +174,25 @@ export interface Layer {
    */
   origin?: string;
 }
+
+/**
+ * MapLibre's colour adjustments of raster layers, applied per pixel in this order: hue
+ * rotation, saturation, contrast, then the brightness range each colour is fitted into.
+ */
+export interface RasterAdjustments {
+  /** Degrees, 0 to 360. */
+  hue: number;
+  /** -1 (grey) to 1. */
+  saturation: number;
+  /** -1 to 1. */
+  contrast: number;
+  /** What black becomes, 0 to 1; above `brightnessMax` the image is inverted. */
+  brightnessMin: number;
+  /** What white becomes, 0 to 1. */
+  brightnessMax: number;
+}
+
+export const NO_ADJUSTMENTS: RasterAdjustments = { hue: 0, saturation: 0, contrast: 0, brightnessMin: 0, brightnessMax: 1 };
 
 /** What a service offers to add: a layer before it gets an id and the user's settings. */
 export type LayerDraft = Pick<Layer, 'name' | 'source'> &
@@ -196,28 +217,34 @@ interface SourceKind {
   label: string;
   /** Drawn with the app's own vector style, coloured by the layer's `color`. */
   vector?: boolean;
+  /** Drawn as a raster layer, whose colours can be adjusted. */
+  raster?: boolean;
   /** Its tiles can be kept in the browser. */
   cache?: boolean;
 }
 
 /** What the app knows of each kind of source; every kind is listed, so a new one cannot be missed. */
 export const SOURCE_KINDS: Record<LayerSource['type'], SourceKind> = {
-  xyz: { label: 'XYZ tiles', cache: true },
-  wms: { label: 'WMS', cache: true },
-  wmts: { label: 'WMTS', cache: true },
-  'arcgis-map': { label: 'ArcGIS MapServer', cache: true },
+  xyz: { label: 'XYZ tiles', raster: true, cache: true },
+  wms: { label: 'WMS', raster: true, cache: true },
+  wmts: { label: 'WMTS', raster: true, cache: true },
+  'arcgis-map': { label: 'ArcGIS MapServer', raster: true, cache: true },
   'arcgis-features': { label: 'ArcGIS features', vector: true, cache: true },
   'vector-tiles': { label: 'Vector tiles', vector: true, cache: true },
   wfs: { label: 'WFS', vector: true, cache: true },
   'ogc-features': { label: 'OGC API – Features', vector: true, cache: true },
   geojson: { label: 'GeoJSON', vector: true },
   style: { label: 'MapLibre style' },
-  cog: { label: 'Cloud Optimized GeoTIFF' },
-  image: { label: 'Georeferenced image' },
+  cog: { label: 'Cloud Optimized GeoTIFF', raster: true },
+  image: { label: 'Georeferenced image', raster: true },
 };
 
 export function isVector(source: LayerSource): boolean {
   return SOURCE_KINDS[source.type].vector === true;
+}
+
+export function isRaster(source: LayerSource): boolean {
+  return SOURCE_KINDS[source.type].raster === true;
 }
 
 /** Whether the layer keeps its tiles in the browser: where its source allows, unless switched off. */
