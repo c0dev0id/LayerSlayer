@@ -2,7 +2,7 @@ import { geoJSONToTile } from '@maplibre/geojson-vt';
 import { fromGeojsonVt } from '@maplibre/vt-pbf';
 import { HALF_WORLD, mercatorToLngLat, WORLD } from '../geo/mercator';
 import type { FeatureSource } from '../model/layer';
-import { descendants, parseXml } from '../services/xml';
+import { exceptionText } from '../services/xml';
 import { parseProtocolTile, protocolTileUrl, withParams } from './urls';
 
 /**
@@ -118,16 +118,6 @@ interface FeatureAnswer extends GeoJSON.FeatureCollection {
   /** ArcGIS and OGC API errors. */
   error?: { message?: string };
   description?: string;
-}
-
-/** The text of an OWS or WMS exception report, which WFS servers send as XML whatever was asked for. */
-function exceptionText(text: string): string | undefined {
-  try {
-    const root = parseXml(text);
-    return [...descendants(root, 'ExceptionText'), ...descendants(root, 'ServiceException')][0]?.textContent?.trim() || undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 /**

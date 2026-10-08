@@ -47,3 +47,16 @@ export function wgs84Bounds(element: Element): Bounds | undefined {
   const [east, north] = (text(box, 'UpperCorner') ?? '').split(/\s+/).map(Number);
   return validBounds(west!, south!, east!, north!);
 }
+
+/**
+ * The text of an OWS or WMS exception report, which OGC services send as XML whatever was
+ * asked for, often with status 200.
+ */
+export function exceptionText(text: string): string | undefined {
+  try {
+    const root = parseXml(text);
+    return [...descendants(root, 'ExceptionText'), ...descendants(root, 'ServiceException')][0]?.textContent?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}

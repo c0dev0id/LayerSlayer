@@ -1,14 +1,23 @@
 import { AJAXError, type AddProtocolAction } from 'maplibre-gl';
+import { exceptionText } from '../services/xml';
 import { hostOf, requestUrl } from '../state/net';
 import { CACHE_PREFIX, resolveWmtsTile, WMTS_PROTOCOL } from './compose';
 import { encodeFeatures, FEATURE_PROTOCOL, featureQueryUrl, featureSourceName, parseFeatureTileUrl, readFeatureAnswer } from './featureTiles';
 import { createLimiter } from './limit';
 import { cachedTile, storeTile } from './tileCache';
 
-/** Fetches a tile; a missing one is reported as MapLibre's AJAXError, after which it shows the zoom below. */
+/**
+ * Fetches a tile; a missing one is reported as MapLibre's AJAXError, after which it shows
+ * the zoom below. An XML answer is an OGC exception report, whose text becomes the error.
+ */
 async function fetchTile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
   const response = await fetch(requestUrl(url), { signal });
   if (!response.ok) throw new AJAXError(response.status, response.statusText, url, await response.blob());
+  const type = response.headers.get('content-type') ?? '';
+  if (type.includes('xml') && !type.startsWith('image/')) {
+    const reason = exceptionText(await response.text());
+    throw new Error(`${hostOf(url) ?? url} answered with an error${reason ? `: ${reason}` : ' instead of a tile.'}`);
+  }
   return response.arrayBuffer();
 }
 
