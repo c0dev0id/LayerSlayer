@@ -173,7 +173,7 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
           <FileTab />
         </div>
         <div class="tab-panel" role="tabpanel" hidden={tab() !== 'osm'}>
-          <OsmQueryTab onClose={() => props.onClose()} />
+          <OsmQueryTab active={props.open && tab() === 'osm'} onClose={() => props.onClose()} />
         </div>
       </div>
       <Show when={opened()} keyed>

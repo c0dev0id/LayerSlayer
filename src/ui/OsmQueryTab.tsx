@@ -14,8 +14,10 @@ import { createOutcome, OutcomeNote } from './outcome';
  * or typed in as tags, queried together. Tags typed in join the list at the top. The layer
  * takes the icon of the first chosen feature that has one, unless another is picked.
  */
-export function OsmQueryTab(props: { onClose: () => void }) {
-  const [features] = createResource(loadOsmFeatures);
+export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
+  // The list and its icons load the first time the tab is shown, not with the app.
+  const shown = createMemo((seen: boolean) => seen || props.active, false);
+  const [features] = createResource(shown, loadOsmFeatures);
   const [search, setSearch] = createSignal('');
   const [typed, setTyped] = createSignal<OsmFeature[]>([]);
   const [chosen, setChosen] = createSignal<OsmFeature[]>([]);
