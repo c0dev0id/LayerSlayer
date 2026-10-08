@@ -38,6 +38,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - idb-keyval (IndexedDB for imported files and OSM query results).
 - Vitest 5 with jsdom for unit tests of the pure modules.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx`.
+- Layer icons from Maki (CC0), Temaki (CC0) and Material Design Icons (Apache 2.0), read
+  from their packages at build time by a Vite plugin (`tools/iconSets.ts`); dev
+  dependencies only, each set a chunk that loads with the icon picker.
 - Routing by the FOSSGIS OSRM servers (routing.openstreetmap.de), car, bike and foot.
 - OSM queries by the Overpass API (overpass-api.de).
 - Deployment: GitHub Actions to GitHub Pages.
@@ -376,6 +379,22 @@ It is a static single-page app on GitHub Pages; there is no server component.
   into the next style instead, the documented way, would have MapLibre compare and clone
   all of it on every change. A layer whose file changes keeps drawing its old file until
   the new one has loaded, rather than vanishing meanwhile.
+- **Layer icons.** Vector layers can mark their points, and their areas at the pole of
+  inaccessibility MapLibre places point symbols at, with an icon: white on a disc of the
+  layer's colour, which stays readable on any base map while the colour still tells layers
+  apart. The sets were chosen for coverage: Maki and Temaki (770 icons, CC0) are drawn for
+  maps and named after OpenStreetMap's features, barriers included; Material Design Icons
+  (about 7,200 after leaving out brand logos and deprecated ones) cover nearly everything
+  else and bring aliases and categories that make search work. All three draw with plain
+  `<path>` elements, so an icon is its viewBox and path data, drawn with `Path2D`. The
+  plugin turns each package into a virtual module (MDI about 800 kB gzipped), loaded when
+  the picker opens. A layer keeps its icon's shape, not just its id, so drawing it needs no
+  set loaded and a project file carries it. The OSM feature presets each name an icon; the
+  plugin serves just those (`virtual:osm-feature-icons`, 30 kB) and fails the build on a
+  name no set has. Map images are named after icon and colour (`poi:set:name:#rrggbb`) and
+  drawn when the map asks, through `setMissingStyleImageResolver`: in MapLibre 6 the
+  `styleimagemissing` event fires only after the asking tile was laid out, so images added
+  there missed it, which ArcGIS symbols suffered from too.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
@@ -417,6 +436,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
+- Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
+  a disc of the layer's colour, picked by search; OSM presets come with theirs.
 - OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about
   140 led by what off-road riders look for (tracks, trails, surfaces, barriers, access)
   or typed as tags, queried with Overpass once and updated on demand.

@@ -38,10 +38,12 @@ in the browser.
     what matters off the road: tracks by grade, unpaved and rough ways, fords, trails
     rated for mountain bikes and hikers, gates, barriers and ways closed to motor
     vehicles, then roads, fuel and repair, water, camp sites and about a hundred more,
-    each with the tags it stands for. Or type tags and *Add* them: `key=value`, or
+    each with the tags it stands for and its icon. Or type tags and *Add* them: `key=value`, or
     `key=*` for any value, with tags separated by spaces all having to match, e.g.
     `highway=track tracktype=grade4`. *Query* finds everything chosen in one layer,
-    named after it; the result is kept in the browser as GeoJSON.
+    named after it, with the icon of the first chosen feature that has one; the icon
+    button next to the name picks another, or none. The result is kept in the browser as
+    GeoJSON.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
   arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
   it, and the frame icon flies to the area the layer covers (layers that span most of the
@@ -59,6 +61,11 @@ in the browser.
   inverts the image; with the hue turned 180° that gives a dark map that keeps its colours.
   ArcGIS feature layers can be *drawn with the service's own symbols* (simple, unique value
   and class breaks renderers with simple and picture symbols) instead of their colour.
+  Vector layers can take an *Icon*: its points, and its areas at their middle, are then
+  marked with it, white on a disc of the layer's colour. The picker searches about 7,900
+  icons by name and keyword: Maki and Temaki, drawn for maps and named after OpenStreetMap's
+  features (bollard, cattle grid, lift gate, water tap, fuel), and Material Design Icons
+  for nearly everything else. × goes back to dots.
   OSM query layers show their tags and when they were queried; *Update* queries again in
   the focus area as it is now and replaces the layer's data.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
