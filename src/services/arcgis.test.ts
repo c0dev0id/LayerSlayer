@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseFeatureService, parseMapServer } from './arcgis';
+import { FEATURE_MINZOOM, parseFeatureService, parseMapServer } from './arcgis';
 import dynamic from './fixtures/arcgis-mapserver-dynamic.json';
 import tiled from './fixtures/arcgis-mapserver-tiled.json';
 import featureServer from './fixtures/arcgis-featureserver.json';
@@ -45,7 +45,14 @@ describe('parseFeatureService', () => {
     expect(info.offers[0]!.draft).toMatchObject({
       name: 'Perimeters',
       source: { type: 'arcgis-features', url: 'https://services3.arcgis.com/x/arcgis/rest/services/WFIGS/FeatureServer/0', geometry: 'polygon', maxRecordCount: 1000 },
+      minzoom: FEATURE_MINZOOM,
     });
+  });
+
+  it('keeps a higher minimum zoom the service asks for', () => {
+    // minScale 70 000 is just under map zoom 12.
+    const info = parseFeatureService({ ...featureLayer, minScale: 70000 } as never, 'https://x/FeatureServer/0');
+    expect(info.offers[0]!.draft!.minzoom).toBeCloseTo(11.9, 1);
   });
 
   it('offers a single feature layer with its own record limit', () => {

@@ -56,6 +56,13 @@ interface FeatureLayer extends ServiceLayer {
 }
 
 const MERCATOR_WKIDS = new Set([3857, 102100, 102113, 900913]);
+
+/**
+ * The lowest zoom a feature layer is shown at unless the service asks for more. Below it a
+ * view needs few tiles, but each covers so much that the server returns its whole record
+ * limit for it, slowly; the layer's zoom range can be widened in the panel.
+ */
+export const FEATURE_MINZOOM = 9;
 /** Geographic coordinate systems whose degrees are close enough to WGS 84 for bounds. */
 const DEGREE_WKIDS = new Set([4326, 4269, 4258, 4283, 4617]);
 
@@ -172,12 +179,14 @@ function featureOffer(
     return offer;
   }
   const bounds = extentBounds(layer.extent);
+  const range = scaleRange(layer);
   offer.draft = {
     name: layer.name,
     source: { type: 'arcgis-features', url: layerUrl, geometry, maxRecordCount: maxRecordCount ?? 1000 },
     ...(bounds && { bounds }),
     ...(layer.copyrightText && { attribution: layer.copyrightText }),
-    ...scaleRange(layer),
+    ...range,
+    minzoom: Math.max(FEATURE_MINZOOM, range.minzoom ?? 0),
   };
   return offer;
 }
