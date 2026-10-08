@@ -1,5 +1,6 @@
 import type {
   LayerSpecification,
+  RasterDEMSourceSpecification,
   SourceSpecification,
   SpriteSpecification,
   StyleSpecification,
@@ -68,6 +69,36 @@ function cached(layer: Layer, tiles: string[]): string[] {
   return keepsTiles(layer) ? tiles.map((t) => CACHE_PREFIX + t) : tiles;
 }
 
+/** What is drawn around the layers. */
+export interface MapOptions {
+  /**
+   * The bounds of the focus area: every layer but the bottom one requests tiles within them
+   * only, and a layer whose bounds lie outside is left out. The bottom layer, usually the
+   * base map, is drawn everywhere, so that the area has surroundings.
+   */
+  focus?: Bounds;
+  /** The colour the map is drawn on. */
+  background?: string;
+  /** The ground in 3D, raised by its elevation, everywhere like the bottom layer. */
+  terrain?: boolean;
+}
+
+export const TERRAIN_SOURCE = 'terrain';
+
+/**
+ * Elevation from Mapterhorn: open terrain data, global at about 30 m and finer where
+ * countries publish it, as Terrarium-encoded tiles. Where the finer tiles end, the map
+ * keeps the ground of the coarser ones.
+ */
+const TERRAIN: RasterDEMSourceSpecification = {
+  type: 'raster-dem',
+  tiles: ['https://tiles.mapterhorn.com/{z}/{x}/{y}.webp'],
+  tileSize: 512,
+  encoding: 'terrarium',
+  maxzoom: 18,
+  attribution: '<a href="https://mapterhorn.com/attribution">© Mapterhorn</a>',
+};
+
 /** One user layer as MapLibre sources and layers, plus what a style layer brings along. */
 interface Fragment {
   sources: Record<string, SourceSpecification>;
@@ -83,17 +114,9 @@ interface Fragment {
  * under the layer's id and its image references are prefixed to match. A map has one
  * font source, so labels of the upper styles need fonts the bottom one serves.
  *
- * With `focus`, the bounds of the focus area, every layer but the bottom one requests
- * tiles within them only, and a layer whose bounds lie outside is left out. The bottom
- * layer, usually the base map, is drawn everywhere, so that the area has surroundings.
- * With `background`, the map is drawn on that colour.
+ * See MapOptions for what is drawn around the layers.
  */
-export function composeStyle(
-  layers: readonly Layer[],
-  assets: ReadonlyMap<string, Assets>,
-  focus?: Bounds,
-  background?: string,
-): StyleSpecification {
+export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain }: MapOptions = {}): StyleSpecification {
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
   if (background) style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
   const sprites: { id: string; url: string }[] = [];
@@ -121,6 +144,10 @@ export function composeStyle(
     if (part.glyphs && !style.glyphs) style.glyphs = part.glyphs;
   }
   if (sprites.length > 0) style.sprite = sprites;
+  if (terrain) {
+    style.sources[TERRAIN_SOURCE] = TERRAIN;
+    style.terrain = { source: TERRAIN_SOURCE, exaggeration: 1 };
+  }
   return style;
 }
 

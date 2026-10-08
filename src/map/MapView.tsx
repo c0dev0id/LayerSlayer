@@ -4,11 +4,11 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createEffect, createMemo, on, onCleanup, onMount, untrack } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { describeLoadError, requestUrl } from '../state/net';
-import { focusBounds, setView, state } from '../state/store';
+import { focusBounds, setTerrain, setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
-import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, WMTS_PROTOCOL } from './compose';
+import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, TERRAIN_SOURCE, WMTS_PROTOCOL } from './compose';
 import { FEATURE_PROTOCOL } from './featureTiles';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
@@ -16,6 +16,7 @@ import { withOverlays } from './overlays';
 import { drawDisc, drawGlyph, parsePoiImageId, POI_DISC } from './poiIcons';
 import { loadCachedTile, loadTile } from './protocols';
 import { routeOverlay } from './routeOverlay';
+import { TerrainControl } from './terrainControl';
 
 maplibregl.setWorkerUrl(workerUrl);
 maplibregl.addProtocol(FEATURE_PROTOCOL, loadTile);
@@ -58,6 +59,9 @@ export function MapView() {
     map.scrollZoom.setWheelZoomRate(1 / 100);
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     map.addControl(new maplibregl.GeolocateControl({ fitBoundsOptions: { maxZoom: 15 } }), 'top-right');
+    const terrainControl = new TerrainControl(() => !!state.settings.terrain, setTerrain);
+    map.addControl(terrainControl, 'top-right');
+    createEffect(() => terrainControl.show(!!state.settings.terrain));
     map.addControl(new maplibregl.ScaleControl(), 'bottom-left');
 
     setZoom(map.getZoom());
@@ -72,6 +76,8 @@ export function MapView() {
       });
     });
     map.on('error', (event: maplibregl.ErrorEvent & { sourceId?: string }) => {
+      // Where finer elevation ends, its tiles are missing; the map keeps the coarser ground.
+      if (event.sourceId === TERRAIN_SOURCE && (event.error as { status?: number }).status === 404) return;
       const id = layerOf(event.sourceId);
       if (id) void describeLoadError(event.error).then((message) => reportLayerError(id, message));
       else console.error(event.error);
@@ -101,7 +107,11 @@ export function MapView() {
       // Composing reads every layer setting, so any change recomposes. The style goes to
       // MapLibre as plain data: store proxies cannot be sent to its workers.
       const layers = createMemo(() =>
-        JSON.parse(JSON.stringify(composeStyle(state.layers, assets(), focusBounds(), state.settings.background))),
+        JSON.parse(
+          JSON.stringify(
+            composeStyle(state.layers, assets(), { focus: focusBounds(), background: state.settings.background, terrain: state.settings.terrain }),
+          ),
+        ),
       );
       // A layer change carries the overlays' data as it is; a change of an overlay's data
       // only replaces it.

@@ -904,6 +904,16 @@ input.swatch {
   font: inherit;
 }
 
+.maplibregl-ctrl button.terrain-toggle {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.maplibregl-ctrl button.terrain-toggle[aria-pressed='true'] {
+  background: var(--active);
+  color: var(--accent);
+}
+
 .search-form button.icon {
   display: inline-grid;
   place-items: center;

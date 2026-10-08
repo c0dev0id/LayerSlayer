@@ -14,6 +14,8 @@ export interface Settings {
   proxiedHosts: string[];
   /** The colour the map is drawn on, as #rrggbb; none for the page's white. */
   background?: string;
+  /** The ground in 3D, raised by its elevation. */
+  terrain?: boolean;
 }
 
 export interface View {
@@ -98,6 +100,7 @@ export function parseState(json: string): AppState {
       proxy: typeof settings?.proxy === 'string' ? settings.proxy : '',
       proxiedHosts: Array.isArray(settings?.proxiedHosts) ? settings.proxiedHosts.filter((h) => typeof h === 'string') : [],
       ...(typeof settings?.background === 'string' && /^#[0-9a-f]{6}$/i.test(settings.background) && { background: settings.background }),
+      ...(settings?.terrain === true && { terrain: true }),
     },
     view:
       view && Array.isArray(view.center) && typeof view.zoom === 'number'
@@ -190,6 +193,11 @@ export function setProxyAddress(proxy: string): void {
 /** Sets the colour the map is drawn on, or with none goes back to white. */
 export function setBackground(color: string | undefined): void {
   setState('settings', 'background', color);
+}
+
+/** Shows the ground in 3D, raised by its elevation, or flat. */
+export function setTerrain(on: boolean): void {
+  setState('settings', 'terrain', on || undefined);
 }
 
 /** Routes a host's requests through the CORS proxy, or stops doing so. */
