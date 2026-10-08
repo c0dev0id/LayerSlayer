@@ -116,7 +116,6 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
 /** The layer's settings at a glance: opacity, colour, zoom range and the options that are on. Edited below the list. */
 function LayerSummary(props: { layer: Layer }) {
   const layer = props.layer;
-  const zoomRange = () => (layer.minzoom > MIN_ZOOM || layer.maxzoom < MAX_ZOOM ? `zoom ${layer.minzoom}–${layer.maxzoom}` : undefined);
   // From the settings rather than net.ts, so the tag follows the proxy checkbox.
   const proxied = () => {
     const host = layerHost(layer);
@@ -128,7 +127,9 @@ function LayerSummary(props: { layer: Layer }) {
       <Show when={isVector(layer.source)}>
         <span class="layer-color" style={{ 'background-color': layerColor(layer) }} title={layerColor(layer)} />
       </Show>
-      <Show when={zoomRange()}>{(range) => <span>{range()}</span>}</Show>
+      <span title={`Drawn from zoom ${layer.minzoom} to ${layer.maxzoom}`}>
+        z{layer.minzoom}–{layer.maxzoom}
+      </span>
       <Show when={keepsTiles(layer)}>
         <span title={`Keeps its tiles in this browser for ${TILE_MAX_AGE_HOURS} hours`}>cache</span>
       </Show>

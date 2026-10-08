@@ -36,7 +36,7 @@ in the browser.
   it, and the frame icon flies to the area the layer covers (layers that span most of the
   world have none). A layer shown in grey italics is outside its zoom range at the current
   zoom; a red triangle carries the last error loading it. Under each name, a small line
-  shows its opacity, colour, zoom range where narrowed, and *cache* and *proxy* where its
+  shows its opacity, colour, zoom range (z5–15), and *cache* and *proxy* where its
   tiles are kept or its server goes through the CORS proxy.
 - Below the list, the **active layer** (click a name) has its opacity, zoom range, colour
   (vector layers), source, the CORS proxy for its server and, for tiled layers, whether it
