@@ -45,7 +45,7 @@ describe('library', () => {
     const swiss = entries.find((e) => e.bounds)!;
     expect(entryAreas(swiss)).toEqual([swiss.bounds]);
     expect(entryAreas({ ...swiss, bounds: undefined })).toBe(REGION_BOUNDS[swiss.region]);
-    expect(entryAreas({ ...swiss, bounds: undefined, region: 'Global' })).toBeUndefined();
+    expect(entryAreas({ ...swiss, bounds: undefined, region: 'Global' })).toEqual([]);
   });
 
   it('filters by words, region and category', () => {

@@ -1,4 +1,4 @@
-import { createEffect, createRoot } from 'solid-js';
+import { createEffect, createMemo, createRoot } from 'solid-js';
 import { reconcile } from 'solid-js/store';
 import { cornersBounds } from '../geo/bounds';
 import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFile, type Bounds, type Layer, type LayerDraft } from '../model/layer';
@@ -190,6 +190,4 @@ export function clearFocus(): void {
 }
 
 /** The bounds of the focus area, within which layers request tiles; none without one. */
-export function focusBounds(): Bounds | undefined {
-  return state.focus && cornersBounds(state.focus);
-}
+export const focusBounds = createRoot(() => createMemo((): Bounds | undefined => state.focus && cornersBounds(state.focus)));

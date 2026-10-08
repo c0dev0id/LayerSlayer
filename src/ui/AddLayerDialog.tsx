@@ -59,12 +59,12 @@ function isAdded(url: string, offer: Offer): boolean {
 }
 
 /** Whether a focus area is set and `areas` are known to lie outside its bounds. */
-function outsideFocus(areas: readonly Bounds[] | undefined): boolean {
+function outsideFocus(areas: readonly Bounds[]): boolean {
   const focus = focusBounds();
   return focus !== undefined && allOutside(areas, focus);
 }
 
-const offerAreas = (offer: Offer) => (offer.draft?.bounds ? [offer.draft.bounds] : undefined);
+const offerAreas = (offer: Offer): Bounds[] => (offer.draft?.bounds ? [offer.draft.bounds] : []);
 
 /** Adds the offer's layer, or removes it when it is on the map already. */
 function toggle(url: string, offer: Offer): void {
@@ -234,7 +234,8 @@ function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<strin
           {(entry) => {
             const onMap = () => state.layers.filter((l) => isFromSource(l.origin, entry.url)).length;
             const size = () => props.sizes.get(entry.url);
-            const outside = () => outsideFocus(entryAreas(entry));
+            const areas = entryAreas(entry);
+            const outside = () => outsideFocus(areas);
             return (
               <li>
                 <button class="entry" classList={{ added: onMap() > 0, outside: outside() }} onClick={() => props.onOpen(entry)}>

@@ -39,7 +39,6 @@ describe('allOutside', () => {
     const box: [number, number, number, number] = [8, 48, 9, 49];
     expect(allOutside([[0, 0, 1, 1], [20, 20, 21, 21]], box)).toBe(true);
     expect(allOutside([[0, 0, 1, 1], [8.5, 48.5, 10, 50]], box)).toBe(false);
-    expect(allOutside(undefined, box)).toBe(false);
     expect(allOutside([], box)).toBe(false);
   });
 });

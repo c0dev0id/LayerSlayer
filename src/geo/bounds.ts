@@ -44,7 +44,7 @@ export function intersectBounds(a: Bounds, b: Bounds): Bounds | undefined {
   return west < east && south < north ? [west, south, east, north] : undefined;
 }
 
-/** Whether areas are known and none of them meets `box`. */
-export function allOutside(areas: readonly Bounds[] | undefined, box: Bounds): boolean {
-  return areas !== undefined && areas.length > 0 && areas.every((area) => !intersectBounds(area, box));
+/** Whether there are areas and none of them meets `box`; no areas means unknown, not outside. */
+export function allOutside(areas: readonly Bounds[], box: Bounds): boolean {
+  return areas.length > 0 && areas.every((area) => !intersectBounds(area, box));
 }

@@ -24,8 +24,8 @@ export async function loadLibrary(): Promise<LibraryEntry[]> {
 }
 
 /** Where an entry has data, as far as the library knows: its own bounds or its region's; none for global services. */
-export function entryAreas(entry: LibraryEntry): readonly Bounds[] | undefined {
-  return entry.bounds ? [entry.bounds] : REGION_BOUNDS[entry.region];
+export function entryAreas(entry: LibraryEntry): readonly Bounds[] {
+  return entry.bounds ? [entry.bounds] : (REGION_BOUNDS[entry.region] ?? []);
 }
 
 /** Entries matching a search in name, note, region or category, and the chosen region and category. */
