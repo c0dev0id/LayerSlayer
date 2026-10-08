@@ -3,8 +3,11 @@ import { isWebMercatorCode, mercatorBounds } from '../geo/mercator';
 import type { CogSource } from '../model/layer';
 import type { ServiceInfo } from './types';
 
-/** Overviews larger than this are not read for the value range of a colour ramp. */
-const MAX_STATS_PIXELS = 4_000_000;
+/**
+ * Overviews larger than this are not read for the value range of a colour ramp: they are
+ * decoded on the page's main thread. Files made by GDAL have overviews well below it.
+ */
+const MAX_STATS_PIXELS = 1024 * 1024;
 
 /**
  * Whether an image holds measurements in one band (elevation, temperature) rather than a
