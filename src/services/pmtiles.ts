@@ -1,4 +1,4 @@
-import { FetchSource, PMTiles, TileType, type Header, type RangeResponse, type Source } from 'pmtiles';
+import { FetchSource, PMTiles, SharedPromiseCache, TileType, type Header, type RangeResponse, type Source } from 'pmtiles';
 import { boxBounds, tileAt } from '../geo/mercator';
 import { parsePmtilesUrl, pmtilesTiles } from '../map/urls';
 import type { XyzSource } from '../model/layer';
@@ -17,8 +17,9 @@ class RemoteArchive implements Source {
     this.#fetch = new FetchSource(requestUrl(url));
   }
 
+  /** The address requested, which keys its headers and directories in the cache, failures included. */
   getKey(): string {
-    return this.url;
+    return this.#fetch.getKey();
   }
 
   async getBytes(offset: number, length: number, signal?: AbortSignal, etag?: string): Promise<RangeResponse> {
@@ -36,14 +37,16 @@ class RemoteArchive implements Source {
 
 /**
  * The open archives by the address they are requested from, so that a host routed through
- * the proxy later is read anew. An archive keeps its header and directories once read.
+ * the proxy later is read anew. Their headers and directories share one cache of a bounded
+ * size, so archives no longer drawn do not keep theirs.
  */
 const archives = new Map<string, PMTiles>();
+const directories = new SharedPromiseCache();
 
 function archive(url: string): PMTiles {
   const key = requestUrl(url);
   let found = archives.get(key);
-  if (!found) archives.set(key, (found = new PMTiles(new RemoteArchive(url))));
+  if (!found) archives.set(key, (found = new PMTiles(new RemoteArchive(url), directories)));
   return found;
 }
 
@@ -114,7 +117,9 @@ async function imageTileSize(pmtiles: PMTiles, header: Header): Promise<number> 
 export async function readPmtiles(url: string, title: string): Promise<ServiceInfo> {
   const pmtiles = archive(url);
   const header = await pmtiles.getHeader();
-  const metadata = ((await pmtiles.getMetadata()) ?? {}) as Metadata;
-  const tileSize = IMAGE_TILES.has(header.tileType) ? await imageTileSize(pmtiles, header) : undefined;
-  return describePmtiles(url, title, header, metadata, tileSize);
+  const [metadata, tileSize] = await Promise.all([
+    pmtiles.getMetadata() as Promise<Metadata | undefined>,
+    IMAGE_TILES.has(header.tileType) ? imageTileSize(pmtiles, header) : undefined,
+  ]);
+  return describePmtiles(url, title, header, metadata ?? {}, tileSize);
 }

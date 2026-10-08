@@ -2,6 +2,7 @@ import { createMemo, createResource, createRoot, createSignal, For, Index, Show 
 import { allOutside } from '../geo/bounds';
 import { entryAreas, entryService, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
 import type { Bounds } from '../model/layer';
+import { parsePmtilesUrl } from '../map/urls';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
 import { readService } from '../services/read';
@@ -288,6 +289,8 @@ function AddressTab(props: { busy: ReadonlySet<string>; onOpen: (source: Source)
   const [chosen, setChosen] = createSignal<ServiceType | ''>('');
   const [added, setAdded] = createSignal<string>();
   const detected = () => detectServiceType(url());
+  /** The address read: a PMTiles archive copied with the scheme styles name it by, without it. */
+  const address = () => parsePmtilesUrl(url().trim())?.archive ?? url().trim();
   const type = () => chosen() || detected();
 
   async function importPdf(address: string) {
@@ -306,11 +309,10 @@ function AddressTab(props: { busy: ReadonlySet<string>; onOpen: (source: Source)
       onSubmit={(e) => {
         e.preventDefault();
         const t = type();
-        const address = url().trim();
-        if (!t || !address) return;
+        if (!t || !address()) return;
         setAdded(undefined);
-        if (t === 'geopdf') void importPdf(address);
-        else props.onOpen({ type: t, url: address });
+        if (t === 'geopdf') void importPdf(address());
+        else props.onOpen({ type: t, url: address() });
       }}
     >
       <p class="muted hint">
@@ -324,8 +326,8 @@ function AddressTab(props: { busy: ReadonlySet<string>; onOpen: (source: Source)
           <For each={SERVICE_TYPES}>{(t) => <option value={t.value}>{t.label}</option>}</For>
         </select>
         <span class="grow" />
-        <button class="primary" type="submit" disabled={!type() || !url().trim() || props.busy.has(url().trim())}>
-          {props.busy.has(url().trim()) ? 'Reading…' : 'Open'}
+        <button class="primary" type="submit" disabled={!type() || !address() || props.busy.has(address())}>
+          {props.busy.has(address()) ? 'Reading…' : 'Open'}
         </button>
       </div>
       <Show when={added()}>{(name) => <p class="note info">Added {name()}.</p>}</Show>

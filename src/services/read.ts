@@ -1,4 +1,4 @@
-import { getParam, parsePmtilesUrl, withParams } from '../map/urls';
+import { getParam, withParams } from '../map/urls';
 import { tileAt } from '../geo/mercator';
 import type { LngLat } from '../model/route';
 import { fetchResource } from '../state/net';
@@ -39,10 +39,8 @@ export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: str
     case 'vector-tiles':
       return readVectorTiles(url, near);
     case 'pmtiles': {
-      // Addresses copied from styles written for the pmtiles library carry its scheme.
-      const archive = parsePmtilesUrl(url)?.archive ?? url;
       const { readPmtiles } = await import('./pmtiles');
-      return readPmtiles(archive, fileName(archive));
+      return readPmtiles(url, fileName(url));
     }
     case 'cog': {
       const { readCog } = await import('./cog');

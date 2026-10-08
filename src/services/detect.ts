@@ -1,4 +1,4 @@
-import { getParam } from '../map/urls';
+import { getParam, PMTILES_PROTOCOL } from '../map/urls';
 import type { ServiceType } from './types';
 
 /** A guess at the kind of service behind an address, from its shape alone. */
@@ -7,7 +7,7 @@ export function detectServiceType(url: string): ServiceType | undefined {
   const path = lower.split(/[?#]/)[0]!.replace(/\/+$/, '');
   const service = getParam(url, 'SERVICE')?.toUpperCase();
   const template = /\{(z|x|y|-y|q|quadkey|zoom|bbox-epsg-3857)\}/.test(lower);
-  if (lower.startsWith('pmtiles://') || path.endsWith('.pmtiles')) return 'pmtiles';
+  if (lower.startsWith(`${PMTILES_PROTOCOL}://`) || path.endsWith('.pmtiles')) return 'pmtiles';
   if (template && /\.(pbf|mvt)$/.test(path)) return 'vector-tiles';
   if (template) return 'xyz';
   if (/\/tiles?\.json$/.test(path)) return 'vector-tiles';

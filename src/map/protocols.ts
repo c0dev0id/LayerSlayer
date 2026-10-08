@@ -54,11 +54,15 @@ function featureTile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
   }, signal);
 }
 
+/** The PMTiles reader, loaded with the first archive's tile and kept, as tiles ask for it by the hundred. */
+let pmtilesModule: Promise<typeof import('../services/pmtiles')> | undefined;
+const pmtiles = () => (pmtilesModule ??= import('../services/pmtiles'));
+
 /** Any tile the map asks for: a plain address, a WMTS matrix tile, a feature tile or a tile of a PMTiles archive. */
 async function tile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
   if (url.startsWith(`${WMTS_PROTOCOL}://`)) return fetchTile(resolveWmtsTile(url), signal);
   if (url.startsWith(`${FEATURE_PROTOCOL}://`)) return featureTile(url, signal);
-  if (url.startsWith(`${PMTILES_PROTOCOL}://`)) return (await import('../services/pmtiles')).pmtilesTile(url, signal);
+  if (url.startsWith(`${PMTILES_PROTOCOL}://`)) return (await pmtiles()).pmtilesTile(url, signal);
   return fetchTile(url, signal);
 }
 
@@ -74,7 +78,7 @@ export const loadTile: AddProtocolAction = async (params, abort) => ({ data: awa
 
 /** Tiles of PMTiles archives, and the TileJSON that styles written for PMTiles ask for. */
 export const loadPmtiles: AddProtocolAction = async (params, abort) =>
-  params.type === 'json' ? { data: await (await import('../services/pmtiles')).pmtilesTileJson(params.url) } : loadTile(params, abort);
+  params.type === 'json' ? { data: await (await pmtiles()).pmtilesTileJson(params.url) } : loadTile(params, abort);
 
 /**
  * Tiles of layers that keep them: answered from the tile cache while fresh, otherwise

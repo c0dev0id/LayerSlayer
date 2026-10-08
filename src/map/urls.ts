@@ -79,13 +79,15 @@ export function pmtilesTiles(archive: string): string {
   return `${PMTILES_PROTOCOL}://${archive}/{z}/{x}/{y}`;
 }
 
+const PMTILES_ADDRESS = new RegExp(`^${PMTILES_PROTOCOL}://(.+?)(?:/(\\d+|\\{z\\})/(\\d+|\\{x\\})/(\\d+|\\{y\\})(?:\\.\\w+)?)?$`);
+
 /**
  * The archive a PMTiles address reads from, and the tile it asks for unless it is a template
  * or the archive's TileJSON. A tile may end in a file extension, as the library's TileJSON
  * writes them.
  */
 export function parsePmtilesUrl(url: string): { archive: string; tile?: [z: number, x: number, y: number] } | undefined {
-  const match = /^pmtiles:\/\/(.+?)(?:\/(\d+|\{z\})\/(\d+|\{x\})\/(\d+|\{y\})(?:\.\w+)?)?$/.exec(url);
+  const match = PMTILES_ADDRESS.exec(url);
   if (!match) return undefined;
   const tile = match.slice(2, 5).map(Number);
   return { archive: match[1]!, ...(tile.every(Number.isInteger) && { tile: tile as [number, number, number] }) };
