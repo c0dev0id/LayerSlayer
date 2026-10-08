@@ -26,9 +26,17 @@ function isGpx(blob: Blob, name: string): boolean {
   return blob.type === 'application/gpx+xml' || /\.gpx$/i.test(name);
 }
 
+function isKml(blob: Blob, name: string): boolean {
+  return blob.type === 'application/vnd.google-earth.kml+xml' || /\.kml$/i.test(name);
+}
+
+function isKmz(blob: Blob, name: string): boolean {
+  return blob.type === 'application/vnd.google-earth.kmz' || /\.kmz$/i.test(name);
+}
+
 /**
- * A layer from a file: GeoJSON is kept as it is, the tracks of a GPX file as GeoJSON, a
- * GeoPDF as the picture of its map area.
+ * A layer from a file: GeoJSON is kept as it is, the tracks of a GPX file and the
+ * placemarks of a KML or KMZ file as GeoJSON, a GeoPDF as the picture of its map area.
  */
 export async function importFile(file: Blob, name: string): Promise<LayerDraft> {
   const title = fileName(name);
@@ -38,7 +46,7 @@ export async function importFile(file: Blob, name: string): Promise<LayerDraft> 
     const bounds = cornersBounds(coordinates);
     return { name: title, source: { type: 'image', data: { file: key, name }, coordinates }, ...(bounds && { bounds }) };
   }
-  const [geojson, blob] = isGpx(file, name) ? await gpxTracks(file, name) : await readGeoJson(file, name);
+  const [geojson, blob] = await readFeatures(file, name);
   const key = await storeFile(blob);
   const bounds = geojsonBounds(geojson);
   return { name: title, source: { type: 'geojson', data: { file: key, name } }, ...(bounds && { bounds }) };
@@ -56,11 +64,22 @@ async function readGeoJson(file: Blob, name: string): Promise<[GeoJSON.GeoJSON, 
   return [geojson, file];
 }
 
-/** The tracks of a GPX file, kept as GeoJSON. */
-async function gpxTracks(file: Blob, name: string): Promise<[GeoJSON.GeoJSON, Blob]> {
-  const tracks = gpxTracksGeoJson(await file.text());
-  if (tracks.features.length === 0) throw new Error(`${name} holds no tracks; its routes and waypoints can be imported under Routes.`);
-  return [tracks, new Blob([JSON.stringify(tracks)], { type: 'application/geo+json' })];
+/** The features of a file, and what is kept of it: a GeoJSON file as it is, other formats converted to GeoJSON. */
+async function readFeatures(file: Blob, name: string): Promise<[GeoJSON.GeoJSON, Blob]> {
+  if (isGpx(file, name)) {
+    return converted(gpxTracksGeoJson(await file.text()), `${name} holds no tracks; its routes and waypoints can be imported under Routes.`);
+  }
+  if (isKml(file, name) || isKmz(file, name)) {
+    const { kmlPlacemarks, kmzDocument } = await import('./kml');
+    const text = isKmz(file, name) ? kmzDocument(new Uint8Array(await file.arrayBuffer())) : await file.text();
+    return converted(kmlPlacemarks(text), `${name} holds no placemarks with a geometry.`);
+  }
+  return readGeoJson(file, name);
+}
+
+function converted(features: GeoJSON.FeatureCollection, empty: string): [GeoJSON.GeoJSON, Blob] {
+  if (features.features.length === 0) throw new Error(empty);
+  return [features, new Blob([JSON.stringify(features)], { type: 'application/geo+json' })];
 }
 
 /** A GeoPDF fetched from an address, imported like a file. */

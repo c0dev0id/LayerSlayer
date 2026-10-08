@@ -339,8 +339,8 @@ function FileTab() {
   return (
     <div class="file">
       <p class="muted hint">
-        GeoJSON files, the tracks of GPX files and GeoPDFs. They are kept in this browser; a GeoPDF is kept as a picture of
-        its map area.
+        GeoJSON files, the tracks of GPX files, the placemarks of KML and KMZ files, and GeoPDFs. They are kept in this
+        browser; a GeoPDF is kept as a picture of its map area.
       </p>
       <label class="button">
         Choose files
@@ -348,7 +348,7 @@ function FileTab() {
           type="file"
           hidden
           multiple
-          accept=".geojson,.json,.gpx,.pdf,application/geo+json,application/json,application/gpx+xml,application/pdf"
+          accept=".geojson,.json,.gpx,.kml,.kmz,.pdf,application/geo+json,application/json,application/gpx+xml,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz,application/pdf"
           onChange={(e) => {
             const files = [...(e.currentTarget.files ?? [])];
             e.currentTarget.value = '';
