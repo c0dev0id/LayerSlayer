@@ -43,10 +43,12 @@ export async function sweepTileCache(caches = storage(), now = Date.now()): Prom
     if (name.startsWith('webmap-') && name.includes('tiles') && name !== CACHE_NAME) await caches.delete(name);
   }
   const cache = await caches.open(CACHE_NAME);
-  for (const request of await cache.keys()) {
-    const response = await cache.match(request);
-    if (!response || !fresh(response, now)) await cache.delete(request);
-  }
+  await Promise.all(
+    (await cache.keys()).map(async (request) => {
+      const response = await cache.match(request);
+      if (!response || !fresh(response, now)) await cache.delete(request);
+    }),
+  );
 }
 
 export interface TileCacheStats {
