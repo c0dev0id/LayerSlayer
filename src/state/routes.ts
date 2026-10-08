@@ -1,9 +1,10 @@
-import { createEffect, createRoot, createSignal } from 'solid-js';
-import { createStore, reconcile, unwrap } from 'solid-js/store';
+import { createSignal } from 'solid-js';
+import { reconcile, unwrap } from 'solid-js/store';
 import type { LngLat, Profile, Route, RouteData, Waypoint } from '../model/route';
 import * as edit from '../routing/routeEdit';
 import { editingRouteId, setMenu, stopDrawing } from './drawing';
 import { History } from './history';
+import { persistedStore } from './persist';
 
 /**
  * Routes and waypoints of the route tool, kept in the browser apart from the layers. All
@@ -48,29 +49,8 @@ export function parseRouteData(json: string): RouteData {
   };
 }
 
-function loadRouteData(): RouteData {
-  try {
-    const json = localStorage.getItem(STORAGE_KEY);
-    if (json) return parseRouteData(json);
-  } catch (error) {
-    console.error('The stored routes could not be read; starting afresh.', error);
-  }
-  return { routes: [], waypoints: [] };
-}
-
-const [routeData, setRouteData] = createStore<RouteData>(loadRouteData());
+const [routeData, setRouteData] = persistedStore<RouteData>(STORAGE_KEY, 'routes', parseRouteData, () => ({ routes: [], waypoints: [] }));
 export { routeData };
-
-createRoot(() => {
-  createEffect(() => {
-    const json = JSON.stringify(routeData);
-    try {
-      localStorage.setItem(STORAGE_KEY, json);
-    } catch (error) {
-      console.error('Saving the routes failed.', error);
-    }
-  });
-});
 
 /** Undo history of route and waypoint edits; routing results are not recorded. */
 const history = new History<RouteData>();

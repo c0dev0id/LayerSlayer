@@ -1,8 +1,8 @@
 import { createEffect, createRoot } from 'solid-js';
-import { createStore } from 'solid-js/store';
 import { createLayer, MAX_ZOOM, MIN_ZOOM, storedFile, type Layer, type LayerDraft } from '../model/layer';
 import { deleteFile } from './files';
 import { setProxy } from './net';
+import { persistedStore } from './persist';
 
 export interface Settings {
   /** CORS proxy address with {url} where the target goes; empty for none. */
@@ -90,28 +90,10 @@ export function parseState(json: string): AppState {
   };
 }
 
-function loadState(): AppState {
-  try {
-    const json = localStorage.getItem(STORAGE_KEY);
-    if (json) return parseState(json);
-  } catch (error) {
-    console.error('The stored layers could not be read; starting afresh.', error);
-  }
-  return defaultState();
-}
-
-const [state, setState] = createStore<AppState>(loadState());
+const [state, setState] = persistedStore(STORAGE_KEY, 'layers', parseState, defaultState);
 export { state };
 
 createRoot(() => {
-  createEffect(() => {
-    const json = JSON.stringify(state);
-    try {
-      localStorage.setItem(STORAGE_KEY, json);
-    } catch (error) {
-      console.error('Saving the layers failed.', error);
-    }
-  });
   createEffect(() => setProxy(state.settings.proxy, [...state.settings.proxiedHosts]));
 });
 
