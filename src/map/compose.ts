@@ -37,9 +37,9 @@ export const CACHE_PREFIX = 'cache+';
 /** The schemes a cached tile address can have. */
 export const CACHED_SCHEMES = ['https', 'http', WMTS_PROTOCOL, FEATURE_PROTOCOL].map((s) => CACHE_PREFIX + s);
 
-/** The layer's tile addresses, through the tile cache where the layer keeps its tiles. */
+/** The layer's tile addresses, through the tile cache unless the layer is set not to keep its tiles. */
 function cached(layer: Layer, tiles: string[]): string[] {
-  return layer.cache ? tiles.map((t) => CACHE_PREFIX + t) : tiles;
+  return layer.cache !== false ? tiles.map((t) => CACHE_PREFIX + t) : tiles;
 }
 
 /** One user layer as MapLibre sources and layers, plus what a style layer brings along. */

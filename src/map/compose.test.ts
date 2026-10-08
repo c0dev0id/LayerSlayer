@@ -31,7 +31,7 @@ describe('composeStyle', () => {
           bounds: [5, 45, 10, 48],
           attribution: '© OSM',
         },
-        { opacity: 0.5, minzoom: 3, maxzoom: 18 },
+        { opacity: 0.5, minzoom: 3, maxzoom: 18, cache: false },
       ),
     ]);
     expect(style.sources.L).toEqual({
@@ -70,7 +70,7 @@ describe('composeStyle', () => {
         layer({
           name: 'w',
           source: { type: 'wms', url: 'https://w.example/wms?map=x', version, layers: 'a,b', styles: '', format: 'image/png', crs: 'EPSG:3857' },
-        }),
+        }, { cache: false }),
       ]).sources.L as { tiles: string[]; tileSize: number };
     expect(wms('1.3.0').tiles[0]).toBe(
       'https://w.example/wms?map=x&SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=a,b&STYLES=&FORMAT=image/png' +
@@ -82,7 +82,7 @@ describe('composeStyle', () => {
 
   it('requests ArcGIS exports in Web Mercator', () => {
     const style = compose([
-      layer({ name: 'a', source: { type: 'arcgis-map', url: 'https://a.example/rest/services/X/MapServer', layers: 'show:3', format: 'png32' } }),
+      layer({ name: 'a', source: { type: 'arcgis-map', url: 'https://a.example/rest/services/X/MapServer', layers: 'show:3', format: 'png32' } }, { cache: false }),
     ]);
     expect((style.sources.L as { tiles: string[] }).tiles[0]).toBe(
       'https://a.example/rest/services/X/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857' +
@@ -113,14 +113,13 @@ describe('composeStyle', () => {
     expect(style.layers[0]).toMatchObject({ 'source-layer': 'features' });
   });
 
-  it('sends the tiles of a layer that keeps them through the tile cache', () => {
+  it('sends tiles through the tile cache unless the layer is set not to keep them', () => {
     const style = compose([
-      layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, { cache: true }, 'X'),
+      layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, {}, 'X'),
       layer({ name: 'f', source: { type: 'arcgis-features', url: 'https://a/FeatureServer/0', geometry: 'point', maxRecordCount: 1000 } }, {}, 'F'),
-      layer({ name: 'n', source: { type: 'xyz', tiles: ['https://n/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, {}, 'N'),
+      layer({ name: 'n', source: { type: 'xyz', tiles: ['https://n/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, { cache: false }, 'N'),
     ]);
     expect((style.sources.X as { tiles: string[] }).tiles).toEqual(['cache+https://t/{z}/{x}/{y}.png']);
-    // New feature layers keep their tiles.
     expect((style.sources.F as { tiles: string[] }).tiles[0]).toMatch(/^cache\+arcgis-features:\/\//);
     expect((style.sources.N as { tiles: string[] }).tiles).toEqual(['https://n/{z}/{x}/{y}.png']);
   });

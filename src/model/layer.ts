@@ -108,7 +108,7 @@ export interface Layer {
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;
-  /** Keep the layer's tiles in the browser, for slow servers; see `canCache`. */
+  /** Whether the layer keeps its tiles in the browser (`canCache`); on unless false. */
   cache?: boolean;
   /**
    * Where the layer was added from: the source's address, followed by a space (which no
@@ -160,7 +160,5 @@ export function createLayer(draft: LayerDraft, existing: readonly Layer[], id: s
     const used = existing.filter((l) => isVector(l.source)).length;
     layer.color = VECTOR_COLORS[used % VECTOR_COLORS.length];
   }
-  // Feature servers are the slow ones as a rule; other layers keep tiles where asked to.
-  if (draft.source.type === 'arcgis-features') layer.cache = true;
   return layer;
 }

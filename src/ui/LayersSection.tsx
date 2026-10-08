@@ -281,7 +281,7 @@ function ActiveLayer(props: { layer: Layer }) {
       </Show>
       <Show when={canCache(layer.source)}>
         <label class="row" title="For slow servers: tiles once loaded are answered from the browser">
-          <input type="checkbox" checked={layer.cache === true} onChange={(e) => updateLayer(layer.id, { cache: e.currentTarget.checked })} />
+          <input type="checkbox" checked={layer.cache !== false} onChange={(e) => updateLayer(layer.id, { cache: e.currentTarget.checked })} />
           <span>Keep tiles in this browser for {TILE_MAX_AGE_HOURS} hours</span>
         </label>
       </Show>
