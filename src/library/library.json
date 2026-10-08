@@ -515,6 +515,15 @@
       "note": "Recent aerial photography."
     },
     {
+      "name": "Amsterdam — travel times on main roads",
+      "type": "geojson",
+      "url": "http://web.redant.net/~amsterdam/ndw/data/reistijdenAmsterdam.geojson",
+      "region": "Netherlands",
+      "category": "Traffic",
+      "note": "Current travel time per road stretch of the main road network, refreshed every five minutes. The server speaks plain HTTP only, so it needs the CORS proxy.",
+      "cors": false
+    },
+    {
       "name": "Kartverket",
       "type": "wmts",
       "url": "https://cache.kartverket.no/v1/wmts/1.0.0/WMTSCapabilities.xml",
@@ -833,6 +842,94 @@
       "region": "United States",
       "category": "Basemap",
       "note": "The National Map's topographic base map, cached tiles."
+    },
+    {
+      "name": "USGS — protected areas by fee manager (PAD-US 4.1)",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/v01gqwM5QqNysAAi/arcgis/rest/services/Fee_Managers_PADUS/FeatureServer",
+      "region": "United States",
+      "category": "POI",
+      "note": "Who owns or manages each protected area, as polygons drawn in the browser; the same data as the PAD-US map service."
+    },
+    {
+      "name": "BTS — North American rail network lines",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Lines/FeatureServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Every rail line in the United States, Canada and Mexico, with owner, track rights and use (NTAD)."
+    },
+    {
+      "name": "BTS — North American rail network nodes",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Nodes/FeatureServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Junctions and ends of the rail network lines (NTAD)."
+    },
+    {
+      "name": "BTS — passenger rail lines",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Lines_Passenger_Rail/FeatureServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "The rail network lines that carry passenger trains (NTAD)."
+    },
+    {
+      "name": "BTS — Amtrak routes",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Amtrak_Routes/FeatureServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Amtrak's passenger routes as lines."
+    },
+    {
+      "name": "BTS — Amtrak stations",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Amtrak_Stations/FeatureServer",
+      "region": "United States",
+      "category": "POI",
+      "note": "Amtrak stations and stops."
+    },
+    {
+      "name": "BTS — railroad grade crossings",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Railroad_Grade_Crossings/FeatureServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Every place a road or path crosses a railway, from the FRA crossing inventory."
+    },
+    {
+      "name": "BTS — railroad bridges",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Railroad_Bridges/FeatureServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Railroad bridges, as points."
+    },
+    {
+      "name": "BTS — rail yards",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Rail_Yards/FeatureServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "The tracks of rail yards, as lines."
+    },
+    {
+      "name": "HIFLD — electric power transmission lines",
+      "type": "arcgis-features",
+      "url": "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/US_Electric_Power_Transmission_Lines/FeatureServer",
+      "region": "United States",
+      "category": "Infrastructure",
+      "note": "High-voltage transmission lines with their voltage and owner."
+    },
+    {
+      "name": "EPA AirNow — air quality index",
+      "type": "arcgis-features",
+      "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursCombined/FeatureServer",
+      "region": "United States",
+      "category": "Weather",
+      "note": "Contours of the latest air quality index, ozone and fine particles combined."
     }
   ]
 }
