@@ -117,7 +117,7 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
         layer,
         {
           type: 'vector',
-          tiles: cached(layer, [featureTileUrl(src.url, src.maxRecordCount)]),
+          tiles: cached(layer, [featureTileUrl(src.url, src.maxRecordCount, src.tileQueries === true)]),
           maxzoom: FEATURE_TILE_MAXZOOM,
           ...(layer.attribution && { attribution: layer.attribution }),
         },
@@ -240,11 +240,21 @@ export function resolveWmtsTile(url: string): string {
   return (params.get('t') ?? '').replace('{TileMatrix}', id).replace('{x}', x!).replace('{y}', y!);
 }
 
-export function featureTileUrl(layerUrl: string, maxRecordCount: number): string {
-  return `${FEATURE_PROTOCOL}://{z}/{x}/{y}?${new URLSearchParams({ url: layerUrl, max: String(maxRecordCount) })}`;
+export function featureTileUrl(layerUrl: string, maxRecordCount: number, tileQueries = false): string {
+  const params = new URLSearchParams({ url: layerUrl, max: String(maxRecordCount), ...(tileQueries && { tile: '1' }) });
+  return `${FEATURE_PROTOCOL}://{z}/{x}/{y}?${params}`;
 }
 
-export function parseFeatureTileUrl(url: string): { z: number; x: number; y: number; layerUrl: string; maxRecordCount: number } {
+export interface FeatureTile {
+  z: number;
+  x: number;
+  y: number;
+  layerUrl: string;
+  maxRecordCount: number;
+  tileQueries: boolean;
+}
+
+export function parseFeatureTileUrl(url: string): FeatureTile {
   const match = /^[^:]+:\/\/(\d+)\/(\d+)\/(\d+)\?(.*)$/.exec(url);
   if (!match) throw new Error(`Not a feature tile: ${url}`);
   const params = new URLSearchParams(match[4]);
@@ -254,6 +264,7 @@ export function parseFeatureTileUrl(url: string): { z: number; x: number; y: num
     y: Number(match[3]),
     layerUrl: params.get('url') ?? '',
     maxRecordCount: Number(params.get('max') ?? 1000),
+    tileQueries: params.get('tile') === '1',
   };
 }
 

@@ -3,7 +3,7 @@ import { fromGeojsonVt } from '@maplibre/vt-pbf';
 import { AJAXError, type AddProtocolAction } from 'maplibre-gl';
 import { HALF_WORLD, WORLD } from '../geo/mercator';
 import { hostOf, requestUrl } from '../state/net';
-import { CACHE_PREFIX, FEATURE_LAYER, FEATURE_PROTOCOL, parseFeatureTileUrl, resolveWmtsTile, WMTS_PROTOCOL } from './compose';
+import { CACHE_PREFIX, FEATURE_LAYER, FEATURE_PROTOCOL, parseFeatureTileUrl, resolveWmtsTile, WMTS_PROTOCOL, type FeatureTile } from './compose';
 import { createLimiter } from './limit';
 import { cachedTile, storeTile } from './tileCache';
 import { withParams } from './urls';
@@ -19,9 +19,11 @@ async function fetchTile(url: string, signal: AbortSignal): Promise<ArrayBuffer>
 
 /**
  * The query for the features in one tile: its extent in Web Mercator, the answer as
- * GeoJSON in degrees, generalised to about a pixel of a 512 px tile.
+ * GeoJSON in degrees, generalised to about a pixel of a 512 px tile. A tile query
+ * (`resultType=tile`) is allowed more records and is answered much faster by hosted
+ * services, which optimise for it.
  */
-export function featureQueryUrl(layerUrl: string, z: number, x: number, y: number, maxRecordCount: number): string {
+export function featureQueryUrl({ layerUrl, z, x, y, maxRecordCount, tileQueries }: FeatureTile): string {
   const size = WORLD / 2 ** z;
   const xmin = -HALF_WORLD + x * size;
   const ymax = HALF_WORLD - y * size;
@@ -36,6 +38,7 @@ export function featureQueryUrl(layerUrl: string, z: number, x: number, y: numbe
     outSR: 4326,
     maxAllowableOffset: 360 / 2 ** z / 1024,
     resultRecordCount: maxRecordCount,
+    ...(tileQueries && { resultType: 'tile' }),
     f: 'geojson',
   });
 }
@@ -59,8 +62,9 @@ function limiterFor(url: string): ReturnType<typeof createLimiter> {
  * Queries to one server are limited.
  */
 function featureTile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
-  const { z, x, y, layerUrl, maxRecordCount } = parseFeatureTileUrl(url);
-  const query = featureQueryUrl(layerUrl, z, x, y, maxRecordCount);
+  const feature = parseFeatureTileUrl(url);
+  const { z, x, y, layerUrl } = feature;
+  const query = featureQueryUrl(feature);
   return limiterFor(query)(async () => {
     const json = JSON.parse(new TextDecoder().decode(await fetchTile(query, signal))) as GeoJSON.FeatureCollection & {
       error?: { message?: string };
@@ -86,10 +90,7 @@ function tile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
 /** The address a tile is kept under in the cache: the request that answers it. */
 export function cacheKey(url: string): string {
   if (url.startsWith(`${WMTS_PROTOCOL}://`)) return resolveWmtsTile(url);
-  if (url.startsWith(`${FEATURE_PROTOCOL}://`)) {
-    const { z, x, y, layerUrl, maxRecordCount } = parseFeatureTileUrl(url);
-    return featureQueryUrl(layerUrl, z, x, y, maxRecordCount);
-  }
+  if (url.startsWith(`${FEATURE_PROTOCOL}://`)) return featureQueryUrl(parseFeatureTileUrl(url));
   return url;
 }
 

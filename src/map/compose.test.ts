@@ -248,6 +248,8 @@ describe('WMTS tiles', () => {
 describe('feature tile URLs', () => {
   it('round-trips the layer and the record limit', () => {
     const url = featureTileUrl('https://a.example/FeatureServer/0', 2000).replace('{z}', '3').replace('{x}', '4').replace('{y}', '5');
-    expect(parseFeatureTileUrl(url)).toEqual({ z: 3, x: 4, y: 5, layerUrl: 'https://a.example/FeatureServer/0', maxRecordCount: 2000 });
+    expect(parseFeatureTileUrl(url)).toEqual({ z: 3, x: 4, y: 5, layerUrl: 'https://a.example/FeatureServer/0', maxRecordCount: 2000, tileQueries: false });
+    const tiled = featureTileUrl('https://a.example/FeatureServer/0', 4000, true).replace('{z}', '3').replace('{x}', '4').replace('{y}', '5');
+    expect(parseFeatureTileUrl(tiled).tileQueries).toBe(true);
   });
 });

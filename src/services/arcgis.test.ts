@@ -40,13 +40,30 @@ describe('parseMapServer', () => {
 });
 
 describe('parseFeatureService', () => {
-  it('offers each layer of a FeatureServer', () => {
-    const info = parseFeatureService(featureServer as never, 'https://services3.arcgis.com/x/arcgis/rest/services/WFIGS/FeatureServer?f=json');
+  const root = 'https://services3.arcgis.com/x/arcgis/rest/services/WFIGS/FeatureServer?f=json';
+
+  it('offers each layer of a FeatureServer with what the service says, where the layer was not read', () => {
+    const info = parseFeatureService(featureServer as never, root);
     expect(info.offers[0]!.draft).toMatchObject({
       name: 'Perimeters',
       source: { type: 'arcgis-features', url: 'https://services3.arcgis.com/x/arcgis/rest/services/WFIGS/FeatureServer/0', geometry: 'polygon', maxRecordCount: 1000 },
       minzoom: FEATURE_MINZOOM,
     });
+    expect(info.offers[0]!.draft!.source).not.toHaveProperty('tileQueries');
+  });
+
+  it("takes a layer's own description and count over the service's", () => {
+    const info = parseFeatureService(featureServer as never, root, new Map([[0, { layer: featureLayer as never, count: 312 }]]));
+    const draft = info.offers[0]!.draft!;
+    // The layer allows tile queries of 4000 records, though the service says 1000.
+    expect(draft.source).toMatchObject({ maxRecordCount: 4000, tileQueries: true });
+    // 312 features fit in one query, so the layer is shown at every zoom.
+    expect(draft.minzoom).toBeUndefined();
+  });
+
+  it('starts a layer with more features than a query returns at the feature zoom', () => {
+    const info = parseFeatureService(featureLayer as never, 'https://x/FeatureServer/0', new Map([[0, { count: 300000 }]]));
+    expect(info.offers[0]!.draft!.minzoom).toBe(FEATURE_MINZOOM);
   });
 
   it('keeps a higher minimum zoom the service asks for', () => {
@@ -55,13 +72,18 @@ describe('parseFeatureService', () => {
     expect(info.offers[0]!.draft!.minzoom).toBeCloseTo(11.9, 1);
   });
 
-  it('offers a single feature layer with its own record limit', () => {
+  it('asks a single layer with tile queries where it supports them', () => {
     const info = parseFeatureService(featureLayer as never, 'https://services3.arcgis.com/x/FeatureServer/0');
     expect(info.offers[0]!.draft).toMatchObject({
-      source: { url: 'https://services3.arcgis.com/x/FeatureServer/0', geometry: 'polygon', maxRecordCount: 2000 },
+      source: { url: 'https://services3.arcgis.com/x/FeatureServer/0', geometry: 'polygon', maxRecordCount: 4000, tileQueries: true },
     });
     // The fixture's extent is not in degrees, so no bounds are taken from it.
     expect(info.offers[0]!.draft!.bounds).toBeUndefined();
+  });
+
+  it('uses the standard record limit for a layer without tile queries', () => {
+    const plain = { ...featureLayer, advancedQueryCapabilities: { supportsQueryWithResultType: false } };
+    expect(parseFeatureService(plain as never, 'https://x/FeatureServer/0').offers[0]!.draft!.source).toMatchObject({ maxRecordCount: 2000 });
   });
 
   it('refuses a layer that cannot answer in GeoJSON', () => {

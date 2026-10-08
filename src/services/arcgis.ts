@@ -46,13 +46,26 @@ interface MapServer {
   error?: { message?: string };
 }
 
-interface FeatureLayer extends ServiceLayer {
+export interface FeatureLayer extends ServiceLayer {
   description?: string;
   copyrightText?: string;
   extent?: Extent;
   maxRecordCount?: number;
+  /** The record limit of tile queries (`resultType=tile`), where the layer supports them. */
+  tileMaxRecordCount?: number;
+  advancedQueryCapabilities?: { supportsQueryWithResultType?: boolean };
   supportedQueryFormats?: string;
   error?: { message?: string };
+}
+
+/**
+ * What reading a feature layer itself adds to its service's listing: the layer's own
+ * description, which can differ from the service's (record limits, query formats, tile
+ * queries), and how many features it has.
+ */
+export interface LayerDetails {
+  layer?: FeatureLayer;
+  count?: number;
 }
 
 const MERCATOR_WKIDS = new Set([3857, 102100, 102113, 900913]);
@@ -138,55 +151,68 @@ function cachedTiles(json: MapServer): { tileSize: number; zooms: { minzoom: num
   return { tileSize: tiles.rows, zooms: { minzoom: Math.min(...levels), maxzoom: Math.max(...levels) } };
 }
 
-/** Reads a FeatureServer's description, or the description of one of its layers. */
-export function parseFeatureService(json: MapServer | FeatureLayer, url: string): ServiceInfo {
+/**
+ * Reads a FeatureServer's description, or the description of one of its layers. Details
+ * read from the layers themselves, by layer id, take precedence over what the service says
+ * about them.
+ */
+export function parseFeatureService(
+  json: MapServer | FeatureLayer,
+  url: string,
+  details: ReadonlyMap<number, LayerDetails> = new Map(),
+): ServiceInfo {
   checkError(json);
   const base = serviceUrl(url);
   if ('geometryType' in json && typeof (json as FeatureLayer).id === 'number' && !('layers' in json)) {
     const layer = json as FeatureLayer;
-    const offer = featureOffer(layer, base, layer.maxRecordCount, layer.supportedQueryFormats, 0);
+    const offer = featureOffer(layer, base, undefined, details.get(layer.id)?.count);
     return { title: layer.name, ...(layer.description && { description: plainText(layer.description) }), offers: [offer] };
   }
-  const service = json as MapServer & { supportedQueryFormats?: string };
+  const service = json as MapServer;
   if (!Array.isArray(service.layers)) throw new Error('This is not an ArcGIS FeatureServer description.');
   const description = plainText(service.serviceDescription || service.description);
   return {
     title: base.split('/').slice(-2, -1)[0] ?? 'FeatureServer',
     ...(description && { description }),
-    // A service's query formats can understate its layers' (hosted layers add geoJSON),
-    // so they are not checked here; a layer that cannot answer shows its error when drawn.
-    offers: service.layers.map((layer) =>
-      featureOffer({ ...layer, copyrightText: service.copyrightText }, `${base}/${layer.id}`, service.maxRecordCount, undefined, 0),
-    ),
+    offers: service.layers.map((listed) => {
+      const own = details.get(listed.id);
+      // Without the layer's own description its query formats are unknown: the service's
+      // understate a hosted layer's (it adds geoJSON), so they are not checked.
+      const layer: FeatureLayer = own?.layer ?? { ...listed, copyrightText: service.copyrightText };
+      return featureOffer(layer, `${base}/${listed.id}`, service.maxRecordCount, own?.count);
+    }),
   };
 }
 
-function featureOffer(
-  layer: FeatureLayer,
-  layerUrl: string,
-  maxRecordCount: number | undefined,
-  queryFormats: string | undefined,
-  depth: number,
-): Offer {
-  const offer: Offer = { title: layer.name, name: String(layer.id), depth };
+/**
+ * A feature layer as a layer to add. Tile queries are used where the layer supports them:
+ * they allow more records per query and are answered much faster by hosted services. A
+ * layer whose features all fit in one query is shown from the lowest zoom, since no tile
+ * can hold more; a larger one from FEATURE_MINZOOM.
+ */
+function featureOffer(layer: FeatureLayer, layerUrl: string, serviceMaxRecordCount: number | undefined, count: number | undefined): Offer {
+  const offer: Offer = { title: layer.name, name: String(layer.id), depth: 0 };
   const geometry = geometryOf(layer.geometryType);
   if (!geometry) {
-    offer.reason = layer.type === 'Group Layer' ? undefined : 'Not a layer with geometries.';
+    if (layer.type !== 'Group Layer') offer.reason = 'Not a layer with geometries.';
     return offer;
   }
-  if (queryFormats !== undefined && !/geojson/i.test(queryFormats)) {
+  if (layer.supportedQueryFormats !== undefined && !/geojson/i.test(layer.supportedQueryFormats)) {
     offer.reason = 'The server cannot answer queries in GeoJSON.';
     return offer;
   }
+  const tileQueries = layer.advancedQueryCapabilities?.supportsQueryWithResultType === true && (layer.tileMaxRecordCount ?? 0) > 0;
+  const maxRecordCount = tileQueries ? layer.tileMaxRecordCount! : (layer.maxRecordCount ?? serviceMaxRecordCount ?? 1000);
   const bounds = extentBounds(layer.extent);
   const range = scaleRange(layer);
+  const fits = count !== undefined && count <= maxRecordCount;
   offer.draft = {
     name: layer.name,
-    source: { type: 'arcgis-features', url: layerUrl, geometry, maxRecordCount: maxRecordCount ?? 1000 },
+    source: { type: 'arcgis-features', url: layerUrl, geometry, maxRecordCount, ...(tileQueries && { tileQueries }) },
     ...(bounds && { bounds }),
     ...(layer.copyrightText && { attribution: layer.copyrightText }),
     ...range,
-    minzoom: Math.max(FEATURE_MINZOOM, range.minzoom ?? 0),
+    ...(!fits && { minzoom: Math.max(FEATURE_MINZOOM, range.minzoom ?? 0) }),
   };
   return offer;
 }

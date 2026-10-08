@@ -61,6 +61,8 @@ export interface ArcGisFeatureSource {
   geometry: Geometry;
   /** Most features one query returns. */
   maxRecordCount: number;
+  /** Ask with tile queries (`resultType=tile`), which the layer supports. */
+  tileQueries?: boolean;
 }
 
 export interface GeoJsonSource {

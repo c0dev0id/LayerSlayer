@@ -7,13 +7,20 @@ import { cacheKey, encodeFeatures, featureQueryUrl } from './protocols';
 
 describe('featureQueryUrl', () => {
   it('asks for the features in the tile extent as GeoJSON', () => {
-    const url = featureQueryUrl('https://a.example/FeatureServer/0', 1, 1, 0, 2000);
+    const url = featureQueryUrl({ layerUrl: 'https://a.example/FeatureServer/0', z: 1, x: 1, y: 0, maxRecordCount: 2000, tileQueries: false });
     expect(url.startsWith('https://a.example/FeatureServer/0/query?')).toBe(true);
     expect(getParam(url, 'geometry')).toBe('0,0,20037508.34,20037508.34');
     expect(getParam(url, 'inSR')).toBe('3857');
     expect(getParam(url, 'outSR')).toBe('4326');
     expect(getParam(url, 'f')).toBe('geojson');
     expect(getParam(url, 'resultRecordCount')).toBe('2000');
+    expect(getParam(url, 'resultType')).toBeUndefined();
+  });
+
+  it('asks with a tile query where the layer supports it', () => {
+    const url = featureQueryUrl({ layerUrl: 'https://a.example/FeatureServer/0', z: 9, x: 1, y: 2, maxRecordCount: 4000, tileQueries: true });
+    expect(getParam(url, 'resultType')).toBe('tile');
+    expect(getParam(url, 'resultRecordCount')).toBe('4000');
   });
 });
 
@@ -24,7 +31,9 @@ describe('cacheKey', () => {
     expect(cacheKey('https://t.example/9/2/3.png')).toBe('https://t.example/9/2/3.png');
     const wmts = wmtsTileUrl({ type: 'wmts', template: 'https://w/{TileMatrix}/{TileRow}/{TileCol}.png', matrices: { '9': '09', '10': '10' }, tileSize: 256 });
     expect(cacheKey(tile(wmts))).toBe('https://w/09/3/2.png');
-    expect(cacheKey(tile(featureTileUrl('https://a/FeatureServer/0', 2000)))).toBe(featureQueryUrl('https://a/FeatureServer/0', 9, 2, 3, 2000));
+    expect(cacheKey(tile(featureTileUrl('https://a/FeatureServer/0', 4000, true)))).toBe(
+      featureQueryUrl({ layerUrl: 'https://a/FeatureServer/0', z: 9, x: 2, y: 3, maxRecordCount: 4000, tileQueries: true }),
+    );
   });
 });
 
