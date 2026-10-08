@@ -959,7 +959,8 @@ input.swatch {
 }
 
 /* Place search over the map's top left corner, its places listed below it. */
-/* Narrow screens only: the button that folds the panel. */
+/* Narrow screens only: the button the search folds into, and the one that folds the panel. */
+button.search-toggle,
 button.panel-toggle {
   display: none;
 }
@@ -1161,8 +1162,33 @@ button.panel-toggle {
     display: none;
   }
 
+  /* The search is a button until it is opened. */
+  .search:not(.open) {
+    width: auto;
+  }
+
+  button.search-toggle {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    color: #343a40;
+    cursor: pointer;
+  }
+
+  .search:not(.open) > :not(.search-toggle),
+  .search.open > .search-toggle {
+    display: none;
+  }
+
+  /* Where the search box is on wide screens, between its button and the map's controls. */
   .hint-bar {
-    max-width: calc(100% - 100px);
+    top: 10px;
+    max-width: calc(100% - 130px);
     font-size: 12px;
   }
 

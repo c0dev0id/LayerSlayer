@@ -12,6 +12,8 @@ let lastSearch = 0;
 /**
  * Searches places and addresses with Nominatim, preferring those in view. The first place
  * found gets a pin and the map flies to it; the list of places found offers the others.
+ * Narrow screens show a button in its place, which opens the search; moving or tapping the
+ * map, Esc or clearing folds it again, keeping the query and the pin.
  */
 export function SearchBox(props: { map: maplibregl.Map }) {
   const map = props.map;
@@ -20,7 +22,9 @@ export function SearchBox(props: { map: maplibregl.Map }) {
   const [shown, setShown] = createSignal<Place>();
   const [busy, setBusy] = createSignal(false);
   const [error, setError] = createSignal<string>();
+  const [open, setOpen] = createSignal(false);
   const pin = new maplibregl.Marker({ color: '#e03131' });
+  let input!: HTMLInputElement;
 
   const show = (place: Place) => {
     setShown(place);
@@ -58,20 +62,38 @@ export function SearchBox(props: { map: maplibregl.Map }) {
     setShown(undefined);
     setError(undefined);
     pin.remove();
+    setOpen(false);
   };
 
   // The list closes once the map is moved by hand; the flight to a place leaves it open.
   const onMoveStart = (e: { originalEvent?: Event }) => {
-    if (e.originalEvent) setPlaces(undefined);
+    if (!e.originalEvent) return;
+    setPlaces(undefined);
+    setOpen(false);
   };
+  const fold = () => setOpen(false);
   map.on('movestart', onMoveStart);
+  map.on('click', fold);
   onCleanup(() => {
     map.off('movestart', onMoveStart);
+    map.off('click', fold);
     pin.remove();
   });
 
   return (
-    <div class="search">
+    <div class="search" classList={{ open: open() }}>
+      <button
+        type="button"
+        class="search-toggle"
+        title="Search a place or address"
+        aria-label="Search a place or address"
+        onClick={() => {
+          setOpen(true);
+          input.focus();
+        }}
+      >
+        <SearchIcon />
+      </button>
       <form
         class="search-form"
         role="search"
@@ -81,6 +103,7 @@ export function SearchBox(props: { map: maplibregl.Map }) {
         }}
       >
         <input
+          ref={input}
           type="text"
           enterkeyhint="search"
           placeholder="Search a place or address"
@@ -88,7 +111,9 @@ export function SearchBox(props: { map: maplibregl.Map }) {
           value={query()}
           onInput={(e) => setQuery(e.currentTarget.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Escape') setPlaces(undefined);
+            if (e.key !== 'Escape') return;
+            if (places()) setPlaces(undefined);
+            else setOpen(false);
           }}
         />
         <Show when={query() || shown()}>
