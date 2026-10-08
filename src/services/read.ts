@@ -63,8 +63,8 @@ export function wmsCapabilitiesUrl(url: string): string {
   return withParams(url, { SERVICE: 'WMS', REQUEST: 'GetCapabilities', ...(!getParam(url, 'VERSION') && { VERSION: '1.3.0' }) });
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
-  return (await fetchResource(url)).json() as Promise<T>;
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  return (await fetchResource(url, init)).json() as Promise<T>;
 }
 
 /**
@@ -103,10 +103,8 @@ const ACCEPT_JSON = { headers: { Accept: 'application/json' } };
 
 /** Reads an OGC API's collections from its landing page, its collections or one collection. */
 async function readOgcFeatures(url: string): Promise<ServiceInfo> {
-  const address = collectionsAddress(url) ?? {
-    collections: landingPageCollections(await (await fetchResource(url, ACCEPT_JSON)).json(), url),
-  };
-  return parseCollections(await (await fetchResource(address.collections, ACCEPT_JSON)).json(), address.collections, address.id);
+  const address = collectionsAddress(url) ?? { collections: landingPageCollections(await fetchJson(url, ACCEPT_JSON), url) };
+  return parseCollections(await fetchJson(address.collections, ACCEPT_JSON), address.collections, address.id);
 }
 
 /**
