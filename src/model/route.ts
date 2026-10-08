@@ -34,9 +34,14 @@ export interface Route {
   legs: Record<string, string>;
 }
 
-/** A named place of its own (a GPX waypoint), independent of the routes. */
+/**
+ * A named place (a GPX waypoint). It is none of a route's points, but belongs to a route
+ * entry all the same: exported with it, shown in its view, and deleted with it.
+ */
 export interface Waypoint {
   id: string;
+  /** The route it belongs to: the one being drawn when it was placed. */
+  routeId: string;
   lngLat: LngLat;
   name: string;
   description?: string;

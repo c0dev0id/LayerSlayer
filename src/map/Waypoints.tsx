@@ -7,8 +7,8 @@ import { WaypointPin } from '../ui/icons';
 import { MarkerHandle, onMarkerMenu } from './markers';
 
 /**
- * Waypoints: always shown as a pin with the name. While a route is drawn they can be
- * dragged, edited or deleted; otherwise they let clicks through to the map.
+ * Waypoints: always shown as a pin with the name. While their route is drawn they can be
+ * dragged, edited or deleted, like its points; otherwise they let clicks through to the map.
  */
 export function Waypoints(props: { map: MapLibreMap }) {
   return <For each={routeData.waypoints.map((w) => w.id)}>{(id) => <WaypointMarker map={props.map} id={id} />}</For>;
@@ -17,7 +17,7 @@ export function Waypoints(props: { map: MapLibreMap }) {
 function WaypointMarker(props: { map: MapLibreMap; id: string }) {
   const { map, id } = props;
   const waypoint = () => routeData.waypoints.find((w) => w.id === id);
-  const editable = () => editingRouteId() !== undefined;
+  const editable = () => editingRouteId() !== undefined && editingRouteId() === waypoint()?.routeId;
 
   const content = (
     <div class="waypoint" title={waypoint()?.description ?? ''}>
@@ -48,7 +48,8 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
     return [
       {
         label: 'Edit waypoint…',
-        run: () => setWaypointDraft({ id, lngLat: w.lngLat, name: w.name, description: w.description ?? '', ...(w.icon && { icon: w.icon }) }),
+        run: () =>
+          setWaypointDraft({ id, routeId: w.routeId, lngLat: w.lngLat, name: w.name, description: w.description ?? '', ...(w.icon && { icon: w.icon }) }),
       },
       { label: 'Delete waypoint', run: () => removeWaypoint(id) },
     ];

@@ -23,6 +23,9 @@ const cleanPoints = (points: readonly LngLat[]) => withoutRepeats(points.map(rou
  * routed with `profile`; a leg the routing cannot find stays unrouted until one of its
  * points moves. A track is simplified to at most MAX_TRACK_POINTS joined by straight
  * lines, so that it keeps its shape. Unnamed entries are named after the file.
+ *
+ * GPX ties waypoints to no route or track, so they belong to the file's first route; a file
+ * of waypoints alone becomes a route without points, named after the file, to hold them.
  */
 export function gpxToRouteData(
   gpx: GpxContent,
@@ -44,8 +47,13 @@ export function gpxToRouteData(
       legs: {},
     });
   });
+  if (routes.length === 0 && gpx.waypoints.length > 0) {
+    routes.push({ id: options.newId(), name: options.fileName, profile: options.profile, color: nextRouteColor(options.existing), points: [], legs: {} });
+  }
+  const routeId = routes[0]?.id ?? '';
   const waypoints = gpx.waypoints.map((w, i) => ({
     id: options.newId(),
+    routeId,
     lngLat: roundLngLat(w.lngLat),
     name: w.name ?? `Waypoint ${i + 1}`,
     ...(w.description && { description: w.description }),

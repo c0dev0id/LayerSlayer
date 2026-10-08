@@ -36,6 +36,8 @@ export const [menu, setMenu] = createSignal<{ x: number; y: number; touch: boole
 /** A waypoint being created (no id) or edited in the waypoint dialog. */
 export interface WaypointDraft {
   id?: string;
+  /** The route it belongs to: for a new waypoint, the route being drawn when it was placed. */
+  routeId: string;
   lngLat: LngLat;
   name: string;
   description: string;

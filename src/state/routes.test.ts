@@ -17,10 +17,16 @@ describe('parseRouteData', () => {
     const data = parseRouteData(
       JSON.stringify({
         routes: [route('a'), { ...route('b'), profile: 'plane' }, { ...route('c'), points: [{ id: 'p', lngLat: [1] }] }],
-        waypoints: [{ id: 'w', name: 'W', lngLat: [1, 2] }, { id: 'x', lngLat: [1, 2] }],
+        waypoints: [
+          { id: 'w', routeId: 'a', name: 'W', lngLat: [1, 2] },
+          { id: 'x', routeId: 'a', lngLat: [1, 2] },
+          { id: 'y', name: 'Y', lngLat: [1, 2] },
+          { id: 'z', routeId: 'b', name: 'Z', lngLat: [1, 2] },
+        ],
       }),
     );
     expect(data.routes.map((r) => r.id)).toEqual(['a']);
+    // Without a name, without a route, and with a route that was dropped.
     expect(data.waypoints.map((w) => w.id)).toEqual(['w']);
     expect(parseRouteData('{}')).toEqual({ routes: [], waypoints: [] });
   });
@@ -47,11 +53,31 @@ describe('route history', () => {
 
   it('imports routes and waypoints as one step', async () => {
     const s = await freshStore();
-    s.importRouteData({ routes: [route('a'), route('b')], waypoints: [{ id: 'w', name: 'W', lngLat: [1, 2] }] }, 'Import GPX');
+    s.importRouteData({ routes: [route('a'), route('b')], waypoints: [{ id: 'w', routeId: 'a', name: 'W', lngLat: [1, 2] }] }, 'Import GPX');
     expect(s.routeData.routes).toHaveLength(2);
     expect(s.undoLabel()).toBe('Import GPX');
     s.undo();
     expect(s.routeData).toEqual({ routes: [], waypoints: [] });
+  });
+
+  it('deletes a route with its waypoints, as one step', async () => {
+    const s = await freshStore();
+    s.importRouteData(
+      {
+        routes: [route('a'), route('b')],
+        waypoints: [
+          { id: 'wa', routeId: 'a', name: 'A', lngLat: [1, 2] },
+          { id: 'wb', routeId: 'b', name: 'B', lngLat: [3, 4] },
+        ],
+      },
+      'Import GPX',
+    );
+    s.removeRoute('a');
+    expect(s.routeData.routes.map((r) => r.id)).toEqual(['b']);
+    expect(s.routeData.waypoints.map((w) => w.id)).toEqual(['wb']);
+    expect(s.undoLabel()).toBe('Delete route');
+    s.undo();
+    expect(s.routeWaypoints('a').map((w) => w.id)).toEqual(['wa']);
   });
 
   it('keeps routes in the browser', async () => {

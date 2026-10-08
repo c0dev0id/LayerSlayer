@@ -47,8 +47,8 @@ describe('toGpx', () => {
     const gpx = toGpx(
       'Alps',
       [
-        { id: 'a', name: 'Café', lngLat: [11.5, 48.1] },
-        { id: 'b', name: 'Gravel', lngLat: [11.6, 48.2], description: 'Loose stones after the bend' },
+        { id: 'a', routeId: 'r', name: 'Café', lngLat: [11.5, 48.1] },
+        { id: 'b', routeId: 'r', name: 'Gravel', lngLat: [11.6, 48.2], description: 'Loose stones after the bend' },
       ],
       [{ name: 'Day 1', points: [[11.5, 48.1]] }],
       time,
@@ -67,7 +67,7 @@ describe('toGpx', () => {
   it('escapes names and descriptions', () => {
     const gpx = toGpx(
       'A & B',
-      [{ id: 'w', name: 'Tom & Jerry', lngLat: [0, 0], description: '<b>' }],
+      [{ id: 'w', routeId: 'r', name: 'Tom & Jerry', lngLat: [0, 0], description: '<b>' }],
       [{ name: '<Pass> "Höhe"', points: [] }],
       time,
     );
@@ -80,7 +80,7 @@ describe('toGpx', () => {
   it('keeps longitudes in [-180, 180)', () => {
     const gpx = toGpx(
       'x',
-      [{ id: 'w', name: 'w', lngLat: [190, 0] }],
+      [{ id: 'w', routeId: 'r', name: 'w', lngLat: [190, 0] }],
       [
         {
           name: 't',

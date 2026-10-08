@@ -106,7 +106,7 @@ export function Interactions(props: { map: MapLibreMap }) {
     const { lng, lat } = e.lngLat.wrap();
     const t = tool();
     if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], tapRadius());
-    else if (t === 'waypoint') setWaypointDraft({ lngLat: roundLngLat([lng, lat]), name: '', description: '' });
+    else if (t === 'waypoint') setWaypointDraft({ routeId, lngLat: roundLngLat([lng, lat]), name: '', description: '' });
     else if (t === 'append') appendPoint(routeId, roundLngLat([lng, lat]), reach() === 'line');
   };
   /** A tap on the first corner closes the focus area; anywhere else it adds a corner. */

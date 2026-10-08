@@ -20,7 +20,7 @@ export function WaypointDialog() {
     const description = String(data.get('description') ?? '').trim();
     if (!name) return;
     if (draft.id) updateWaypoint(draft.id, { name, description, icon }, 'Edit waypoint');
-    else addWaypoint({ id: crypto.randomUUID(), lngLat: draft.lngLat, name, ...(description && { description }), ...(icon && { icon }) });
+    else addWaypoint({ id: crypto.randomUUID(), routeId: draft.routeId, lngLat: draft.lngLat, name, ...(description && { description }), ...(icon && { icon }) });
     setWaypointDraft(undefined);
   };
   return (

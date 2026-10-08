@@ -8,7 +8,7 @@ import { defaultState } from './store';
 const file = createLayer({ name: 'walk.kml', source: { type: 'geojson', data: { file: 'f1', name: 'walk.kml' } } }, [], 'g');
 const routes: RouteData = {
   routes: [{ id: 'r', name: 'Tour', profile: 'bike', color: '#e8590c', points: [{ id: 'p', lngLat: [8, 49] }], legs: {} }],
-  waypoints: [{ id: 'w', lngLat: [8.1, 49.1], name: 'Pass' }],
+  waypoints: [{ id: 'w', routeId: 'r', lngLat: [8.1, 49.1], name: 'Pass' }],
 };
 const base = defaultState();
 const project: Project = {

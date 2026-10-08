@@ -31,16 +31,26 @@ function isRoute(value: unknown): value is Route {
 
 function isWaypoint(value: unknown): value is Waypoint {
   const w = value as Waypoint;
-  return typeof w === 'object' && w !== null && typeof w.id === 'string' && typeof w.name === 'string' && isLngLat(w.lngLat);
+  return (
+    typeof w === 'object' &&
+    w !== null &&
+    typeof w.id === 'string' &&
+    typeof w.routeId === 'string' &&
+    typeof w.name === 'string' &&
+    isLngLat(w.lngLat)
+  );
 }
 
-/** Reads stored routes; entries without the current shape are dropped one by one. */
+/**
+ * Reads stored routes; entries without the current shape are dropped one by one, as are
+ * waypoints whose route is not among them.
+ */
 export function parseRouteData(json: string): RouteData {
   const stored = JSON.parse(json) as Partial<RouteData>;
-  return {
-    routes: Array.isArray(stored.routes) ? stored.routes.filter(isRoute) : [],
-    waypoints: Array.isArray(stored.waypoints) ? stored.waypoints.filter(isWaypoint) : [],
-  };
+  const routes = Array.isArray(stored.routes) ? stored.routes.filter(isRoute) : [];
+  const ids = new Set(routes.map((r) => r.id));
+  const waypoints = Array.isArray(stored.waypoints) ? stored.waypoints.filter((w) => isWaypoint(w) && ids.has(w.routeId)) : [];
+  return { routes, waypoints };
 }
 
 const [routeData, setRouteData] = persistedStore<RouteData>(STORAGE_KEY, 'routes', parseRouteData, () => ({ routes: [], waypoints: [] }));
@@ -93,10 +103,17 @@ export function addRoute(route: Route): void {
   setRouteData('routes', (routes) => [...routes, route]);
 }
 
+/** The waypoints that belong to a route. */
+export function routeWaypoints(id: string): Waypoint[] {
+  return routeData.waypoints.filter((w) => w.routeId === id);
+}
+
+/** Deletes a route and its waypoints, as one step. */
 export function removeRoute(id: string): void {
   if (!routeById(id)) return;
   recordEdit('Delete route');
   setRouteData('routes', (routes) => routes.filter((r) => r.id !== id));
+  setRouteData('waypoints', (list) => list.filter((w) => w.routeId !== id));
 }
 
 export function renameRoute(id: string, name: string): void {

@@ -52,6 +52,14 @@ describe('gpxToRouteData', () => {
       ['Café', 'Good cake'],
       ['Waypoint 2', 'No name'],
     ]);
+    expect(data.waypoints.every((w) => w.routeId === data.routes[0]!.id)).toBe(true);
+  });
+
+  it('puts waypoints without a route or track into a route of their own, named after the file', () => {
+    const data = gpxToRouteData({ waypoints: [{ lngLat: [11.5, 48.1], name: 'Hut' }], routes: [], tracks: [] }, options);
+    expect(data.routes.map((r) => [r.name, r.points.length])).toEqual([['tour', 0]]);
+    expect(data.waypoints.map((w) => [w.name, w.routeId])).toEqual([['Hut', data.routes[0]!.id]]);
+    expect(gpxToRouteData({ waypoints: [], routes: [], tracks: [] }, options)).toEqual({ routes: [], waypoints: [] });
   });
 
   it('names a single unnamed line after the file and drops repeated points', () => {
