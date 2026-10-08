@@ -755,7 +755,8 @@ input.swatch {
 
 .hint-bar {
   position: absolute;
-  top: 10px;
+  /* Below the place search. */
+  top: 54px;
   left: 50%;
   z-index: 5;
   display: flex;
@@ -768,6 +769,87 @@ input.swatch {
   background: rgba(33, 37, 41, 0.85);
   color: #fff;
   font-size: 13px;
+}
+
+/* Place search over the map's top left corner, its places listed below it. */
+.search {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 6;
+  width: min(320px, calc(100% - 70px));
+  font-size: 13px;
+}
+
+.search-form,
+.search-results,
+.search > .search-note {
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px 2px 10px;
+}
+
+.search-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 0;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+}
+
+.search-form button.icon {
+  display: inline-grid;
+  place-items: center;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.search-form button.icon:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.search-results {
+  max-height: 50vh;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.search-results button {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.search-results button:hover,
+.search-results button.current {
+  background: var(--active);
+}
+
+.search-note {
+  margin: 4px 0 0;
+  padding: 4px 10px;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .context-menu {

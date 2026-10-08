@@ -42,6 +42,10 @@ in the browser.
 - Below the list, the **active layer** (click a name) has its opacity, zoom range, colour
   (vector layers), source, the CORS proxy for its server and, for tiled layers, whether it
   keeps its tiles in the browser. New layers start at 50% opacity.
+- **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
+  search, preferring those in view. Enter searches; the first place found gets a pin and the
+  map flies to it, and the list below offers the other places found. × clears the search
+  and the pin.
 - **Focus area**, above the layers: *Draw* starts a polygon over the map. Each tap places
   a corner and a tap on the first corner closes it; Backspace or *Undo* takes the last
   corner back, Esc or *Cancel* stops. Every layer but the bottom one then requests tiles

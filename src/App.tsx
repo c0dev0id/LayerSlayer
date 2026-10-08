@@ -4,6 +4,7 @@ import { HintBar } from './map/HintBar';
 import { Interactions } from './map/Interactions';
 import { MapView } from './map/MapView';
 import { RouteEditor } from './map/RouteEditor';
+import { SearchBox } from './map/SearchBox';
 import { Toolbar } from './map/Toolbar';
 import { Waypoints } from './map/Waypoints';
 import { editingRouteId } from './state/drawing';
@@ -40,6 +41,7 @@ export function App() {
               <RouteEditor map={m()} />
               <Interactions map={m()} />
               <ContextMenu map={m()} />
+              <SearchBox map={m()} />
             </>
           )}
         </Show>

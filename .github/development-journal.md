@@ -307,6 +307,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
   it, names renamed in place on the card, a summary line per card (opacity, colour, zoom
   range, cache, proxy) so the list answers which layer is set how without opening each, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
   panel layout, and the panel below the map on narrow screens.
+- **Place search with Nominatim.** OpenStreetMap's geocoder needs no key and sends CORS
+  headers, so the page asks it directly (through the proxy only if its host is proxied).
+  Its usage policy forbids search as you type and allows one request per second, so a
+  search runs on Enter and waits out the second since the last one; the results list
+  carries the attribution it asks for. The view is passed as `viewbox` to prefer nearby
+  places without excluding others. The first place is shown at once (a MapLibre marker,
+  the map fitted to the place's extent up to zoom 17); the others stay listed until one is
+  chosen, the map is moved by hand or Esc. The pin is not kept: it marks a search, not
+  data. The drawing hint bar moved below the search box.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
@@ -337,6 +346,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
   area, opacity, zoom range, colour for vector layers, and per-layer error marks.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
+- Place and address search (Nominatim) with a pin on the place found.
 - Optional CORS proxy, used per host.
 - A focus area: a polygon outside whose bounds no layer but the bottom one requests
   tiles, with the map around it dimmed.
