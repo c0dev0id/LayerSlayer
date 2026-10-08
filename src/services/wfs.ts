@@ -38,8 +38,7 @@ function values(element: Element | undefined, kind: 'Parameter' | 'Constraint', 
  * FEATURE_MINZOOM, since a feature count per type would cost a request each.
  */
 export function parseWfs(xml: string, capabilitiesUrl: string): ServiceInfo {
-  const root = parseXml(xml);
-  if (root.localName !== 'WFS_Capabilities') throw new Error('The service did not answer with WFS capabilities.');
+  const root = parseXml(xml, 'The service did not answer with WFS capabilities.', 'WFS_Capabilities');
   const version = root.getAttribute('version');
   if (version !== '2.0.0' && version !== '1.1.0') {
     throw new Error(`The service speaks WFS ${version ?? 'of an unknown version'}; webmap reads WFS 2.0 and 1.1.`);

@@ -8,8 +8,7 @@ import { parseXml } from './xml';
  * drawn in its own colour.
  */
 export function kmlPlacemarks(text: string): GeoJSON.FeatureCollection {
-  const root = parseXml(text, 'This is not a KML file.');
-  if (root.localName !== 'kml') throw new Error('This is not a KML file.');
+  const root = parseXml(text, 'This is not a KML file.', 'kml');
   const { features } = kml(root.ownerDocument, { skipNullGeometry: true });
   return {
     type: 'FeatureCollection',

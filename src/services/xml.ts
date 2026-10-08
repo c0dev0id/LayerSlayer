@@ -3,10 +3,11 @@ import type { Bounds } from '../model/layer';
 
 /** Namespace-agnostic reading of OGC capabilities documents. */
 
-export function parseXml(text: string, unreadable = 'The service did not answer with a readable XML document.'): Element {
+/** Parses an XML document; `root`, where given, is the local name its root element must have. */
+export function parseXml(text: string, unreadable = 'The service did not answer with a readable XML document.', root?: string): Element {
   const doc = new DOMParser().parseFromString(text, 'application/xml');
   const error = doc.getElementsByTagName('parsererror')[0];
-  if (error) throw new Error(unreadable);
+  if (error || (root && doc.documentElement.localName !== root)) throw new Error(unreadable);
   return doc.documentElement;
 }
 

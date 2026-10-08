@@ -1,5 +1,6 @@
 import { HALF_WORLD, mercatorToLngLat, WORLD } from '../geo/mercator';
 import type { FeatureSource } from '../model/layer';
+import { descendants, parseXml } from '../services/xml';
 import { withParams } from './urls';
 
 /**
@@ -112,8 +113,12 @@ interface FeatureAnswer extends GeoJSON.FeatureCollection {
 
 /** The text of an OWS or WMS exception report, which WFS servers send as XML whatever was asked for. */
 function exceptionText(text: string): string | undefined {
-  const match = /<(?:\w+:)?(?:ExceptionText|ServiceException)\b[^>]*>([\s\S]*?)<\//.exec(text);
-  return match?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, '').trim() || undefined;
+  try {
+    const root = parseXml(text);
+    return [...descendants(root, 'ExceptionText'), ...descendants(root, 'ServiceException')][0]?.textContent?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

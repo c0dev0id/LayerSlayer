@@ -87,8 +87,8 @@ describe('readFeatureAnswer', () => {
     expect(() => readFeatureAnswer('{"code":"InvalidParameterValue","description":"Bad bbox"}')).toThrow('Bad bbox');
     const report =
       '<?xml version="1.0"?><ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1"><ows:Exception exceptionCode="InvalidParameterValue">' +
-      '<ows:ExceptionText>Feature type ns:x unknown</ows:ExceptionText></ows:Exception></ows:ExceptionReport>';
-    expect(() => readFeatureAnswer(report)).toThrow('Feature type ns:x unknown');
+      '<ows:ExceptionText>Feature type ns:x &amp; ns:y unknown</ows:ExceptionText></ows:Exception></ows:ExceptionReport>';
+    expect(() => readFeatureAnswer(report)).toThrow('Feature type ns:x & ns:y unknown');
     expect(() => readFeatureAnswer('<html>Bad Gateway</html>')).toThrow('did not answer with GeoJSON');
   });
 });

@@ -64,8 +64,7 @@ const positions = (elements: Element[]) => elements.map(position).filter((p): p 
 
 /** Reads a GPX 1.0 or 1.1 document. */
 export function parseGpx(xml: string): GpxContent {
-  const root = parseXml(xml, 'This is not a GPX file.');
-  if (root.localName !== 'gpx') throw new Error('This is not a GPX file.');
+  const root = parseXml(xml, 'This is not a GPX file.', 'gpx');
   return {
     waypoints: children(root, 'wpt').flatMap((w) => {
       const lngLat = position(w);
