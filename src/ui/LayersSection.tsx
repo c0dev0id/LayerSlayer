@@ -1,4 +1,4 @@
-import { For, Show } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import {
@@ -12,12 +12,14 @@ import {
   NO_ADJUSTMENTS,
   SOURCE_KINDS,
   type Layer,
+  type OsmQuerySource,
   type RasterAdjustments,
 } from '../model/layer';
 import { OVERPASS_URL } from '../services/overpass';
 import { hostOf } from '../state/net';
+import { updateOsmQueryLayer } from '../state/osmQuery';
 import { moveLayer, removeLayer, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
-import { layerErrors, showBounds, zoom } from '../state/ui';
+import { errorMessage, layerErrors, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
 import { reorderTarget } from './reorder';
@@ -293,6 +295,48 @@ function layerHost(layer: Layer): string | undefined {
   return url ? hostOf(url) : undefined;
 }
 
+/** What an OSM query layer asked for and when; Update asks again, in the focus area as it is now. */
+function OsmQueryRows(props: { layer: Layer; source: OsmQuerySource }) {
+  const [updating, setUpdating] = createSignal(false);
+  const [outcome, setOutcome] = createSignal<{ text: string; error?: boolean }>();
+
+  async function update() {
+    setUpdating(true);
+    setOutcome(undefined);
+    try {
+      const count = await updateOsmQueryLayer(props.layer.id);
+      setOutcome({ text: `Updated: ${count} ${count === 1 ? 'feature' : 'features'}.` });
+    } catch (error) {
+      setOutcome({ text: errorMessage(error), error: true });
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  return (
+    <>
+      <div class="row">
+        <span class="muted label">Tags</span>
+        <span class="grow name" title={props.source.filters.join('\n')}>
+          {props.source.filters.join(', ')}
+        </span>
+      </div>
+      <div class="row">
+        <span class="muted label">Queried</span>
+        <span class="grow">{new Date(props.source.queried).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</span>
+        <button
+          disabled={updating() || !state.focus}
+          title={state.focus ? 'Query the focus area again, as it is now' : 'Draw a focus area first'}
+          onClick={() => void update()}
+        >
+          {updating() ? 'Updating…' : 'Update'}
+        </button>
+      </div>
+      <Show when={outcome()}>{(o) => <p class="note" classList={{ error: !!o().error, info: !o().error }}>{o().text}</p>}</Show>
+    </>
+  );
+}
+
 /** Opacity, zoom range, colour and source of the active layer. */
 function ActiveLayer(props: { layer: Layer }) {
   const layer = props.layer;
@@ -360,6 +404,9 @@ function ActiveLayer(props: { layer: Layer }) {
             onInput={(e) => updateLayer(layer.id, { color: e.currentTarget.value })}
           />
         </div>
+      </Show>
+      <Show when={layer.source.type === 'osm-query' ? layer.source : undefined}>
+        {(source) => <OsmQueryRows layer={layer} source={source()} />}
       </Show>
       <div class="row">
         <span class="muted label">Source</span>
