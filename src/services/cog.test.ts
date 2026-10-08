@@ -32,7 +32,7 @@ describe('describeCog', () => {
 
   it('turns away other projections', async () => {
     const geographic = await geotiff(new Uint8Array(4), { GTModelTypeGeoKey: 2, GeographicTypeGeoKey: 4326 });
-    await expect(describeCog(geographic, 'https://x/a.tif', 'a')).rejects.toThrow('EPSG:4326; webmap draws GeoTIFFs in Web Mercator');
+    await expect(describeCog(geographic, 'https://x/a.tif', 'a')).rejects.toThrow('EPSG:4326; Layer Slayer draws GeoTIFFs in Web Mercator');
     const utm = await geotiff(new Uint8Array(4), { GTModelTypeGeoKey: 1, ProjectedCSTypeGeoKey: 25832 });
     await expect(describeCog(utm, 'https://x/b.tif', 'b')).rejects.toThrow('EPSG:25832');
   });

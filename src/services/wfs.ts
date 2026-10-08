@@ -41,7 +41,7 @@ export function parseWfs(xml: string, capabilitiesUrl: string): ServiceInfo {
   const root = parseXml(xml, 'The service did not answer with WFS capabilities.', 'WFS_Capabilities');
   const version = root.getAttribute('version');
   if (version !== '2.0.0' && version !== '1.1.0') {
-    throw new Error(`The service speaks WFS ${version ?? 'of an unknown version'}; webmap reads WFS 2.0 and 1.1.`);
+    throw new Error(`The service speaks WFS ${version ?? 'of an unknown version'}; Layer Slayer reads WFS 2.0 and 1.1.`);
   }
   const getFeature = operation(root, 'GetFeature');
   const url = xlinkHref(descendants(getFeature ?? root, 'Get')[0]) ?? capabilitiesUrl.split('?')[0]!;

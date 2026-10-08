@@ -11,8 +11,9 @@ import { parseState, type AppState } from './store';
  * setting of the browser and may carry an account key.
  */
 
+/** The format's mark in project.json: the app's code name, kept when it was renamed Layer Slayer. */
 const APP = 'webmap';
-const NOT_A_PROJECT = 'This is not a webmap project file.';
+const NOT_A_PROJECT = 'This is not a Layer Slayer project file.';
 
 export interface Project {
   state: AppState;

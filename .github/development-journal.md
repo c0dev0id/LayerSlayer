@@ -7,7 +7,7 @@ FeatureServer, plain XYZ tile templates, MapLibre styles over vector tiles, GeoJ
 and feeds, GeoPDFs. Viewers usually support a few of them, or flatten all of them into
 raster tiles (as WMSproxy does for navigation apps that only take XYZ).
 
-webmap is a browser map viewer that stacks base maps and overlays from all of these and
+Layer Slayer (code name webmap) is a browser map viewer that stacks base maps and overlays from all of these and
 supports each properly: it reads the service's own description (capabilities document,
 service JSON, the georeference inside a PDF) and draws it with the MapLibre source that
 fits, so WMS stays a GetMap per tile, a FeatureServer stays vector data, a style keeps its
@@ -149,6 +149,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
   store and so subscribes to every property; imported files are Blobs in IndexedDB, referenced by key,
   deleted with their layer and swept at start-up. Before 1.0 there is no migration: stored
   layers that no longer have the current shape are dropped one by one.
+- **Named Layer Slayer, code name webmap.** The name shows in the page title, the panel,
+  messages, GPX files and saved project names. The repository and its Pages address, the
+  storage keys (local storage, IndexedDB, the tile cache) and the project file format
+  (`.webmap`, `"app": "webmap"`) keep the code name, so browsers keep what they hold and
+  project files saved before the rename still open.
 - **Project files, as in mappic.** *Save* writes a ZIP (`.webmap`): `project.json` with
   the layers, view, focus area, proxied hosts, routes and waypoints, and each stored file
   as `files/<key>` under the key its layer refers to, so nothing needs rewriting. Reading

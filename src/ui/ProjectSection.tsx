@@ -15,13 +15,13 @@ export function ProjectSection() {
   return (
     <header class="section">
       <div class="row">
-        <h1 class="grow">webmap</h1>
+        <h1 class="grow">Layer Slayer</h1>
         <button
           title="Download the layers, routes, focus area and imported files as a .webmap file, to open in another browser or after clearing this one"
           onClick={async () => {
             setError(undefined);
             try {
-              downloadBlob(await saveProject(), `webmap-${new Date().toISOString().slice(0, 10)}.webmap`);
+              downloadBlob(await saveProject(), `layer-slayer-${new Date().toISOString().slice(0, 10)}.webmap`);
             } catch (e) {
               setError(`The project could not be saved: ${errorMessage(e)}`);
             }

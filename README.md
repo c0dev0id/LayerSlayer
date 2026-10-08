@@ -1,4 +1,4 @@
-# webmap
+# Layer Slayer
 
 A map viewer for the web that stacks base maps and overlays from many kinds of map
 services: WMS, WMTS, WFS, OGC API – Features, ArcGIS MapServer and FeatureServer, XYZ tile
@@ -8,7 +8,8 @@ documents, service descriptions, georeferencing in the PDF) and drawn with the M
 source that fits it, rather than turned into raster tiles by a proxy.
 
 It is a static page built with SolidJS and MapLibre GL JS and deployed to GitHub Pages by
-GitHub Actions. Nothing runs on a server; layers, routes, settings and imported files stay
+GitHub Actions. Its code name, used by the repository, browser storage and the `.webmap`
+project files, is webmap. Nothing runs on a server; layers, routes, settings and imported files stay
 in the browser.
 
 ## Using it

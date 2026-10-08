@@ -60,7 +60,7 @@ export async function describeCog(tiff: GeoTIFF, url: string, title: string): Pr
   if (!isWebMercatorCode(projected)) {
     const crs = projected ?? (keys.GeographicTypeGeoKey as number | undefined);
     throw new Error(
-      `This GeoTIFF is in ${crs ? `EPSG:${crs}` : 'an unknown coordinate system'}; webmap draws GeoTIFFs in Web Mercator ` +
+      `This GeoTIFF is in ${crs ? `EPSG:${crs}` : 'an unknown coordinate system'}; Layer Slayer draws GeoTIFFs in Web Mercator ` +
         '(EPSG:3857) only. GDAL converts it: gdalwarp -t_srs EPSG:3857 -of COG.',
     );
   }
