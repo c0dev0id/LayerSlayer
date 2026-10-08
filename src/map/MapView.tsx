@@ -11,6 +11,7 @@ import { watchGeoJsonBounds } from './bounds';
 import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, WMTS_PROTOCOL } from './compose';
 import { FEATURE_PROTOCOL } from './featureTiles';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
+import { keepLoadedGeoJson } from './geojsonDiff';
 import { withOverlays } from './overlays';
 import { loadCachedTile, loadTile } from './protocols';
 import { routeOverlay } from './routeOverlay';
@@ -96,9 +97,10 @@ export function MapView() {
       );
       // A layer change carries the overlays' data as it is; a change of an overlay's data
       // only replaces it.
+      const transformStyle = keepLoadedGeoJson();
       createEffect(() => {
         const style = layers();
-        map.setStyle(untrack(() => withOverlays(style, OVERLAYS)), { diff: true });
+        map.setStyle(untrack(() => withOverlays(style, OVERLAYS)), { diff: true, transformStyle });
       });
       for (const overlay of OVERLAYS) {
         createEffect(on(overlay.data, (data) => map.getSource<maplibregl.GeoJSONSource>(overlay.id)?.setData(data), { defer: true }));
