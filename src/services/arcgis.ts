@@ -1,4 +1,4 @@
-import { HALF_WORLD, mercatorToLngLat, scaleToZoom, tileZoom, validBounds } from '../geo/mercator';
+import { HALF_WORLD, isWebMercatorCode, mercatorBounds, scaleToZoom, tileZoom, validBounds } from '../geo/mercator';
 import type { Bounds, Geometry, LayerDraft } from '../model/layer';
 import { FEATURE_MINZOOM, type Offer, type ServiceInfo } from './types';
 
@@ -68,7 +68,6 @@ export interface LayerDetails {
   count?: number;
 }
 
-const MERCATOR_WKIDS = new Set([3857, 102100, 102113, 900913]);
 
 /** Geographic coordinate systems whose degrees are close enough to WGS 84 for bounds. */
 const DEGREE_WKIDS = new Set([4326, 4269, 4258, 4283, 4617]);
@@ -138,7 +137,7 @@ function cachedTiles(json: MapServer): { tileSize: number; zooms: { minzoom: num
   const tiles = json.tileInfo;
   if (!json.singleFusedMapCache || !tiles || tiles.rows !== tiles.cols) return undefined;
   const wkid = tiles.spatialReference.latestWkid ?? tiles.spatialReference.wkid;
-  if (!wkid || !MERCATOR_WKIDS.has(wkid)) return undefined;
+  if (!isWebMercatorCode(wkid)) return undefined;
   if (Math.abs(tiles.origin.x + HALF_WORLD) > 1 || Math.abs(tiles.origin.y - HALF_WORLD) > 1) return undefined;
   const levels = tiles.lods.map((lod) => lod.level);
   if (levels.length === 0 || tiles.lods.some((lod) => tileZoom(lod.resolution, tiles.rows) !== lod.level)) return undefined;
@@ -237,12 +236,7 @@ function scaleRange(layer: ServiceLayer | undefined): { minzoom?: number; maxzoo
 function extentBounds(extent: Extent | undefined): Bounds | undefined {
   if (!extent) return undefined;
   const wkid = extent.spatialReference?.latestWkid ?? extent.spatialReference?.wkid;
-  if (wkid && MERCATOR_WKIDS.has(wkid)) {
-    const clamp = (v: number) => Math.max(-HALF_WORLD, Math.min(HALF_WORLD, v));
-    const [west, south] = mercatorToLngLat(clamp(extent.xmin), clamp(extent.ymin));
-    const [east, north] = mercatorToLngLat(clamp(extent.xmax), clamp(extent.ymax));
-    return validBounds(west, south, east, north);
-  }
+  if (isWebMercatorCode(wkid)) return mercatorBounds(extent.xmin, extent.ymin, extent.xmax, extent.ymax);
   if (wkid && DEGREE_WKIDS.has(wkid)) return validBounds(extent.xmin, extent.ymin, extent.xmax, extent.ymax);
   return undefined;
 }

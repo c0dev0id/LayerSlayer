@@ -1,4 +1,4 @@
-import { validBounds } from '../geo/mercator';
+import { boxBounds } from '../geo/mercator';
 import { resolveUrl } from '../map/urls';
 import type { Bounds } from '../model/layer';
 import { FEATURE_MINZOOM, type Offer, type ServiceInfo } from './types';
@@ -41,14 +41,14 @@ export function landingPageCollections(json: { links?: Link[] }, url: string): s
   return resolveUrl(link.href, url);
 }
 
-const CRS84 = /OGC\/1\.3\/CRS84$|CRS84$/;
+const CRS84 = /CRS84$/;
 
 function collectionBounds(collection: Collection): Bounds | undefined {
   const spatial = collection.extent?.spatial;
   const box = spatial?.bbox?.[0];
   if (!box || (spatial?.crs && !CRS84.test(spatial.crs))) return undefined;
-  const [west, south, east, north] = box.length === 6 ? [box[0], box[1], box[3], box[4]] : box;
-  return west !== undefined && south !== undefined && east !== undefined && north !== undefined ? validBounds(west, south, east, north) : undefined;
+  // A box with heights lists the lowest and highest corner: west, south, bottom, east, north, top.
+  return boxBounds(box.length === 6 ? [box[0]!, box[1]!, box[3]!, box[4]!] : box);
 }
 
 /**

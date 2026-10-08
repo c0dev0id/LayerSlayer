@@ -10,6 +10,13 @@ const SCALE_256_Z0 = WORLD / 256 / 0.00028;
 /** The latitude Web Mercator ends at. */
 const MAX_LATITUDE = 85.0511287798;
 
+/** EPSG codes (and ESRI and old aliases) of Web Mercator, the usual one first. */
+export const WEB_MERCATOR_CODES = [3857, 900913, 102100, 102113, 3785] as const;
+
+export function isWebMercatorCode(code: number | undefined): boolean {
+  return code !== undefined && (WEB_MERCATOR_CODES as readonly number[]).includes(code);
+}
+
 /**
  * The map zoom at a scale denominator. MapLibre's zoom 0 shows the world 512 px wide, one
  * zoom below a 256 px tile pyramid's zoom 0.
@@ -33,7 +40,7 @@ export function lngLatToMercator(lng: number, lat: number): [number, number] {
 
 /** The XYZ tile at zoom `z` that holds a position, rows counted from the north. */
 export function tileAt(lng: number, lat: number, z: number): { x: number; y: number } {
-  const [mx, my] = lngLatToMercator(lng, Math.max(-85.0511, Math.min(85.0511, lat)));
+  const [mx, my] = lngLatToMercator(lng, Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, lat)));
   const n = 2 ** z;
   const clamp = (v: number) => Math.max(0, Math.min(n - 1, Math.floor(v)));
   return { x: clamp(((mx + HALF_WORLD) / WORLD) * n), y: clamp(((HALF_WORLD - my) / WORLD) * n) };
@@ -71,4 +78,17 @@ export function validBounds(west: number, south: number, east: number, north: nu
     Math.min(180, east),
     Math.min(MAX_LATITUDE, north),
   ];
+}
+
+/** Bounds of a box given as west, south, east and north (as in a TileJSON or an OGC API extent). */
+export function boxBounds(box: readonly number[] | undefined): Bounds | undefined {
+  return box && box.length >= 4 ? validBounds(box[0]!, box[1]!, box[2]!, box[3]!) : undefined;
+}
+
+/** Bounds of a Web Mercator extent in metres, clamped to the world first. */
+export function mercatorBounds(xmin: number, ymin: number, xmax: number, ymax: number): Bounds | undefined {
+  const clamp = (v: number) => Math.max(-HALF_WORLD, Math.min(HALF_WORLD, v));
+  const [west, south] = mercatorToLngLat(clamp(xmin), clamp(ymin));
+  const [east, north] = mercatorToLngLat(clamp(xmax), clamp(ymax));
+  return validBounds(west, south, east, north);
 }

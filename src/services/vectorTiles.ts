@@ -1,4 +1,4 @@
-import { validBounds } from '../geo/mercator';
+import { boxBounds } from '../geo/mercator';
 import { resolveUrl } from '../map/urls';
 import type { LayerDraft, VectorTilesSource } from '../model/layer';
 import type { Offer, ServiceInfo } from './types';
@@ -62,8 +62,7 @@ export function parseTileJson(json: TileJson, url: string): ServiceInfo {
     ...(json.minzoom !== undefined && { minzoom: json.minzoom }),
     ...(json.maxzoom !== undefined && { maxzoom: json.maxzoom }),
   };
-  const [west, south, east, north] = json.bounds ?? [];
-  const bounds = west !== undefined && south !== undefined && east !== undefined && north !== undefined ? validBounds(west, south, east, north) : undefined;
+  const bounds = boxBounds(json.bounds);
   return {
     title,
     ...(json.description && { description: json.description }),

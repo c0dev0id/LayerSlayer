@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HALF_WORLD, coversMostOfWorld, mercatorToLngLat, scaleToZoom, tileAt, tileZoom, validBounds } from './mercator';
+import { boxBounds, coversMostOfWorld, HALF_WORLD, isWebMercatorCode, mercatorBounds, mercatorToLngLat, scaleToZoom, tileAt, tileZoom, validBounds } from './mercator';
 
 describe('mercator', () => {
   it('converts scale denominators to map zooms', () => {
@@ -46,5 +46,25 @@ describe('tileAt', () => {
     expect(tileAt(11.575, 48.137, 14)).toEqual({ x: 8718, y: 5685 });
     expect(tileAt(-180, 89, 2)).toEqual({ x: 0, y: 0 });
     expect(tileAt(180, -89, 2)).toEqual({ x: 3, y: 3 });
+  });
+});
+
+describe('bounds helpers', () => {
+  it('read a west, south, east, north box', () => {
+    expect(boxBounds([5, 45, 10, 48])).toEqual([5, 45, 10, 48]);
+    expect(boxBounds([5, 45])).toBeUndefined();
+    expect(boxBounds(undefined)).toBeUndefined();
+  });
+
+  it('turn a Web Mercator extent into degrees, clamped to the world', () => {
+    const [west, south, east, north] = mercatorBounds(-HALF_WORLD * 1.01, 0, HALF_WORLD * 1.01, HALF_WORLD)!;
+    expect([west, south, east]).toEqual([-180, 0, 180]);
+    expect(north).toBeCloseTo(85.05, 2);
+  });
+
+  it('know the names of Web Mercator', () => {
+    expect([3857, 900913, 102100, 3785].every(isWebMercatorCode)).toBe(true);
+    expect(isWebMercatorCode(4326)).toBe(false);
+    expect(isWebMercatorCode(undefined)).toBe(false);
   });
 });

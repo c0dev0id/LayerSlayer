@@ -1,10 +1,10 @@
-import { scaleToZoom, validBounds } from '../geo/mercator';
+import { scaleToZoom, validBounds, WEB_MERCATOR_CODES } from '../geo/mercator';
 import type { Bounds } from '../model/layer';
 import type { Offer, ServiceInfo } from './types';
 import { child, children, parseXml, text, xlinkHref } from './xml';
 
 /** Names services use for Web Mercator, in the order they are preferred. */
-const MERCATOR_CRS = ['EPSG:3857', 'EPSG:900913', 'EPSG:102100', 'EPSG:102113', 'EPSG:3785', 'OSGEO:41001'];
+const MERCATOR_CRS = [...WEB_MERCATOR_CODES.map((code) => `EPSG:${code}`), 'OSGEO:41001'];
 
 /** Image formats in the order they are preferred: transparency first. */
 const FORMATS = ['image/png', 'image/png8', 'image/png; mode=8bit', 'image/webp', 'image/gif', 'image/jpeg'];

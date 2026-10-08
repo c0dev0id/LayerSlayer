@@ -1,10 +1,7 @@
 import { fromUrl, type GeoTIFF, type GeoTIFFImage } from 'geotiff';
-import { mercatorToLngLat, validBounds } from '../geo/mercator';
+import { isWebMercatorCode, mercatorBounds } from '../geo/mercator';
 import type { CogSource } from '../model/layer';
 import type { ServiceInfo } from './types';
-
-/** EPSG codes of Web Mercator, the only projection the COG protocol draws. */
-const WEB_MERCATOR = new Set([3857, 3785, 900913, 102100, 102113]);
 
 /** Overviews larger than this are not read for the value range of a colour ramp. */
 const MAX_STATS_PIXELS = 4_000_000;
@@ -57,7 +54,7 @@ export async function describeCog(tiff: GeoTIFF, url: string, title: string): Pr
   const image = await tiff.getImage();
   const keys = image.getGeoKeys() ?? {};
   const projected = keys.ProjectedCSTypeGeoKey as number | undefined;
-  if (projected === undefined || !WEB_MERCATOR.has(projected)) {
+  if (!isWebMercatorCode(projected)) {
     const crs = projected ?? (keys.GeographicTypeGeoKey as number | undefined);
     throw new Error(
       `This GeoTIFF is in ${crs ? `EPSG:${crs}` : 'an unknown coordinate system'}; webmap draws GeoTIFFs in Web Mercator ` +
@@ -65,9 +62,7 @@ export async function describeCog(tiff: GeoTIFF, url: string, title: string): Pr
     );
   }
   const [minX, minY, maxX, maxY] = image.getBoundingBox();
-  const [west, south] = mercatorToLngLat(minX!, minY!);
-  const [east, north] = mercatorToLngLat(maxX!, maxY!);
-  const bounds = validBounds(west, south, east, north);
+  const bounds = mercatorBounds(minX!, minY!, maxX!, maxY!);
   const source: CogSource = { type: 'cog', url, ...(isData(image) && { ramp: await valueRange(tiff) }) };
   return { title, offers: [{ title, depth: 0, draft: { name: title, source, ...(bounds && { bounds }) } }] };
 }

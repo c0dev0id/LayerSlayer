@@ -1,8 +1,7 @@
-import { HALF_WORLD, tileZoom, validBounds } from '../geo/mercator';
-import type { Bounds } from '../model/layer';
+import { HALF_WORLD, tileZoom, WEB_MERCATOR_CODES } from '../geo/mercator';
 import { withParams } from '../map/urls';
 import type { Offer, ServiceInfo } from './types';
-import { child, children, descendants, parseXml, text, xlinkHref } from './xml';
+import { child, children, descendants, parseXml, text, wgs84Bounds, xlinkHref } from './xml';
 
 /** A tile matrix set that lines up with Web Mercator tiles: matrix identifiers by tile zoom. */
 interface MercatorSet {
@@ -10,7 +9,7 @@ interface MercatorSet {
   tileSize: number;
 }
 
-const MERCATOR_CODE = /(?:^|\D)(3857|900913|102100|102113|3785)$/;
+const MERCATOR_CODE = new RegExp(`(?:^|\\D)(${WEB_MERCATOR_CODES.join('|')})$`);
 
 /** Formats in the order they are preferred: transparency first. */
 const FORMATS = ['image/png', 'image/png8', 'image/webp', 'image/jpeg'];
@@ -51,7 +50,7 @@ export function parseWmts(xml: string, capabilitiesUrl: string): ServiceInfo {
       offer.reason = 'The service names no address for its tiles.';
       return offer;
     }
-    const bounds = layerBounds(layer);
+    const bounds = wgs84Bounds(layer);
     offer.draft = {
       name: title,
       source: { type: 'wmts', template, matrices: limitMatrices(set.matrices, link), tileSize: set.tileSize },
@@ -161,10 +160,3 @@ function getTileKvpUrl(root: Element): string | undefined {
   return xlinkHref(get);
 }
 
-function layerBounds(layer: Element): Bounds | undefined {
-  const box = child(layer, 'WGS84BoundingBox');
-  if (!box) return undefined;
-  const [west, south] = (text(box, 'LowerCorner') ?? '').split(/\s+/).map(Number);
-  const [east, north] = (text(box, 'UpperCorner') ?? '').split(/\s+/).map(Number);
-  return validBounds(west!, south!, east!, north!);
-}

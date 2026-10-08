@@ -1,7 +1,5 @@
-import { validBounds } from '../geo/mercator';
-import type { Bounds } from '../model/layer';
 import { FEATURE_MINZOOM, type Offer, type ServiceInfo } from './types';
-import { child, children, descendants, parseXml, text, xlinkHref } from './xml';
+import { child, children, descendants, parseXml, text, wgs84Bounds, xlinkHref } from './xml';
 
 /** Most features asked for per tile, unless the server allows fewer. */
 export const WFS_MAX_FEATURES = 2000;
@@ -32,13 +30,6 @@ function values(element: Element | undefined, kind: 'Parameter' | 'Constraint', 
   const entry = children(element, kind).find((p) => p.getAttribute('name')?.toLowerCase() === name.toLowerCase());
   if (!entry) return [];
   return [...descendants(entry, 'Value'), ...descendants(entry, 'DefaultValue')].map((v) => v.textContent?.trim() ?? '').filter(Boolean);
-}
-
-function wgs84Bounds(featureType: Element): Bounds | undefined {
-  const box = child(featureType, 'WGS84BoundingBox');
-  const [west, south] = (text(box, 'LowerCorner') ?? '').split(/\s+/).map(Number);
-  const [east, north] = (text(box, 'UpperCorner') ?? '').split(/\s+/).map(Number);
-  return west !== undefined && south !== undefined && east !== undefined && north !== undefined ? validBounds(west, south, east, north) : undefined;
 }
 
 /**
