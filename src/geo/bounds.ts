@@ -43,3 +43,8 @@ export function intersectBounds(a: Bounds, b: Bounds): Bounds | undefined {
   const north = Math.min(a[3], b[3]);
   return west < east && south < north ? [west, south, east, north] : undefined;
 }
+
+/** Whether areas are known and none of them meets `box`. */
+export function allOutside(areas: readonly Bounds[] | undefined, box: Bounds): boolean {
+  return areas !== undefined && areas.length > 0 && areas.every((area) => !intersectBounds(area, box));
+}

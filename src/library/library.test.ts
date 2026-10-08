@@ -4,7 +4,9 @@ import { SERVICE_TYPES } from '../services/types';
 import { parseXyz } from '../services/xyz';
 import { defaultState } from '../state/store';
 import library from './library.json';
-import { filterLibrary, withEntry, type LibraryEntry } from './library';
+import { validBounds } from '../geo/mercator';
+import { entryAreas, filterLibrary, withEntry, type LibraryEntry } from './library';
+import { REGION_BOUNDS } from './regions';
 
 const entries = library.entries as LibraryEntry[];
 
@@ -27,6 +29,23 @@ describe('library', () => {
 
   it('holds the default layer, so its entry shows it as on the map', () => {
     expect(entries.map((e) => e.url)).toContain(defaultState().layers[0]!.origin);
+  });
+
+  it('knows the area of every region but Global, in valid bounds', () => {
+    for (const region of new Set(entries.map((e) => e.region))) {
+      if (region === 'Global') expect(REGION_BOUNDS[region]).toBeUndefined();
+      else expect(REGION_BOUNDS[region], region).toBeDefined();
+    }
+    for (const [region, areas] of Object.entries(REGION_BOUNDS)) {
+      for (const area of areas) expect(validBounds(...area), region).toEqual(area);
+    }
+  });
+
+  it('takes the bounds of an entry over those of its region', () => {
+    const swiss = entries.find((e) => e.bounds)!;
+    expect(entryAreas(swiss)).toEqual([swiss.bounds]);
+    expect(entryAreas({ ...swiss, bounds: undefined })).toBe(REGION_BOUNDS[swiss.region]);
+    expect(entryAreas({ ...swiss, bounds: undefined, region: 'Global' })).toBeUndefined();
   });
 
   it('filters by words, region and category', () => {

@@ -496,6 +496,12 @@ input.swatch {
   background: #d0ebff;
 }
 
+/* Known to lie outside the focus area: still there, but out of the way of what lies inside. */
+.dialog button.entry.outside,
+.dialog button.offer.outside {
+  color: var(--muted);
+}
+
 .dialog button.offer:disabled {
   opacity: 1;
   color: var(--muted);

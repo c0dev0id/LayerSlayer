@@ -1,11 +1,13 @@
 import { createEffect, createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
-import { filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
+import { allOutside } from '../geo/bounds';
+import { entryAreas, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
+import type { Bounds } from '../model/layer';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
 import { readService } from '../services/read';
 import { SERVICE_TYPES, type Offer, type ServiceInfo, type ServiceType } from '../services/types';
 import { hostOf, isProxied } from '../state/net';
-import { addLayer, removeLayersWhere, setHostProxied, state } from '../state/store';
+import { addLayer, focusBounds, removeLayersWhere, setHostProxied, state } from '../state/store';
 import { errorMessage } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { CloseIcon } from './icons';
@@ -54,6 +56,14 @@ const origins = createRoot(() =>
 function isAdded(url: string, offer: Offer): boolean {
   return origins().has(originOf(url, offer));
 }
+
+/** Whether a focus area is set and `areas` are known to lie outside its bounds. */
+function outsideFocus(areas: readonly Bounds[] | undefined): boolean {
+  const focus = focusBounds();
+  return focus !== undefined && allOutside(areas, focus);
+}
+
+const offerAreas = (offer: Offer) => (offer.draft?.bounds ? [offer.draft.bounds] : undefined);
 
 /** Adds the offer's layer, or removes it when it is on the map already. */
 function toggle(url: string, offer: Offer): void {
@@ -226,9 +236,10 @@ function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<strin
           {(entry) => {
             const onMap = () => state.layers.filter((l) => isFromSource(l.origin, entry.url)).length;
             const size = () => props.sizes.get(entry.url);
+            const outside = () => outsideFocus(entryAreas(entry));
             return (
               <li>
-                <button class="entry" classList={{ added: onMap() > 0 }} onClick={() => props.onOpen(entry)}>
+                <button class="entry" classList={{ added: onMap() > 0, outside: outside() }} onClick={() => props.onOpen(entry)}>
                   <span class="row">
                     <strong class="grow">{entry.name}</strong>
                     <Show when={props.busy.has(entry.url)}>
@@ -251,6 +262,7 @@ function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<strin
                   </span>
                   <span class="muted">
                     {entry.region} · {entry.category} · {SERVICE_TYPES.find((t) => t.value === entry.type)?.label}
+                    <Show when={outside()}> · outside the focus area</Show>
                   </span>
                   <Show when={entry.note}>
                     <span class="note-text">{entry.note}</span>
@@ -424,11 +436,14 @@ function OfferRow(props: { url: string; offers: readonly Offer[]; offer: Offer; 
     if (props.offer.draft) return isAdded(props.url, props.offer) ? 'all' : 'none';
     return members().length > 0 ? selection(members(), (o) => isAdded(props.url, o)) : undefined;
   };
+  /** A layer, or a group whose layers all are, known to lie outside the focus area. */
+  const outside = () =>
+    props.offer.draft ? outsideFocus(offerAreas(props.offer)) : members().length > 0 && members().every((m) => outsideFocus(offerAreas(m)));
   return (
     <li>
       <button
         class="offer"
-        classList={{ added: selected() === 'all', partial: selected() === 'some', heading: !props.offer.draft }}
+        classList={{ added: selected() === 'all', partial: selected() === 'some', heading: !props.offer.draft, outside: outside() }}
         style={{ 'padding-left': `${8 + props.offer.depth * 14}px` }}
         disabled={selected() === undefined}
         aria-pressed={selected() === 'some' ? 'mixed' : selected() === 'all'}
@@ -444,6 +459,9 @@ function OfferRow(props: { url: string; offers: readonly Offer[]; offer: Offer; 
           </Show>
           <Show when={members().length > 0}>
             <span class="muted id"> · {members().length} layers</span>
+          </Show>
+          <Show when={outside()}>
+            <span class="muted reason">Outside the focus area</span>
           </Show>
           <Show when={props.offer.reason}>
             <span class="muted reason">{props.offer.reason}</span>

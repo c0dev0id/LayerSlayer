@@ -1,5 +1,6 @@
 import type { Bounds, LayerDraft } from '../model/layer';
 import type { ServiceInfo, ServiceType } from '../services/types';
+import { REGION_BOUNDS } from './regions';
 
 /** A service in the library: where it is, what it covers and what it is for. */
 export interface LibraryEntry {
@@ -20,6 +21,11 @@ export interface LibraryEntry {
 export async function loadLibrary(): Promise<LibraryEntry[]> {
   const { default: library } = await import('./library.json');
   return library.entries as LibraryEntry[];
+}
+
+/** Where an entry has data, as far as the library knows: its own bounds or its region's; none for global services. */
+export function entryAreas(entry: LibraryEntry): readonly Bounds[] | undefined {
+  return entry.bounds ? [entry.bounds] : REGION_BOUNDS[entry.region];
 }
 
 /** Entries matching a search in name, note, region or category, and the chosen region and category. */
