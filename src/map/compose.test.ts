@@ -14,8 +14,8 @@ import {
 
 const layer = (draft: LayerDraft, patch: Partial<Layer> = {}, id = 'L'): Layer => ({ ...createLayer(draft, [], id), ...patch });
 
-function compose(layers: Layer[], assets: Record<string, Assets> = {}, focus?: Bounds): StyleSpecification {
-  const style = composeStyle(layers, new Map(Object.entries(assets)), focus);
+function compose(layers: Layer[], assets: Record<string, Assets> = {}, focus?: Bounds, background?: string): StyleSpecification {
+  const style = composeStyle(layers, new Map(Object.entries(assets)), focus, background);
   expect(validateStyleMin(style)).toEqual([]);
   return style;
 }
@@ -72,6 +72,13 @@ describe('composeStyle', () => {
     });
     expect(rasterAdjustments({ hue: 0, saturation: 0, contrast: 0, brightnessMin: 0, brightnessMax: 1 })).toEqual({});
     expect(rasterAdjustments(undefined)).toEqual({});
+  });
+
+  it('draws the map on its background colour, under every layer', () => {
+    const xyz = layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } });
+    expect(compose([xyz], {}, undefined, '#1b2b44').layers.slice(0, 2).map((l) => l.id)).toEqual(['map-background', 'L']);
+    expect(compose([xyz], {}, undefined, '#1b2b44').layers[0]).toEqual({ id: 'map-background', type: 'background', paint: { 'background-color': '#1b2b44' } });
+    expect(compose([xyz]).layers.map((l) => l.id)).toEqual(['L']);
   });
 
   it('leaves hidden layers and layers waiting for their file out', () => {

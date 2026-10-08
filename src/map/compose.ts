@@ -42,6 +42,9 @@ export const DYNAMIC_TILE_SIZE = 512;
 
 export const WMTS_PROTOCOL = 'wmts-matrix';
 
+/** The layer of the map's background colour, under every user layer. */
+const BACKGROUND_LAYER = 'map-background';
+
 /** The protocol of Cloud Optimized GeoTIFFs (@geomatico/maplibre-cog-protocol). */
 export const COG_PROTOCOL = 'cog';
 
@@ -80,9 +83,16 @@ interface Fragment {
  * With `focus`, the bounds of the focus area, every layer but the bottom one requests
  * tiles within them only, and a layer whose bounds lie outside is left out. The bottom
  * layer, usually the base map, is drawn everywhere, so that the area has surroundings.
+ * With `background`, the map is drawn on that colour.
  */
-export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, focus?: Bounds): StyleSpecification {
+export function composeStyle(
+  layers: readonly Layer[],
+  assets: ReadonlyMap<string, Assets>,
+  focus?: Bounds,
+  background?: string,
+): StyleSpecification {
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
+  if (background) style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
   const sprites: { id: string; url: string }[] = [];
   for (const [index, layer] of layers.entries()) {
     if (!layer.visible) continue;

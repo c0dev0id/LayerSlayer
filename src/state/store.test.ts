@@ -29,6 +29,11 @@ describe('parseState', () => {
     expect(parseState(JSON.stringify({ layers: [], focus: [[1, 1], [2, 'x'], [2, 2]] }))).not.toHaveProperty('focus');
   });
 
+  it('keeps a background colour only where it is one', () => {
+    expect(parseState(JSON.stringify({ layers: [], settings: { background: '#1B2B44' } })).settings.background).toBe('#1B2B44');
+    expect(parseState(JSON.stringify({ layers: [], settings: { background: 'red' } })).settings).not.toHaveProperty('background');
+  });
+
   it('keeps an empty layer list empty', () => {
     expect(parseState('{"layers":[]}').layers).toEqual([]);
   });

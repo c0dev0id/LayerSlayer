@@ -91,7 +91,9 @@ export function MapView() {
       setMap(map);
       // Composing reads every layer setting, so any change recomposes. The style goes to
       // MapLibre as plain data: store proxies cannot be sent to its workers.
-      const layers = createMemo(() => JSON.parse(JSON.stringify(composeStyle(state.layers, assets(), focusBounds()))));
+      const layers = createMemo(() =>
+        JSON.parse(JSON.stringify(composeStyle(state.layers, assets(), focusBounds(), state.settings.background))),
+      );
       // A layer change carries the overlays' data as it is; a change of an overlay's data
       // only replaces it.
       createEffect(() => {
