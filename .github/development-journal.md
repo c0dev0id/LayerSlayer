@@ -84,15 +84,17 @@ It is a static single-page app on GitHub Pages; there is no server component.
     `geoJSONToTile` and encoded with vt-pbf, so MapLibre loads, caches and overzooms it like
     any vector source. Tiles are queried up to zoom 14. A tile with more features than one
     query returns is truncated (logged once per layer). Opening a FeatureServer also reads
-    each feature layer's own description and feature count, because the service listing
-    understates its layers: the NTAD services list 1000 records and JSON only, where each
+    each feature layer's own description, because the service listing understates its
+    layers: the NTAD services list 1000 records and JSON only, where each
     layer allows 2000, GeoJSON and tile queries. Layers that support `resultType=tile` are
     queried that way with their `tileMaxRecordCount` (4000 or 8000 on hosted services); on
     the NTAD rail lines a zoom 9 tile then came back complete with 3597 features in 1.4 s,
-    against a standard query cut off at 2000 after 23 s. A layer whose features all fit in
-    one query is shown from zoom 0, since no tile can hold more; a larger one starts at
-    zoom 9 (or the service's minimum where higher), because a low-zoom tile makes the
-    server return its whole record limit. Where a layer's own description cannot be read,
+    against a standard query cut off at 2000 after 23 s. Feature layers are shown from zoom
+    0, or the service's own minimum. They first started at zoom 9 when larger than one
+    query, found by a count request per layer, because a low-zoom tile makes the server
+    return its whole record limit; the focus area made that unnecessary, since it keeps
+    the queries of a zoomed-out view to the area, and the count requests went with it.
+    Where a layer's own description cannot be read,
     the service's word is taken and its query formats are not checked, since hosted layers
     support GeoJSON even where the service says only JSON. The source is not limited to the
     layer's bounds: those are where the features were when the layer was added, and live
@@ -105,9 +107,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
     finds nothing in a longitude-first one. The box is therefore sent as
     `lat,lon,lat,lon,urn:ogc:def:crs:EPSG::4326`, whose axis order both follow. Servers
     list only their native CRS per type (GeoServer supports any), so the listed CRSs are
-    not used to decide anything. Types start at zoom 9: a feature count per type
-    (`resultType=hits`) would cost a request each, and services list up to hundreds of
-    types. The limit per tile is 2000, or the server's `CountDefault` where lower.
+    not used to decide anything. The limit per tile is 2000, or the server's
+    `CountDefault` where lower.
   - OGC API – Features: read from a landing page (its `data` link), the collections list
     or one collection; each feature collection is queried per tile with `bbox` (CRS84,
     longitude first) and `limit` at its items link of type `application/geo+json`,

@@ -100,13 +100,11 @@ from the browser's Cache Storage for 24 hours. For layers with live data, such a
 untick *Keep tiles in this browser* in the layer's settings. Settings shows how many tiles
 are kept and their size, and clears them.
 
-At most four feature queries run at once per server. An ArcGIS feature layer whose features
-all fit in one query is shown at every zoom; a larger one starts at zoom 9, or at the
-service's own minimum zoom where that is higher, since at lower zooms each tile covers so
-much that the server returns its whole record limit for it. WFS and OGC API layers start
-at zoom 9, since counting the features of every type would cost a request each. The zoom
-range of the layer widens that. WFS servers that cannot answer in GeoJSON are listed with
-the reason; WFS 1.0 is not read.
+At most four feature queries run at once per server. Feature layers are shown at every
+zoom, or from the service's own minimum zoom where it sets one. Zoomed far out, a tile
+covers so much that it may hold more features than one query returns (then the most the
+server sends); a focus area keeps such queries to the area. WFS servers that cannot answer
+in GeoJSON are listed with the reason; WFS 1.0 is not read.
 
 ## Routing
 
