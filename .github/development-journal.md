@@ -438,7 +438,16 @@ It is a static single-page app on GitHub Pages; there is no server component.
   pixels at the zoom, 15 to 250 m) asks for drivable ways (motorways down to tracks,
   paths and bridleways; footways and cycleways are left out), places to go to (amenity,
   shop, tourism, craft, office, healthcare; leisure and historic only with a name) and
-  barrier nodes. Street furniture (benches, bins, vending machines, post boxes, …), kerbs
+  barrier nodes. The query looks around the spot once (`nwr(around)->.near`) and filters
+  that set by tag, as openstreetmap.org's "Query features" does, rather than a lookup per
+  tag: far less work for overpass-api.de, whose per-address rate limit refused every few
+  clicks before. Its declared timeout is 10 s, and relations come clipped to a box twice
+  the radius (`out geom(box)`, points outside are null), so a large park does not send its
+  whole outline; a clipped area is measured to its edge. openstreetmap.org's tool runs on
+  its own Overpass server (query.openstreetmap.org), which only that site may use.
+  The area query of OSM Query layers stays one statement per filter: over a large area the
+  tag index narrows first, and everything within the area would be far too much.
+  Street furniture (benches, bins, vending machines, post boxes, …), kerbs
   and unnamed information boards are dropped. Of each kind the nearest is kept, measured
   in a local plane to nodes, segments and inside closed rings, and the up to three
   results are shown nearest first, so a click near a gate on a track shows both. Tags

@@ -69,12 +69,15 @@ export function overpassQuery(filters: readonly string[], area: readonly LngLat[
 }
 
 /** A point of an element's geometry. */
-interface LatLon {
+export interface LatLon {
   lat: number;
   lon: number;
 }
 
-/** An element of an Overpass answer asked for with `out geom`: its tags and where it lies. */
+/**
+ * An element of an Overpass answer asked for with `out geom`: its tags and where it lies.
+ * With `out geom(box)`, points outside the box are null.
+ */
 export interface OsmElement {
   type: 'node' | 'way' | 'relation';
   id: number;
@@ -83,9 +86,9 @@ export interface OsmElement {
   lat?: number;
   lon?: number;
   /** A way's points. */
-  geometry?: LatLon[];
+  geometry?: (LatLon | null)[];
   /** A relation's members, with their positions or points. */
-  members?: ({ type: string; ref?: number; role?: string } & Partial<LatLon> & { geometry?: LatLon[] })[];
+  members?: ({ type: string; ref?: number; role?: string } & Partial<LatLon> & { geometry?: (LatLon | null)[] })[];
 }
 
 /** An Overpass answer in OSM JSON. */

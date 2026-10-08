@@ -36,6 +36,13 @@ group('distanceTo', () => {
     expect(distanceTo({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [at(5, -50), at(5, 50)] }] }, spot)).toBeCloseTo(5, 0);
     expect(distanceTo({ type: 'way', id: 1 }, spot)).toBeUndefined();
   });
+
+  it('measures a clipped area to the edge left in the box, as it is no ring any more', () => {
+    const ring = [at(-300, -10), at(-10, -10), at(-10, 10), at(-300, 10), at(-300, -10)];
+    const clipped = { type: 'relation' as const, id: 1, members: [{ type: 'way', geometry: [null, ring[1]!, ring[2]!, null, null] }] };
+    expect(distanceTo(clipped, spot)).toBeCloseTo(10, 0);
+    expect(distanceTo({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, null] }] }, spot)).toBeUndefined();
+  });
 });
 
 group('geometryOf', () => {
@@ -43,6 +50,20 @@ group('geometryOf', () => {
     expect(geometryOf({ type: 'node', id: 1, lat: 49, lon: 8 })).toEqual({ type: 'Point', coordinates: [8, 49] });
     expect(geometryOf({ type: 'way', id: 1, geometry: [{ lat: 49, lon: 8 }, { lat: 49.1, lon: 8.1 }] })).toEqual({ type: 'LineString', coordinates: [[8, 49], [8.1, 49.1]] });
     expect(geometryOf({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [{ lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }] }, { type: 'node', lat: 49.05, lon: 8.05 }] })).toEqual({
+      type: 'MultiLineString',
+      coordinates: [[[8, 49], [8.1, 49]]],
+    });
+  });
+
+  it('splits clipped lines where points were left out', () => {
+    expect(geometryOf({ type: 'way', id: 1, geometry: [{ lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }, null, { lat: 49.1, lon: 8.2 }, { lat: 49.1, lon: 8.3 }] })).toEqual({
+      type: 'MultiLineString',
+      coordinates: [
+        [[8, 49], [8.1, 49]],
+        [[8.2, 49.1], [8.3, 49.1]],
+      ],
+    });
+    expect(geometryOf({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, { lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }, null] }] })).toEqual({
       type: 'MultiLineString',
       coordinates: [[[8, 49], [8.1, 49]]],
     });
@@ -128,13 +149,20 @@ group('describe', () => {
 });
 
 group('the query', () => {
-  it('asks for drivable ways, places and barriers around the spot', () => {
+  it('looks around the spot once and picks drivable ways, places and barriers from there', () => {
     const query = detailsQuery(spot, 63.4);
-    expect(query).toMatch(/^\[out:json\]\[timeout:20\];\(.*\);out geom;$/);
-    expect(query).toContain('way["highway"~"^((motorway|trunk|primary|secondary|tertiary)(_link)?|');
-    expect(query).toContain('nwr["amenity"](around:63,49.000000,8.400000);');
-    expect(query).toContain('nwr["leisure"]["name"](around:63,49.000000,8.400000);');
-    expect(query).toContain('node["barrier"](around:63,49.000000,8.400000);');
+    expect(query).toMatch(/^\[out:json\]\[timeout:10\];nwr\(around:63,49\.000000,8\.400000\)->\.near;\(.*\)->\.found;/);
+    expect(query.match(/around/g)).toHaveLength(1);
+    expect(query).toContain('way.near["highway"~"^((motorway|trunk|primary|secondary|tertiary)(_link)?|');
+    expect(query).toContain('nwr.near["amenity"];');
+    expect(query).toContain('nwr.near["leisure"]["name"];');
+    expect(query).toContain('node.near["barrier"];');
+  });
+
+  it('clips relations to a box twice the radius around the spot', () => {
+    expect(detailsQuery(spot, 63.4)).toMatch(
+      /\(node\.found;way\.found;\);out tags geom;relation\.found;out geom\(48\.998853,8\.398264,49\.001147,8\.401736\);$/,
+    );
   });
 
   it('looks about 40 pixels around, between 15 and 250 metres', () => {

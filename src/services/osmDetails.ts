@@ -1,5 +1,5 @@
 import type { LngLat } from '../model/route';
-import { askOverpass, type OsmElement } from './overpass';
+import { askOverpass, type LatLon, type OsmElement } from './overpass';
 
 /**
  * What lies at a spot on the map, for people on the move: the nearest road or trail, the
@@ -63,16 +63,28 @@ function poiKey(tags: Record<string, string>): string | undefined {
   );
 }
 
-/** The query for what may be of interest within `radius` metres of the spot, with geometry. */
+/**
+ * The query for what may be of interest within `radius` metres of the spot, with geometry.
+ * Everything around the spot is looked up once and filtered from there, far less work for
+ * the server than a lookup per tag; openstreetmap.org builds its "Query features" query the
+ * same way. Relations come clipped to a box twice the radius around the spot: a large park
+ * would otherwise bring all of its outline.
+ */
 export function detailsQuery([lng, lat]: LngLat, radius: number): string {
   const around = `(around:${Math.round(radius)},${lat.toFixed(6)},${lng.toFixed(6)})`;
-  const statements = [
-    `way["highway"~"${ROAD_VALUES}"]${around};`,
-    ...POI_KEYS.map((key) => `nwr["${key}"]${around};`),
-    ...NAMED_POI_KEYS.map((key) => `nwr["${key}"]["name"]${around};`),
-    `node["barrier"]${around};`,
+  const filters = [
+    `way.near["highway"~"${ROAD_VALUES}"];`,
+    ...POI_KEYS.map((key) => `nwr.near["${key}"];`),
+    ...NAMED_POI_KEYS.map((key) => `nwr.near["${key}"]["name"];`),
+    `node.near["barrier"];`,
   ];
-  return `[out:json][timeout:20];(${statements.join('')});out geom;`;
+  const dLat = (2 * radius) / 110_574;
+  const dLng = (2 * radius) / (111_320 * Math.cos((lat * Math.PI) / 180));
+  const box = [lat - dLat, lng - dLng, lat + dLat, lng + dLng].map((v) => v.toFixed(6)).join(',');
+  return (
+    `[out:json][timeout:10];nwr${around}->.near;(${filters.join('')})->.found;` +
+    `(node.found;way.found;);out tags geom;relation.found;out geom(${box});`
+  );
 }
 
 /** How far around a spot to look: 40 CSS pixels at the map's zoom, between 15 and 250 metres. */
@@ -118,14 +130,27 @@ function lineDistance(points: Point[]): number {
   return nearest;
 }
 
-/** Metres from the spot to the element: to a node, to a way's line or area, to a relation's members. */
+/** The unbroken stretches of points of a geometry whose points outside a box were left out. */
+function stretches(points: readonly (LatLon | null)[] | undefined): LatLon[][] {
+  const runs: LatLon[][] = [[]];
+  for (const point of points ?? []) {
+    if (point) runs.at(-1)!.push(point);
+    else if (runs.at(-1)!.length > 0) runs.push([]);
+  }
+  return runs.filter((run) => run.length > 0);
+}
+
+/**
+ * Metres from the spot to the element: to a node, to a way's line or area, to a relation's
+ * members. An area clipped to a box is no ring any more, so it is measured to its edge.
+ */
 export function distanceTo(element: OsmElement, spot: LngLat): number | undefined {
   const toPlane = plane(spot);
   const lines: Point[][] = [];
   if (element.lat !== undefined && element.lon !== undefined) lines.push([toPlane({ lat: element.lat, lon: element.lon })]);
-  if (element.geometry) lines.push(element.geometry.map(toPlane));
+  for (const run of stretches(element.geometry)) lines.push(run.map(toPlane));
   for (const member of element.members ?? []) {
-    if (member.geometry) lines.push(member.geometry.map(toPlane));
+    if (member.geometry) lines.push(...stretches(member.geometry).map((run) => run.map(toPlane)));
     else if (member.lat !== undefined && member.lon !== undefined) lines.push([toPlane({ lat: member.lat, lon: member.lon })]);
   }
   const nearest = Math.min(...lines.map(lineDistance));
@@ -188,9 +213,13 @@ export interface Details {
 /** An element's geometry as GeoJSON: areas as their outlines, which is what a highlight draws. */
 export function geometryOf(element: OsmElement): GeoJSON.Geometry {
   if (element.lat !== undefined && element.lon !== undefined) return { type: 'Point', coordinates: [element.lon, element.lat] };
-  if (element.geometry) return { type: 'LineString', coordinates: element.geometry.map((p) => [p.lon, p.lat]) };
+  const toLine = (run: LatLon[]) => run.map((p) => [p.lon, p.lat]);
+  if (element.geometry) {
+    const runs = stretches(element.geometry).map(toLine);
+    return runs.length === 1 ? { type: 'LineString', coordinates: runs[0]! } : { type: 'MultiLineString', coordinates: runs };
+  }
   const members = element.members ?? [];
-  const lines = members.flatMap((m) => (m.geometry ? [m.geometry.map((p) => [p.lon, p.lat])] : []));
+  const lines = members.flatMap((m) => stretches(m.geometry).map(toLine));
   if (lines.length > 0) return { type: 'MultiLineString', coordinates: lines };
   return { type: 'MultiPoint', coordinates: members.flatMap((m) => (m.lat !== undefined && m.lon !== undefined ? [[m.lon, m.lat]] : [])) };
 }
