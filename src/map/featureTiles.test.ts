@@ -1,6 +1,8 @@
+import { VectorTile } from '@mapbox/vector-tile';
+import { PbfReader } from 'pbf';
 import { describe, expect, it } from 'vitest';
 import type { FeatureSource } from '../model/layer';
-import { featureQueryUrl, featureTileUrl, parseFeatureTileUrl, readFeatureAnswer } from './featureTiles';
+import { encodeFeatures, featureQueryUrl, featureTileUrl, parseFeatureTileUrl, readFeatureAnswer } from './featureTiles';
 import { getParam } from './urls';
 
 const arcgis: FeatureSource = { type: 'arcgis-features', url: 'https://a.example/FeatureServer/0', geometry: 'point', maxRecordCount: 2000 };
@@ -90,5 +92,34 @@ describe('readFeatureAnswer', () => {
       '<ows:ExceptionText>Feature type ns:x &amp; ns:y unknown</ows:ExceptionText></ows:Exception></ows:ExceptionReport>';
     expect(() => readFeatureAnswer(report)).toThrow('Feature type ns:x & ns:y unknown');
     expect(() => readFeatureAnswer('<html>Bad Gateway</html>')).toThrow('did not answer with GeoJSON');
+  });
+});
+
+describe('encodeFeatures', () => {
+  it('encodes features as a vector tile layer', () => {
+    const data = encodeFeatures(
+      {
+        type: 'FeatureCollection',
+        features: [
+          { type: 'Feature', properties: { name: 'a' }, geometry: { type: 'Point', coordinates: [10, 10] } },
+          {
+            type: 'Feature',
+            properties: { name: 'b' },
+            geometry: { type: 'Polygon', coordinates: [[[-170, -80], [170, -80], [170, 80], [-170, 80], [-170, -80]]] },
+          },
+        ],
+      },
+      0,
+      0,
+      0,
+    );
+    const layer = new VectorTile(new PbfReader(new Uint8Array(data))).layers.features!;
+    expect(layer.length).toBe(2);
+    expect(layer.feature(0).properties.name).toBe('a');
+    expect(layer.feature(1).type).toBe(3);
+  });
+
+  it('gives an empty tile for no features', () => {
+    expect(encodeFeatures({ type: 'FeatureCollection', features: [] }, 3, 1, 1).byteLength).toBe(0);
   });
 });

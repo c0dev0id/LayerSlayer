@@ -15,8 +15,8 @@ import {
   type WmtsSource,
   type XyzSource,
 } from '../model/layer';
-import { FEATURE_PROTOCOL, featureTileUrl } from './featureTiles';
-import { resolveUrl, withParams } from './urls';
+import { FEATURE_LAYER, FEATURE_PROTOCOL, FEATURE_TILE_MAXZOOM, featureTileUrl } from './featureTiles';
+import { parseProtocolTile, protocolTileUrl, resolveUrl, withParams } from './urls';
 
 /**
  * What a layer needs beyond its configuration before it can be drawn: the fetched style of
@@ -29,12 +29,6 @@ export interface Assets {
 
 /** Tiles of dynamic services (WMS, ArcGIS export) are requested at this size. */
 export const DYNAMIC_TILE_SIZE = 512;
-
-/** Feature layers are queried up to this tile zoom; the map enlarges the vectors beyond. */
-export const FEATURE_TILE_MAXZOOM = 14;
-
-/** The vector tile layer that feature queries are encoded into. */
-export const FEATURE_LAYER = 'features';
 
 export const WMTS_PROTOCOL = 'wmts-matrix';
 
@@ -260,19 +254,16 @@ export function wmtsTileUrl(src: WmtsSource): string {
     const prefix = first[1].slice(0, first[1].length - first[0].length);
     if (entries.every(([z, id]) => id === prefix + z)) return template.replace('{TileMatrix}', `${prefix}{z}`);
   }
-  return `${WMTS_PROTOCOL}://{z}/{x}/{y}?${new URLSearchParams({ t: template, m: JSON.stringify(src.matrices) })}`;
+  return protocolTileUrl(WMTS_PROTOCOL, { t: template, m: JSON.stringify(src.matrices) });
 }
 
 /** The tile URL a matrix protocol address stands for. */
 export function resolveWmtsTile(url: string): string {
-  const match = /^[^:]+:\/\/(\d+)\/(\d+)\/(\d+)\?(.*)$/.exec(url);
-  if (!match) throw new Error(`Not a WMTS matrix tile: ${url}`);
-  const [, z, x, y, query] = match;
-  const params = new URLSearchParams(query);
+  const { z, x, y, params } = parseProtocolTile(url);
   const matrices = JSON.parse(params.get('m') ?? '{}') as Record<string, string>;
-  const id = matrices[z!];
+  const id = matrices[z];
   if (id === undefined) throw new Error(`The tile matrix set has no zoom ${z}`);
-  return (params.get('t') ?? '').replace('{TileMatrix}', id).replace('{x}', x!).replace('{y}', y!);
+  return (params.get('t') ?? '').replace('{TileMatrix}', id).replace('{x}', String(x)).replace('{y}', String(y));
 }
 
 const POLYGON = ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]] as const;

@@ -1,7 +1,9 @@
+import { geoJSONToTile } from '@maplibre/geojson-vt';
+import { fromGeojsonVt } from '@maplibre/vt-pbf';
 import { HALF_WORLD, mercatorToLngLat, WORLD } from '../geo/mercator';
 import type { FeatureSource } from '../model/layer';
 import { descendants, parseXml } from '../services/xml';
-import { withParams } from './urls';
+import { parseProtocolTile, protocolTileUrl, withParams } from './urls';
 
 /**
  * Vector tiles of feature sources (ArcGIS feature layers, WFS feature types, OGC API
@@ -11,8 +13,16 @@ import { withParams } from './urls';
 
 export const FEATURE_PROTOCOL = 'features';
 
+/** Feature layers are queried up to this tile zoom; the map enlarges the vectors beyond. */
+export const FEATURE_TILE_MAXZOOM = 14;
+
+/** The vector tile layer that feature queries are encoded into. */
+export const FEATURE_LAYER = 'features';
+
+const EXTENT = 4096;
+
 /** One tile of a feature source. */
-export interface FeatureTile {
+interface FeatureTile {
   z: number;
   x: number;
   y: number;
@@ -21,13 +31,12 @@ export interface FeatureTile {
 
 /** The tile address template of a feature source; the source travels with every tile. */
 export function featureTileUrl(source: FeatureSource): string {
-  return `${FEATURE_PROTOCOL}://{z}/{x}/{y}?source=${encodeURIComponent(JSON.stringify(source))}`;
+  return protocolTileUrl(FEATURE_PROTOCOL, { source: JSON.stringify(source) });
 }
 
 export function parseFeatureTileUrl(url: string): FeatureTile {
-  const match = /^[^:]+:\/\/(\d+)\/(\d+)\/(\d+)\?source=(.*)$/.exec(url);
-  if (!match) throw new Error(`Not a feature tile: ${url}`);
-  return { z: Number(match[1]), x: Number(match[2]), y: Number(match[3]), source: JSON.parse(decodeURIComponent(match[4]!)) as FeatureSource };
+  const { z, x, y, params } = parseProtocolTile(url);
+  return { z, x, y, source: JSON.parse(params.get('source') ?? '{}') as FeatureSource };
 }
 
 /** The tile's extent in Web Mercator metres: west, south, east, north. */
@@ -141,4 +150,13 @@ export function readFeatureAnswer(text: string): { features: GeoJSON.FeatureColl
     answer.properties?.exceededTransferLimit === true ||
     (Number.isFinite(matched) && matched > (answer.numberReturned ?? answer.features.length));
   return { features: answer, truncated };
+}
+
+/** GeoJSON features as one vector tile. */
+export function encodeFeatures(collection: GeoJSON.FeatureCollection, z: number, x: number, y: number): ArrayBuffer {
+  if (!collection.features?.length) return new ArrayBuffer(0);
+  const tile = geoJSONToTile(collection, z, x, y, { extent: EXTENT, buffer: 64, clip: true });
+  if (!tile) return new ArrayBuffer(0);
+  const bytes = fromGeojsonVt({ [FEATURE_LAYER]: tile }, { version: 2, extent: EXTENT });
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
 }

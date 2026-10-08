@@ -1,13 +1,9 @@
-import { geoJSONToTile } from '@maplibre/geojson-vt';
-import { fromGeojsonVt } from '@maplibre/vt-pbf';
 import { AJAXError, type AddProtocolAction } from 'maplibre-gl';
 import { hostOf, requestUrl } from '../state/net';
-import { CACHE_PREFIX, FEATURE_LAYER, resolveWmtsTile, WMTS_PROTOCOL } from './compose';
-import { FEATURE_PROTOCOL, featureQueryUrl, featureSourceName, parseFeatureTileUrl, readFeatureAnswer } from './featureTiles';
+import { CACHE_PREFIX, resolveWmtsTile, WMTS_PROTOCOL } from './compose';
+import { encodeFeatures, FEATURE_PROTOCOL, featureQueryUrl, featureSourceName, parseFeatureTileUrl, readFeatureAnswer } from './featureTiles';
 import { createLimiter } from './limit';
 import { cachedTile, storeTile } from './tileCache';
-
-const EXTENT = 4096;
 
 /** Fetches a tile; a missing one is reported as MapLibre's AJAXError, after which it shows the zoom below. */
 async function fetchTile(url: string, signal: AbortSignal): Promise<ArrayBuffer> {
@@ -79,12 +75,3 @@ export const loadCachedTile: AddProtocolAction = async (params, abort) => {
   void storeTile(key, data.slice(0)).catch(() => {});
   return { data };
 };
-
-/** GeoJSON features as one vector tile. */
-export function encodeFeatures(collection: GeoJSON.FeatureCollection, z: number, x: number, y: number): ArrayBuffer {
-  if (!collection.features?.length) return new ArrayBuffer(0);
-  const tile = geoJSONToTile(collection, z, x, y, { extent: EXTENT, buffer: 64, clip: true });
-  if (!tile) return new ArrayBuffer(0);
-  const bytes = fromGeojsonVt({ [FEATURE_LAYER]: tile }, { version: 2, extent: EXTENT });
-  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
-}

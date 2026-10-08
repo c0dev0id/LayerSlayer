@@ -53,3 +53,15 @@ export function resolveUrl(url: string, base: string): string {
   const masked = url.replace(/\{[^}]*\}/g, (token) => `__token${tokens.push(token) - 1}__`);
   return new URL(masked, base).href.replace(/__token(\d+)__/g, (_, i: string) => tokens[Number(i)]!);
 }
+
+/** A tile address of one of the app's protocols, `scheme://{z}/{x}/{y}?params`, which the map fills in per tile. */
+export function protocolTileUrl(scheme: string, params: Record<string, string>): string {
+  return `${scheme}://{z}/{x}/{y}?${new URLSearchParams(params)}`;
+}
+
+/** The tile and parameters of a filled-in protocol tile address. */
+export function parseProtocolTile(url: string): { z: number; x: number; y: number; params: URLSearchParams } {
+  const match = /^[^:]+:\/\/(\d+)\/(\d+)\/(\d+)\?(.*)$/.exec(url);
+  if (!match) throw new Error(`Not a protocol tile address: ${url}`);
+  return { z: Number(match[1]), x: Number(match[2]), y: Number(match[3]), params: new URLSearchParams(match[4]) };
+}
