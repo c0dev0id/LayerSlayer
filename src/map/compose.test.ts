@@ -102,9 +102,14 @@ describe('composeStyle', () => {
 
   it('queries feature layers as vector tiles through the feature protocol', () => {
     const style = compose([
-      layer({ name: 'f', source: { type: 'arcgis-features', url: 'https://a.example/FeatureServer/0', geometry: 'polygon', maxRecordCount: 2000 } }),
+      layer({
+        name: 'f',
+        source: { type: 'arcgis-features', url: 'https://a.example/FeatureServer/0', geometry: 'polygon', maxRecordCount: 2000 },
+        bounds: [-120, 30, -100, 45],
+      }),
     ]);
     expect(style.sources.L).toMatchObject({ type: 'vector', maxzoom: 14 });
+    expect(style.sources.L).not.toHaveProperty('bounds');
     expect(style.layers[0]).toMatchObject({ 'source-layer': 'features' });
   });
 

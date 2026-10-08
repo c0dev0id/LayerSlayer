@@ -7,6 +7,7 @@ import { requestUrl } from '../state/net';
 import { setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
+import { watchGeoJsonBounds } from './bounds';
 import { composeStyle, FEATURE_PROTOCOL, WMTS_PROTOCOL } from './compose';
 import { loadFeatureTile, loadWmtsMatrixTile } from './protocols';
 
@@ -56,6 +57,7 @@ export function MapView() {
       if (id) reportLayerError(id, event.error?.message ?? 'The layer could not be loaded.');
       else console.error(event.error);
     });
+    watchGeoJsonBounds(map);
     map.on('sourcedata', (event) => {
       const id = layerOf(event.sourceId);
       if (id && event.tile) clearLayerError(id);

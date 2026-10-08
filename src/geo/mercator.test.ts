@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HALF_WORLD, mercatorToLngLat, scaleToZoom, tileZoom, validBounds } from './mercator';
+import { coversMostOfWorld, HALF_WORLD, mercatorToLngLat, scaleToZoom, tileZoom, validBounds } from './mercator';
 
 describe('mercator', () => {
   it('converts scale denominators to map zooms', () => {
@@ -19,6 +19,18 @@ describe('mercator', () => {
     const [lng, lat] = mercatorToLngLat(HALF_WORLD, HALF_WORLD);
     expect(lng).toBeCloseTo(180);
     expect(lat).toBeCloseTo(85.0511, 3);
+  });
+
+  it('tells world-wide bounds from regional ones', () => {
+    expect(coversMostOfWorld([-180, -90, 180, 90])).toBe(true);
+    // A week of earthquakes: every longitude, no poles, under half the world's area.
+    expect(coversMostOfWorld([-179.98, -58.16, 179.88, 69.62])).toBe(true);
+    // Pole to pole over Europe and Africa.
+    expect(coversMostOfWorld([-30, -85, 60, 85])).toBe(true);
+    // The United States, North America, Europe.
+    expect(coversMostOfWorld([-125, 24, -66, 50])).toBe(false);
+    expect(coversMostOfWorld([-170, 18, -50, 83])).toBe(false);
+    expect(coversMostOfWorld([-25, 34, 45, 72])).toBe(false);
   });
 
   it('accepts only bounds in degrees and clamps the poles', () => {

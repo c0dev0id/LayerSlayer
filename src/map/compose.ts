@@ -97,9 +97,16 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
       return vector(layer, { type: 'geojson', data, ...(layer.attribution && { attribution: layer.attribution }) });
     }
     case 'arcgis-features':
+      // Not limited to the layer's bounds: they are where the features were when the layer
+      // was added, and live data moves.
       return vector(
         layer,
-        { type: 'vector', tiles: [featureTileUrl(src.url, src.maxRecordCount)], maxzoom: FEATURE_TILE_MAXZOOM, ...common(layer) },
+        {
+          type: 'vector',
+          tiles: [featureTileUrl(src.url, src.maxRecordCount)],
+          maxzoom: FEATURE_TILE_MAXZOOM,
+          ...(layer.attribution && { attribution: layer.attribution }),
+        },
         FEATURE_LAYER,
       );
     case 'style':

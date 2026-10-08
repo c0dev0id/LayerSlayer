@@ -37,6 +37,19 @@ export function mercatorToLngLat(x: number, y: number): [number, number] {
   return [lng, lat];
 }
 
+/**
+ * Whether bounds span more than half the width or height of the Web Mercator world, the
+ * map as it is drawn, so that flying to them would show about the whole world. Area alone
+ * misjudges this: data around the globe that leaves out the poles covers less than half
+ * the world's area, yet fitting it on screen shows all of it.
+ */
+export function coversMostOfWorld([west, south, east, north]: Bounds): boolean {
+  const clamp = (lat: number) => Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, lat));
+  const [x1, y1] = lngLatToMercator(west, clamp(south));
+  const [x2, y2] = lngLatToMercator(east, clamp(north));
+  return (x2 - x1) / WORLD > 0.5 || (y2 - y1) / WORLD > 0.5;
+}
+
 /** Bounds clamped to what Web Mercator shows, or undefined when they are not degrees. */
 export function validBounds(west: number, south: number, east: number, north: number): Bounds | undefined {
   const values = [west, south, east, north];

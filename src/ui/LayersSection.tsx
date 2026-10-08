@@ -1,4 +1,5 @@
 import { For, Show } from 'solid-js';
+import { coversMostOfWorld } from '../geo/mercator';
 import { isVector, MAX_ZOOM, MIN_ZOOM, type Layer } from '../model/layer';
 import { hostOf } from '../state/net';
 import {
@@ -10,7 +11,7 @@ import {
   updateLayer,
 } from '../state/store';
 import { layerErrors, map, zoom } from '../state/ui';
-import { AlertIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
+import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon } from './icons';
 import { reorderTarget } from './reorder';
 
 export function LayersSection(props: { onAdd: () => void }) {
@@ -40,11 +41,16 @@ export function LayersSection(props: { onAdd: () => void }) {
   );
 }
 
+/** Flies to the layer's bounds, no closer than the layer is drawn. */
+function flyTo(layer: Layer): void {
+  if (layer.bounds) map()?.fitBounds(layer.bounds, { padding: 40, maxZoom: Math.min(layer.maxzoom, 16) });
+}
+
 function outOfRange(layer: Layer): boolean {
   return zoom() < layer.minzoom || zoom() >= layer.maxzoom;
 }
 
-/** Name (a click makes the layer active), visibility, error, delete and a drag handle. */
+/** Name (a click makes the layer active), visibility, flying to its area, error, delete and a drag handle. */
 function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
   const layer = props.layer;
   const isActive = () => state.activeLayerId === layer.id;
@@ -83,6 +89,16 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
       >
         <span class="name">{layer.name}</span>
       </button>
+      <Show when={layer.bounds && !coversMostOfWorld(layer.bounds)}>
+        <button
+          class="icon"
+          title={`Fly to the area of ${layer.name}`}
+          aria-label={`Fly to the area of ${layer.name}`}
+          onClick={() => flyTo(layer)}
+        >
+          <AreaIcon />
+        </button>
+      </Show>
       <Show when={layerErrors[layer.id]}>
         {(message) => (
           <span class="error-mark" title={message()} role="img" aria-label={message()}>
@@ -260,15 +276,6 @@ function ActiveLayer(props: { layer: Layer }) {
             />
             <span>Fetch {h()} through the CORS proxy</span>
           </label>
-        )}
-      </Show>
-      <Show when={layer.bounds}>
-        {(bounds) => (
-          <div class="row">
-            <button onClick={() => map()?.fitBounds(bounds(), { padding: 40, maxZoom: Math.min(layer.maxzoom, 18) })}>
-              Zoom to layer
-            </button>
-          </div>
         )}
       </Show>
       <Show when={layerErrors[layer.id]}>{(message) => <p class="note error">{message()}</p>}</Show>
