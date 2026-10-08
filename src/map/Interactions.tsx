@@ -18,7 +18,9 @@ import {
   stopFocusDrawing,
   tool,
 } from '../state/drawing';
+import { searchRadius } from '../services/osmDetails';
 import { appendPoint, redo, undo } from '../state/routes';
+import { showDetails } from '../ui/DetailsDialog';
 import { fromMarker } from './markers';
 import { googleMapsUrl, latLonText, streetViewUrl } from './placeLinks';
 import { insertPointOnLine } from './routeTools';
@@ -26,7 +28,8 @@ import { TapFilter, type PointerSample } from './tapFilter';
 
 /**
  * Taps on the map and keys while a route or the focus area is drawn, and the menu of a spot
- * on the map (right-click or long press): its coordinates, Google Maps and Street View.
+ * on the map (right-click or long press): what OSM knows there, its coordinates, Google Maps
+ * and Street View.
  */
 export function Interactions(props: { map: MapLibreMap }) {
   const map = props.map;
@@ -80,6 +83,7 @@ export function Interactions(props: { map: MapLibreMap }) {
       y: e.point.y,
       touch,
       items: [
+        { label: 'Show details', run: () => showDetails(spot, searchRadius(lat, map.getZoom())) },
         { label: 'Copy coordinates', run: () => void navigator.clipboard?.writeText(latLonText(spot)).catch(() => {}) },
         { label: 'Open Google Maps', run: () => window.open(googleMapsUrl(spot), '_blank', 'noopener') },
         { label: 'Open Street View', run: () => window.open(streetViewUrl(spot), '_blank', 'noopener') },

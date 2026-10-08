@@ -172,6 +172,164 @@ export const PencilIcon = () => (
   </Icon>
 );
 
+/** A road (Tabler's road). */
+export const RoadIcon = () => (
+  <Icon>
+    <path d="M4 19l4 -14" />
+    <path d="M16 5l4 14" />
+    <path d="M12 8v-2" />
+    <path d="M12 13v-2" />
+    <path d="M12 18v-2" />
+  </Icon>
+);
+
+/** A speed limit (Tabler's gauge). */
+export const GaugeIcon = () => (
+  <Icon>
+    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+    <path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+    <path d="M13.41 10.59l2.59 -2.59" />
+    <path d="M7 12a5 5 0 0 1 5 -5" />
+  </Icon>
+);
+
+/** One way (Tabler's arrow-narrow-right). */
+export const OneWayIcon = () => (
+  <Icon>
+    <path d="M5 12l14 0" />
+    <path d="M15 16l4 -4" />
+    <path d="M15 8l4 4" />
+  </Icon>
+);
+
+/** Both ways (Tabler's arrows-left-right). */
+export const BothWaysIcon = () => (
+  <Icon>
+    <path d="M21 17l-18 0" />
+    <path d="M6 10l-3 -3l3 -3" />
+    <path d="M3 7l18 0" />
+    <path d="M18 20l3 -3l-3 -3" />
+  </Icon>
+);
+
+/** A surface (Tabler's texture). */
+export const TextureIcon = () => (
+  <Icon>
+    <path d="M6 3l-3 3" />
+    <path d="M21 18l-3 3" />
+    <path d="M11 3l-8 8" />
+    <path d="M16 3l-13 13" />
+    <path d="M21 3l-18 18" />
+    <path d="M21 8l-13 13" />
+    <path d="M21 13l-8 8" />
+  </Icon>
+);
+
+/** A track grade (Tabler's mountain). */
+export const MountainIcon = () => (
+  <Icon>
+    <path d="M3 20h18l-6.921 -14.612a2.3 2.3 0 0 0 -4.158 0l-6.921 14.612" />
+    <path d="M7.5 11l2 2.5l2.5 -2.5l2 3l2.5 -2" />
+  </Icon>
+);
+
+/** Smoothness (Tabler's wave-sine). */
+export const WaveIcon = () => (
+  <Icon>
+    <path d="M21 12h-2c-.894 0 -1.662 -.857 -1.761 -2c-.296 -3.45 -.749 -6 -2.749 -6s-2.5 3.582 -2.5 8s-.5 8 -2.5 8s-2.452 -2.547 -2.749 -6c-.1 -1.147 -.867 -2 -1.763 -2h-2" />
+  </Icon>
+);
+
+/** A width (Tabler's ruler-measure). */
+export const RulerIcon = () => (
+  <Icon>
+    <path d="M19.875 12c.621 0 1.125 .512 1.125 1.143v5.714c0 .631 -.504 1.143 -1.125 1.143h-15.875a1 1 0 0 1 -1 -1v-5.857c0 -.631 .504 -1.143 1.125 -1.143h15.75" />
+    <path d="M9 12v2" />
+    <path d="M6 12v3" />
+    <path d="M12 12v3" />
+    <path d="M18 12v3" />
+    <path d="M15 12v2" />
+    <path d="M3 3v4" />
+    <path d="M3 5h18" />
+    <path d="M21 3v4" />
+  </Icon>
+);
+
+/** Access (Tabler's key). */
+export const KeyIcon = () => (
+  <Icon>
+    <path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0" />
+    <path d="M15 9h.01" />
+  </Icon>
+);
+
+/** Locked (Tabler's lock). */
+export const LockIcon = () => (
+  <Icon>
+    <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" />
+    <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+    <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
+  </Icon>
+);
+
+/** An address or place (Tabler's map-pin). */
+export const MapPinIcon = () => (
+  <Icon>
+    <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+    <path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
+  </Icon>
+);
+
+/** A phone number (Tabler's phone). */
+export const PhoneIcon = () => (
+  <Icon>
+    <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />
+  </Icon>
+);
+
+/** A website (Tabler's world). */
+export const WorldIcon = () => (
+  <Icon>
+    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+    <path d="M3.6 9h16.8" />
+    <path d="M3.6 15h16.8" />
+    <path d="M11.5 3a17 17 0 0 0 0 18" />
+    <path d="M12.5 3a17 17 0 0 1 0 18" />
+  </Icon>
+);
+
+/** Opening hours (Tabler's clock). */
+export const ClockIcon = () => (
+  <Icon>
+    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+    <path d="M12 7v5l3 3" />
+  </Icon>
+);
+
+/** A reference number (Tabler's tag). */
+export const TagIcon = () => (
+  <Icon>
+    <path d="M6.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+    <path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3" />
+  </Icon>
+);
+
+/** A barrier (Tabler's barrier-block). */
+export const BarrierIcon = () => (
+  <Icon>
+    <path d="M4 8a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1v7a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1l0 -7" />
+    <path d="M7 16v4" />
+    <path d="M7.5 16l9 -9" />
+    <path d="M13.5 16l6.5 -6.5" />
+    <path d="M4 13.5l6.5 -6.5" />
+    <path d="M17 16v4" />
+    <path d="M5 20h4" />
+    <path d="M15 20h4" />
+    <path d="M17 7v-2" />
+    <path d="M7 7v-2" />
+  </Icon>
+);
+
 /** The map pin of a waypoint; its tip marks the place. */
 export function WaypointPin(props: { icon?: MapIcon | undefined }) {
   return (

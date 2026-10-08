@@ -459,6 +459,75 @@ input.swatch {
   background: rgba(0, 0, 0, 0.15);
 }
 
+.dialog.details-dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-height: min(680px, calc(100vh - 64px));
+}
+
+.details {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.detail-card {
+  display: grid;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.detail-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+}
+
+.detail-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.detail-card .distance {
+  align-self: start;
+  white-space: nowrap;
+}
+
+.detail-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0 0 0 38px;
+}
+
+.detail-rows dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.detail-rows dt svg {
+  width: 16px;
+  height: 16px;
+}
+
+.detail-rows dd {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.detail-card .osm-link {
+  margin-left: 38px;
+  font-size: 12px;
+}
+
 .dialog.icon-picker {
   width: min(560px, calc(100vw - 32px));
   height: min(640px, calc(100vh - 64px));

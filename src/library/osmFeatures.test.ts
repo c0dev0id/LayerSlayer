@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { formatFilter, parseFilter } from '../services/overpass';
 import list from './osmFeatures.json';
-import { filterOsmFeatures, loadOsmFeatures, typedFeature, type OsmFeature } from './osmFeatures';
+import { filterOsmFeatures, loadOsmFeatures, matchingFeature, typedFeature, type OsmFeature } from './osmFeatures';
 
 const features: OsmFeature[] = list.features.map(({ icon: _, ...feature }) => feature);
 
@@ -31,6 +31,18 @@ describe('OSM features', () => {
     expect(filterOsmFeatures(features, 'generator:source=wind').map((f) => f.name)).toEqual(['Wind turbines']);
     expect(filterOsmFeatures(features, 'routes').every((f) => f.category === 'Routes')).toBe(true);
     expect(filterOsmFeatures(features, '')).toHaveLength(features.length);
+  });
+});
+
+describe('matchingFeature', () => {
+  it('finds the feature an element is, among those with an icon', async () => {
+    const loaded = await loadOsmFeatures();
+    expect(matchingFeature(loaded, { amenity: 'fuel', brand: 'Aral' })?.name).toBe('Fuel stations');
+    expect(matchingFeature(loaded, { barrier: 'gate' })?.name).toBe('Gates');
+    expect(matchingFeature(loaded, { power: 'generator', 'generator:source': 'wind' })?.name).toBe('Wind turbines');
+    expect(matchingFeature(loaded, { shop: 'jewelry' })?.name).toBe('All shops');
+    // Roads are found as lines, which have no icon.
+    expect(matchingFeature(loaded, { highway: 'track' })).toBeUndefined();
   });
 });
 
