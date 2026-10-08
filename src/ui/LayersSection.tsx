@@ -200,6 +200,7 @@ const SOURCE_LABELS: Record<Layer['source']['type'], string> = {
   'ogc-features': 'OGC API – Features',
   geojson: 'GeoJSON',
   style: 'MapLibre style',
+  cog: 'Cloud Optimized GeoTIFF',
   image: 'Georeferenced image',
 };
 

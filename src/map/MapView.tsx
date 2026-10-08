@@ -8,7 +8,7 @@ import { setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
-import { CACHED_SCHEMES, composeStyle, WMTS_PROTOCOL } from './compose';
+import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, WMTS_PROTOCOL } from './compose';
 import { FEATURE_PROTOCOL } from './featureTiles';
 import { loadCachedTile, loadTile } from './protocols';
 import { routeLines, ROUTES_SOURCE, withRoutes } from './routeOverlay';
@@ -17,6 +17,8 @@ maplibregl.setWorkerUrl(workerUrl);
 maplibregl.addProtocol(FEATURE_PROTOCOL, loadTile);
 maplibregl.addProtocol(WMTS_PROTOCOL, loadTile);
 for (const scheme of CACHED_SCHEMES) maplibregl.addProtocol(scheme, loadCachedTile);
+// geotiff.js and the protocol load with the first COG.
+maplibregl.addProtocol(COG_PROTOCOL, async (params) => (await import('@geomatico/maplibre-cog-protocol')).cogProtocol(params));
 
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits;
 

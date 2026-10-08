@@ -28,6 +28,12 @@ export const FEATURE_LAYER = 'features';
 
 export const WMTS_PROTOCOL = 'wmts-matrix';
 
+/** The protocol of Cloud Optimized GeoTIFFs (@geomatico/maplibre-cog-protocol). */
+export const COG_PROTOCOL = 'cog';
+
+/** The colour ramp of single-band COGs: spectral, blue for low values to red for high ones. */
+const COG_RAMP = 'BrewerSpectral11';
+
 /**
  * Put in front of a tile address of a layer that keeps its tiles (`cache+https://…`), so
  * the tile goes through the tile cache, which answers it or fetches it and keeps it.
@@ -122,6 +128,11 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
         },
         src.layer,
       );
+    case 'cog': {
+      const ramp = src.ramp && `#color:${COG_RAMP},${src.ramp.min},${src.ramp.max},c-`;
+      // The protocol serves a TileJSON for the address and 256 px tiles.
+      return raster(layer, { type: 'raster', url: `${COG_PROTOCOL}://${src.url}${ramp ?? ''}`, tileSize: 256, ...common(layer) });
+    }
     case 'arcgis-features':
     case 'wfs':
     case 'ogc-features':
@@ -173,7 +184,7 @@ function raster(layer: Layer, source: SourceSpecification): Fragment {
   };
 }
 
-export function rasterTiles(src: Exclude<LayerSource, FeatureSource | { type: 'geojson' | 'style' | 'image' | 'vector-tiles' }>): string[] {
+export function rasterTiles(src: Exclude<LayerSource, FeatureSource | { type: 'geojson' | 'style' | 'image' | 'vector-tiles' | 'cog' }>): string[] {
   switch (src.type) {
     case 'xyz':
       return src.tiles;

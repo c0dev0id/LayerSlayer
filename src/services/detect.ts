@@ -17,6 +17,7 @@ export function detectServiceType(url: string): ServiceType | undefined {
   if (/\/featureserver(\/\d+)?$/.test(path) || /\/mapserver\/\d+$/.test(path)) return 'arcgis-features';
   if (path.endsWith('/mapserver')) return 'arcgis-mapserver';
   if (path.endsWith('.pdf')) return 'geopdf';
+  if (/\.tiff?$/.test(path)) return 'cog';
   if (path.endsWith('.geojson')) return 'geojson';
   if (path.endsWith('style.json') || /\/styles?\//.test(path)) return 'style';
   return undefined;

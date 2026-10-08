@@ -23,6 +23,8 @@ describe('detectServiceType', () => {
     ['https://tiles.example/{z}/{x}/{y}.mvt?key=k', 'vector-tiles'],
     ['https://tiles.versatiles.org/tiles/osm/tiles.json', 'vector-tiles'],
     ['https://x/maps/topo.pdf', 'geopdf'],
+    ['https://x/data/dem_cog.tif', 'cog'],
+    ['https://x/data/ortho.TIFF?v=2', 'cog'],
     ['https://x/data/quakes.geojson', 'geojson'],
     ['https://tiles.openfreemap.org/styles/liberty', 'style'],
     ['https://x/style.json', 'style'],

@@ -117,6 +117,16 @@ export interface StyleSource {
   url: string;
 }
 
+/**
+ * A Cloud Optimized GeoTIFF in Web Mercator, read by range requests and drawn as raster
+ * tiles: in its own colours, or for single-band data with a colour ramp over `ramp`.
+ */
+export interface CogSource {
+  type: 'cog';
+  url: string;
+  ramp?: { min: number; max: number };
+}
+
 /** A georeferenced picture, e.g. a rendered GeoPDF page. */
 export interface ImageSource {
   type: 'image';
@@ -135,6 +145,7 @@ export type LayerSource =
   | OgcFeaturesSource
   | GeoJsonSource
   | StyleSource
+  | CogSource
   | ImageSource;
 
 export interface Layer {

@@ -136,6 +136,13 @@ describe('composeStyle', () => {
     expect(style.layers.every((l) => 'source-layer' in l && l['source-layer'] === 'transportation')).toBe(true);
   });
 
+  it('reads a COG through its protocol, colouring single-band data', () => {
+    const image = compose([layer({ name: 'o', source: { type: 'cog', url: 'https://x/ortho.tif' } })]);
+    expect(image.sources.L).toEqual({ type: 'raster', url: 'cog://https://x/ortho.tif', tileSize: 256 });
+    const data = compose([layer({ name: 'd', source: { type: 'cog', url: 'https://x/dem.tif', ramp: { min: 120, max: 480 } } })]);
+    expect((data.sources.L as { url: string }).url).toBe('cog://https://x/dem.tif#color:BrewerSpectral11,120,480,c-');
+  });
+
   it('places a georeferenced image by its corners', () => {
     const coordinates: [number, number][] = [[0, 1], [1, 1], [1, 0], [0, 0]];
     const style = compose(

@@ -12,6 +12,7 @@ export type ServiceType =
   | 'vector-tiles'
   | 'geojson'
   | 'style'
+  | 'cog'
   | 'geopdf';
 
 export const SERVICE_TYPES: readonly { value: ServiceType; label: string }[] = [
@@ -25,6 +26,7 @@ export const SERVICE_TYPES: readonly { value: ServiceType; label: string }[] = [
   { value: 'vector-tiles', label: 'Vector tiles (MVT)' },
   { value: 'geojson', label: 'GeoJSON' },
   { value: 'style', label: 'MapLibre style' },
+  { value: 'cog', label: 'Cloud Optimized GeoTIFF' },
   { value: 'geopdf', label: 'GeoPDF' },
 ];
 

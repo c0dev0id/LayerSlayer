@@ -38,6 +38,10 @@ export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: str
       return parseXyz(url);
     case 'vector-tiles':
       return readVectorTiles(url);
+    case 'cog': {
+      const { readCog } = await import('./cog');
+      return readCog(url, fileName(url));
+    }
     case 'geojson': {
       const name = fileName(url);
       return { title: name, offers: [{ title: name, depth: 0, draft: { name, source: { type: 'geojson', data: { url } } } }] };
