@@ -120,8 +120,9 @@ pass. Keeping a proxied layer's tiles in the browser spares the proxy's request 
 ## The library
 
 `src/library/library.json` holds the services offered in the library: the services of
-[WMSproxy](https://github.com/c0dev0id/WMSproxy) and the base maps of
-[mappic](https://github.com/c0dev0id/mappic), each with its type, region and category.
+[WMSproxy](https://github.com/c0dev0id/WMSproxy), the base maps of
+[mappic](https://github.com/c0dev0id/mappic), and WFS, OGC API and vector tile services,
+each with its type, region and category.
 
 `npm run check-library` reads every entry with the app's own parsers, prints how many
 layers each offers and can show, and marks entries whose server sends no valid CORS header
