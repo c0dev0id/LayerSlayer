@@ -1,6 +1,6 @@
 import { createMemo, createResource, createSignal, For, Show } from 'solid-js';
-import { ICON_SET_IDS, loadIconSet, searchIcons } from '../icons/iconSets';
-import type { MapIcon } from '../model/icon';
+import { ICON_SETS, searchIcons } from '../icons/iconSets';
+import type { IconSet, MapIcon } from '../model/icon';
 import { showModalWhile } from './modal';
 import { answerIconRequest, iconRequest } from './pickIcon';
 
@@ -34,10 +34,11 @@ export function IconPicker() {
   let dialog!: HTMLDialogElement;
   const open = () => iconRequest() !== undefined;
   showModalWhile(() => dialog, open);
-  const [sets] = createResource(
-    () => open() || undefined,
-    () => Promise.all(ICON_SET_IDS.map(loadIconSet)),
-  );
+  // The sets load when the picker first opens, and each is shown as it arrives: the map
+  // sets are small, Material Design Icons take longer.
+  const opened = createMemo((seen: boolean) => seen || open(), false);
+  const loading = ICON_SETS.map((load) => createResource(opened, load)[0]);
+  const sets = () => loading.map((set) => set()).filter((set): set is IconSet => set !== undefined);
   const [query, setQuery] = createSignal('');
   const [setId, setSetId] = createSignal('');
   const found = createMemo(() => searchIcons((sets() ?? []).filter((s) => !setId() || s.id === setId()), query(), LIMIT));
@@ -58,7 +59,7 @@ export function IconPicker() {
           <For each={sets()}>{(set) => <option value={set.id}>{set.name}</option>}</For>
         </select>
       </div>
-      <Show when={sets()} fallback={<p class="muted">{sets.error ? 'The icons could not be loaded.' : 'Loading icons…'}</p>}>
+      <Show when={sets().length > 0} fallback={<p class="muted">{loading.some((set) => set.error) ? 'The icons could not be loaded.' : 'Loading icons…'}</p>}>
         <div class="icon-grid">
           <For each={found().icons}>
             {(icon) => (
@@ -80,6 +81,7 @@ export function IconPicker() {
             : found().total > LIMIT
               ? `${found().total - LIMIT} more; narrow the search to see them.`
               : `${found().total} icons.`}{' '}
+          {loading.some((set) => set.loading) ? 'More are loading. ' : ''}
           Maki and Temaki (CC0), Material Design Icons (Apache 2.0).
         </p>
       </Show>

@@ -13,7 +13,7 @@ export interface OsmFeature {
 /** The kinds of features the OSM Query tab offers, with their icons. */
 export async function loadOsmFeatures(): Promise<OsmFeature[]> {
   const [{ default: list }, { default: icons }] = await Promise.all([import('./osmFeatures.json'), import('virtual:osm-feature-icons')]);
-  return list.features.map(({ icon, ...feature }) => ({ ...feature, ...(icons[icon] && { icon: icons[icon] }) }));
+  return list.features.map((feature) => ({ ...feature, icon: icons[feature.icon] }));
 }
 
 /** Features whose name, category or filters contain every word of the search. */

@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'vite';
+import { mapIcon, type IconSet, type MapIcon } from '../src/model/icon.ts';
 
 /**
  * The icon sets layers can be drawn with, read from their npm packages at build time and
@@ -12,18 +13,7 @@ import type { Plugin } from 'vite';
  * keep them, so that the list can show them without loading whole sets.
  */
 
-interface IconData {
-  paths: string[];
-  size?: [number, number];
-  keywords?: string;
-}
-
-interface IconSet {
-  id: string;
-  name: string;
-  size: number;
-  icons: Record<string, IconData>;
-}
+type IconData = IconSet['icons'][string];
 
 const packageDir = (name: string) => fileURLToPath(new URL(`../node_modules/${name}/`, import.meta.url));
 
@@ -79,16 +69,15 @@ function iconSet(id: string): IconSet | undefined {
 const OSM_FEATURES = fileURLToPath(new URL('../src/library/osmFeatures.json', import.meta.url));
 
 /** The icons the OSM features name, by `set:name`, with their shapes. Unknown icons fail the build. */
-function osmFeatureIcons(): Record<string, { id: string; size: [number, number]; paths: string[] }> {
-  const { features } = JSON.parse(readFileSync(OSM_FEATURES, 'utf8')) as { features: { name: string; icon?: string }[] };
-  const icons: Record<string, { id: string; size: [number, number]; paths: string[] }> = {};
+function osmFeatureIcons(): Record<string, MapIcon> {
+  const { features } = JSON.parse(readFileSync(OSM_FEATURES, 'utf8')) as { features: { name: string; icon: string }[] };
+  const icons: Record<string, MapIcon> = {};
   for (const { name, icon } of features) {
-    if (!icon || icon in icons) continue;
+    if (icon in icons) continue;
     const [setId = '', iconName = ''] = icon.split(':');
     const set = iconSet(setId);
-    const data = set?.icons[iconName];
-    if (!set || !data) throw new Error(`OSM feature "${name}" names the icon ${icon}, which no icon set has.`);
-    icons[icon] = { id: icon, size: data.size ?? [set.size, set.size], paths: data.paths };
+    if (!set?.icons[iconName]) throw new Error(`OSM feature "${name}" names the icon ${icon}, which no icon set has.`);
+    icons[icon] = mapIcon(set, iconName);
   }
   return icons;
 }

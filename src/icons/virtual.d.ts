@@ -1,6 +1,6 @@
 /** The icon sets, built from their packages by tools/iconSets.ts. */
 declare module 'virtual:icons/*' {
-  const set: import('./iconSets').IconSet;
+  const set: import('../model/icon').IconSet;
   export default set;
 }
 

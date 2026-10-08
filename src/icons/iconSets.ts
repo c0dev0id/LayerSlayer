@@ -1,58 +1,32 @@
-import type { MapIcon } from '../model/icon';
+import { mapIcon, type IconSet, type MapIcon } from '../model/icon';
 
 /**
- * The icon sets layers can be drawn with: Maki and Temaki, made for maps and named after
- * OpenStreetMap's features (CC0), and Material Design Icons for everything else (Apache
- * 2.0). Each is a chunk of its own, built from its package by tools/iconSets.ts and loaded
- * when first needed.
+ * The icon sets layers and waypoints can be drawn with: Maki and Temaki, made for maps and
+ * named after OpenStreetMap's features (CC0), and Material Design Icons for everything else
+ * (Apache 2.0). Each is a chunk of its own, built from its package by tools/iconSets.ts.
  */
 
-export interface IconSet {
-  id: string;
-  name: string;
-  /** Width and height of the viewBox of most of its icons. */
-  size: number;
-  icons: Record<string, { paths: string[]; size?: [number, number]; keywords?: string }>;
-}
+/** Loads each set, map sets first. */
+export const ICON_SETS: readonly (() => Promise<IconSet>)[] = [
+  () => import('virtual:icons/maki').then((m) => m.default),
+  () => import('virtual:icons/temaki').then((m) => m.default),
+  () => import('virtual:icons/mdi').then((m) => m.default),
+];
 
-const LOADERS: Record<string, () => Promise<{ default: IconSet }>> = {
-  maki: () => import('virtual:icons/maki'),
-  temaki: () => import('virtual:icons/temaki'),
-  mdi: () => import('virtual:icons/mdi'),
-};
+/** A set's icons with the words they are found by: their names in words and the set's keywords. */
+const indexes = new WeakMap<IconSet, { text: string; icon: MapIcon }[]>();
 
-/** The sets, map sets first, by id. */
-export const ICON_SET_IDS = Object.keys(LOADERS);
-
-const loaded = new Map<string, Promise<IconSet>>();
-
-export function loadIconSet(id: string): Promise<IconSet> {
-  let set = loaded.get(id);
-  if (!set) {
-    const load = LOADERS[id];
-    if (!load) return Promise.reject(new Error(`There is no icon set ${id}.`));
-    set = load().then((m) => m.default);
-    set.catch(() => loaded.delete(id));
-    loaded.set(id, set);
+function index(set: IconSet): { text: string; icon: MapIcon }[] {
+  let entries = indexes.get(set);
+  if (!entries) {
+    entries = Object.keys(set.icons).map((name) => ({
+      text: `${name.replace(/[-_]/g, ' ')} ${set.icons[name]!.keywords ?? ''}`.toLowerCase(),
+      icon: mapIcon(set, name),
+    }));
+    indexes.set(set, entries);
   }
-  return set;
+  return entries;
 }
-
-/** The icon `name` of a set, as layers and waypoints keep it. */
-export function mapIcon(set: IconSet, name: string): MapIcon {
-  const icon = set.icons[name];
-  if (!icon) throw new Error(`There is no icon ${set.id}:${name}.`);
-  return { id: `${set.id}:${name}`, size: icon.size ?? [set.size, set.size], paths: icon.paths };
-}
-
-/** The icon `set:name`, as layers and waypoints keep it. */
-export async function loadIcon(id: string): Promise<MapIcon> {
-  const [setId = '', name = ''] = id.split(':');
-  return mapIcon(await loadIconSet(setId), name);
-}
-
-/** What an icon is found by: its name in words, and its set's keywords for it. */
-const searchText = (set: IconSet, name: string) => `${name.replace(/[-_]/g, ' ')} ${set.icons[name]!.keywords ?? ''}`.toLowerCase();
 
 /**
  * Icons whose name or keywords contain every word of the search, in the order of the sets,
@@ -63,11 +37,10 @@ export function searchIcons(sets: readonly IconSet[], query: string, limit: numb
   const icons: MapIcon[] = [];
   let total = 0;
   for (const set of sets) {
-    for (const name of Object.keys(set.icons)) {
-      const text = searchText(set, name);
+    for (const { text, icon } of index(set)) {
       if (!words.every((w) => text.includes(w))) continue;
       total++;
-      if (icons.length < limit) icons.push(mapIcon(set, name));
+      if (icons.length < limit) icons.push(icon);
     }
   }
   return { icons, total };
