@@ -46,6 +46,9 @@ in the browser.
     tracks, paths, routes, fences, rivers, power lines) show a line symbol instead of an
     icon and give their layer none, since icons mark points and areas only. The result is kept in the browser as
     GeoJSON.
+- The **panel** can be made wider or narrower by dragging its edge (or with the arrow
+  keys on it), for longer layer names; a double click on the edge brings it back to its
+  usual width.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
   arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
   it, and the frame icon flies to the area the layer covers (layers that span most of the
@@ -63,7 +66,8 @@ in the browser.
   inverts the image; with the hue turned 180° that gives a dark map that keeps its colours.
   ArcGIS feature layers can be *drawn with the service's own symbols* (simple, unique value
   and class breaks renderers with simple and picture symbols) instead of their colour.
-  Vector layers can take an *Icon*: its points, and its areas at their middle, are then
+  Vector layers have a *Line* style (solid, dashed, long dashes, dotted) and width for
+  their lines and the outlines of their areas. Vector layers can take an *Icon*: its points, and its areas at their middle, are then
   marked with it, white on a disc of the layer's colour. The picker searches about 7,900
   icons by name and keyword: Maki and Temaki, drawn for maps and named after OpenStreetMap's
   features (bollard, cattle grid, lift gate, water tap, fuel), and Material Design Icons
@@ -84,7 +88,9 @@ in the browser.
   trail (type, name, speed limit, one way or not, surface, track grade, access), place
   (type, name, address, phone, website, opening hours) and barrier (opening hours, lock,
   access) within about 40 pixels, in words rather than tags. Benches, bins, kerbs, fields
-  and the like are left out; each entry links to all its tags on openstreetmap.org.
+  and the like are left out; each entry links to all its tags on openstreetmap.org. The
+  details open in a sheet beside the map, which highlights what they describe in amber;
+  right-click another spot to see its details instead.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
   search, preferring those in view. Enter searches; the first place found gets a pin and the
   map flies to it, and the list below offers the other places found. × clears the search

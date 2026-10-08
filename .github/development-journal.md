@@ -430,7 +430,20 @@ It is a static single-page app on GitHub Pages; there is no server component.
   results are shown nearest first, so a click near a gate on a track shows both. Tags
   become words (`motor_vehicle=forestry` is "Motor vehicles: Forestry only"), with
   Tabler icons for the lines and the OSM preset's icon where the element matches one;
-  the link to openstreetmap.org shows everything else.
+  the link to openstreetmap.org shows everything else. The details are a non-modal sheet
+  beside the map rather than a centred modal, which would hide the very spot: the map
+  stays usable, another spot's details replace them, and an overlay highlights the spot
+  and what was found (lines amber with a white casing, points as amber rings). A spot in
+  the sheet's column is panned beside it; the sheet's height says little, as it grows
+  with its results.
+- **Line styles of vector layers.** Width and dashes (solid, dashed, long dashes, dotted)
+  apply to lines and the outlines of areas alike, so the setting means something for
+  area layers too; unset, lines stay 2.5 and outlines 1.5 pixels. Dash patterns are in
+  line widths and allow for the round ends, which add half a width to each end of a dash
+  (dotted is a zero-length dash: [0, 2]). MapLibre restarts patterns at tile edges.
+- **The panel's width is the browser's, not the project's.** Dragging its edge sets a CSS
+  variable on the app's grid (260 to 720 pixels, the map keeping at least 320), kept in
+  local storage under its own key; MapLibre follows the container's size by itself.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
