@@ -145,6 +145,17 @@ describe('composeStyle', () => {
   });
 
 
+  it('draws lines and outlines at the width and with the dashes of the layer', () => {
+    const source = { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } as const;
+    const plain = compose([layer({ name: 'g', source })]);
+    expect(plain.layers[1]!.paint).toEqual({ 'line-color': '#e8590c', 'line-width': 1.5, 'line-opacity': 0.5 });
+    expect(plain.layers[2]!.paint).toEqual({ 'line-color': '#e8590c', 'line-width': 2.5, 'line-opacity': 0.5 });
+    const dotted = compose([layer({ name: 'g', source }, { lineWidth: 4, lineDash: 'dotted' })]);
+    expect(dotted.layers[1]!.paint).toMatchObject({ 'line-width': 4, 'line-dasharray': [0, 2] });
+    expect(dotted.layers[2]!.paint).toMatchObject({ 'line-width': 4, 'line-dasharray': [0, 2] });
+    expect(compose([layer({ name: 'g', source }, { lineDash: 'long-dashed' })]).layers[2]!.paint).toMatchObject({ 'line-width': 2.5, 'line-dasharray': [5, 4] });
+  });
+
   it('marks points and areas with the layer icon on a disc of its colour', () => {
     const icon = { id: 'maki:fuel', size: [15, 15] as [number, number], paths: ['M0 0h15v15z'] };
     const source = { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } as const;

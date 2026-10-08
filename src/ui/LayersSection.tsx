@@ -8,12 +8,15 @@ import {
   keepsTiles,
   layerColor,
   MAX_ICON_SIZE,
+  MAX_LINE_WIDTH,
   MAX_ZOOM,
   MIN_ICON_SIZE,
+  MIN_LINE_WIDTH,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
   SOURCE_KINDS,
   type Layer,
+  type LineDash,
   type OsmQuery,
   type RasterAdjustments,
 } from '../model/layer';
@@ -397,6 +400,30 @@ function ActiveLayer(props: { layer: Layer }) {
             value={layerColor(layer)}
             onInput={(e) => updateLayer(layer.id, { color: e.currentTarget.value })}
           />
+        </div>
+        <div class="row" title="How lines and the outlines of areas are drawn">
+          <span class="muted label">Line</span>
+          <select
+            aria-label={`Line style of ${layer.name}`}
+            value={layer.lineDash ?? ''}
+            onChange={(e) => updateLayer(layer.id, { lineDash: (e.currentTarget.value || undefined) as LineDash | undefined })}
+          >
+            <option value="">Solid</option>
+            <option value="dashed">Dashed</option>
+            <option value="long-dashed">Long dashes</option>
+            <option value="dotted">Dotted</option>
+          </select>
+          <input
+            class="grow"
+            type="range"
+            aria-label={`Line width of ${layer.name}`}
+            min={MIN_LINE_WIDTH}
+            max={MAX_LINE_WIDTH}
+            step="0.5"
+            value={layer.lineWidth ?? 2.5}
+            onInput={(e) => updateLayer(layer.id, { lineWidth: e.currentTarget.valueAsNumber })}
+          />
+          <span class="value">{layer.lineWidth ?? 2.5} px</span>
         </div>
         <div class="row" title="Marks points and areas with an icon on a disc of the layer's colour">
           <span class="muted label">Icon</span>

@@ -18,6 +18,7 @@ import {
   type Bounds,
   type Layer,
   type LayerSource,
+  type LineDash,
   type RasterAdjustments,
   type WmsSource,
   type WmtsSource,
@@ -353,6 +354,12 @@ const POLYGON = ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon'
 const LINE = ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]] as const;
 const POINT = ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]] as const;
 
+/**
+ * Dash patterns in line widths. Lines have round ends, which add half a width to each end
+ * of a dash: [2, 3] shows dashes of 3 widths with gaps of 2, and [0, 2] shows dots.
+ */
+const LINE_DASHES: Record<LineDash, number[]> = { dashed: [2, 3], 'long-dashed': [5, 4], dotted: [0, 2] };
+
 /** Share of a polygon's fill against its outline, so what lies below stays readable. */
 const FILL_SHARE = 0.25;
 
@@ -364,6 +371,7 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
   const color = layerColor(layer);
   const base: LayerBase = { source: layer.id, ...(sourceLayer && { 'source-layer': sourceLayer }), ...zoomRange(layer) };
   const opacity = layer.opacity;
+  const dash = layer.lineDash && { 'line-dasharray': LINE_DASHES[layer.lineDash] };
   return {
     sources: { [layer.id]: source },
     layers: [
@@ -379,7 +387,8 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
         id: `${layer.id}/outline`,
         type: 'line',
         filter: POLYGON as never,
-        paint: { 'line-color': color, 'line-width': 1.5, 'line-opacity': opacity },
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': color, 'line-width': layer.lineWidth ?? 1.5, 'line-opacity': opacity, ...dash },
       },
       {
         ...base,
@@ -387,7 +396,7 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
         type: 'line',
         filter: LINE as never,
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': color, 'line-width': 2.5, 'line-opacity': opacity },
+        paint: { 'line-color': color, 'line-width': layer.lineWidth ?? 2.5, 'line-opacity': opacity, ...dash },
       },
       ...(layer.icon ? poiLayers(layer, layer.icon, base, color) : [dots(layer, base, color)]),
     ],
