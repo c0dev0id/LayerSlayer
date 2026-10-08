@@ -117,7 +117,7 @@ a {
 
 /* Buttons */
 
-:where(.panel, .dialog) button.icon {
+:where(.panel, .dialog, .hint-bar) button.icon {
   display: inline-grid;
   place-items: center;
   padding: 2px 4px;
@@ -128,7 +128,7 @@ a {
 }
 
 .button,
-:where(.panel, .dialog) button:not(.icon) {
+:where(.panel, .dialog, .hint-bar) button:not(.icon) {
   display: inline-block;
   padding: 3px 10px;
   border: 1px solid #ced4da;
@@ -140,22 +140,22 @@ a {
 }
 
 .button:hover,
-:where(.panel, .dialog) button:not(.icon):hover:not(:disabled) {
+:where(.panel, .dialog, .hint-bar) button:not(.icon):hover:not(:disabled) {
   background: var(--hover);
 }
 
-:where(.panel, .dialog) button:disabled {
+:where(.panel, .dialog, .hint-bar) button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-:where(.panel, .dialog) button.primary {
+:where(.panel, .dialog, .hint-bar) button.primary {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
 }
 
-:where(.panel, .dialog) button.primary:hover:not(:disabled) {
+:where(.panel, .dialog, .hint-bar) button.primary:hover:not(:disabled) {
   background: #1971c2;
 }
 
@@ -563,6 +563,249 @@ input.swatch {
   color: #c92a2a;
 }
 
+/* Route tool: routes in the panel, markers, toolbar, hint bar and menu over the map. */
+
+.routes {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+
+.route {
+  padding: 4px 6px;
+  margin: 0 -6px 2px;
+  border-radius: 4px;
+}
+
+.route.active {
+  background: var(--active);
+}
+
+.route-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.route-point-marker {
+  cursor: grab;
+}
+
+.route-point {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font: bold 10px/1 system-ui, sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+/* Waypoints: a pin whose tip marks the place, with the name beside its head. */
+.waypoint-marker {
+  pointer-events: none;
+  cursor: grab;
+}
+
+.map[data-tool='delete'] .waypoint-marker,
+.map[data-tool='delete'] .route-point-marker {
+  cursor: pointer;
+}
+
+.waypoint {
+  position: relative;
+}
+
+.waypoint svg {
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+.waypoint-name {
+  position: absolute;
+  top: 11px;
+  left: 100%;
+  max-width: 180px;
+  margin-left: 2px;
+  padding: 1px 6px;
+  overflow: hidden;
+  transform: translateY(-50%);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: #212529;
+  font: 600 12px/1.4 system-ui, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* While a route is drawn, the map shows a crosshair instead of the grab hand. */
+.map[data-tool] .maplibregl-canvas-container.maplibregl-interactive {
+  cursor: crosshair;
+}
+
+/*
+ * The toolbar floats over the map, above the scale bar and the attribution. Each group of
+ * tools is a box of its own; on narrow screens the boxes wrap onto a second row.
+ */
+.toolbar {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
+}
+
+/* Icon over a one-line caption; the caption sets the width. */
+.tool {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 48px;
+  padding: 5px 6px 4px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #343a40;
+  cursor: pointer;
+}
+
+.tool svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.tool-label {
+  font-size: 10px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.tool:hover:not(:disabled) {
+  background: #f1f3f5;
+}
+
+.tool.active,
+.tool.active:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tool:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.hint-bar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(640px, calc(100% - 140px));
+  transform: translateX(-50%);
+  padding: 6px 8px 6px 12px;
+  border-radius: 6px;
+  background: rgba(33, 37, 41, 0.85);
+  color: #fff;
+  font-size: 13px;
+}
+
+.context-menu {
+  position: absolute;
+  z-index: 10;
+  width: 210px;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.context-menu button:hover {
+  background: var(--active);
+}
+
+/* The waypoint dialog: a small form rather than the add-layer dialog's panes. */
+.dialog.form-dialog {
+  width: min(360px, calc(100vw - 32px));
+  height: auto;
+}
+
+.form-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-dialog input,
+.form-dialog textarea {
+  box-sizing: border-box;
+  padding: 3px 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font: inherit;
+}
+
+.form-dialog textarea {
+  resize: vertical;
+}
+
+.row.end {
+  justify-content: flex-end;
+}
+
 @media (max-width: 720px) {
   .app {
     grid-template-columns: 1fr;
@@ -579,18 +822,53 @@ input.swatch {
     border-right: none;
     border-top: 1px solid var(--border);
   }
+
+  .hint-bar {
+    max-width: calc(100% - 100px);
+    font-size: 12px;
+  }
+
+  /* Above the attribution, which starts expanded over two lines on narrow screens. */
+  .toolbar {
+    bottom: 64px;
+  }
+
+  /* Smaller captions, so that the tools take at most two rows on phones. */
+  .tool {
+    min-width: 44px;
+    padding: 5px 4px 4px;
+  }
+
+  .tool-label {
+    font-size: 9px;
+    line-height: 11px;
+  }
 }
 
 @media (pointer: coarse) {
-  :where(.panel, .dialog) button,
+  :where(.panel, .dialog, .hint-bar) button,
   input,
   select,
   .button {
     font-size: 16px;
   }
 
-  :where(.panel, .dialog) button.icon {
+  :where(.panel, .dialog, .hint-bar) button.icon {
     min-width: 34px;
     min-height: 34px;
+  }
+
+  .context-menu {
+    width: 240px;
+  }
+
+  .context-menu button {
+    padding: 11px 14px;
+  }
+
+  .route-point {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
   }
 }

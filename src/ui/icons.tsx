@@ -1,4 +1,4 @@
-// Shapes from Tabler Icons (https://tabler.io/icons).
+// Shapes from or composed of Tabler Icons (https://tabler.io/icons).
 // Copyright (c) 2020-2026 Paweł Kuna, MIT License: see tabler-icons-license.txt.
 import type { JSX } from 'solid-js';
 
@@ -76,3 +76,104 @@ export const CloseIcon = () => (
     <path d="M6 6l12 12" />
   </Icon>
 );
+
+/** Undo (Tabler's arrow-back-up). */
+export const UndoIcon = () => (
+  <Icon>
+    <path d="M9 14l-4 -4l4 -4" />
+    <path d="M5 10h11a4 4 0 1 1 0 8h-1" />
+  </Icon>
+);
+
+/** Redo (Tabler's arrow-forward-up). */
+export const RedoIcon = () => (
+  <Icon>
+    <path d="M15 14l4 -4l-4 -4" />
+    <path d="M19 10h-11a4 4 0 1 0 0 8h1" />
+  </Icon>
+);
+
+/** Append route points: a line of points with a plus at its end. */
+export const AppendIcon = () => (
+  <Icon>
+    <circle cx="4" cy="20" r="2" />
+    <path d="M5.5 18.5l3 -3" />
+    <circle cx="10" cy="14" r="2" />
+    <path d="M17.5 2.5v8" />
+    <path d="M13.5 6.5h8" />
+  </Icon>
+);
+
+/** Reach new points by routing: a winding path between two points (Tabler's route). */
+export const RouteIcon = () => (
+  <Icon>
+    <path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+    <path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4" />
+    <path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5" />
+  </Icon>
+);
+
+/** Reach new points by a straight line (Tabler's line). */
+export const LineIcon = () => (
+  <Icon>
+    <path d="M4 18a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+    <path d="M16 6a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+    <path d="M7.5 16.5l9 -9" />
+  </Icon>
+);
+
+/** Insert a route point: a line between two points with a plus in its middle. */
+export const InsertIcon = () => (
+  <Icon>
+    <circle cx="4" cy="20" r="2" />
+    <circle cx="20" cy="4" r="2" />
+    <path d="M5.5 18.5l2 -2" />
+    <path d="M16.5 7.5l2 -2" />
+    <path d="M12 8v8" />
+    <path d="M8 12h8" />
+  </Icon>
+);
+
+/** Add a waypoint: a map pin with a plus (Tabler's map-pin-plus). */
+export const WaypointIcon = () => (
+  <Icon>
+    <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+    <path d="M12.794 21.322a2 2 0 0 1 -2.207 -.422l-4.244 -4.243a8 8 0 1 1 13.59 -4.616" />
+    <path d="M16 19h6" />
+    <path d="M19 16v6" />
+  </Icon>
+);
+
+/** Delete (Tabler's trash). */
+export const DeleteIcon = () => (
+  <Icon>
+    <path d="M4 7l16 0" />
+    <path d="M10 11l0 6" />
+    <path d="M14 11l0 6" />
+    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+  </Icon>
+);
+
+/** Rename (Tabler's pencil). */
+export const PencilIcon = () => (
+  <Icon>
+    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+    <path d="M13.5 6.5l4 4" />
+  </Icon>
+);
+
+/** The map pin of a waypoint; its tip marks the place. */
+export function WaypointPin() {
+  return (
+    <svg viewBox="0 0 22 28" width="22" height="28" aria-hidden="true">
+      <path
+        d="M11 27s-9.5-9.2-9.5-15.6a9.5 9.5 0 0 1 19 0C20.5 17.8 11 27 11 27z"
+        fill="#c92a2a"
+        stroke="#fff"
+        stroke-width="1.5"
+      />
+      <circle cx="11" cy="11" r="3.5" fill="#fff" />
+    </svg>
+  );
+}

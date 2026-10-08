@@ -1,15 +1,19 @@
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-import { createEffect, onCleanup, onMount } from 'solid-js';
+import { createEffect, createMemo, onCleanup, onMount } from 'solid-js';
 import { unwrap } from 'solid-js/store';
+import { failedLegs } from '../routing/service';
+import { ROUTING_ATTRIBUTION } from '../routing/osrm';
 import { describeLoadError, requestUrl } from '../state/net';
+import { routeData } from '../state/routes';
 import { setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
 import { CACHED_SCHEMES, composeStyle, FEATURE_PROTOCOL, WMTS_PROTOCOL } from './compose';
 import { loadCachedTile, loadTile } from './protocols';
+import { routeFeatures, withRoutes } from './routeOverlay';
 
 maplibregl.setWorkerUrl(workerUrl);
 maplibregl.addProtocol(FEATURE_PROTOCOL, loadTile);
@@ -35,7 +39,7 @@ export function MapView() {
       zoom,
       bearing,
       pitch,
-      attributionControl: { compact: true },
+      attributionControl: { compact: true, customAttribution: ROUTING_ATTRIBUTION },
       transformRequest: (url) => ({ url: requestUrl(url) }),
     });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
@@ -66,12 +70,11 @@ export function MapView() {
 
     map.once('load', () => {
       setMap(map);
-      createEffect(() => {
-        // Composing reads every layer setting, so any change recomposes. The style goes to
-        // MapLibre as plain data: store proxies cannot be sent to its workers.
-        const style = JSON.parse(JSON.stringify(composeStyle(state.layers, assets())));
-        map.setStyle(style, { diff: true });
-      });
+      // Composing reads every layer setting, so any change recomposes. The style goes to
+      // MapLibre as plain data: store proxies cannot be sent to its workers.
+      const layers = createMemo(() => JSON.parse(JSON.stringify(composeStyle(state.layers, assets()))));
+      const lines = createMemo(() => routeFeatures(routeData.routes, failedLegs()));
+      createEffect(() => map.setStyle(withRoutes(layers(), lines()), { diff: true }));
     });
     onCleanup(() => {
       setMap(undefined);
