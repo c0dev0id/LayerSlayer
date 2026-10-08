@@ -181,6 +181,8 @@ export interface Layer {
   ownStyle?: boolean;
   /** The icon a vector layer's points and areas are marked with, on a disc of its colour. */
   icon?: MapIcon;
+  /** How many times its normal size the icon is drawn, MIN_ICON_SIZE to MAX_ICON_SIZE; 1 where unset. */
+  iconSize?: number;
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;
@@ -219,6 +221,9 @@ export type LayerDraft = Pick<Layer, 'name' | 'source'> &
 
 /** New layers are half transparent, so what lies below them shows; layers with an icon start opaque, as icons read best that way. */
 const DEFAULT_OPACITY = 0.5;
+
+export const MIN_ICON_SIZE = 1;
+export const MAX_ICON_SIZE = 3;
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;

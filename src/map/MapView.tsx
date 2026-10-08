@@ -82,7 +82,7 @@ export function MapView() {
       if (map.hasImage(id)) return;
       const poi = parsePoiImageId(id);
       const layerIcon = poi && state.layers.find((l) => l.icon?.id === poi.icon)?.icon;
-      const icon = layerIcon ? drawPoi(layerIcon, poi.color) : [...assets().values()].find((loaded) => loaded.icons?.has(id))?.icons?.get(id);
+      const icon = layerIcon ? drawPoi(layerIcon, poi.color, poi.size) : [...assets().values()].find((loaded) => loaded.icons?.has(id))?.icons?.get(id);
       if (icon) map.addImage(id, icon.image, { pixelRatio: icon.pixelRatio });
     });
     watchGeoJsonBounds(map);

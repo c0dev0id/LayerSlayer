@@ -353,7 +353,7 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
             id: `${layer.id}/point`,
             type: 'symbol',
             filter: ['any', POINT, POLYGON] as never,
-            layout: { 'icon-image': poiImageId(layer.icon, color), 'icon-allow-overlap': true, 'icon-ignore-placement': true },
+            layout: { 'icon-image': poiImageId(layer.icon, color, layer.iconSize ?? 1), 'icon-allow-overlap': true, 'icon-ignore-placement': true },
             paint: { 'icon-opacity': opacity },
           }
         : {

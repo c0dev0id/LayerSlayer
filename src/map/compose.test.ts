@@ -133,10 +133,12 @@ describe('composeStyle', () => {
     expect(style.layers.map((l) => l.id)).toEqual(['L/fill', 'L/outline', 'L/line', 'L/point']);
     expect(style.layers[3]).toMatchObject({
       type: 'symbol',
-      layout: { 'icon-image': 'poi:maki:fuel:#e8590c', 'icon-allow-overlap': true },
+      layout: { 'icon-image': 'poi:maki:fuel:#e8590c:1', 'icon-allow-overlap': true },
       paint: { 'icon-opacity': 0.8 },
     });
     expect(JSON.stringify(style.layers[3])).toContain('Polygon');
+    const larger = compose([layer({ name: 'g', source: { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } }, { icon, iconSize: 1.5 })]);
+    expect(larger.layers[3]).toMatchObject({ layout: { 'icon-image': 'poi:maki:fuel:#e8590c:1.5' } });
   });
 
   it('queries feature layers as vector tiles through the feature protocol', () => {

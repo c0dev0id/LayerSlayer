@@ -7,7 +7,9 @@ import {
   isVector,
   keepsTiles,
   layerColor,
+  MAX_ICON_SIZE,
   MAX_ZOOM,
+  MIN_ICON_SIZE,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
   SOURCE_KINDS,
@@ -417,6 +419,22 @@ function ActiveLayer(props: { layer: Layer }) {
             </button>
           </Show>
         </div>
+        <Show when={layer.icon}>
+          <div class="row" title="How large the icon is drawn">
+            <span class="muted label">Size</span>
+            <input
+              class="grow"
+              type="range"
+              aria-label={`Icon size of ${layer.name}`}
+              min={MIN_ICON_SIZE}
+              max={MAX_ICON_SIZE}
+              step="0.25"
+              value={layer.iconSize ?? 1}
+              onInput={(e) => updateLayer(layer.id, { iconSize: e.currentTarget.valueAsNumber })}
+            />
+            <span class="value">{layer.iconSize ?? 1}×</span>
+          </div>
+        </Show>
       </Show>
       <Show when={layer.source.type === 'geojson' ? layer.source.query : undefined}>
         {(query) => <OsmQueryRows id={layer.id} query={query()} />}
