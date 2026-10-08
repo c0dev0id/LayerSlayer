@@ -15,6 +15,10 @@ vector rendering. A layer list controls order, visibility, opacity and zoom rang
 configuration survives a browser restart. A library of services, grown from WMSproxy's,
 offers ready-made layers.
 
+A route tool, taken from mappic, draws routes over the layers: points tapped on the map are
+joined along the roads by OSRM routing or by straight lines, with waypoints, undo and redo,
+and GPX export and import.
+
 It is a static single-page app on GitHub Pages; there is no server component.
 
 ## Software stack
@@ -28,6 +32,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - idb-keyval (IndexedDB for imported files).
 - Vitest 5 with jsdom for unit tests of the pure modules.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx`.
+- Routing by the FOSSGIS OSRM servers (routing.openstreetmap.de), car, bike and foot.
 - Deployment: GitHub Actions to GitHub Pages.
 
 ## Key decisions
@@ -172,6 +177,29 @@ It is a static single-page app on GitHub Pages; there is no server component.
   every `setStyle`, so one invalid layer of an imported style would stop all updates; with
   validation off, a skipped layer breaks the `before` positions of the diff. Failing layers
   and sources are dropped at load with a console warning instead.
+- **The route tool is mappic's.** Route model, leg routing, edits, history, markers, tap
+  filter, toolbar, hint bar, context menu and GPX export are ported from mappic with their
+  tests. A route is a list of points; each leg between two points is routed (OSRM
+  polyline6, cached on the route under a key of profile and both ends) or straight. Edits
+  are pure functions that keep exactly the legs still needed, and a pull-based pump asks
+  the state for the next missing leg, one request per 1.1 s as FOSSGIS asks, so nothing
+  stale is queued. What differs from mappic:
+  - Route lines are part of the composed style (`withRoutes` adds a GeoJSON source and
+    three line layers on top). A source added to the map beside the style would be removed
+    or reset by the next diffed `setStyle`. The layers' style is memoised, so a route edit
+    diffs the style without recomposing the layers.
+  - Routes and waypoints are a store of their own under the storage key `webmap-routes`,
+    apart from the layers. Undo and redo cover this store only, so layer changes are never
+    undone; the toolbar and Ctrl+Z work while a route is drawn. Routing results are not
+    undo steps; an undo restores the cached legs with the points.
+  - GPX import goes into the route editor. Waypoints stay waypoints; a `<rte>` keeps its
+    points and is routed with the profile of the last route; a `<trk>`, or a route of more
+    than 100 points (routing those would take minutes at one request per second), is
+    simplified with Douglas–Peucker to at most 500 points joined by straight lines, since
+    every point is a marker while the route is drawn and an undo step copies all routes.
+    Straight legs keep their shape when the profile changes.
+  - Requests to the routing server go out directly, not through the CORS proxy; it sends
+    `Access-Control-Allow-Origin: *`.
 - **UI after mappic.** Top-first layer list with an active layer whose settings sit below
   it, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
   panel layout, and the panel below the map on narrow screens.
@@ -202,4 +230,6 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Optional CORS proxy, used per host.
-- Layers, settings, view and imported files survive a browser restart.
+- Route drawing over the layers: routed or straight legs, insert, drag and delete points,
+  waypoints, undo and redo, car, bike and foot profiles, GPX export and import.
+- Layers, routes, settings, view and imported files survive a browser restart.

@@ -2,13 +2,13 @@
 
 A map viewer for the web that stacks base maps and overlays from many kinds of map
 services: WMS, WMTS, ArcGIS MapServer and FeatureServer, XYZ tile templates, MapLibre
-styles, GeoJSON and GeoPDF. Each service is read the way it describes itself (capabilities
+styles, GeoJSON and GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
 documents, service descriptions, georeferencing in the PDF) and drawn with the MapLibre
 source that fits it, rather than turned into raster tiles by a proxy.
 
 It is a static page built with SolidJS and MapLibre GL JS and deployed to GitHub Pages by
-GitHub Actions. Nothing runs on a server; layers, settings and imported files stay in the
-browser.
+GitHub Actions. Nothing runs on a server; layers, routes, settings and imported files stay
+in the browser.
 
 ## Using it
 
@@ -34,9 +34,22 @@ browser.
 - Below the list, the **active layer** (click a name) has its name, opacity, zoom range,
   colour (vector layers), source, the CORS proxy for its server and, for tiled layers,
   whether it keeps its tiles in the browser.
+- **Routes**: *Draw route* starts a route and a toolbar over the map.
+  - *Append* adds a point at the end with each tap on the map, *Insert* puts one into the
+    line where it is tapped, *Waypoint* places a named pin, and *Delete* removes the point
+    or waypoint tapped. Points and waypoints can be dragged; right-click or long-press one
+    for its menu.
+  - New points are reached along the roads (*Route*, by OSRM with the route's car, bike or
+    foot profile) or by a straight line (*Line*), for ways the routing does not know.
+  - *Undo* and *Redo* (Ctrl+Z, Ctrl+Shift+Z) step through route and waypoint edits; layer
+    changes are not part of it. *Done* or Esc ends drawing.
+  - *Export GPX* writes the waypoints and one track per route. *Import GPX* adds a file's
+    waypoints, its routes (`<rte>`) as routed points, and its tracks (`<trk>`) simplified
+    to at most 500 points joined by straight lines, so they keep their shape and stay
+    editable. Routes of more than 100 points are taken as tracks.
 
-Layers, their settings and the map view are kept in the browser's local storage, files
-in IndexedDB, so the map is as it was after a restart.
+Layers, their settings, routes and the map view are kept in the browser's local storage,
+files in IndexedDB, so the map is as it was after a restart.
 
 ## How each source is drawn
 
@@ -63,6 +76,14 @@ At most four feature queries run at once per server. A feature layer whose featu
 in one query is shown at every zoom; a larger one starts at zoom 9, or at the service's own
 minimum zoom where that is higher, since at lower zooms each tile covers so much that the
 server returns its whole record limit for it. The zoom range of the layer widens that.
+
+## Routing
+
+Routes are routed by the [FOSSGIS OSRM servers](https://routing.openstreetmap.de/about.html)
+with OpenStreetMap data, one leg (two consecutive points) per request and at most one
+request per second, as they ask. A leg that cannot be routed is drawn red and dashed and
+can be retried; legs still waiting are grey and dashed. The route tool is the one of
+[mappic](https://github.com/c0dev0id/mappic).
 
 ## CORS and the proxy
 
