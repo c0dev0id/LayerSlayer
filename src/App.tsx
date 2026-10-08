@@ -10,7 +10,9 @@ import { editingRouteId } from './state/drawing';
 import { map } from './state/ui';
 import { AddLayerDialog } from './ui/AddLayerDialog';
 import { LayersSection } from './ui/LayersSection';
+import { RoutesSection } from './ui/RoutesSection';
 import { SettingsSection } from './ui/SettingsSection';
+import { WaypointDialog } from './ui/WaypointDialog';
 
 export function App() {
   const [adding, setAdding] = createSignal(false);
@@ -21,9 +23,10 @@ export function App() {
           <h1>webmap</h1>
         </header>
         <LayersSection onAdd={() => setAdding(true)} />
+        <RoutesSection />
         <SettingsSection />
         <footer class="footer">
-          Layers and settings are kept in this browser. <a href="https://github.com/c0dev0id/webmap">Source</a>
+          Layers, routes and settings are kept in this browser. <a href="https://github.com/c0dev0id/webmap">Source</a>
         </footer>
       </aside>
       <main class="map-wrap">
@@ -44,6 +47,7 @@ export function App() {
         </Show>
       </main>
       <AddLayerDialog open={adding()} onClose={() => setAdding(false)} />
+      <WaypointDialog />
     </div>
   );
 }
