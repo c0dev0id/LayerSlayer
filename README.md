@@ -73,8 +73,11 @@ be refused here. For those, Settings takes the address of a CORS proxy you
 run, with `{url}` where the target address goes (percent-encoded), e.g.
 `https://proxy.example/?url={url}`; without `{url}` the target is appended as it is.
 Only the hosts you choose go through it: tick *Fetch … through the CORS proxy* on a
-layer, or use the button an error offers. On a page served over HTTPS, plain-HTTP
-addresses are upgraded to HTTPS unless their host goes through the proxy.
+layer, or use the button an error offers; library entries marked *proxy* use it from the
+first request. On a page served over HTTPS, plain-HTTP addresses are upgraded to HTTPS
+unless their host goes through the proxy. A failed layer shows the reason the server or
+the proxy gave. Free plans of public proxies often pass text only: corsproxy.io's free
+plan reads capabilities and feature data but refuses map images.
 
 ## The library
 

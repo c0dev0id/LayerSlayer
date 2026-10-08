@@ -108,7 +108,13 @@ It is a static single-page app on GitHub Pages; there is no server component.
   The header must hold exactly one value: mobil.trk.de sends `Access-Control-Allow-Origin: *`
   twice when a request carries an Origin, and Chromium refuses that for fetches and for
   `crossorigin` images, while a plain `<img>` (Leaflet's tiles) still loads. Such servers
-  work in DOM-based viewers but need the proxy here.
+  work in DOM-based viewers but need the proxy here. Library entries marked `cors: false`
+  route their host through the proxy before the first request, when a proxy is set. Load
+  errors name who answered (the server, or the proxy for it), the status and the reason
+  the answer gives, and never the proxy's address, which holds any key it was given.
+  Tested with corsproxy.io: its free plan passes text only (capabilities, JSON feature
+  data) and answers images with 403; as a Cloudflare worker it cannot reach hosts that
+  Cloudflare refuses (maps.geogratis.gc.ca gives Error 1000), whatever the plan.
 - **The library.** Generated once from WMSproxy's `library.json` and mappic's base maps;
   each entry names its type explicitly, and a unit test checks that address detection
   agrees with every entry. `npm run check-library` reads every entry with the app's own
@@ -118,9 +124,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
   its keyless endpoint is only licensed with Esri software. The feature services WMSproxy
   had to refuse for want of a renderer (its `docs/feature-servers.md`) are in the library,
   with the distinct rail datasets of geodata.bts.gov; the per-railroad views of the rail
-  network were left out as copies of the same lines. Amsterdam's travel time feed is
-  served over plain HTTP only and is listed as needing the proxy; it could not be reached
-  for checking.
+  network were left out as copies of the same lines. Amsterdam's travel time feed, also in
+  that list, was left out: its server resets HTTPS connections and gives no answer over
+  HTTP.
 - **GeoPDF georeferencing.** Only ISO 32000-2 geospatial viewports (Adobe's extension:
   `/VP` with a `/Measure` of subtype `/GEO`, `GPTS` and `LPTS`) are read; the OGC/TerraGo
   `LGIDict` encoding is not. pdf.js gives no access to raw page dictionaries, so pdf-lib
