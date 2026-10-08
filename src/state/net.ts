@@ -112,6 +112,15 @@ export async function describeLoadError(error: unknown): Promise<string> {
   return typeof e?.message === 'string' ? e.message : 'The layer could not be loaded.';
 }
 
+/** Why a request got no answer, in words: the proxy did not answer, or the server could not be read. */
+export function unreachableMessage(url: string): string {
+  const host = hostOf(url) ?? url;
+  return isProxied(url)
+    ? `The CORS proxy did not answer for ${host}.`
+    : `${host} could not be read: it is unreachable or does not allow this page to read it (CORS). ` +
+        'Routing it through a CORS proxy (Settings) may help.';
+}
+
 /** Fetches through `requestUrl`; a failed request or an error status becomes a readable Error. */
 export async function fetchResource(url: string, init?: RequestInit): Promise<Response> {
   let response: Response;
@@ -119,14 +128,7 @@ export async function fetchResource(url: string, init?: RequestInit): Promise<Re
     response = await fetch(requestUrl(url), init);
   } catch (error) {
     if ((error as Error).name === 'AbortError') throw error;
-    const host = hostOf(url) ?? url;
-    throw new Error(
-      isProxied(url)
-        ? `The CORS proxy did not answer for ${host}.`
-        : `${host} could not be read: it is unreachable or does not allow this page to read it (CORS). ` +
-            'Routing it through a CORS proxy (Settings) may help.',
-      { cause: error },
-    );
+    throw new Error(unreachableMessage(url), { cause: error });
   }
   if (!response.ok) {
     const sent = requestUrl(url);
