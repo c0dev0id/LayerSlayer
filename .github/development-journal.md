@@ -102,7 +102,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
   256 px tile pyramid's. Scale denominators convert to map zoom with that in mind; source
   `minzoom`/`maxzoom` stay in the source's own tile zooms.
 - **Persistence.** Layers, settings and the view are JSON in local storage (synchronous,
-  so the map starts where it was); imported files are Blobs in IndexedDB, referenced by key,
+  so the map starts where it was), saved by `persistedStore` after writes through the
+  store's setter, once per batch of writes, rather than by an effect that serialises the
+  store and so subscribes to every property; imported files are Blobs in IndexedDB, referenced by key,
   deleted with their layer and swept at start-up. Before 1.0 there is no migration: stored
   layers that no longer have the current shape are dropped one by one.
 - **CORS is the limit of a static site.** WebGL needs CORS-clean images. Requests go
@@ -186,12 +188,16 @@ It is a static single-page app on GitHub Pages; there is no server component.
   stale is queued. What differs from mappic:
   - Route lines are part of the composed style (`withRoutes` adds a GeoJSON source and
     three line layers on top). A source added to the map beside the style would be removed
-    or reset by the next diffed `setStyle`. The layers' style is memoised, so a route edit
-    diffs the style without recomposing the layers.
+    or reset by the next diffed `setStyle`. A layer change applies the style with the lines
+    as they are; a route change or routing result only sets the source's data, which
+    spares MapLibre diffing and validating the whole style. The routing credit is that
+    source's attribution.
   - Routes and waypoints are a store of their own under the storage key `webmap-routes`,
     apart from the layers. Undo and redo cover this store only, so layer changes are never
     undone; the toolbar and Ctrl+Z work while a route is drawn. Routing results are not
     undo steps; an undo restores the cached legs with the points.
+  - The GPX format, reading and writing, is `services/gpx.ts`; reading keeps track
+    segments, which the layer import draws apart and the route import joins.
   - GPX import goes into the route editor. Waypoints stay waypoints; a `<rte>` keeps its
     points and is routed with the profile of the last route; a `<trk>`, or a route of more
     than 100 points (routing those would take minutes at one request per second), is
