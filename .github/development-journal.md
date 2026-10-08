@@ -141,14 +141,28 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - **UI after mappic.** Top-first layer list with an active layer whose settings sit below
   it, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
   panel layout, and the panel below the map on narrow screens.
+- **The add-layer dialog stays open.** Adding many layers from several sources was a chore
+  when the dialog closed after each one. Now a tap toggles a layer, the source list and a
+  source's layer list take turns without the dialog closing, and only Close leaves it. The
+  source list stays mounted (hidden) while a layer list is open, so search, filters, the
+  address typed and the scroll position survive; each service is read once per session.
+  Whether a layer is on the map is not tracked by the dialog but derived from the layers
+  themselves: each carries its `origin` (the source address, plus the layer's name where
+  the source names its layers), as in WMSproxy, so the highlights hold across restarts and
+  for layers removed in the panel. A library entry with a single layer toggles in place
+  instead of opening a list of one. A group (a heading in the layer tree) toggles the
+  layers under it, each added as its own layer so each keeps its own opacity and order;
+  adding more than 20 at once asks first, since each is fetched and drawn separately.
 
 ## Core features
 
 - Layers from WMS, WMTS, ArcGIS MapServer and FeatureServer, XYZ templates, MapLibre
   styles, GeoJSON (URL or file) and GeoPDF (file or URL).
 - A library of about a hundred services by region and category, with search.
-- Service browser listing every layer a service offers, with reasons for those it cannot
-  show and a filter for services with hundreds of layers.
+- An add-layer dialog that stays open: layers and groups toggle with a tap, what is on
+  the map is highlighted, and the library and a service's layers can be switched between
+  freely. Every layer a service offers is listed, with reasons for those it cannot show
+  and a filter for services with hundreds of layers.
 - Layer list with drag and keyboard reordering, visibility, removal, flying to the layer's
   area, opacity, zoom range, colour for vector layers, and per-layer error marks.
 - Feature tiles cached in the browser for a day, with a limit on parallel queries per

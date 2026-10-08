@@ -12,15 +12,20 @@ browser.
 
 ## Using it
 
-- **Add layer** opens the library, an address field and a file picker.
-  - The **library** lists services by region and category. Opening one reads what it
-    offers; a service with a single layer is added at once, others list their layers to
-    pick from. Layers a service cannot show in Web Mercator are listed with the reason.
+- **Add layer** opens the library, an address field and a file picker. The dialog stays
+  open until *Close*: a tap adds a layer in the background and a second tap removes it,
+  and what is on the map is highlighted.
+  - The **library** lists services by region and category. A service with a single layer
+    is added or removed by tapping its entry; others open their list of layers, and
+    *‹ Sources* goes back to the library as it was left. Tapping a group adds what of it
+    is missing, or removes it when all of it is on the map. Layers a service cannot show
+    in Web Mercator are listed with the reason.
   - An **address** can be a WMS or WMTS capabilities URL, an ArcGIS MapServer or
     FeatureServer (or one of its layers), a tile template with `{z}/{x}/{y}`, a GeoJSON
     file, a MapLibre style or a GeoPDF. The kind of service is guessed from the address
-    and can be changed.
-  - **Files**: GeoJSON, and GeoPDFs with an ISO 32000 geospatial viewport.
+    and can be changed. *Open* shows the source's layers.
+  - **Files**: GeoJSON, and GeoPDFs with an ISO 32000 geospatial viewport, added as they
+    are chosen.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
   arrow keys on it) to change the order; the eye hides it, × removes it, and the frame
   icon flies to the area the layer covers (layers that span most of the world have none).
