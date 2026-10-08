@@ -2,6 +2,8 @@
 export interface Icon {
   image: ImageData | ImageBitmap;
   pixelRatio: number;
+  /** A signed distance field, which the map tints with `icon-color`. */
+  sdf?: boolean;
 }
 
 /** Device pixels per CSS pixel that icons are drawn at. */

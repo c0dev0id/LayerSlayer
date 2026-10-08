@@ -5,9 +5,11 @@ import type {
   StyleSpecification,
 } from 'maplibre-gl';
 import { intersectBounds } from '../geo/bounds';
+import type { MapIcon } from '../model/icon';
 import {
   keepsTiles,
   layerColor,
+  layerIconSize,
   MAX_ZOOM,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
@@ -22,7 +24,7 @@ import {
 } from '../model/layer';
 import type { Symbology } from '../services/arcgisSymbology';
 import type { Icon } from './icon';
-import { poiImageId } from './poiIcons';
+import { POI_DISC, POI_RING, poiImageId } from './poiIcons';
 import { FEATURE_LAYER, FEATURE_PROTOCOL, FEATURE_TILE_MAXZOOM, featureTileUrl } from './featureTiles';
 import { parseProtocolTile, protocolTileUrl, resolveUrl, withParams } from './urls';
 
@@ -320,7 +322,7 @@ const FILL_SHARE = 0.25;
  */
 function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string): Fragment {
   const color = layerColor(layer);
-  const base = { source: layer.id, ...(sourceLayer && { 'source-layer': sourceLayer }), ...zoomRange(layer) };
+  const base: LayerBase = { source: layer.id, ...(sourceLayer && { 'source-layer': sourceLayer }), ...zoomRange(layer) };
   const opacity = layer.opacity;
   return {
     sources: { [layer.id]: source },
@@ -347,31 +349,60 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': color, 'line-width': 2.5, 'line-opacity': opacity },
       },
-      layer.icon
-        ? {
-            ...base,
-            id: `${layer.id}/point`,
-            type: 'symbol',
-            filter: ['any', POINT, POLYGON] as never,
-            layout: { 'icon-image': poiImageId(layer.icon, color, layer.iconSize ?? 1), 'icon-allow-overlap': true, 'icon-ignore-placement': true },
-            paint: { 'icon-opacity': opacity },
-          }
-        : {
-            ...base,
-            id: `${layer.id}/point`,
-            type: 'circle',
-            filter: POINT as never,
-            paint: {
-              'circle-color': color,
-              'circle-radius': 5,
-              'circle-stroke-color': '#ffffff',
-              'circle-stroke-width': 1.5,
-              'circle-opacity': opacity,
-              'circle-stroke-opacity': opacity,
-            },
-          },
+      ...(layer.icon ? poiLayers(layer, layer.icon, base, color) : [dots(layer, base, color)]),
     ],
   };
+}
+
+/** What every style layer of a user layer has: its source, and its zoom range. */
+interface LayerBase {
+  source: string;
+  'source-layer'?: string;
+  minzoom?: number;
+  maxzoom?: number;
+}
+
+/** Points as dots of the layer's colour. */
+function dots(layer: Layer, base: LayerBase, color: string): LayerSpecification {
+  return {
+    ...base,
+    id: `${layer.id}/point`,
+    type: 'circle',
+    filter: POINT as never,
+    paint: {
+      'circle-color': color,
+      'circle-radius': 5,
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 1.5,
+      'circle-opacity': layer.opacity,
+      'circle-stroke-opacity': layer.opacity,
+    },
+  };
+}
+
+/** Points, and areas at their middle, marked with the icon on a disc of the layer's colour. */
+function poiLayers(layer: Layer, icon: MapIcon, base: LayerBase, color: string): LayerSpecification[] {
+  const size = layerIconSize(layer);
+  const placement = { 'icon-allow-overlap': true, 'icon-ignore-placement': true };
+  const filter = ['any', POINT, POLYGON] as never;
+  return [
+    {
+      ...base,
+      id: `${layer.id}/point`,
+      type: 'symbol',
+      filter,
+      layout: { 'icon-image': POI_DISC, 'icon-size': size, ...placement },
+      paint: { 'icon-color': color, 'icon-halo-color': '#ffffff', 'icon-halo-width': POI_RING * size, 'icon-opacity': layer.opacity },
+    },
+    {
+      ...base,
+      id: `${layer.id}/icon`,
+      type: 'symbol',
+      filter,
+      layout: { 'icon-image': poiImageId(icon, size), ...placement },
+      paint: { 'icon-opacity': layer.opacity },
+    },
+  ];
 }
 
 /**

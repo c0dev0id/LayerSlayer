@@ -129,16 +129,22 @@ describe('composeStyle', () => {
 
   it('marks points and areas with the layer icon on a disc of its colour', () => {
     const icon = { id: 'maki:fuel', size: [15, 15] as [number, number], paths: ['M0 0h15v15z'] };
-    const style = compose([layer({ name: 'g', source: { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } }, { icon, opacity: 0.8 })]);
-    expect(style.layers.map((l) => l.id)).toEqual(['L/fill', 'L/outline', 'L/line', 'L/point']);
+    const source = { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } as const;
+    const style = compose([layer({ name: 'g', source }, { icon, opacity: 0.8 })]);
+    expect(style.layers.map((l) => l.id)).toEqual(['L/fill', 'L/outline', 'L/line', 'L/point', 'L/icon']);
+    // The disc is tinted and ringed by paint properties, so a new colour does not lay out tiles again.
     expect(style.layers[3]).toMatchObject({
       type: 'symbol',
-      layout: { 'icon-image': 'poi:maki:fuel:#e8590c:1', 'icon-allow-overlap': true },
-      paint: { 'icon-opacity': 0.8 },
+      layout: { 'icon-image': 'poi-disc', 'icon-size': 1, 'icon-allow-overlap': true },
+      paint: { 'icon-color': '#e8590c', 'icon-halo-color': '#ffffff', 'icon-halo-width': 1.5, 'icon-opacity': 0.8 },
     });
-    expect(JSON.stringify(style.layers[3])).toContain('Polygon');
-    const larger = compose([layer({ name: 'g', source: { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } }, { icon, iconSize: 1.5 })]);
-    expect(larger.layers[3]).toMatchObject({ layout: { 'icon-image': 'poi:maki:fuel:#e8590c:1.5' } });
+    expect(style.layers[4]).toMatchObject({ type: 'symbol', layout: { 'icon-image': 'poi:maki:fuel:1' }, paint: { 'icon-opacity': 0.8 } });
+    expect(JSON.stringify(style.layers[4])).toContain('Polygon');
+    const larger = compose([layer({ name: 'g', source }, { icon, iconSize: 1.5 })]);
+    expect(larger.layers[3]).toMatchObject({ layout: { 'icon-size': 1.5 }, paint: { 'icon-halo-width': 2.25 } });
+    expect(larger.layers[4]).toMatchObject({ layout: { 'icon-image': 'poi:maki:fuel:1.5' } });
+    // A size out of bounds, as a project file may hold, is drawn at the nearest bound.
+    expect(compose([layer({ name: 'g', source }, { icon, iconSize: 9 })]).layers[4]).toMatchObject({ layout: { 'icon-image': 'poi:maki:fuel:3' } });
   });
 
   it('queries feature layers as vector tiles through the feature protocol', () => {

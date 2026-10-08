@@ -225,6 +225,11 @@ const DEFAULT_OPACITY = 0.5;
 export const MIN_ICON_SIZE = 1;
 export const MAX_ICON_SIZE = 3;
 
+/** The size a layer's icon is drawn at, within the bounds whatever a project file says. */
+export function layerIconSize(layer: Layer): number {
+  return Math.min(MAX_ICON_SIZE, Math.max(MIN_ICON_SIZE, layer.iconSize ?? 1));
+}
+
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
 

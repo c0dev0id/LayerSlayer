@@ -13,7 +13,7 @@ import { FEATURE_PROTOCOL } from './featureTiles';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
 import { withOverlays } from './overlays';
-import { drawPoi, parsePoiImageId } from './poiIcons';
+import { drawDisc, drawGlyph, parsePoiImageId, POI_DISC } from './poiIcons';
 import { loadCachedTile, loadTile } from './protocols';
 import { routeOverlay } from './routeOverlay';
 
@@ -82,8 +82,13 @@ export function MapView() {
       if (map.hasImage(id)) return;
       const poi = parsePoiImageId(id);
       const layerIcon = poi && state.layers.find((l) => l.icon?.id === poi.icon)?.icon;
-      const icon = layerIcon ? drawPoi(layerIcon, poi.color, poi.size) : [...assets().values()].find((loaded) => loaded.icons?.has(id))?.icons?.get(id);
-      if (icon) map.addImage(id, icon.image, { pixelRatio: icon.pixelRatio });
+      const icon =
+        id === POI_DISC
+          ? drawDisc()
+          : layerIcon
+            ? drawGlyph(layerIcon, poi.size)
+            : [...assets().values()].find((loaded) => loaded.icons?.has(id))?.icons?.get(id);
+      if (icon) map.addImage(id, icon.image, { pixelRatio: icon.pixelRatio, sdf: icon.sdf });
     });
     watchGeoJsonBounds(map);
     map.on('sourcedata', (event) => {
