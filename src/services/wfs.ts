@@ -1,4 +1,4 @@
-import { FEATURE_MINZOOM, type Offer, type ServiceInfo } from './types';
+import type { Offer, ServiceInfo } from './types';
 import { child, children, descendants, parseXml, text, wgs84Bounds, xlinkHref } from './xml';
 
 /** Most features asked for per tile, unless the server allows fewer. */
@@ -34,8 +34,7 @@ function values(element: Element | undefined, kind: 'Parameter' | 'Constraint', 
 
 /**
  * Reads WFS 2.0 or 1.1 capabilities. Each feature type is offered as a layer queried per
- * tile for GeoJSON at the GetFeature address the server names; types are offered from
- * FEATURE_MINZOOM, since a feature count per type would cost a request each.
+ * tile for GeoJSON at the GetFeature address the server names.
  */
 export function parseWfs(xml: string, capabilitiesUrl: string): ServiceInfo {
   const root = parseXml(xml, 'The service did not answer with WFS capabilities.', 'WFS_Capabilities');
@@ -69,7 +68,6 @@ export function parseWfs(xml: string, capabilitiesUrl: string): ServiceInfo {
       offer.draft = {
         name: title,
         source: { type: 'wfs', url, version, typeName, outputFormat, maxFeatures },
-        minzoom: FEATURE_MINZOOM,
         ...(bounds && { bounds }),
         ...(provider && { attribution: provider }),
       };

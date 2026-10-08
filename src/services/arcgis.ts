@@ -1,6 +1,6 @@
 import { HALF_WORLD, isWebMercatorCode, mercatorBounds, scaleToZoom, tileZoom, validBounds } from '../geo/mercator';
 import type { Bounds, Geometry, LayerDraft } from '../model/layer';
-import { FEATURE_MINZOOM, type Offer, type ServiceInfo } from './types';
+import type { Offer, ServiceInfo } from './types';
 
 interface SpatialReference {
   wkid?: number;
@@ -61,11 +61,10 @@ export interface FeatureLayer extends ServiceLayer {
 /**
  * What reading a feature layer itself adds to its service's listing: the layer's own
  * description, which can differ from the service's (record limits, query formats, tile
- * queries), and how many features it has.
+ * queries).
  */
 export interface LayerDetails {
   layer?: FeatureLayer;
-  count?: number;
 }
 
 
@@ -158,7 +157,7 @@ export function parseFeatureService(
   const base = serviceUrl(url);
   if ('geometryType' in json && typeof (json as FeatureLayer).id === 'number' && !('layers' in json)) {
     const layer = json as FeatureLayer;
-    const offer = featureOffer(layer, base, undefined, details.get(layer.id)?.count);
+    const offer = featureOffer(layer, base, undefined);
     return { title: layer.name, ...(layer.description && { description: plainText(layer.description) }), offers: [offer] };
   }
   const service = json as MapServer;
@@ -172,18 +171,17 @@ export function parseFeatureService(
       // Without the layer's own description its query formats are unknown: the service's
       // understate a hosted layer's (it adds geoJSON), so they are not checked.
       const layer: FeatureLayer = own?.layer ?? { ...listed, copyrightText: service.copyrightText };
-      return featureOffer(layer, `${base}/${listed.id}`, service.maxRecordCount, own?.count);
+      return featureOffer(layer, `${base}/${listed.id}`, service.maxRecordCount);
     }),
   };
 }
 
 /**
- * A feature layer as a layer to add. Tile queries are used where the layer supports them:
- * they allow more records per query and are answered much faster by hosted services. A
- * layer whose features all fit in one query is shown from the lowest zoom, since no tile
- * can hold more; a larger one from FEATURE_MINZOOM.
+ * A feature layer as a layer to add, shown at the zooms the service sets. Tile queries are
+ * used where the layer supports them: they allow more records per query and are answered
+ * much faster by hosted services.
  */
-function featureOffer(layer: FeatureLayer, layerUrl: string, serviceMaxRecordCount: number | undefined, count: number | undefined): Offer {
+function featureOffer(layer: FeatureLayer, layerUrl: string, serviceMaxRecordCount: number | undefined): Offer {
   const offer: Offer = { title: layer.name, name: String(layer.id), depth: 0 };
   const geometry = geometryOf(layer.geometryType);
   if (!geometry) {
@@ -197,15 +195,12 @@ function featureOffer(layer: FeatureLayer, layerUrl: string, serviceMaxRecordCou
   const tileQueries = layer.advancedQueryCapabilities?.supportsQueryWithResultType === true && (layer.tileMaxRecordCount ?? 0) > 0;
   const maxRecordCount = tileQueries ? layer.tileMaxRecordCount! : (layer.maxRecordCount ?? serviceMaxRecordCount ?? 1000);
   const bounds = extentBounds(layer.extent);
-  const range = scaleRange(layer);
-  const fits = count !== undefined && count <= maxRecordCount;
   offer.draft = {
     name: layer.name,
     source: { type: 'arcgis-features', url: layerUrl, geometry, maxRecordCount, ...(tileQueries && { tileQueries }) },
     ...(bounds && { bounds }),
     ...(layer.copyrightText && { attribution: layer.copyrightText }),
-    ...range,
-    ...(!fits && { minzoom: Math.max(FEATURE_MINZOOM, range.minzoom ?? 0) }),
+    ...scaleRange(layer),
   };
   return offer;
 }

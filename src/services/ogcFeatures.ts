@@ -1,7 +1,7 @@
 import { boxBounds } from '../geo/mercator';
 import { resolveUrl } from '../map/urls';
 import type { Bounds } from '../model/layer';
-import { FEATURE_MINZOOM, type Offer, type ServiceInfo } from './types';
+import type { Offer, ServiceInfo } from './types';
 
 /** Most features asked for per tile. */
 export const OGC_FEATURES_LIMIT = 1000;
@@ -83,7 +83,6 @@ export function parseCollections(json: { title?: string; description?: string; c
       offer.draft = {
         name: title,
         source: { type: 'ogc-features', url: itemsUrl(collection, collectionsUrl), limit: OGC_FEATURES_LIMIT },
-        minzoom: FEATURE_MINZOOM,
         ...(bounds && { bounds }),
       };
       return offer;

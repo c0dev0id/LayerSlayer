@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { collectionsAddress, landingPageCollections, OGC_FEATURES_LIMIT, parseCollections } from './ogcFeatures';
-import { FEATURE_MINZOOM } from './types';
 
 const collections = {
   title: 'Daraa',
@@ -43,7 +42,6 @@ describe('parseCollections', () => {
     expect(info.offers[0]!.draft).toEqual({
       name: 'Aeronautic (Curves)',
       source: { type: 'ogc-features', url: 'https://demo.ldproxy.net/daraa/collections/AeronauticCrv/items?f=json&profile=rfc7946', limit: OGC_FEATURES_LIMIT },
-      minzoom: FEATURE_MINZOOM,
       bounds: [36.395158, 32.693301, 36.430814, 32.717333],
     });
     expect(info.offers[1]!.draft!.source).toMatchObject({ url: 'https://demo.ldproxy.net/daraa/collections/lakes/items?f=json' });

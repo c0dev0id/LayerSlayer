@@ -18,13 +18,6 @@ export const SERVICE_TYPES = [
 
 export type ServiceType = (typeof SERVICE_TYPES)[number]['value'];
 
-/**
- * The lowest zoom a feature layer is shown at unless the service asks for more. Below it a
- * view needs few tiles, but each covers so much that the server returns its whole record
- * limit for it, slowly; the layer's zoom range can be widened in the panel.
- */
-export const FEATURE_MINZOOM = 9;
-
 /** One entry of what a service offers: a layer to add, a heading, or a layer that cannot be shown. */
 export interface Offer {
   title: string;

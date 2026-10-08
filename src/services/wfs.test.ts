@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import geoserver from './fixtures/wfs200-geoserver.xml?raw';
 import mapserver from './fixtures/wfs200-mapserver.xml?raw';
-import { FEATURE_MINZOOM } from './types';
 import { geojsonFormat, parseWfs, WFS_MAX_FEATURES } from './wfs';
 
 describe('parseWfs', () => {
@@ -20,7 +19,6 @@ describe('parseWfs', () => {
         outputFormat: 'application/json',
         maxFeatures: WFS_MAX_FEATURES,
       },
-      minzoom: FEATURE_MINZOOM,
       bounds: [7.6, 47.5, 10.2, 49.5],
       attribution: 'MobiData BW',
     });

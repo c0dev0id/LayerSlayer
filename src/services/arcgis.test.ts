@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { parseFeatureService, parseMapServer } from './arcgis';
-import { FEATURE_MINZOOM } from './types';
 import dynamic from './fixtures/arcgis-mapserver-dynamic.json';
 import tiled from './fixtures/arcgis-mapserver-tiled.json';
 import featureServer from './fixtures/arcgis-featureserver.json';
@@ -48,26 +47,19 @@ describe('parseFeatureService', () => {
     expect(info.offers[0]!.draft).toMatchObject({
       name: 'Perimeters',
       source: { type: 'arcgis-features', url: 'https://services3.arcgis.com/x/arcgis/rest/services/WFIGS/FeatureServer/0', geometry: 'polygon', maxRecordCount: 1000 },
-      minzoom: FEATURE_MINZOOM,
     });
+    // Shown at every zoom; a focus area keeps low-zoom queries in bounds.
+    expect(info.offers[0]!.draft).not.toHaveProperty('minzoom');
     expect(info.offers[0]!.draft!.source).not.toHaveProperty('tileQueries');
   });
 
-  it("takes a layer's own description and count over the service's", () => {
-    const info = parseFeatureService(featureServer as never, root, new Map([[0, { layer: featureLayer as never, count: 312 }]]));
-    const draft = info.offers[0]!.draft!;
+  it("takes a layer's own description over the service's", () => {
+    const info = parseFeatureService(featureServer as never, root, new Map([[0, { layer: featureLayer as never }]]));
     // The layer allows tile queries of 4000 records, though the service says 1000.
-    expect(draft.source).toMatchObject({ maxRecordCount: 4000, tileQueries: true });
-    // 312 features fit in one query, so the layer is shown at every zoom.
-    expect(draft.minzoom).toBeUndefined();
+    expect(info.offers[0]!.draft!.source).toMatchObject({ maxRecordCount: 4000, tileQueries: true });
   });
 
-  it('starts a layer with more features than a query returns at the feature zoom', () => {
-    const info = parseFeatureService(featureLayer as never, 'https://x/FeatureServer/0', new Map([[0, { count: 300000 }]]));
-    expect(info.offers[0]!.draft!.minzoom).toBe(FEATURE_MINZOOM);
-  });
-
-  it('keeps a higher minimum zoom the service asks for', () => {
+  it('keeps the minimum zoom the service asks for', () => {
     // minScale 70 000 is just under map zoom 12.
     const info = parseFeatureService({ ...featureLayer, minScale: 70000 } as never, 'https://x/FeatureServer/0');
     expect(info.offers[0]!.draft!.minzoom).toBeCloseTo(11.9, 1);

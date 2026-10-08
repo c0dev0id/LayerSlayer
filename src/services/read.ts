@@ -108,9 +108,9 @@ async function readOgcFeatures(url: string): Promise<ServiceInfo> {
 }
 
 /**
- * Reads a FeatureServer or one of its layers, and each feature layer's own description and
- * feature count, which the service listing lacks. Those are best effort: a layer whose
- * details fail is offered with what the service says.
+ * Reads a FeatureServer or one of its layers, and each feature layer's own description,
+ * which the service listing lacks. That is best effort: a layer whose description fails
+ * is offered with what the service says.
  */
 async function readFeatureService(url: string): Promise<ServiceInfo> {
   const base = serviceUrl(url);
@@ -121,13 +121,8 @@ async function readFeatureService(url: string): Promise<ServiceInfo> {
     : (json.layers ?? []).filter((l) => l.geometryType).map((l) => [l.id, `${base}/${l.id}`, undefined]);
   const details = await Promise.all(
     layers.map(async ([id, layerUrl, known]): Promise<[number, LayerDetails]> => {
-      const [layer, count] = await Promise.all([
-        known ?? fetchJson<FeatureLayer>(withParams(layerUrl, { f: 'json' })).catch(() => undefined),
-        fetchJson<{ count?: number }>(withParams(`${layerUrl}/query`, { where: '1=1', returnCountOnly: 'true', f: 'json' }))
-          .then((r) => r.count)
-          .catch(() => undefined),
-      ]);
-      return [id, { ...(layer && !layer.error && { layer }), ...(count !== undefined && { count }) }];
+      const layer = known ?? (await fetchJson<FeatureLayer>(withParams(layerUrl, { f: 'json' })).catch(() => undefined));
+      return [id, { ...(layer && !layer.error && { layer }) }];
     }),
   );
   return parseFeatureService(json, url, new Map(details));
