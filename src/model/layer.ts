@@ -65,6 +65,35 @@ export interface ArcGisFeatureSource {
   tileQueries?: boolean;
 }
 
+/** A WFS feature type, queried per vector tile for GeoJSON. */
+export interface WfsSource {
+  type: 'wfs';
+  /** The GetFeature endpoint. */
+  url: string;
+  version: '2.0.0' | '1.1.0';
+  typeName: string;
+  /** The server's name for GeoJSON output, e.g. application/json. */
+  outputFormat: string;
+  /** Most features one query returns. */
+  maxFeatures: number;
+}
+
+/** An OGC API – Features collection, queried per vector tile. */
+export interface OgcFeaturesSource {
+  type: 'ogc-features';
+  /** The collection's items endpoint, answering GeoJSON. */
+  url: string;
+  /** Most features one query returns. */
+  limit: number;
+}
+
+/** Sources whose features are queried per vector tile and cut into tiles in the browser. */
+export type FeatureSource = ArcGisFeatureSource | WfsSource | OgcFeaturesSource;
+
+export function isFeatureSource(source: LayerSource): source is FeatureSource {
+  return source.type === 'arcgis-features' || source.type === 'wfs' || source.type === 'ogc-features';
+}
+
 export interface GeoJsonSource {
   type: 'geojson';
   data: Resource;
@@ -89,6 +118,8 @@ export type LayerSource =
   | WmtsSource
   | ArcGisMapSource
   | ArcGisFeatureSource
+  | WfsSource
+  | OgcFeaturesSource
   | GeoJsonSource
   | StyleSource
   | ImageSource;
@@ -130,7 +161,7 @@ export const VECTOR_COLORS = ['#e8590c', '#1c7ed6', '#2f9e44', '#ae3ec9', '#f08c
 
 /** Whether the source is drawn with the app's own vector style, coloured by `color`. */
 export function isVector(source: LayerSource): boolean {
-  return source.type === 'geojson' || source.type === 'arcgis-features';
+  return source.type === 'geojson' || isFeatureSource(source);
 }
 
 /**
@@ -144,7 +175,7 @@ export function keepsTiles(layer: Layer): boolean {
 }
 
 export function canCache(source: LayerSource): boolean {
-  return ['xyz', 'wms', 'wmts', 'arcgis-map', 'arcgis-features'].includes(source.type);
+  return ['xyz', 'wms', 'wmts', 'arcgis-map'].includes(source.type) || isFeatureSource(source);
 }
 
 /** The file a layer keeps in the browser, if any. */

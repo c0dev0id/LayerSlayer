@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wfs:WFS_Capabilities xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:sa="http://xml.sandre.eaufrance.fr/" xmlns="http://www.opengis.net/wfs/2.0" version="2.0.0" updateSequence="1" xsi:schemaLocation="http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd">
+  <ows:ServiceIdentification>
+    <ows:Title>Référentiels géographiques du Sandre</ows:Title>
+    <ows:Abstract>Les référentiels géographiques sur l'eau conformes Sandre sont accessibles en libre accés via des services web OGC INSPIRE - ISO/DIS 19128 - pour tous les usages y compris commerciaux</ows:Abstract>
+    <ows:Keywords>
+      <ows:Keyword>eau</ows:Keyword>
+      <ows:Keyword> référentiels</ows:Keyword>
+      <ows:Keyword> sie</ows:Keyword>
+      <ows:Keyword> sandre</ows:Keyword>
+      <ows:Keyword> FRANCE</ows:Keyword>
+      <ows:Keyword> METROPOLE</ows:Keyword>
+      <ows:Keyword> GUADELOUPE</ows:Keyword>
+      <ows:Keyword> MARTINIQUE</ows:Keyword>
+      <ows:Keyword> REUNION</ows:Keyword>
+      <ows:Keyword> GUYANE</ows:Keyword>
+      <ows:Keyword> MAYOTTE</ows:Keyword>
+    </ows:Keywords>
+    <ows:ServiceType codeSpace="OGC">WFS</ows:ServiceType>
+    <ows:ServiceTypeVersion>2.0.0</ows:ServiceTypeVersion>
+    <ows:Fees>no conditions apply</ows:Fees>
+    <ows:AccessConstraints>accés libre</ows:AccessConstraints>
+  </ows:ServiceIdentification>
+  <ows:ServiceProvider>
+    <ows:ProviderName>Office International de l'eau / SANDRE</ows:ProviderName>
+    <ows:ProviderSite xlink:type="simple" xlink:href="http://www.sandre.eaufrance.fr"/>
+    <ows:ServiceContact>
+      <ows:IndividualName>Contact SANDRE</ows:IndividualName>
+      <ows:PositionName>ST_Sandre</ows:PositionName>
+      <ows:ContactInfo>
+        <ows:Phone>
+          <ows:Voice>+33555113111</ows:Voice>
+          <ows:Facsimile>+33555114748</ows:Facsimile>
+        </ows:Phone>
+        <ows:Address>
+          <ows:DeliveryPoint>15 rue Edouard Chamberland</ows:DeliveryPoint>
+          <ows:City>LIMOGES</ows:City>
+          <ows:AdministrativeArea>France, Métropole, Guadeloupe, Martinique, Guyane, Réunion, Mayotte</ows:AdministrativeArea>
+          <ows:PostalCode>87065</ows:PostalCode>
+          <ows:Country>FRANCE</ows:Country>
+          <ows:ElectronicMailAddress>sandre@sandre.eaufrance.fr</ows:ElectronicMailAddress>
+        </ows:Address>
+        <ows:OnlineResource xlink:type="simple" xlink:href="http://www.sandre.eaufrance.fr"/>
+        <ows:HoursOfService>lundi-vendredi, 9h00-18h00</ows:HoursOfService>
+        <ows:ContactInstructions>email</ows:ContactInstructions>
+      </ows:ContactInfo>
+      <ows:Role>developpeur, gestionnaire, point de contact</ows:Role>
+    </ows:ServiceContact>
+  </ows:ServiceProvider>
+  <ows:OperationsMetadata>
+    <ows:Operation name="GetCapabilities">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:type="simple" xlink:href="https://services.sandre.eaufrance.fr/geo/sandre?language=fre&amp;"/>
+          <ows:Post xlink:type="simple" xlink:href="https://services.sandre.eaufrance.fr/geo/sandre?language=fre&amp;"/>
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="AcceptVersions">
+        <ows:AllowedValues>
+          <ows:Value>2.0.0</ows:Value>
+          <ows:Value>1.1.0</ows:Value>
+          <ows:Value>1.0.0</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+      <ows:Parameter name="AcceptFormats">
+        <ows:AllowedValues>
+          <ows:Value>text/xml</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+      <ows:Parameter name="Sections">
+        <ows:AllowedValues>
+          <ows:Value>ServiceIdentification</ows:Value>
+          <ows:Value>ServiceProvider</ows:Value>
+          <ows:Value>OperationsMetadata</ows:Value>
+          <ows:Value>FeatureTypeList</ows:Value>
+          <ows:Value>Filter_Capabilities</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+    </ows:Operation>
+    <ows:Operation name="DescribeFeatureType">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:type="simple" xlink:href="https://services.sandre.eaufrance.fr/geo/sandre?language=fre&amp;"/>
+          <ows:Post xlink:type="simple" xlink:href="https://services.sandre.eaufrance.fr/geo/sandre?language=fre&amp;"/>
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="outputFormat">
+        <ows:AllowedValues>
+          <ows:Value>application/gml+xml; version=3.2</ows:Value>
+          <ows:Value>text/xml; subtype=gml/3.2.1</ows:Value>
+          <ows:Value>text/xml; subtype=gml/3.1.1</ows:Value>
+          <ows:Value>text/xml; subtype=gml/2.1.2</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+    </ows:Operation>
+    <ows:Operation name="GetFeature">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:type="simple" xlink:href="https://services.sandre.eaufrance.fr/geo/sandre?language=fre&amp;"/>
+          <ows:Post xlink:type="simple" xlink:href="https://services.sandre.eaufrance.fr/geo/sandre?language=fre&amp;"/>
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="outputFormat">
+        <ows:AllowedValues>
+          <ows:Value>application/gml+xml; version=3.2</ows:Value>
+          <ows:Value>text/xml; subtype=gml/3.2.1</ows:Value>
+          <ows:Value>text/xml; subtype=gml/3.1.1</ows:Value>
+          <ows:Value>text/xml; subtype=gml/2.1.2</ows:Value>
+          <ows:Value>application/shapefile</ows:Value>
+          <ows:Value>MIDMIF</ows:Value>
+          <ows:Value>OGRGML</ows:Value>
+          <ows:Value>text/csv</ows:Value>
+          <ows:Value>application/json; subtype=geojson</ows:Value>
+          <ows:Value>GPKG</ows:Value>
+          <ows:Value>OGRGML3</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+    </ows:Operation>
+    <ows:Parameter name="version">
+      <ows:AllowedValues>
+        <ows:Value>2.0.0</ows:Value>
+        <ows:Value>1.1.0</ows:Value>
+        <ows:Value>1.0.0</ows:Value>
+      </ows:AllowedValues>
+    </ows:Parameter>
+    <ows:Constraint name="ImplementsBasicWFS">
+      <ows:NoValues/>
+      <ows:DefaultValue>TRUE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsTransactionalWFS">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsLockingWFS">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="KVPEncoding">
+      <ows:NoValues/>
+      <ows:DefaultValue>TRUE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="XMLEncoding">
+      <ows:NoValues/>
+      <ows:DefaultValue>TRUE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="SOAPEncoding">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsInheritance">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsRemoteResolve">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsResultPaging">
+      <ows:NoValues/>
+      <ows:DefaultValue>TRUE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsStandardJoins">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsSpatialJoins">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsTemporalJoins">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ImplementsFeatureVersioning">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="ManageStoredQueries">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="PagingIsTransactionSafe">
+      <ows:NoValues/>
+      <ows:DefaultValue>FALSE</ows:DefaultValue>
+    </ows:Constraint>
+    <ows:Constraint name="QueryExpressions">
+      <ows:AllowedValues>
+        <ows:Value>wfs:Query</ows:Value>
+        <ows:Value>wfs:StoredQuery</ows:Value>
+      </ows:AllowedValues>
+    </ows:Constraint>
+  </ows:OperationsMetadata>
+  <FeatureTypeList>
+    <FeatureType>
+      <Name>sa:LieuSurvRsx</Name>
+      <Title>Association lieux de surveillance de la qualité des eaux littorales et dispositifs de collecte - France entière - geometrie calculée</Title>
+      <DefaultCRS>urn:ogc:def:crs:EPSG::4326</DefaultCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::2154</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::5490</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::32620</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::2972</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::2975</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::4471</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::4467</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::27572</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::32622</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::32738</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::32740</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::3857</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::900913</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::4559</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::5490</OtherCRS>
+      <OutputFormats>
+        <Format>application/gml+xml; version=3.2</Format>
+        <Format>text/xml; subtype=gml/3.2.1</Format>
+        <Format>text/xml; subtype=gml/3.1.1</Format>
+        <Format>text/xml; subtype=gml/2.1.2</Format>
+        <Format>application/shapefile</Format>
+        <Format>MIDMIF</Format>
+        <Format>OGRGML</Format>
+        <Format>text/csv</Format>
+        <Format>application/json; subtype=geojson</Format>
+        <Format>GPKG</Format>
+        <Format>OGRGML3</Format>
+      </OutputFormats>
+      <ows:WGS84BoundingBox dimensions="2">
+        <ows:LowerCorner>-70.000000 -30.000000</ows:LowerCorner>
+        <ows:UpperCorner>75.000000 57.000000</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+      <MetadataURL xlink:href="https://services.sandre.eaufrance.fr/geo/sandre?language=fre&amp;request=GetMetadata&amp;layer=LieuSurvRsx"/>
+    </FeatureType>
+<FeatureType>
+      <Name>sa:LieuSurv_FRA</Name>
+      <Title>Lieux de surveillance de la qualité des eaux littorales - France entière</Title>
+      <DefaultCRS>urn:ogc:def:crs:EPSG::4326</DefaultCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::2154</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::5490</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::32620</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::2972</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::2975</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::4471</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::4467</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::27572</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::32622</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::32738</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::32740</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::3857</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::900913</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::4559</OtherCRS>
+      <OtherCRS>urn:ogc:def:crs:EPSG::5490</OtherCRS>
+      <OutputFormats>
+        <Format>application/gml+xml; version=3.2</Format>
+        <Format>text/xml; subtype=gml/3.2.1</Format>
+        <Format>text/xml; subtype=gml/3.1.1</Format>
+        <Format>text/xml; subtype=gml/2.1.2</Format>
+        <Format>application/shapefile</Format>
+        <Format>MIDMIF</Format>
+        <Format>OGRGML</Format>
+        <Format>text/csv</Format>
+        <Format>application/json; subtype=geojson</Format>
+        <Format>GPKG</Format>
+        <Format>OGRGML3</Format>
+      </OutputFormats>
+      <!--WARNING: Optional WGS84BoundingBox could not be established for this layer.  Consider setting the EXTENT in the LAYER object, or wfs_extent metadata. Also check that your data exists in the DATA statement-->
+      <MetadataURL xlink:href="https://services.sandre.eaufrance.fr/geo/sandre?language=fre&amp;request=GetMetadata&amp;layer=LieuSurv_FRA"/>
+    </FeatureType>
+  </FeatureTypeList>
+</wfs:WFS_Capabilities>

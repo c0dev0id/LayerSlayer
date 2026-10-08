@@ -8,7 +8,8 @@ import { setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
-import { CACHED_SCHEMES, composeStyle, FEATURE_PROTOCOL, WMTS_PROTOCOL } from './compose';
+import { CACHED_SCHEMES, composeStyle, WMTS_PROTOCOL } from './compose';
+import { FEATURE_PROTOCOL } from './featureTiles';
 import { loadCachedTile, loadTile } from './protocols';
 import { routeLines, ROUTES_SOURCE, withRoutes } from './routeOverlay';
 

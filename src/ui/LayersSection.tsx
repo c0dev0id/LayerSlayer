@@ -169,6 +169,8 @@ const SOURCE_LABELS: Record<Layer['source']['type'], string> = {
   wmts: 'WMTS',
   'arcgis-map': 'ArcGIS MapServer',
   'arcgis-features': 'ArcGIS features',
+  wfs: 'WFS',
+  'ogc-features': 'OGC API – Features',
   geojson: 'GeoJSON',
   style: 'MapLibre style',
   image: 'Georeferenced image',

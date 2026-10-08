@@ -4,8 +4,6 @@ import { describe, expect, it } from 'vitest';
 import { createLayer, type Layer, type LayerDraft } from '../model/layer';
 import {
   composeStyle,
-  featureTileUrl,
-  parseFeatureTileUrl,
   prefixImage,
   resolveWmtsTile,
   scaleOpacity,
@@ -120,7 +118,7 @@ describe('composeStyle', () => {
       layer({ name: 'n', source: { type: 'xyz', tiles: ['https://n/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, { cache: false }, 'N'),
     ]);
     expect((style.sources.X as { tiles: string[] }).tiles).toEqual(['cache+https://t/{z}/{x}/{y}.png']);
-    expect((style.sources.F as { tiles: string[] }).tiles[0]).toMatch(/^cache\+arcgis-features:\/\//);
+    expect((style.sources.F as { tiles: string[] }).tiles[0]).toMatch(/^cache\+features:\/\//);
     expect((style.sources.N as { tiles: string[] }).tiles).toEqual(['https://n/{z}/{x}/{y}.png']);
   });
 
@@ -241,14 +239,5 @@ describe('WMTS tiles', () => {
     expect(url.startsWith('wmts-matrix://{z}/{x}/{y}?')).toBe(true);
     const tile = url.replace('{z}', '9').replace('{x}', '0').replace('{y}', '1');
     expect(resolveWmtsTile(tile)).toBe('https://w.example/t/09/1/0.png');
-  });
-});
-
-describe('feature tile URLs', () => {
-  it('round-trips the layer and the record limit', () => {
-    const url = featureTileUrl('https://a.example/FeatureServer/0', 2000).replace('{z}', '3').replace('{x}', '4').replace('{y}', '5');
-    expect(parseFeatureTileUrl(url)).toEqual({ z: 3, x: 4, y: 5, layerUrl: 'https://a.example/FeatureServer/0', maxRecordCount: 2000, tileQueries: false });
-    const tiled = featureTileUrl('https://a.example/FeatureServer/0', 4000, true).replace('{z}', '3').replace('{x}', '4').replace('{y}', '5');
-    expect(parseFeatureTileUrl(tiled).tileQueries).toBe(true);
   });
 });
