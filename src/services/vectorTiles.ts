@@ -1,8 +1,7 @@
 import { boxBounds } from '../geo/mercator';
 import { resolveUrl } from '../map/urls';
-import type { LayerDraft, VectorTilesSource } from '../model/layer';
+import type { LayerDraft, VectorTilesSource, XyzSource } from '../model/layer';
 import type { Offer, ServiceInfo } from './types';
-import { xyzSource } from './xyz';
 
 /** The highest tile zoom assumed for a template without a TileJSON: where most vector tile sets end. */
 export const TEMPLATE_MAXZOOM = 14;
@@ -70,10 +69,9 @@ export function parseTileJson(json: TileJson, url: string): ServiceInfo {
   };
 }
 
-/** A tile template's layers, as read from one of its tiles. Tiles are taken to end at TEMPLATE_MAXZOOM. */
-export function parseTemplate(template: string, layerNames: readonly string[], title: string): ServiceInfo {
+/** A tile template's layers, as read from its tiles. Tiles are taken to end at TEMPLATE_MAXZOOM. */
+export function parseTemplate({ tiles, scheme }: Pick<XyzSource, 'tiles' | 'scheme'>, layerNames: readonly string[], title: string): ServiceInfo {
   if (layerNames.length === 0) throw new Error('The tile read from this address holds no layers.');
-  const { tiles, scheme } = xyzSource(template);
   const base: Omit<VectorTilesSource, 'layer'> = { type: 'vector-tiles', tiles, ...(scheme === 'tms' && { scheme }), maxzoom: TEMPLATE_MAXZOOM };
   return { title, offers: offers(title, base, layerNames.map((id) => ({ id })), {}) };
 }

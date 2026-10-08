@@ -38,7 +38,7 @@ function read(source: Source): Promise<ServiceInfo> {
   const key = `${source.type} ${source.url}`;
   let info = reads.get(key);
   if (!info) {
-    info = readService(source.type, source.url).then((i) => (source.entry ? withEntry(i, source.entry) : i));
+    info = readService(source.type, source.url, state.view.center).then((i) => (source.entry ? withEntry(i, source.entry) : i));
     info.catch(() => reads.delete(key));
     reads.set(key, info);
   }

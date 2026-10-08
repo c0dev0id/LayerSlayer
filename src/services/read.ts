@@ -1,7 +1,7 @@
 import { getParam, withParams } from '../map/urls';
 import { tileAt } from '../geo/mercator';
+import type { LngLat } from '../model/route';
 import { fetchResource } from '../state/net';
-import { state } from '../state/store';
 import { parseFeatureService, parseMapServer, serviceUrl, type FeatureLayer, type LayerDetails } from './arcgis';
 import { collectionsAddress, landingPageCollections, parseCollections } from './ogcFeatures';
 import { loadStyle } from './style';
@@ -10,10 +10,10 @@ import type { ServiceInfo, ServiceType } from './types';
 import { parseWfs } from './wfs';
 import { parseWms } from './wms';
 import { parseWmts } from './wmts';
-import { parseXyz, xyzSource } from './xyz';
+import { parseXyz, tileTemplates } from './xyz';
 
-/** Reads what a service offers. GeoPDF addresses are imported as files instead. */
-export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: string): Promise<ServiceInfo> {
+/** Reads what a service offers. GeoPDF addresses are imported as files instead. `near` is where the map is. */
+export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: string, near: LngLat): Promise<ServiceInfo> {
   switch (type) {
     case 'wms': {
       const caps = wmsCapabilitiesUrl(url);
@@ -37,7 +37,7 @@ export async function readService(type: Exclude<ServiceType, 'geopdf'>, url: str
     case 'xyz':
       return parseXyz(url);
     case 'vector-tiles':
-      return readVectorTiles(url);
+      return readVectorTiles(url, near);
     case 'cog': {
       const { readCog } = await import('./cog');
       return readCog(url, fileName(url));
@@ -69,37 +69,33 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 /**
  * Reads vector tiles from a TileJSON, or from a tile template by the layers of two of its
- * tiles: the one at zoom 0, which every tile set has, and the one at TEMPLATE_MAXZOOM where
- * the map is, which holds the layers that only begin at higher zooms, if the area has them.
+ * tiles: the one at zoom 0, which every tile set has, and the one at TEMPLATE_MAXZOOM at
+ * `near`, which holds the layers that only begin at higher zooms, if the area has them.
  */
-async function readVectorTiles(url: string): Promise<ServiceInfo> {
-  if (!url.includes('{z}')) return parseTileJson(await fetchJson<TileJson>(url), url);
-  const { tiles, scheme } = xyzSource(url);
+async function readVectorTiles(url: string, near: LngLat): Promise<ServiceInfo> {
+  if (!/\{z(oom)?\}/.test(url)) return parseTileJson(await fetchJson<TileJson>(url), url);
+  const templates = tileTemplates(url);
+  if (!['{z}', '{x}', '{y}'].every((token) => templates.tiles[0]!.includes(token)))
+    throw new Error('A vector tile address needs {z}, {x} and {y}.');
   const tileUrl = (z: number, x: number, y: number) =>
-    tiles[0]!
-      .replace('{z}', String(z))
+    templates.tiles[0]!.replace('{z}', String(z))
       .replace('{x}', String(x))
-      .replace('{y}', String(scheme === 'tms' ? 2 ** z - 1 - y : y));
-  const [lng, lat] = state.view.center;
-  const near = tileAt(lng, lat, TEMPLATE_MAXZOOM);
-  const [{ tileLayerNames }, world, here] = await Promise.all([
+      .replace('{y}', String(templates.scheme === 'tms' ? 2 ** z - 1 - y : y));
+  const here = tileAt(near[0], near[1], TEMPLATE_MAXZOOM);
+  const [{ tileLayerNames }, world, local] = await Promise.all([
     import('./mvt'),
     fetchResource(tileUrl(0, 0, 0)).then((r) => r.arrayBuffer()),
-    fetchResource(tileUrl(TEMPLATE_MAXZOOM, near.x, near.y))
+    fetchResource(tileUrl(TEMPLATE_MAXZOOM, here.x, here.y))
       .then((r) => r.arrayBuffer())
       .catch(() => undefined),
   ]);
-  // The layer names in a tile, or none for a tile that is not a vector tile.
-  const read = (data: ArrayBuffer | undefined): string[] | undefined => {
-    try {
-      return data && tileLayerNames(data);
-    } catch {
-      return undefined;
-    }
-  };
-  const names = read(world);
+  const names = tileLayerNames(world);
   if (!names) throw new Error('The tile at zoom 0 is not a vector tile; the address of its TileJSON may work instead.');
-  return parseTemplate(url, [...new Set([...names, ...(read(here) ?? [])])], fileName(url.split('{z}')[0]!) || 'Vector tiles');
+  return parseTemplate(
+    templates,
+    [...new Set([...names, ...(tileLayerNames(local) ?? [])])],
+    fileName(url.split(/\{z/)[0]!) || 'Vector tiles',
+  );
 }
 
 /** OGC APIs answer HTML to a browser's default Accept header. */

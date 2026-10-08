@@ -3,6 +3,7 @@ import { fromGeojsonVt } from '@maplibre/vt-pbf';
 import { describe, expect, it } from 'vitest';
 import { tileLayerNames } from './mvt';
 import { parseTemplate, parseTileJson, TEMPLATE_MAXZOOM } from './vectorTiles';
+import { tileTemplates } from './xyz';
 
 const tileJson = {
   name: 'Versatiles',
@@ -56,7 +57,7 @@ describe('parseTileJson', () => {
 
 describe('parseTemplate', () => {
   it('offers the layers read from a tile, up to the usual highest zoom', () => {
-    const info = parseTemplate('https://{a-c}.t.example/{z}/{x}/{-y}.pbf', ['roads', 'water'], 't.example');
+    const info = parseTemplate(tileTemplates('https://{a-c}.t.example/{z}/{x}/{-y}.pbf'), ['roads', 'water'], 't.example');
     expect(info.offers[1]!.draft!.source).toEqual({
       type: 'vector-tiles',
       tiles: ['https://a.t.example/{z}/{x}/{y}.pbf', 'https://b.t.example/{z}/{x}/{y}.pbf', 'https://c.t.example/{z}/{x}/{y}.pbf'],
@@ -64,7 +65,7 @@ describe('parseTemplate', () => {
       maxzoom: TEMPLATE_MAXZOOM,
       layer: 'roads',
     });
-    expect(() => parseTemplate('https://t/{z}/{x}/{y}.pbf', [], 't')).toThrow('holds no layers');
+    expect(() => parseTemplate(tileTemplates('https://t/{z}/{x}/{y}.pbf'), [], 't')).toThrow('holds no layers');
   });
 });
 

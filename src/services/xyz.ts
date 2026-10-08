@@ -9,7 +9,7 @@ const DEFAULT_SUBDOMAINS = ['a', 'b', 'c'];
  * and {a-c} subdomains become one template per subdomain, {-y} the TMS scheme, {q} a
  * quadkey, {r} the retina suffix.
  */
-export function xyzSource(template: string, subdomains: readonly string[] = DEFAULT_SUBDOMAINS): XyzSource {
+export function tileTemplates(template: string, subdomains: readonly string[] = DEFAULT_SUBDOMAINS): Pick<XyzSource, 'tiles' | 'scheme'> {
   let url = template
     .trim()
     .replace(/\{zoom\}/g, '{z}')
@@ -31,8 +31,12 @@ export function xyzSource(template: string, subdomains: readonly string[] = DEFA
   if (!/^https?:\/\//i.test(url) || !hasTile) {
     throw new Error('A tile address needs {z}, {x} and {y} (or {quadkey}, or {bbox-epsg-3857}).');
   }
-  const tiles = shards.length > 0 ? shards.map((s) => url.replace('{s}', s)) : [url];
-  return { type: 'xyz', tiles, scheme, tileSize: 256 };
+  return { tiles: shards.length > 0 ? shards.map((s) => url.replace('{s}', s)) : [url], scheme };
+}
+
+/** Raster tiles from a template in any of the spellings `tileTemplates` reads. */
+export function xyzSource(template: string, subdomains: readonly string[] = DEFAULT_SUBDOMAINS): XyzSource {
+  return { type: 'xyz', ...tileTemplates(template, subdomains), tileSize: 256 };
 }
 
 export function parseXyz(template: string): ServiceInfo {
