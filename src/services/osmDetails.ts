@@ -78,8 +78,8 @@ export function detailsQuery([lng, lat]: LngLat, radius: number): string {
     ...NAMED_POI_KEYS.map((key) => `nwr.near["${key}"]["name"];`),
     `node.near["barrier"];`,
   ];
-  const dLat = (2 * radius) / 110_574;
-  const dLng = (2 * radius) / (111_320 * Math.cos((lat * Math.PI) / 180));
+  const [east, north] = metresPerDegree(lat);
+  const [dLng, dLat] = [(2 * radius) / east, (2 * radius) / north];
   const box = [lat - dLat, lng - dLng, lat + dLat, lng + dLng].map((v) => v.toFixed(6)).join(',');
   return (
     `[out:json][timeout:10];nwr${around}->.near;(${filters.join('')})->.found;` +
@@ -95,10 +95,15 @@ export function searchRadius(lat: number, zoom: number): number {
 
 type Point = [number, number];
 
+/** Metres per degree of longitude and of latitude at a latitude. */
+function metresPerDegree(lat: number): Point {
+  return [111_320 * Math.cos((lat * Math.PI) / 180), 110_574];
+}
+
 /** Positions as metres east and north of the spot; plane enough within a few hundred metres. */
 function plane([lng, lat]: LngLat): (p: { lat: number; lon: number }) => Point {
-  const east = 111_320 * Math.cos((lat * Math.PI) / 180);
-  return (p) => [(p.lon - lng) * east, (p.lat - lat) * 110_574];
+  const [east, north] = metresPerDegree(lat);
+  return (p) => [(p.lon - lng) * east, (p.lat - lat) * north];
 }
 
 function segmentDistance([px, py]: Point, [ax, ay]: Point, [bx, by]: Point): number {
@@ -148,9 +153,10 @@ export function distanceTo(element: OsmElement, spot: LngLat): number | undefine
   const toPlane = plane(spot);
   const lines: Point[][] = [];
   if (element.lat !== undefined && element.lon !== undefined) lines.push([toPlane({ lat: element.lat, lon: element.lon })]);
-  for (const run of stretches(element.geometry)) lines.push(run.map(toPlane));
+  const toLines = (points: readonly (LatLon | null)[] | undefined) => stretches(points).map((run) => run.map(toPlane));
+  lines.push(...toLines(element.geometry));
   for (const member of element.members ?? []) {
-    if (member.geometry) lines.push(...stretches(member.geometry).map((run) => run.map(toPlane)));
+    if (member.geometry) lines.push(...toLines(member.geometry));
     else if (member.lat !== undefined && member.lon !== undefined) lines.push([toPlane({ lat: member.lat, lon: member.lon })]);
   }
   const nearest = Math.min(...lines.map(lineDistance));
