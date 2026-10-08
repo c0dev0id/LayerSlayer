@@ -4,12 +4,14 @@ import type {
   SpriteSpecification,
   StyleSpecification,
 } from 'maplibre-gl';
+import { intersectBounds } from '../geo/bounds';
 import {
   keepsTiles,
   layerColor,
   MAX_ZOOM,
   MIN_ZOOM,
   type ArcGisMapSource,
+  type Bounds,
   type Layer,
   type LayerSource,
   type WmsSource,
@@ -67,13 +69,19 @@ interface Fragment {
  * one brings the fonts and the default sprite; the sprite of any style above it is added
  * under the layer's id and its image references are prefixed to match. A map has one
  * font source, so labels of the upper styles need fonts the bottom one serves.
+ *
+ * With `focus`, the bounds of the focus area, every layer but the bottom one requests
+ * tiles within them only, and a layer whose bounds lie outside is left out. The bottom
+ * layer, usually the base map, is drawn everywhere, so that the area has surroundings.
  */
-export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>): StyleSpecification {
+export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, focus?: Bounds): StyleSpecification {
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
   const sprites: { id: string; url: string }[] = [];
-  for (const layer of layers) {
+  for (const [index, layer] of layers.entries()) {
     if (!layer.visible) continue;
-    const part = fragment(layer, assets.get(layer.id));
+    const within = index > 0 ? focus : undefined;
+    if (within && layer.bounds && !intersectBounds(layer.bounds, within)) continue;
+    const part = fragment(layer, assets.get(layer.id), within);
     if (!part) continue;
     let partLayers = part.layers;
     const sprite = part.sprite;
@@ -96,7 +104,8 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   return style;
 }
 
-function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefined {
+/** The layer's part of the map; with `focus`, its tiles are requested within those bounds only. */
+function fragment(layer: Layer, assets: Assets | undefined, focus: Bounds | undefined): Fragment | undefined {
   const src = layer.source;
   switch (src.type) {
     case 'xyz':
@@ -109,7 +118,7 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
         tileSize: src.type === 'xyz' || src.type === 'wmts' ? src.tileSize : DYNAMIC_TILE_SIZE,
         ...(src.type === 'xyz' && src.scheme === 'tms' && { scheme: 'tms' }),
         ...tileZooms(src),
-        ...common(layer),
+        ...common(layer, focus),
       });
     case 'image': {
       const url = 'url' in src.data ? src.data.url : assets?.url;
@@ -129,14 +138,14 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
           tiles: cached(layer, src.tiles),
           ...(src.scheme && { scheme: src.scheme }),
           ...tileZooms(src),
-          ...common(layer),
+          ...common(layer, focus),
         },
         src.layer,
       );
     case 'cog': {
       const ramp = src.ramp && `#color:${COG_RAMP},${src.ramp.min},${src.ramp.max},c-`;
       // The protocol serves a TileJSON for the address and 256 px tiles.
-      return raster(layer, { type: 'raster', url: `${COG_PROTOCOL}://${src.url}${ramp ?? ''}`, tileSize: 256, ...common(layer) });
+      return raster(layer, { type: 'raster', url: `${COG_PROTOCOL}://${src.url}${ramp ?? ''}`, tileSize: 256, ...common(layer, focus) });
     }
     case 'arcgis-features':
     case 'wfs':
@@ -149,19 +158,21 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
           type: 'vector',
           tiles: cached(layer, [featureTileUrl(src)]),
           maxzoom: FEATURE_TILE_MAXZOOM,
+          ...(focus && { bounds: focus }),
           ...(layer.attribution && { attribution: layer.attribution }),
         },
         FEATURE_LAYER,
       );
     case 'style':
-      return assets?.style ? fromStyle(layer, assets.style, src.url) : undefined;
+      return assets?.style ? fromStyle(layer, assets.style, src.url, focus) : undefined;
   }
 }
 
-/** Bounds and attribution of a tiled source. */
-function common(layer: Layer): { bounds?: [number, number, number, number]; attribution?: string } {
+/** Bounds and attribution of a tiled source: the layer's bounds, within the focus area's. */
+function common(layer: Layer, focus: Bounds | undefined): { bounds?: Bounds; attribution?: string } {
+  const bounds = layer.bounds && focus ? intersectBounds(layer.bounds, focus) : (layer.bounds ?? focus);
   return {
-    ...(layer.bounds && { bounds: layer.bounds }),
+    ...(bounds && { bounds }),
     ...(layer.attribution && { attribution: layer.attribution }),
   };
 }
@@ -324,12 +335,13 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
 
 /**
  * A fetched MapLibre style as part of the map: ids prefixed with the layer's, URLs made
- * absolute, the layer's opacity and zoom range applied to each of its layers.
+ * absolute, the layer's opacity and zoom range applied to each of its layers, its tiled
+ * sources limited to the focus area.
  */
-function fromStyle(layer: Layer, style: StyleSpecification, styleUrl: string): Fragment {
+function fromStyle(layer: Layer, style: StyleSpecification, styleUrl: string, focus: Bounds | undefined): Fragment {
   const prefix = `${layer.id}/`;
   const sources: Record<string, SourceSpecification> = {};
-  for (const [id, source] of Object.entries(style.sources)) sources[prefix + id] = absoluteSource(source, styleUrl);
+  for (const [id, source] of Object.entries(style.sources)) sources[prefix + id] = withinFocus(absoluteSource(source, styleUrl), focus);
   const sprite = typeof style.sprite === 'string' ? resolveUrl(style.sprite, styleUrl) : style.sprite;
   return {
     sources,
@@ -376,6 +388,19 @@ function absoluteSource(source: SourceSpecification, base: string): SourceSpecif
   if (Array.isArray(next.tiles)) next.tiles = (next.tiles as string[]).map((t) => resolveUrl(t, base));
   if (typeof next.data === 'string') next.data = resolveUrl(next.data, base);
   return next as unknown as SourceSpecification;
+}
+
+const TILED_SOURCES = new Set(['vector', 'raster', 'raster-dem']);
+
+/**
+ * A style's tiled source requesting tiles within the focus area only. Bounds in the style
+ * take precedence over those of a TileJSON, so a source whose tile set ends inside the
+ * area may be asked for tiles beyond its end.
+ */
+function withinFocus(source: SourceSpecification, focus: Bounds | undefined): SourceSpecification {
+  if (!focus || !TILED_SOURCES.has(source.type)) return source;
+  const own = 'bounds' in source ? source.bounds : undefined;
+  return { ...source, bounds: (own && intersectBounds(own, focus)) ?? focus } as SourceSpecification;
 }
 
 function stripUndefined<T extends object>(value: T): T {

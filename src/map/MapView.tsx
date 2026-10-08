@@ -4,7 +4,7 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createEffect, createMemo, on, onCleanup, onMount, untrack } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { describeLoadError, requestUrl } from '../state/net';
-import { setView, state } from '../state/store';
+import { focusBounds, setView, state } from '../state/store';
 import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
@@ -79,7 +79,7 @@ export function MapView() {
       setMap(map);
       // Composing reads every layer setting, so any change recomposes. The style goes to
       // MapLibre as plain data: store proxies cannot be sent to its workers.
-      const layers = createMemo(() => JSON.parse(JSON.stringify(composeStyle(state.layers, assets()))));
+      const layers = createMemo(() => JSON.parse(JSON.stringify(composeStyle(state.layers, assets(), focusBounds()))));
       // A layer change carries the route lines as they are; a route change only replaces their data.
       createEffect(() => map.setStyle(withRoutes(layers(), untrack(routeLines)), { diff: true }));
       createEffect(

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cornersBounds, geojsonBounds } from './bounds';
+import { cornersBounds, geojsonBounds, intersectBounds } from './bounds';
 
 describe('geojsonBounds', () => {
   it('covers all coordinates of all features', () => {
@@ -23,5 +23,13 @@ describe('geojsonBounds', () => {
 describe('cornersBounds', () => {
   it('covers four corners', () => {
     expect(cornersBounds([[7, 47.2], [7.2, 47.2], [7.2, 47], [7, 47]])).toEqual([7, 47, 7.2, 47.2]);
+  });
+});
+
+describe('intersectBounds', () => {
+  it('gives the overlap, and nothing for bounds that only touch or lie apart', () => {
+    expect(intersectBounds([0, 0, 10, 10], [5, -5, 15, 5])).toEqual([5, 0, 10, 5]);
+    expect(intersectBounds([0, 0, 10, 10], [10, 0, 20, 10])).toBeUndefined();
+    expect(intersectBounds([0, 0, 1, 1], [5, 5, 6, 6])).toBeUndefined();
   });
 });

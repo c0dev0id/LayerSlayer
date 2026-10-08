@@ -1,7 +1,7 @@
 import { validateStyleMin } from '@maplibre/maplibre-gl-style-spec';
 import type { StyleSpecification } from 'maplibre-gl';
 import { describe, expect, it } from 'vitest';
-import { createLayer, type Layer, type LayerDraft } from '../model/layer';
+import { createLayer, type Bounds, type Layer, type LayerDraft } from '../model/layer';
 import {
   composeStyle,
   prefixImage,
@@ -13,8 +13,8 @@ import {
 
 const layer = (draft: LayerDraft, patch: Partial<Layer> = {}, id = 'L'): Layer => ({ ...createLayer(draft, [], id), ...patch });
 
-function compose(layers: Layer[], assets: Record<string, Assets> = {}): StyleSpecification {
-  const style = composeStyle(layers, new Map(Object.entries(assets)));
+function compose(layers: Layer[], assets: Record<string, Assets> = {}, focus?: Bounds): StyleSpecification {
+  const style = composeStyle(layers, new Map(Object.entries(assets)), focus);
   expect(validateStyleMin(style)).toEqual([]);
   return style;
 }
@@ -204,6 +204,52 @@ describe('composeStyle', () => {
       expect(style.sprite).toEqual([{ id: 'default', url: 'https://s.example/styles/sprites/base' }]);
       expect(style.layers.find((l) => l.id === 'B/pois')!.layout).toEqual({ 'icon-image': ['get', 'icon'] });
     });
+  });
+});
+
+describe('composeStyle with a focus area', () => {
+  const focus: Bounds = [8, 48, 9, 49];
+  const xyz = (id: string, bounds?: Bounds) =>
+    layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 }, ...(bounds && { bounds }) }, {}, id);
+
+  it('limits every layer but the bottom one to the area', () => {
+    const style = compose([xyz('A'), xyz('B'), xyz('C', [8.5, 40, 20, 48.5])], {}, focus);
+    expect(style.sources.A).not.toHaveProperty('bounds');
+    expect(style.sources.B).toMatchObject({ bounds: focus });
+    expect(style.sources.C).toMatchObject({ bounds: [8.5, 48, 9, 48.5] });
+  });
+
+  it('leaves out layers whose bounds lie outside the area, unless at the bottom', () => {
+    const style = compose([xyz('A', [0, 0, 1, 1]), xyz('B', [0, 0, 1, 1])], {}, focus);
+    expect(Object.keys(style.sources)).toEqual(['A']);
+  });
+
+  it('limits feature layers and the tiled sources of styles', () => {
+    const style = compose(
+      [
+        xyz('A'),
+        layer({ name: 'f', source: { type: 'ogc-features', url: 'https://o/collections/c/items', limit: 1000 } }, {}, 'F'),
+        layer({ name: 's', source: { type: 'style', url: 'https://s/style.json' } }, {}, 'S'),
+      ],
+      {
+        S: {
+          style: {
+            version: 8,
+            sources: {
+              tiles: { type: 'vector', url: 'tiles.json' },
+              dem: { type: 'raster-dem', tiles: ['https://d/{z}/{x}/{y}.png'], bounds: [8.5, 0, 20, 60] },
+              points: { type: 'geojson', data: 'points.geojson' },
+            },
+            layers: [],
+          },
+        },
+      },
+      focus,
+    );
+    expect(style.sources.F).toMatchObject({ bounds: focus });
+    expect(style.sources['S/tiles']).toMatchObject({ bounds: focus });
+    expect(style.sources['S/dem']).toMatchObject({ bounds: [8.5, 48, 9, 49] });
+    expect(style.sources['S/points']).not.toHaveProperty('bounds');
   });
 });
 

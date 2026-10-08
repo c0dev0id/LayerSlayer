@@ -1,5 +1,7 @@
 import { createEffect, createRoot } from 'solid-js';
-import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFile, type Layer, type LayerDraft } from '../model/layer';
+import { cornersBounds } from '../geo/bounds';
+import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFile, type Bounds, type Layer, type LayerDraft } from '../model/layer';
+import type { LngLat } from '../model/route';
 import { deleteFile } from './files';
 import { setProxy } from './net';
 import { persistedStore } from './persist';
@@ -25,6 +27,11 @@ export interface AppState {
   activeLayerId?: string;
   settings: Settings;
   view: View;
+  /**
+   * The corners of the focus area, a polygon. Every layer but the bottom one requests
+   * tiles within its bounds only.
+   */
+  focus?: LngLat[];
 }
 
 const STORAGE_KEY = 'webmap';
@@ -66,6 +73,15 @@ function isLayer(value: unknown): value is Layer {
   );
 }
 
+/** A polygon's corners: at least three positions. */
+function isPolygon(value: unknown): value is LngLat[] {
+  return (
+    Array.isArray(value) &&
+    value.length >= 3 &&
+    value.every((p) => Array.isArray(p) && p.length === 2 && p.every((v) => typeof v === 'number' && Number.isFinite(v)))
+  );
+}
+
 /**
  * Reads stored state. Layers that do not have the current shape are dropped one by one
  * rather than losing the rest; there is no migration of older shapes before version 1.0.
@@ -87,6 +103,7 @@ export function parseState(json: string): AppState {
       view && Array.isArray(view.center) && typeof view.zoom === 'number'
         ? { center: view.center, zoom: view.zoom, bearing: view.bearing ?? 0, pitch: view.pitch ?? 0 }
         : fallback.view,
+    ...(isPolygon(stored.focus) && { focus: stored.focus }),
   };
 }
 
@@ -159,4 +176,18 @@ export function setHostProxied(host: string, proxied: boolean): void {
   setState('settings', 'proxiedHosts', (hosts) =>
     proxied ? (hosts.includes(host) ? hosts : [...hosts, host]) : hosts.filter((h) => h !== host),
   );
+}
+
+/** Makes a polygon the focus area, in place of the one before. */
+export function setFocus(corners: LngLat[]): void {
+  setState('focus', corners);
+}
+
+export function clearFocus(): void {
+  setState('focus', undefined);
+}
+
+/** The bounds of the focus area, within which layers request tiles; none without one. */
+export function focusBounds(): Bounds | undefined {
+  return state.focus && cornersBounds(state.focus);
 }

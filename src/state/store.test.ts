@@ -18,6 +18,17 @@ describe('parseState', () => {
     expect(state.view).toEqual({ center: [1, 2], zoom: 3, bearing: 0, pitch: 0 });
   });
 
+  it('keeps a focus area of at least three corners', () => {
+    const corners = [
+      [1, 1],
+      [2, 1],
+      [2, 2],
+    ];
+    expect(parseState(JSON.stringify({ layers: [], focus: corners })).focus).toEqual(corners);
+    expect(parseState(JSON.stringify({ layers: [], focus: corners.slice(1) }))).not.toHaveProperty('focus');
+    expect(parseState(JSON.stringify({ layers: [], focus: [[1, 1], [2, 'x'], [2, 2]] }))).not.toHaveProperty('focus');
+  });
+
   it('keeps an empty layer list empty', () => {
     expect(parseState('{"layers":[]}').layers).toEqual([]);
   });

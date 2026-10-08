@@ -34,3 +34,12 @@ export function cornersBounds(corners: readonly (readonly [number, number])[]): 
   const lats = corners.map((c) => c[1]);
   return validBounds(Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats));
 }
+
+/** Where two bounds overlap; none when they do not. */
+export function intersectBounds(a: Bounds, b: Bounds): Bounds | undefined {
+  const west = Math.max(a[0], b[0]);
+  const south = Math.max(a[1], b[1]);
+  const east = Math.min(a[2], b[2]);
+  const north = Math.min(a[3], b[3]);
+  return west < east && south < north ? [west, south, east, north] : undefined;
+}
