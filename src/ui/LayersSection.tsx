@@ -1,7 +1,19 @@
 import { For, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
-import { canCache, isVector, keepsTiles, layerColor, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, type Layer } from '../model/layer';
+import {
+  canCache,
+  isRaster,
+  isVector,
+  keepsTiles,
+  layerColor,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  NO_ADJUSTMENTS,
+  SOURCE_KINDS,
+  type Layer,
+  type RasterAdjustments,
+} from '../model/layer';
 import { hostOf } from '../state/net';
 import { moveLayer, removeLayer, setActiveLayer, setHostProxied, state, updateLayer } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
@@ -130,6 +142,9 @@ function LayerSummary(props: { layer: Layer }) {
       <span title={`Drawn from zoom ${layer.minzoom} to ${layer.maxzoom}`}>
         z{layer.minzoom}–{layer.maxzoom}
       </span>
+      <Show when={layer.adjust}>
+        <span title="Its colours are adjusted">adjusted</span>
+      </Show>
       <Show when={keepsTiles(layer)}>
         <span title={`Keeps its tiles in this browser for ${TILE_MAX_AGE_HOURS} hours`}>cache</span>
       </Show>
@@ -137,6 +152,51 @@ function LayerSummary(props: { layer: Layer }) {
         <span title="Fetched through the CORS proxy">proxy</span>
       </Show>
     </div>
+  );
+}
+
+const percent = (value: number) => `${Math.round(value * 100)}%`;
+
+/** The sliders of a raster layer's colour adjustments, as MapLibre offers them. */
+const ADJUSTMENTS: { key: keyof RasterAdjustments; label: string; title: string; min: number; max: number; step: number; show: (value: number) => string }[] = [
+  { key: 'hue', label: 'Hue', title: 'Turns the colours around the colour wheel', min: 0, max: 360, step: 1, show: (v) => `${v}°` },
+  { key: 'saturation', label: 'Saturation', title: 'Less colour down to grey, or more', min: -1, max: 1, step: 0.01, show: percent },
+  { key: 'contrast', label: 'Contrast', title: 'Less or more contrast', min: -1, max: 1, step: 0.01, show: percent },
+  { key: 'brightnessMin', label: 'Black', title: 'The brightness black becomes; above White the image is inverted', min: 0, max: 1, step: 0.01, show: percent },
+  { key: 'brightnessMax', label: 'White', title: 'The brightness white becomes', min: 0, max: 1, step: 0.01, show: percent },
+];
+
+/** Hue, saturation, contrast and brightness range of a raster layer, folded away until wanted. */
+function Adjustments(props: { layer: Layer }) {
+  const layer = props.layer;
+  const current = () => layer.adjust ?? NO_ADJUSTMENTS;
+  // Open from the start where adjusted, read once so that Reset leaves it open.
+  const startOpen = layer.adjust !== undefined;
+  return (
+    <details class="adjust" open={startOpen}>
+      <summary class="muted">Colour adjustments</summary>
+      {ADJUSTMENTS.map((a) => (
+        <div class="row" title={a.title}>
+          <span class="muted label">{a.label}</span>
+          <input
+            class="grow"
+            type="range"
+            aria-label={`${a.label} of ${layer.name}`}
+            min={a.min}
+            max={a.max}
+            step={a.step}
+            value={current()[a.key]}
+            onInput={(e) => updateLayer(layer.id, { adjust: { ...current(), [a.key]: e.currentTarget.valueAsNumber } })}
+          />
+          <span class="value">{a.show(current()[a.key])}</span>
+        </div>
+      ))}
+      <div class="row end">
+        <button disabled={!layer.adjust} onClick={() => updateLayer(layer.id, { adjust: undefined })}>
+          Reset
+        </button>
+      </div>
+    </details>
   );
 }
 
@@ -259,6 +319,9 @@ function ActiveLayer(props: { layer: Layer }) {
           map {zoom().toFixed(1)}
         </span>
       </div>
+      <Show when={isRaster(layer.source)}>
+        <Adjustments layer={layer} />
+      </Show>
       <Show when={isVector(layer.source)}>
         <div class="row">
           <span class="muted label">Colour</span>

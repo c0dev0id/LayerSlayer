@@ -285,6 +285,15 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+.adjust summary {
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.adjust .label {
+  width: 68px;
+}
+
 .name-input,
 .field input,
 .address input[type='url'],
