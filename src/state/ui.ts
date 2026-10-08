@@ -11,6 +11,33 @@ export function showBounds(bounds: Bounds, maxZoom = 16): void {
   map()?.fitBounds(bounds, { padding: 40, maxZoom });
 }
 
+const PANEL_COLLAPSED_KEY = 'webmap-panel-collapsed';
+
+function storedPanelCollapsed(): boolean {
+  try {
+    return localStorage.getItem(PANEL_COLLAPSED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Whether the panel is folded to its header, which narrow screens offer to give the map
+ * room. This browser's convenience, kept in local storage rather than in projects.
+ */
+const [panelCollapsed, setCollapsed] = createSignal(storedPanelCollapsed());
+export { panelCollapsed };
+
+export function setPanelCollapsed(collapsed: boolean): void {
+  setCollapsed(collapsed);
+  try {
+    if (collapsed) localStorage.setItem(PANEL_COLLAPSED_KEY, '1');
+    else localStorage.removeItem(PANEL_COLLAPSED_KEY);
+  } catch {
+    // Without storage the choice lasts until the page is left.
+  }
+}
+
 /** The map's current zoom, shown next to a layer's zoom range. */
 export const [zoom, setZoom] = createSignal(0);
 

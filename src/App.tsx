@@ -8,7 +8,7 @@ import { SearchBox } from './map/SearchBox';
 import { Toolbar } from './map/Toolbar';
 import { Waypoints } from './map/Waypoints';
 import { editingRouteId } from './state/drawing';
-import { map } from './state/ui';
+import { map, panelCollapsed } from './state/ui';
 import { AddLayerDialog } from './ui/AddLayerDialog';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { DetailsDialog } from './ui/DetailsDialog';
@@ -24,7 +24,7 @@ import { WaypointDialog } from './ui/WaypointDialog';
 export function App() {
   const [adding, setAdding] = createSignal(false);
   return (
-    <div class="app" style={{ '--panel-width': `${panelWidth()}px` }}>
+    <div class="app" classList={{ 'panel-collapsed': panelCollapsed() }} style={{ '--panel-width': `${panelWidth()}px` }}>
       <aside class="panel">
         <ProjectSection />
         <FocusSection />

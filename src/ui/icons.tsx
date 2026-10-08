@@ -78,6 +78,20 @@ export const CloseIcon = () => (
   </Icon>
 );
 
+/** Fold up (Tabler's chevron-down): the panel under the map goes down out of the way. */
+export const ChevronDownIcon = () => (
+  <Icon>
+    <path d="M6 9l6 6l6 -6" />
+  </Icon>
+);
+
+/** Unfold (Tabler's chevron-up). */
+export const ChevronUpIcon = () => (
+  <Icon>
+    <path d="M6 15l6 -6l6 6" />
+  </Icon>
+);
+
 /** Search (Tabler's search). */
 export const SearchIcon = () => (
   <Icon>

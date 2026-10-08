@@ -1,15 +1,19 @@
 import { createSignal, Show } from 'solid-js';
 import { openProject, readProject, saveProject } from '../state/project';
-import { errorMessage } from '../state/ui';
+import { errorMessage, panelCollapsed, setPanelCollapsed } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { downloadBlob } from './download';
+import { ChevronDownIcon, ChevronUpIcon } from './icons';
 
 async function open(file: File): Promise<void> {
   const project = await readProject(file);
   if (await askConfirmation(`Replace the layers, routes and focus area here with those of ${file.name}?`, 'Replace')) await openProject(project);
 }
 
-/** The app's name, with saving everything to a .webmap file and opening one in its place. */
+/**
+ * The app's name, with saving everything to a .webmap file and opening one in its place;
+ * on narrow screens, where the panel lies under the map, a button folds it to this header.
+ */
 export function ProjectSection() {
   const [error, setError] = createSignal<string>();
   return (
@@ -49,6 +53,15 @@ export function ProjectSection() {
             }}
           />
         </label>
+        <button
+          class="icon panel-toggle"
+          title={panelCollapsed() ? 'Show the panel' : 'Fold the panel away, for more map'}
+          aria-label={panelCollapsed() ? 'Show the panel' : 'Fold the panel away'}
+          aria-expanded={!panelCollapsed()}
+          onClick={() => setPanelCollapsed(!panelCollapsed())}
+        >
+          {panelCollapsed() ? <ChevronUpIcon /> : <ChevronDownIcon />}
+        </button>
       </div>
       <Show when={error()}>{(message) => <p class="note error">{message()}</p>}</Show>
     </header>

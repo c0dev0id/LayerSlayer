@@ -959,6 +959,11 @@ input.swatch {
 }
 
 /* Place search over the map's top left corner, its places listed below it. */
+/* Narrow screens only: the button that folds the panel. */
+button.panel-toggle {
+  display: none;
+}
+
 .search {
   position: absolute;
   top: 10px;
@@ -1145,6 +1150,15 @@ input.swatch {
     max-height: 45vh;
     border-right: none;
     border-top: 1px solid var(--border);
+  }
+
+  /* Folded to its header, the panel leaves the map the screen. */
+  button.panel-toggle {
+    display: inline-grid;
+  }
+
+  .app.panel-collapsed .panel > :not(:first-child) {
+    display: none;
   }
 
   .hint-bar {
