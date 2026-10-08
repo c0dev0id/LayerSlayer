@@ -128,6 +128,114 @@
       "note": "Every railway line from OpenStreetMap, with stations and track details at close zoom. An overlay: transparent between the lines."
     },
     {
+      "name": "Open Infrastructure Map — power",
+      "type": "vector-tiles",
+      "url": "https://openinframap.org/map/power/{z}/{x}/{y}.pbf",
+      "region": "Global",
+      "category": "Infrastructure",
+      "note": "Power lines, towers, substations, power plants and generators from OpenStreetMap.",
+      "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
+      "maxzoom": 17,
+      "layers": [
+        "power_line",
+        "power_tower",
+        "power_portal_way",
+        "power_switch",
+        "power_compensator",
+        "power_transformer",
+        "power_substation",
+        "power_substation_point",
+        "power_plant",
+        "power_plant_point",
+        "power_generator",
+        "power_generator_area"
+      ]
+    },
+    {
+      "name": "Open Infrastructure Map — telecoms",
+      "type": "vector-tiles",
+      "url": "https://openinframap.org/map/telecoms/{z}/{x}/{y}.pbf",
+      "region": "Global",
+      "category": "Infrastructure",
+      "note": "Communication lines, masts, antennas, data centres and street cabinets from OpenStreetMap.",
+      "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
+      "maxzoom": 17,
+      "layers": [
+        "telecoms_communication_line",
+        "telecoms_mast",
+        "telecoms_antenna",
+        "telecoms_cabinet",
+        "telecoms_data_center",
+        "telecoms_data_center_point"
+      ]
+    },
+    {
+      "name": "Open Infrastructure Map — oil and gas",
+      "type": "vector-tiles",
+      "url": "https://openinframap.org/map/petroleum/{z}/{x}/{y}.pbf",
+      "region": "Global",
+      "category": "Infrastructure",
+      "note": "Oil and gas pipelines, wells and sites from OpenStreetMap.",
+      "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
+      "minzoom": 2,
+      "maxzoom": 17,
+      "layers": [
+        "petroleum_pipeline",
+        "petroleum_well",
+        "petroleum_site"
+      ]
+    },
+    {
+      "name": "Open Infrastructure Map — other pipelines",
+      "type": "vector-tiles",
+      "url": "https://openinframap.org/map/other_pipeline/{z}/{x}/{y}.pbf",
+      "region": "Global",
+      "category": "Infrastructure",
+      "note": "Pipelines for other substances, such as heat, chemicals or slurry, from OpenStreetMap.",
+      "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
+      "minzoom": 2,
+      "maxzoom": 17,
+      "layers": [
+        "other_pipeline"
+      ]
+    },
+    {
+      "name": "Open Infrastructure Map — water",
+      "type": "vector-tiles",
+      "url": "https://openinframap.org/map/water/{z}/{x}/{y}.pbf",
+      "region": "Global",
+      "category": "Infrastructure",
+      "note": "Water and wastewater pipelines, treatment plants, reservoirs, towers, wells and pumping stations from OpenStreetMap.",
+      "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
+      "minzoom": 3,
+      "maxzoom": 17,
+      "layers": [
+        "water_pipeline",
+        "pressurised_waterway",
+        "water_treatment_plant_polygon",
+        "water_treatment_plant_point",
+        "wastewater_plant_polygon",
+        "wastewater_plant_point",
+        "water_reservoir",
+        "water_reservoir_point",
+        "water_tower",
+        "water_well",
+        "pumping_station_polygon",
+        "pumping_station_point",
+        "water_cabinet"
+      ]
+    },
+    {
+      "name": "NASA Black Marble 2024 — Earth at night",
+      "type": "xyz",
+      "url": "https://openinframap.org/black-marble-2024/{z}/{x}/{y}.webp",
+      "region": "Global",
+      "category": "Aerial",
+      "note": "City and industry lights seen from space, a 2024 composite of the VIIRS night-time imagery, as served by Open Infrastructure Map.",
+      "attribution": "<a href=\"https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/VNP46A4/\">NASA Black Marble 2024</a>",
+      "maxzoom": 8
+    },
+    {
       "name": "EMODnet — bathymetry",
       "type": "wmts",
       "url": "https://tiles.emodnet-bathymetry.eu/wmts/1.0.0/WMTSCapabilities.xml",
