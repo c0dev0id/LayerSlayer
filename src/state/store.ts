@@ -1,7 +1,7 @@
 import { createEffect, createRoot } from 'solid-js';
 import { cornersBounds } from '../geo/bounds';
 import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFile, type Bounds, type Layer, type LayerDraft } from '../model/layer';
-import type { LngLat } from '../model/route';
+import { isLngLat, type LngLat } from '../model/route';
 import { deleteFile } from './files';
 import { setProxy } from './net';
 import { persistedStore } from './persist';
@@ -75,11 +75,7 @@ function isLayer(value: unknown): value is Layer {
 
 /** A polygon's corners: at least three positions. */
 function isPolygon(value: unknown): value is LngLat[] {
-  return (
-    Array.isArray(value) &&
-    value.length >= 3 &&
-    value.every((p) => Array.isArray(p) && p.length === 2 && p.every((v) => typeof v === 'number' && Number.isFinite(v)))
-  );
+  return Array.isArray(value) && value.length >= 3 && value.every(isLngLat);
 }
 
 /**

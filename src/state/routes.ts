@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 import { reconcile, unwrap } from 'solid-js/store';
-import { PROFILES, type LngLat, type Profile, type Route, type RouteData, type Waypoint } from '../model/route';
+import { isLngLat, PROFILES, type LngLat, type Profile, type Route, type RouteData, type Waypoint } from '../model/route';
 import * as edit from '../routing/routeEdit';
 import { History } from './history';
 import { persistedStore } from './persist';
@@ -12,9 +12,6 @@ import { persistedStore } from './persist';
  */
 
 const STORAGE_KEY = 'webmap-routes';
-
-const isLngLat = (value: unknown): value is LngLat =>
-  Array.isArray(value) && value.length === 2 && value.every((n) => typeof n === 'number' && Number.isFinite(n));
 
 function isRoute(value: unknown): value is Route {
   const r = value as Route;

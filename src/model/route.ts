@@ -1,6 +1,9 @@
 /** A position as longitude and latitude in degrees. */
 export type LngLat = [number, number];
 
+export const isLngLat = (value: unknown): value is LngLat =>
+  Array.isArray(value) && value.length === 2 && value.every((n) => typeof n === 'number' && Number.isFinite(n));
+
 /** The OSRM profiles the routing server offers. */
 export type Profile = 'car' | 'bike' | 'foot';
 
