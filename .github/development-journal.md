@@ -420,6 +420,17 @@ It is a static single-page app on GitHub Pages; there is no server component.
   the base map is shaded and overlays are not. It reads the same tiles through a second
   source, as MapLibre advises for terrain and hillshade, and is lighter than MapLibre's
   default (exaggeration 0.3), which darkened a raster base map's labels in the Alps.
+- **Spot details pick what matters on the move.** One Overpass query (`around`, about 40
+  pixels at the zoom, 15 to 250 m) asks for drivable ways (motorways down to tracks,
+  paths and bridleways; footways and cycleways are left out), places to go to (amenity,
+  shop, tourism, craft, office, healthcare; leisure and historic only with a name) and
+  barrier nodes. Street furniture (benches, bins, vending machines, post boxes, …), kerbs
+  and unnamed information boards are dropped. Of each kind the nearest is kept, measured
+  in a local plane to nodes, segments and inside closed rings, and the up to three
+  results are shown nearest first, so a click near a gate on a track shows both. Tags
+  become words (`motor_vehicle=forestry` is "Motor vehicles: Forestry only"), with
+  Tabler icons for the lines and the OSM preset's icon where the element matches one;
+  the link to openstreetmap.org shows everything else.
 - **No browser dialogs.** Questions such as deleting a route are asked in the app's own
   modal `<dialog>` (`ui/confirm.ts`, `ConfirmDialog`), never with `confirm()`: after a
   few native dialogs, browsers offer to silence the page's dialogs, and once silenced
@@ -461,8 +472,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
-- A menu for any spot on the map: copy its coordinates, open it in Google Maps or Street
-  View (Google's documented Maps URLs, no key).
+- A menu for any spot on the map: its details from OSM (nearest road or trail, place and
+  barrier, in words), its coordinates, Google Maps and Street View (Google's documented
+  Maps URLs, no key).
 - 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched by a button
   on the map.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on

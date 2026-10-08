@@ -79,7 +79,12 @@ in the browser.
   where countries publish detailed elevation, such as much of Europe. Tilt and turn the
   map with the right mouse button, Ctrl and drag, or two fingers.
 - **Right-click** a spot on the map (long press on touch screens) to copy its coordinates
-  as `lat,lon`, or to open it in Google Maps or Google Street View in a new tab.
+  as `lat,lon`, or to open it in Google Maps or Google Street View in a new tab. *Show
+  details* asks OpenStreetMap what is there and shows, nearest first, the nearest road or
+  trail (type, name, speed limit, one way or not, surface, track grade, access), place
+  (type, name, address, phone, website, opening hours) and barrier (opening hours, lock,
+  access) within about 40 pixels, in words rather than tags. Benches, bins, kerbs, fields
+  and the like are left out; each entry links to all its tags on openstreetmap.org.
 - **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
   search, preferring those in view. Enter searches; the first place found gets a pin and the
   map flies to it, and the list below offers the other places found. × clears the search
