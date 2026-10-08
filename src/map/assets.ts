@@ -1,5 +1,5 @@
 import { createEffect, createRoot, createSignal } from 'solid-js';
-import type { Layer } from '../model/layer';
+import { storedFile, type Layer } from '../model/layer';
 import { loadSymbology } from './arcgisIcons';
 import { loadStyle } from '../services/style';
 import { loadFile } from '../state/files';
@@ -10,7 +10,8 @@ import type { Assets } from './compose';
 /** What a layer needs loaded before it can be drawn as set, as a key that changes when that changes. */
 function assetKey({ source, ownStyle }: Layer): string | undefined {
   if (source.type === 'style') return `style:${source.url}`;
-  if ((source.type === 'geojson' || source.type === 'image') && 'file' in source.data) return `file:${source.data.file}`;
+  const file = storedFile(source);
+  if (file) return `file:${file}`;
   if (source.type === 'arcgis-features' && ownStyle) return `symbols:${source.url}`;
   return undefined;
 }
@@ -34,10 +35,8 @@ export function assets(): ReadonlyMap<string, Assets> {
 async function load({ id, source }: Layer): Promise<Assets> {
   if (source.type === 'style') return { style: await loadStyle(source.url) };
   if (source.type === 'arcgis-features') return loadSymbology(source, `${id}:`);
-  if ((source.type === 'geojson' || source.type === 'image') && 'file' in source.data) {
-    return { url: URL.createObjectURL(await loadFile(source.data.file)) };
-  }
-  return {};
+  const file = storedFile(source);
+  return file ? { url: URL.createObjectURL(await loadFile(file)) } : {};
 }
 
 function release(entry: Entry): void {

@@ -141,8 +141,9 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
       if (!url) return undefined;
       return raster(layer, { type: 'image', url, coordinates: src.coordinates });
     }
-    case 'geojson': {
-      const data = 'url' in src.data ? src.data.url : assets?.url;
+    case 'geojson':
+    case 'osm-query': {
+      const data = src.type === 'geojson' && 'url' in src.data ? src.data.url : assets?.url;
       if (!data) return undefined;
       return vector(layer, { type: 'geojson', data, ...(layer.attribution && { attribution: layer.attribution }) });
     }

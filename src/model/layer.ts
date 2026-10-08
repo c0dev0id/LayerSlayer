@@ -127,6 +127,20 @@ export interface CogSource {
   ramp?: { min: number; max: number };
 }
 
+/**
+ * OpenStreetMap features an Overpass query found in the focus area, kept as a GeoJSON file.
+ * Updating runs the query again, in the focus area of that time.
+ */
+export interface OsmQuerySource {
+  type: 'osm-query';
+  /** Tag filters as services/overpass reads them; features matching any of them were found. */
+  filters: string[];
+  /** The stored GeoJSON file. */
+  file: string;
+  /** When the query ran, as an ISO 8601 time. */
+  queried: string;
+}
+
 /** A georeferenced picture, e.g. a rendered GeoPDF page. */
 export interface ImageSource {
   type: 'image';
@@ -144,6 +158,7 @@ export type LayerSource =
   | WfsSource
   | OgcFeaturesSource
   | GeoJsonSource
+  | OsmQuerySource
   | StyleSource
   | CogSource
   | ImageSource;
@@ -236,6 +251,7 @@ export const SOURCE_KINDS: Record<LayerSource['type'], SourceKind> = {
   wfs: { label: 'WFS', vector: true, cache: true },
   'ogc-features': { label: 'OGC API – Features', vector: true, cache: true },
   geojson: { label: 'GeoJSON', vector: true },
+  'osm-query': { label: 'OSM query', vector: true },
   style: { label: 'MapLibre style' },
   cog: { label: 'Cloud Optimized GeoTIFF', raster: true },
   image: { label: 'Georeferenced image', raster: true },
@@ -265,6 +281,7 @@ export function canCache(source: LayerSource): boolean {
 
 /** The file a layer keeps in the browser, if any. */
 export function storedFile(source: LayerSource): string | undefined {
+  if (source.type === 'osm-query') return source.file;
   return (source.type === 'geojson' || source.type === 'image') && 'file' in source.data ? source.data.file : undefined;
 }
 

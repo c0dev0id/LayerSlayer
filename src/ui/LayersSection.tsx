@@ -14,6 +14,7 @@ import {
   type Layer,
   type RasterAdjustments,
 } from '../model/layer';
+import { OVERPASS_URL } from '../services/overpass';
 import { hostOf } from '../state/net';
 import { moveLayer, removeLayer, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
@@ -279,6 +280,8 @@ function sourceUrl(layer: Layer): string | undefined {
     case 'geojson':
     case 'image':
       return 'url' in source.data ? source.data.url : undefined;
+    case 'osm-query':
+      return OVERPASS_URL;
     default:
       return source.url;
   }
