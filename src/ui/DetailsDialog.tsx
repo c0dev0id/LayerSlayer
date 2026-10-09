@@ -3,7 +3,7 @@ import { loadOsmFeatures, matchingFeature, type OsmFeature } from '../library/os
 import { latLonText } from '../map/placeLinks';
 import type { LngLat } from '../model/route';
 import type { DetailKind, Details, RowIcon } from '../services/osmDetails';
-import { closeDetails, details, detailsRequest, type LayerFeature } from '../state/details';
+import { closeDetails, details, detailsRequest, osmRequest, type LayerFeature } from '../state/details';
 import { errorMessage, map } from '../state/ui';
 import {
   BarrierIcon,
@@ -54,16 +54,10 @@ const KIND_ICONS: Record<DetailKind, () => JSX.Element> = { road: RoadIcon, poi:
 export function DetailsDialog() {
   let dialog!: HTMLDialogElement;
   showWhile(() => dialog, () => detailsRequest() !== undefined);
-  const osm = () => {
-    const request = detailsRequest();
-    return request?.kind === 'osm' ? request : undefined;
-  };
   const tapped = () => {
     const request = detailsRequest();
     return request?.kind === 'features' ? request.features : undefined;
   };
-  // The OSM presets give places and barriers their icons.
-  const [presets] = createResource(() => osm() !== undefined || undefined, loadOsmFeatures);
   // A spot under the sheet comes out beside it, so that its highlight shows.
   createEffect(on(detailsRequest, (request) => request && requestAnimationFrame(() => keepInView(request.spot, dialog))));
 
@@ -92,13 +86,13 @@ export function DetailsDialog() {
           </div>
         )}
       </Show>
-      <Show when={osm()}>
+      <Show when={osmRequest()}>
         {(r) => (
           <>
             <p class="muted hint">
               Near {latLonText(r().spot)}, within {Math.round(r().radius)} m
             </p>
-            <OsmDetails presets={presets()} />
+            <OsmDetails />
           </>
         )}
       </Show>
@@ -107,7 +101,9 @@ export function DetailsDialog() {
 }
 
 /** What OpenStreetMap has around the spot, as it comes in. */
-function OsmDetails(props: { presets: OsmFeature[] | undefined }) {
+function OsmDetails() {
+  // The OSM presets give places and barriers their icons.
+  const [presets] = createResource(loadOsmFeatures);
   return (
     <>
       <div class="details">
@@ -121,7 +117,7 @@ function OsmDetails(props: { presets: OsmFeature[] | undefined }) {
           <Match when={details()?.length === 0}>
             <p class="muted">No road or trail, place or barrier here. Zoom in closer, or right-click nearer to one.</p>
           </Match>
-          <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={props.presets} />}</For>}</Match>
+          <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={presets()} />}</For>}</Match>
         </Switch>
       </div>
       <p class="muted hint">Data © OpenStreetMap contributors, found with the Overpass API.</p>
@@ -146,19 +142,40 @@ function FeatureCard(props: { feature: LayerFeature }) {
         <br />
         <span class="muted">{props.feature.layer}</span>
       </div>
-      <Show when={props.feature.rows.length > 0}>
-        <dl class="detail-rows">
-          <For each={props.feature.rows}>
-            {(row) => (
-              <>
-                <dt>{row.label}</dt>
-                <dd>{row.value}</dd>
-              </>
-            )}
-          </For>
-        </dl>
-      </Show>
+      <DetailRows rows={props.feature.rows} />
     </section>
+  );
+}
+
+/** What something is, line by line: a label, with an icon where it has one, and the value, linked where it leads somewhere. */
+function DetailRows(props: { rows: readonly { icon?: RowIcon; label: string; value: string; href?: string }[] }) {
+  return (
+    <Show when={props.rows.length > 0}>
+      <dl class="detail-rows">
+        <For each={props.rows}>
+          {(row) => {
+            const Icon = row.icon && ROW_ICONS[row.icon];
+            return (
+              <>
+                <dt>
+                  {Icon && <Icon />}
+                  {row.label}
+                </dt>
+                <dd>
+                  <Show when={row.href} fallback={row.value}>
+                    {(href) => (
+                      <a href={href()} target="_blank" rel="noopener">
+                        {row.value}
+                      </a>
+                    )}
+                  </Show>
+                </dd>
+              </>
+            );
+          }}
+        </For>
+      </dl>
+    </Show>
   );
 }
 
@@ -201,32 +218,7 @@ function DetailCard(props: { details: Details; presets: OsmFeature[] | undefined
         </span>
         <span class="muted distance">{Math.round(props.details.distance)} m</span>
       </div>
-      <Show when={props.details.rows.length > 0}>
-        <dl class="detail-rows">
-          <For each={props.details.rows}>
-            {(row) => {
-              const Icon = ROW_ICONS[row.icon];
-              return (
-                <>
-                  <dt>
-                    <Icon />
-                    {row.label}
-                  </dt>
-                  <dd>
-                    <Show when={row.href} fallback={row.value}>
-                      {(href) => (
-                        <a href={href()} target="_blank" rel="noopener">
-                          {row.value}
-                        </a>
-                      )}
-                    </Show>
-                  </dd>
-                </>
-              );
-            }}
-          </For>
-        </dl>
-      </Show>
+      <DetailRows rows={props.details.rows} />
       <a class="muted osm-link" href={props.details.url} target="_blank" rel="noopener">
         All of it on OpenStreetMap
       </a>

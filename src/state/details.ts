@@ -49,16 +49,16 @@ export function closeDetails(): void {
   setDetailsRequest(undefined);
 }
 
-/** What OpenStreetMap has around the spot, while those details are open. */
-export const [details] = createRoot(() =>
-  createResource(
-    () => {
-      const request = detailsRequest();
-      return request?.kind === 'osm' ? request : undefined;
-    },
-    ({ spot, radius }) => findDetails(spot, radius),
-  ),
+/** The details asked of OpenStreetMap, while they are open. */
+export const osmRequest = createRoot(() =>
+  createMemo(() => {
+    const request = detailsRequest();
+    return request?.kind === 'osm' ? request : undefined;
+  }),
 );
+
+/** What OpenStreetMap has around the spot, while those details are open. */
+export const [details] = createRoot(() => createResource(osmRequest, ({ spot, radius }) => findDetails(spot, radius)));
 
 const NOTHING: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
 
