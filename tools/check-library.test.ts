@@ -81,12 +81,9 @@ async function parse(entry: Entry, body: string, url: string): Promise<ServiceIn
 
 async function check(entry: Entry): Promise<string> {
   const url = documentUrl(entry).replace(/^http:/, 'https:');
-  // A file is downloaded by a link, which needs no CORS: it only has to be there.
-  if (entry.type === 'file') {
-    const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(30_000) }).catch((error: Error) => error);
-    return response instanceof Error ? `failed: ${response.message}` : `download, HTTP ${response.status}`;
-  }
   try {
+    // A file is downloaded by a link, which needs no CORS: it only has to be there.
+    if (entry.type === 'file') return `download, HTTP ${(await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(30_000) })).status}`;
     // OGC APIs answer HTML without Accept; a COG is read only as far as its header.
     const headers = {
       Origin: ORIGIN,

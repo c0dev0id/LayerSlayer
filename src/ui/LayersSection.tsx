@@ -1,4 +1,4 @@
-import { createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { layerFeatures } from '../map/layerFeatures';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
@@ -526,13 +526,11 @@ function ActiveLayer(props: { layer: Layer }) {
         </Show>
         <LabelRow layer={layer} />
       </Show>
-      <Show when={layer.source.type === 'geojson' ? layer.source.query : undefined}>
-        {(query) => <OsmQueryRows id={layer.id} query={query()} />}
-      </Show>
-      {/* An OSM query's file is updated by running the query again. */}
-      <Show when={!(layer.source.type === 'geojson' && layer.source.query) && fileResource(layer.source)}>
-        {(file) => <FileRows layer={layer} file={file()} />}
-      </Show>
+      {/* An OSM query's file is updated by running the query again, other files replaced. */}
+      <Switch>
+        <Match when={layer.source.type === 'geojson' && layer.source.query}>{(query) => <OsmQueryRows id={layer.id} query={query()} />}</Match>
+        <Match when={fileResource(layer.source)}>{(file) => <FileRows layer={layer} file={file()} />}</Match>
+      </Switch>
       <div class="row">
         <span class="muted label">Source</span>
         <span class="grow name" title={sourceUrl(layer) ?? fileName()}>
