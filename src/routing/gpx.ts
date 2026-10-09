@@ -22,7 +22,8 @@ const cleanPoints = (points: readonly LngLat[]) => withoutRepeats(points.map(rou
  * Routes and waypoints from a GPX file. A GPX route keeps all its points and each leg is
  * routed with `profile`; a leg the routing cannot find stays unrouted until one of its
  * points moves. A track is simplified to at most MAX_TRACK_POINTS joined by straight
- * lines, so that it keeps its shape. Unnamed entries are named after the file.
+ * lines, so that it keeps its shape, and so is a route with the course Garmin calculated
+ * for it, which is as good as a track. Unnamed entries are named after the file.
  *
  * GPX ties waypoints to no route or track, so they belong to the file's first route; a file
  * of waypoints alone becomes a route without points, named after the file, to hold them.
@@ -32,7 +33,7 @@ export function gpxToRouteData(
   options: { fileName: string; profile: Profile; existing: readonly Route[]; newId: () => string },
 ): RouteData {
   const lines: { name?: string | undefined; points: LngLat[]; routed: boolean }[] = [
-    ...gpx.routes.map((r) => ({ ...r, routed: true })),
+    ...gpx.routes.map((r) => (r.course ? { name: r.name, points: r.course, routed: false } : { name: r.name, points: r.points, routed: true })),
     ...gpx.tracks.map((t) => ({ name: t.name, points: t.segments.flat(), routed: false })),
   ].filter((l) => l.points.length > 0);
   // Waypoints without a route or track get a route of their own, without points.

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { LngLat, Route } from '../model/route';
 import { parseGpx } from '../services/gpx';
+import GARMIN_ROUTE from '../services/fixtures/gpx-garmin-route.gpx?raw';
 import { gpxToRouteData, MAX_TRACK_POINTS, routeTracks } from './gpx';
 
 const decode = (geometry: string): LngLat[] => JSON.parse(geometry);
@@ -53,6 +54,18 @@ describe('gpxToRouteData', () => {
       ['Waypoint 2', 'No name'],
     ]);
     expect(data.waypoints.every((w) => w.routeId === data.routes[0]!.id)).toBe(true);
+  });
+
+  it("takes a route with Garmin's calculated course as a track, routing none of it", () => {
+    const [garmin, plain] = gpxToRouteData(parseGpx(GARMIN_ROUTE), options).routes;
+    expect(garmin!.name).toBe('Pass road');
+    expect(garmin!.points.map((p) => [p.lngLat, p.straight === true])).toEqual([
+      [[11, 48], false],
+      [[11.1, 48.1], true],
+      [[11.1, 48.2], true],
+      [[11.2, 48.3], true],
+    ]);
+    expect(plain!.points.map((p) => p.straight === true)).toEqual([false, false]);
   });
 
   it('puts waypoints without a route or track into a route of their own, named after the file', () => {

@@ -1,5 +1,5 @@
 import type { LngLat, Waypoint } from '../model/route';
-import { children, parseXml, text } from './xml';
+import { child, children, parseXml, text } from './xml';
 
 /** GPX 1.1 out; waypoints, routes and tracks of GPX 1.0 and 1.1 in. */
 
@@ -48,7 +48,8 @@ export function toGpx(name: string, waypoints: readonly Waypoint[], tracks: read
 /** What a GPX file holds: waypoints, routes (`rte`) and tracks (`trk`) with their segments. */
 export interface GpxContent {
   waypoints: { lngLat: LngLat; name?: string; description?: string }[];
-  routes: { name?: string; points: LngLat[] }[];
+  /** `course` is the line a Garmin device or BaseCamp calculated for the route, where the file has it. */
+  routes: { name?: string; points: LngLat[]; course?: LngLat[] }[];
   tracks: { name?: string; segments: LngLat[][] }[];
 }
 
@@ -62,6 +63,21 @@ function position(element: Element): LngLat | undefined {
 
 const positions = (elements: Element[]) => elements.map(position).filter((p): p is LngLat => p !== undefined);
 
+/** The points Garmin's extension gives a route point for the way on to the next (`gpxx:RoutePointExtension`, `gpxx:rpt`). */
+function garminShape(rtept: Element): Element[] {
+  const extension = child(rtept, 'extensions', 'RoutePointExtension');
+  return extension ? children(extension, 'rpt') : [];
+}
+
+/** A route from its points, with the course Garmin calculated where its points carry one. */
+function route(rte: Element): GpxContent['routes'][number] {
+  const rtepts = children(rte, 'rtept');
+  const name = text(rte, 'name');
+  const points = positions(rtepts);
+  if (!rtepts.some((p) => garminShape(p).length > 0)) return { name, points };
+  return { name, points, course: positions(rtepts.flatMap((p) => [p, ...garminShape(p)])) };
+}
+
 /** Reads a GPX 1.0 or 1.1 document. */
 export function parseGpx(xml: string): GpxContent {
   const root = parseXml(xml, 'This is not a GPX file.', 'gpx');
@@ -70,7 +86,7 @@ export function parseGpx(xml: string): GpxContent {
       const lngLat = position(w);
       return lngLat ? [{ lngLat, name: text(w, 'name'), description: text(w, 'desc') ?? text(w, 'cmt') }] : [];
     }),
-    routes: children(root, 'rte').map((r) => ({ name: text(r, 'name'), points: positions(children(r, 'rtept')) })),
+    routes: children(root, 'rte').map(route),
     tracks: children(root, 'trk').map((t) => ({
       name: text(t, 'name'),
       segments: children(t, 'trkseg').map((segment) => positions(children(segment, 'trkpt'))),
@@ -81,10 +97,13 @@ export function parseGpx(xml: string): GpxContent {
 /**
  * The tracks of a GPX document as GeoJSON, one feature per track named by its `name`:
  * a line, or a multi-line where the track has several segments. Segments of fewer than
- * two points are left out; routes and waypoints are not read.
+ * two points are left out. Routes with the course Garmin calculated for them are as good
+ * as tracks and come first; other routes and the waypoints are not read.
  */
 export function gpxTracksGeoJson(xml: string): GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.MultiLineString> {
-  const features = parseGpx(xml).tracks.flatMap((track) => {
+  const gpx = parseGpx(xml);
+  const courses = gpx.routes.flatMap((r) => (r.course ? [{ name: r.name, segments: [r.course] }] : []));
+  const features = [...courses, ...gpx.tracks].flatMap((track) => {
     const segments = track.segments.filter((line) => line.length >= 2);
     if (segments.length === 0) return [];
     const geometry: GeoJSON.LineString | GeoJSON.MultiLineString =

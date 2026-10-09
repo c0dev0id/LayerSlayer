@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import GARMIN_ROUTE from './fixtures/gpx-garmin-route.gpx?raw';
 import { gpxTracksGeoJson, parseGpx, toGpx } from './gpx';
 
 const time = new Date('2026-10-05T12:00:00Z');
@@ -142,6 +143,24 @@ describe('parseGpx', () => {
     ]);
   });
 
+  it("reads the course Garmin calculated for a route from its route points' extensions", () => {
+    const [garmin, plain] = parseGpx(GARMIN_ROUTE).routes;
+    expect(garmin).toEqual({
+      name: 'Pass road',
+      points: [
+        [11, 48],
+        [11.2, 48.3],
+      ],
+      course: [
+        [11, 48],
+        [11.1, 48.1],
+        [11.1, 48.2],
+        [11.2, 48.3],
+      ],
+    });
+    expect(plain).not.toHaveProperty('course');
+  });
+
   it('reads GPX 1.0 and documents without a namespace', () => {
     const gpx = parseGpx(
       '<gpx version="1.0" xmlns="http://www.topografix.com/GPX/1/0"><trk><trkseg><trkpt lat="1" lon="2"/></trkseg></trk></gpx>',
@@ -192,6 +211,24 @@ describe('gpxTracksGeoJson', () => {
               [6, 5],
               [8, 7],
             ],
+          ],
+        },
+      },
+    ]);
+  });
+
+  it("draws a route with Garmin's calculated course like a track", () => {
+    expect(gpxTracksGeoJson(GARMIN_ROUTE).features).toEqual([
+      {
+        type: 'Feature',
+        properties: { name: 'Pass road' },
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [11, 48],
+            [11.1, 48.1],
+            [11.1, 48.2],
+            [11.2, 48.3],
           ],
         },
       },
