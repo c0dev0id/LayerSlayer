@@ -184,7 +184,7 @@ describe('composeStyle', () => {
     expect(style.glyphs).toBe('https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf');
     expect(style.layers[4]).toMatchObject({
       type: 'symbol',
-      layout: { 'text-field': ['to-string', ['get', 'name']], 'text-font': ['Noto Sans Regular'], 'symbol-placement': 'line', 'text-offset': [0, -(0.5 + (1.25 + 3) / 12)] },
+      layout: { 'text-field': ['to-string', ['get', 'name']], 'text-font': ['Noto Sans Regular'], 'symbol-placement': 'line', 'text-offset': [0, -(0.5 + (5 + 2) / 12)] },
       paint: { 'text-halo-color': '#ffffff', 'text-opacity': 0.8 },
     });
     // Beside the dot, or beside a larger icon.

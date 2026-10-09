@@ -10,6 +10,8 @@ import { iconSize, type MapIcon } from '../model/icon';
 import {
   keepsTiles,
   layerColor,
+  LINE_WIDTH,
+  MAX_LINE_WIDTH,
   MAX_ZOOM,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
@@ -119,7 +121,6 @@ const LABEL_FONT = ['Noto Sans Regular'];
 interface Fragment {
   sources: Record<string, SourceSpecification>;
   layers: LayerSpecification[];
-  glyphs?: string;
   sprite?: SpriteSpecification;
 }
 
@@ -146,10 +147,16 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     return layer.visible && !(within && layer.bounds && !intersectBounds(layer.bounds, within));
   };
   // The first style drawn with fonts brings the map's font source, and the labels' font.
-  const fontStyle = layers
-    .map((layer, index) => (layer.source.type === 'style' && drawn(layer, index) ? assets.get(layer.id)?.style : undefined))
-    .find((s) => s?.glyphs);
-  const labelFont = (fontStyle && styleFont(fontStyle)) ?? LABEL_FONT;
+  let labelFont = LABEL_FONT;
+  for (const [index, layer] of layers.entries()) {
+    const { source } = layer;
+    if (source.type !== 'style' || !drawn(layer, index)) continue;
+    const fonts = assets.get(layer.id)?.style;
+    if (!fonts?.glyphs) continue;
+    style.glyphs = resolveUrl(fonts.glyphs, source.url);
+    labelFont = styleFont(fonts) ?? LABEL_FONT;
+    break;
+  }
   for (const [index, layer] of layers.entries()) {
     if (!drawn(layer, index)) continue;
     const within = withinOf(index);
@@ -171,7 +178,6 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     for (const [id, source] of Object.entries(part.sources)) style.sources[id] = withinFocus(source, within);
     style.layers.push(...partLayers);
     if (index === 0) aboveBottom = style.layers.length;
-    if (part.glyphs && !style.glyphs) style.glyphs = part.glyphs;
   }
   if (sprites.length > 0) style.sprite = sprites;
   if (!style.glyphs && style.layers.some(hasText)) style.glyphs = LABEL_GLYPHS;
@@ -400,9 +406,6 @@ const POINT = ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]] as
  */
 const LINE_DASHES: Record<LineDash, number[]> = { dashed: [2, 3], 'long-dashed': [5, 4], dotted: [0, 2] };
 
-/** Width of lines in pixels where the layer sets none. */
-const LINE_WIDTH = 2.5;
-
 /** Share of a polygon's fill against its outline, so what lies below stays readable. */
 const FILL_SHARE = 0.25;
 
@@ -452,6 +455,12 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
 const LABEL_SIZE = 12;
 
 /**
+ * How far line labels lie beside their line, in ems: clear of the widest line, so that a
+ * change of width only repaints the line instead of laying out its labels again.
+ */
+const LINE_LABEL_OFFSET = 0.5 + (MAX_LINE_WIDTH / 2 + 2) / LABEL_SIZE;
+
+/**
  * A feature property written beside the features: along lines, and next to the dot or icon
  * of points and areas, on whichever side has room. Dark text ringed in white reads on any
  * base map; features without the property are left without a label.
@@ -466,8 +475,7 @@ function labels(layer: Layer, key: string, base: LayerBase, font: string[]): Lay
       id: `${layer.id}/line-label`,
       type: 'symbol',
       filter: LINE as never,
-      // Beside the line rather than over it, clear of its width.
-      layout: { ...text, 'symbol-placement': 'line', 'text-offset': [0, -(0.5 + ((layer.lineWidth ?? LINE_WIDTH) / 2 + 3) / LABEL_SIZE)] },
+      layout: { ...text, 'symbol-placement': 'line', 'text-offset': [0, -LINE_LABEL_OFFSET] },
       paint,
     },
     {
@@ -606,7 +614,6 @@ function fromStyle(layer: Layer, style: StyleSpecification, styleUrl: string): F
       );
       return [stripUndefined(adjusted)];
     }),
-    ...(style.glyphs && { glyphs: resolveUrl(style.glyphs, styleUrl) }),
     ...(sprite && { sprite }),
   };
 }

@@ -10,6 +10,7 @@ import {
   isVector,
   keepsTiles,
   layerColor,
+  LINE_WIDTH,
   MAX_LINE_WIDTH,
   MAX_ZOOM,
   MIN_LINE_WIDTH,
@@ -508,10 +509,10 @@ function ActiveLayer(props: { layer: Layer }) {
             min={MIN_LINE_WIDTH}
             max={MAX_LINE_WIDTH}
             step="0.5"
-            value={layer.lineWidth ?? 2.5}
+            value={layer.lineWidth ?? LINE_WIDTH}
             onInput={(e) => updateLayer(layer.id, { lineWidth: e.currentTarget.valueAsNumber })}
           />
-          <span class="value">{layer.lineWidth ?? 2.5} px</span>
+          <span class="value">{layer.lineWidth ?? LINE_WIDTH} px</span>
         </div>
         <div class="row" title="Marks points and areas with an icon on a disc of the layer's colour">
           <span class="muted label">Icon</span>
