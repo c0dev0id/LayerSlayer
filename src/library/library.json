@@ -578,7 +578,7 @@
       "type": "wms",
       "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_Archaeologische_Kulturdenkmale_BW?SERVICE=WMS&REQUEST=GetCapabilities",
       "region": "Germany",
-      "category": "POI",
+      "category": "History",
       "note": "Recorded archaeological monuments — forts, burial grounds, earthworks."
     },
     {
@@ -1178,6 +1178,70 @@
       "region": "Germany",
       "category": "POI",
       "note": "Hospitals of North Rhine-Westphalia from an OGC API – Features service."
+    },
+    {
+      "name": "Berlin — the Berlin Wall, 1989",
+      "type": "wms",
+      "url": "https://gdi.berlin.de/services/wms/berlinermauer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "The GDR border installations as traced from an aerial photo of 25 April 1989: border wall, rear wall or fence, border strip, with the photo itself."
+    },
+    {
+      "name": "Berlin — the Berlin Wall, 1989 (WFS)",
+      "type": "wfs",
+      "url": "https://gdi.berlin.de/services/wfs/berlinermauer?SERVICE=WFS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "The walls, the border strip and the political border as features, to colour and tap."
+    },
+    {
+      "name": "BKG — GDR topographic map 1:200 000",
+      "type": "wms",
+      "url": "https://sgx.geodatenzentrum.de/wms_tk200_ddr?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "Last editions of the GDR map, 1974–1989: the restricted edition for state and army (Ausgabe Staat) and the public one (Ausgabe für die Volkswirtschaft)."
+    },
+    {
+      "name": "Brandenburg — Reich topographic map 1:25 000",
+      "type": "wms",
+      "url": "https://isk.geobasis-bb.de/mapproxy/dr25/service/wms?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "Messtischblätter of Brandenburg and Berlin, first surveyed from 1875; many sheets were updated in the 1930s and 1940s."
+    },
+    {
+      "name": "North Rhine-Westphalia — topographic 1:25 000, 1936–1945",
+      "type": "wms",
+      "url": "https://www.wms.nrw.de/geobasis/wms_nw_tk25_1936-1945?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "The state's map sheets as updated from 1936 to 1945; drawn only when zoomed in closely."
+    },
+    {
+      "name": "Saxony — historical maps 1:25 000",
+      "type": "wms",
+      "url": "https://geodienste.sachsen.de/wms_geosn_hist/guest?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "Messtischblatt before 1945, the GDR's restricted state edition of 1976–1989, and the map from 1990."
+    },
+    {
+      "name": "Bavaria — monuments",
+      "type": "wms",
+      "url": "https://geoservices.bayern.de/od/wms/gdi/v1/denkmal?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "Listed buildings, archaeological sites and ensembles of the Bavarian monument list, updated daily."
+    },
+    {
+      "name": "Saxony — cultural monuments and protected areas",
+      "type": "wms",
+      "url": "https://geodienste.sachsen.de/iwms_gsz_schutzgebiete/guest?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "Cultural monuments as points, lines and areas, beside the state's nature reserves and protected landscapes."
     },
     {
       "name": "VersaTiles — vector tile layers",
