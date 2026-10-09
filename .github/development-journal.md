@@ -280,6 +280,17 @@ It is a static single-page app on GitHub Pages; there is no server component.
     were chosen by how often they are used in Germany (taginfo): `military=bunker` about
     10 800 times, `bunker_type=munitions` 2 500, `bunker_type=hardened_aircraft_shelter`
     440, and about 120 features with a US Army or US Air Force `operator`.
+  - Cold War sites are often in OpenStreetMap with no military tag at all: the protected
+    zone of the former US special weapons depot at Fischbach bei Dahn is
+    `historic=monument` on a forest, others are a `place=locality`, a meadow or a
+    brownfield carrying a name such as "ehemaliges US-Sonderwaffenlager Clausen" or "ehem.
+    NIKE-Abschussstellung". Filters therefore take `key~text`, a value containing the text
+    in any case, sent to Overpass as `["name"~"…",i]` with the text escaped so that it is
+    matched literally rather than as a pattern. Four presets search names for depots,
+    missile sites and command bunkers. A Nominatim search for those words in Germany found
+    about 60 such sites, all of which they match; matching by name also finds bus stops
+    named after a missile site and a few DLR buildings, which is accepted rather than
+    excluded case by case.
   - An entry's technical details come from two places. What the library holds (address,
     type, CORS, zooms, attribution) shows at once; the kind of data and the formats are
     read from the layers the service offers (`library/entryInfo.ts`), since a WMS's
