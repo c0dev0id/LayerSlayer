@@ -44,9 +44,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   from their packages at build time by a Vite plugin (`tools/iconSets.ts`); dev
   dependencies only, each set a chunk that loads with the icon picker.
 - Routing by the FOSSGIS OSRM servers (routing.openstreetmap.de), car, bike and foot.
-- OSM queries by Postpass (postpass.geofabrik.de), with the Overpass API as fallback; spot
-  details by the Overpass API (overpass-api.de); place search by
-  Nominatim (nominatim.openstreetmap.org).
+- OSM queries and spot details by Postpass (postpass.geofabrik.de), with the Overpass API
+  (overpass-api.de) as fallback; place search by Nominatim (nominatim.openstreetmap.org).
 - Fonts for labels of vector layers from OpenFreeMap (tiles.openfreemap.org) where no
   style on the map brings fonts.
 - Elevation for 3D terrain from Mapterhorn (tiles.mapterhorn.com).
@@ -574,10 +573,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   the radius (`out geom(box)`, points outside are null), so a large park does not send its
   whole outline; a clipped area is measured to its edge. openstreetmap.org's tool runs on
   its own Overpass server (query.openstreetmap.org), which only that site may use.
-  Postpass answers such a lookup (roads, places and barriers within 40 m, `ST_DWithin` on
-  geography after a box test) in 0.6 to 1.6 s where Overpass took up to 11 s or failed;
-  moving details to it means rebuilding what the details read from Overpass elements
-  (way geometry, relations clipped to a box) from its GeoJSON, which is not done yet.
+  Postpass is asked first and answered such a lookup in 0.6 to 1.6 s where Overpass took
+  up to 11 s or failed. Its SQL asks for the same things (`ST_DWithin` on geography after
+  a test against the same box, `?|` for the place keys), gives areas as their outlines
+  (`ST_Boundary`) and clips relations to the box (`ST_Intersection`), so what it answers
+  is measured and drawn as Overpass's answer was. The details work on OSM objects (type,
+  id, tags, GeoJSON geometry) that both sources are turned into, rather than on Overpass
+  elements; at four spots in Karlsruhe, Berlin and the Palatinate both gave the same
+  details.
   The area query of OSM Query layers stays one statement per filter: over a large area the
   tag index narrows first, and everything within the area would be far too much.
   Street furniture (benches, bins, vending machines, post boxes, …), kerbs
