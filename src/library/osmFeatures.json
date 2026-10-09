@@ -170,6 +170,10 @@
     { "name": "Bomb craters", "category": "History and military", "icon": "maki:danger", "filters": ["military=bombcrater"] },
     { "name": "War memorials", "category": "History and military", "icon": "maki:monument", "filters": ["historic=memorial memorial=war_memorial"] },
     { "name": "Battlefields", "category": "History and military", "icon": "maki:historic", "filters": ["historic=battlefield"] },
-    { "name": "Forts", "category": "History and military", "icon": "maki:castle", "filters": ["historic=fort"] }
+    { "name": "Forts", "category": "History and military", "icon": "maki:castle", "filters": ["historic=fort"] },
+    { "name": "Special weapons depots (by name)", "category": "History and military", "icon": "temaki:bunker", "filters": ["name~Sonderwaffenlager", "name~Sondermunitionslager", "name~\"Special Ammunition\"", "name~Atomwaffenlager"] },
+    { "name": "Missile sites (by name)", "category": "History and military", "icon": "maki:rocket", "filters": ["name~Nike-", "name~\"Nike Launching\"", "name~Hawk-", "name~Raketenstellung", "name~Raketenbasis", "name~Pershing"] },
+    { "name": "Ammunition depots (by name)", "category": "History and military", "icon": "mdi:ammunition", "filters": ["name~Munitionsdepot", "name~Munitionslager"] },
+    { "name": "Government and command bunkers (by name)", "category": "History and military", "icon": "temaki:bunker", "filters": ["name~Regierungsbunker", "name~Ausweichsitz", "name~Fernmeldebunker", "name~Atombunker"] }
   ]
 }
