@@ -45,7 +45,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   dependencies only, each set a chunk that loads with the icon picker.
 - Routing by the FOSSGIS OSRM servers (routing.openstreetmap.de), car, bike and foot.
 - OSM queries and spot details by Postpass (postpass.geofabrik.de), with the Overpass API
-  (overpass-api.de) as fallback; place search by Nominatim (nominatim.openstreetmap.org).
+  (overpass-api.de) as fallback; place search by Nominatim (nominatim.openstreetmap.org);
+  the sea or ocean at a spot by the Marine Regions gazetteer (marineregions.org).
 - Fonts for labels of vector layers from OpenFreeMap (tiles.openfreemap.org) where no
   style on the map brings fonts.
 - Elevation for 3D terrain from Mapterhorn (tiles.mapterhorn.com).
@@ -590,36 +591,48 @@ It is a static single-page app on GitHub Pages; there is no server component.
   history: anything historic, bunkers, former military sites (`abandoned:military`,
   `disused:military`, `historic:military`) and Cold War sites known only by name
   ("Sonderwaffenlager", "Nike-", "Raketenstellung", …, the words of the by-name presets).
-  History is a kind of its own, so a bunker next to a road is shown beside the road
-  rather than instead of it, with its dates, heritage status, inscription, description
-  and Wikipedia article. The query looks around the spot once (`nwr(around)->.near`) and
-  filters that set by tag, as openstreetmap.org's "Query features" does, rather than a
-  lookup per tag: far less work for overpass-api.de, whose per-address rate limit refused
-  every few clicks before. Its declared timeout is 10 s, and relations come clipped to a
-  box twice the radius (`out geom(box)`, points outside are null), so a large park does
-  not send its whole outline; a clipped area is measured to its edge. openstreetmap.org's
-  tool runs on its own Overpass server (query.openstreetmap.org), which only that site may
-  use. Postpass is asked first and answered such a lookup in 0.6 to 1.6 s where Overpass
-  took up to 11 s or failed. Its SQL asks for the same things (`ST_DWithin` on geography
-  after a test against the same box, `?|` for the place keys), gives areas as their
-  outlines (`ST_Boundary`) and clips relations to the box (`ST_Intersection`), so what it
-  answers is measured and drawn as Overpass's answer was. The details work on OSM objects
-  (type, id, tags, GeoJSON geometry) that both sources are turned into, rather than on
-  Overpass elements; at four spots in Karlsruhe, Berlin and the Palatinate both gave the
-  same details. The area query of OSM Query layers stays one statement per filter: over a
-  large area the tag index narrows first, and everything within the area would be far too
-  much. Street furniture (benches, bins, vending machines, post boxes, …), kerbs and
-  unnamed information boards are dropped. Of each kind the nearest is kept, measured in a
-  local plane to nodes, segments and inside closed rings, and the up to four results are
-  shown nearest first, so a click near a gate on a track shows both. Tags become words
-  (`motor_vehicle=forestry` is "Motor vehicles: Forestry only"), with Tabler icons for the
-  lines and the OSM preset's icon where the element matches one; the link to
-  openstreetmap.org shows everything else. The details are a non-modal sheet beside the
-  map rather than a centred modal, which would hide the very spot: the map stays usable,
-  another spot's details replace them, and an overlay highlights the spot and what was
-  found (lines amber with a white casing, points as amber rings). A spot in the sheet's
-  column is panned beside it; the sheet's height says little, as it grows with its
-  results.
+  History is a kind of its own, so a bunker next to a road is shown beside the road rather
+  than instead of it, with its dates, heritage status, inscription, description and
+  Wikipedia article; anything with a `heritage` tag counts, as a listed building or
+  monument. Water (lakes, ponds, reservoirs, bays, straits, rivers, streams, canals; not
+  ditches and drains) and bridges (`man_made=bridge` outlines and ways tagged `bridge`)
+  are kinds too, and an object can be several: a road on a bridge is the road and the
+  bridge, the latter named by `bridge:name` rather than the road's name. A lake matters
+  most in its middle, far from its shore, so Postpass also answers whether the spot lies
+  inside each area (`ST_Intersects`, the column `within`), which counts as no distance
+  where the outline, clipped to the box, says nothing; Overpass finds an area only near
+  its edge, and its `is_in` could not be tried while every public instance failed. Seas
+  and oceans are label points in OpenStreetMap, so the sea at a spot comes from the Marine
+  Regions gazetteer instead (its IHO sea areas by English name, a sea before the ocean it
+  is part of), asked beside Postpass and shown after its results, as it takes 2 to 3 s;
+  where it fails there is no sea card rather than an error. The query looks around the
+  spot once (`nwr(around)->.near`) and filters that set by tag, as openstreetmap.org's
+  "Query features" does, rather than a lookup per tag: far less work for overpass-api.de,
+  whose per-address rate limit refused every few clicks before. Its declared timeout is 10
+  s, and relations come clipped to a box twice the radius (`out geom(box)`, points outside
+  are null), so a large park does not send its whole outline; a clipped area is measured
+  to its edge. openstreetmap.org's tool runs on its own Overpass server
+  (query.openstreetmap.org), which only that site may use. Postpass is asked first and
+  answered such a lookup in 0.6 to 1.6 s where Overpass took up to 11 s or failed. Its SQL
+  asks for the same things (`ST_DWithin` on geography after a test against the same box,
+  `?|` for the place keys), gives areas as their outlines (`ST_Boundary`) and clips
+  relations to the box (`ST_Intersection`), so what it answers is measured and drawn as
+  Overpass's answer was. The details work on OSM objects (type, id, tags, GeoJSON
+  geometry) that both sources are turned into, rather than on Overpass elements; at four
+  spots in Karlsruhe, Berlin and the Palatinate both gave the same details. The area query
+  of OSM Query layers stays one statement per filter: over a large area the tag index
+  narrows first, and everything within the area would be far too much. Street furniture
+  (benches, bins, vending machines, post boxes, …), kerbs and unnamed information boards
+  are dropped. Of each kind the nearest is kept, measured in a local plane to nodes,
+  segments and inside closed rings, and the up to six results are shown nearest first, so
+  a click near a gate on a track shows both. Tags become words (`motor_vehicle=forestry`
+  is "Motor vehicles: Forestry only"), with Tabler icons for the lines and the OSM
+  preset's icon where the element matches one; the link to openstreetmap.org shows
+  everything else. The details are a non-modal sheet beside the map rather than a centred
+  modal, which would hide the very spot: the map stays usable, another spot's details
+  replace them, and an overlay highlights the spot and what was found (lines amber with a
+  white casing, points as amber rings). A spot in the sheet's column is panned beside it;
+  the sheet's height says little, as it grows with its results.
 - **Line styles of vector layers.** Width and dashes (solid, dashed, long dashes, dotted)
   apply to lines and the outlines of areas alike, so the setting means something for
   area layers too; unset, lines stay 2.5 and outlines 1.5 pixels. Dash patterns are in
@@ -732,8 +745,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
 - A menu for any spot on the map: its details from OSM (nearest road or trail, place,
-  barrier and piece of history, in words), its coordinates, Google Maps and Street View
-  (Google's documented Maps URLs, no key).
+  barrier, piece of history, water and bridge, in words) and the sea it lies in, its
+  coordinates, Google Maps and Street View (Google's documented Maps URLs, no key).
 - 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched by a button
   on the map.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on

@@ -132,13 +132,17 @@ mapping agency (BKG), which covers the rest of the world in less detail.
   details* asks OpenStreetMap what is there and shows, nearest first, the nearest road or
   trail (type, name, speed limit, one way or not, surface, track grade, access), place
   (type, name, address, phone, website, opening hours), barrier (opening hours, lock,
-  access) and piece of history (bunker, historic place, former military site or Cold War
-  site known by its name; when it was built and given up, whether it is a listed monument,
-  inscription, description, Wikipedia article) within about 40 pixels, in words rather
-  than tags. Benches, bins, kerbs, fields and the like are left out; each entry links to
-  all its tags on openstreetmap.org. The details open in a sheet beside the map, which
-  highlights what they describe in amber; right-click another spot to see its details
-  instead.
+  access), piece of history (bunker, historic place or listed building, former military
+  site or Cold War site known by its name; when it was built and given up, whether it is a
+  listed monument, inscription, description, Wikipedia article), water (lake, pond,
+  reservoir, river, stream, canal, bay; whether it dries up at times) and bridge (its own
+  name, what it carries, weight limit, structure) within about 40 pixels, in words rather
+  than tags. A lake or river counts when the spot lies in it, however far its shore; a
+  road on a bridge shows as both. At sea, the sea or ocean the spot lies in (the North
+  Sea, part of the North Atlantic Ocean) comes from the Marine Regions gazetteer. Benches,
+  bins, kerbs, fields and the like are left out; each entry links to all its tags on
+  openstreetmap.org. The details open in a sheet beside the map, which highlights what
+  they describe in amber; right-click another spot to see its details instead.
 - **Search** (top left of the map) finds places and addresses with Nominatim,
   OpenStreetMap's search, preferring those in view. Enter searches; the first place found
   gets a pin and the map flies to it, and the list below offers the other places found. ×
