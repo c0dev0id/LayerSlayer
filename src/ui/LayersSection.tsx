@@ -12,9 +12,7 @@ import {
   keepsTiles,
   layerColor,
   LINE_WIDTH,
-  MAX_LINE_WIDTH,
   MAX_ZOOM,
-  MIN_LINE_WIDTH,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
   SOURCE_KINDS,
@@ -33,6 +31,7 @@ import { layerErrors, map, onlyLayerId, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
+import { LineWidthSlider } from './LineWidthSlider';
 import { createOutcome, OutcomeNote } from './outcome';
 import { AlertIcon, AreaIcon, CloseIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge } from './icons';
 import { reorderTarget } from './reorder';
@@ -507,17 +506,11 @@ function ActiveLayer(props: { layer: Layer }) {
             <option value="long-dashed">Long dashes</option>
             <option value="dotted">Dotted</option>
           </select>
-          <input
-            class="grow"
-            type="range"
-            aria-label={`Line width of ${layer.name}`}
-            min={MIN_LINE_WIDTH}
-            max={MAX_LINE_WIDTH}
-            step="0.5"
+          <LineWidthSlider
+            label={`Line width of ${layer.name}`}
             value={layer.lineWidth ?? LINE_WIDTH}
-            onInput={(e) => updateLayer(layer.id, { lineWidth: e.currentTarget.valueAsNumber })}
+            onInput={(lineWidth) => updateLayer(layer.id, { lineWidth })}
           />
-          <span class="value">{layer.lineWidth ?? LINE_WIDTH} px</span>
         </div>
         <div class="row" title="Marks points and areas with an icon on a disc of the layer's colour">
           <span class="muted label">Icon</span>
