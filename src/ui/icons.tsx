@@ -358,6 +358,34 @@ export const WorldIcon = () => (
 );
 
 /** Opening hours (Tabler's clock). */
+/** A date (Tabler's calendar-event). */
+export const CalendarIcon = () => (
+  <Icon>
+    <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+    <path d="M16 3l0 4" />
+    <path d="M8 3l0 4" />
+    <path d="M4 11l16 0" />
+    <path d="M8 15h2v2h-2z" />
+  </Icon>
+);
+
+/** History, a monument (Tabler's building-monument). */
+export const MonumentIcon = () => (
+  <Icon>
+    <path d="M8 18l2 -13l2 -2l2 2l2 13" />
+    <path d="M5 21v-3h14v3" />
+    <path d="M3 21l18 0" />
+  </Icon>
+);
+
+/** Words written on or about something (Tabler's quote). */
+export const QuoteIcon = () => (
+  <Icon>
+    <path d="M10 11h-4a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h3a1 1 0 0 1 1 1v6c0 2.667 -1.333 4.333 -4 5" />
+    <path d="M19 11h-4a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h3a1 1 0 0 1 1 1v6c0 2.667 -1.333 4.333 -4 5" />
+  </Icon>
+);
+
 export const ClockIcon = () => (
   <Icon>
     <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />

@@ -5,11 +5,12 @@ import { askPostpass, selectObjects, sql } from './postpass';
 
 /**
  * What lies at a spot on the map, for people on the move: the nearest road or trail, the
- * nearest place to go to (a POI) and the nearest barrier, each described in words rather
- * than OpenStreetMap tags. Street furniture, fields and the like are left out.
+ * nearest place to go to (a POI), the nearest barrier and the nearest piece of history
+ * (a bunker, a memorial, a former military site), each described in words rather than
+ * OpenStreetMap tags. Street furniture, fields and the like are left out.
  */
 
-export type DetailKind = 'road' | 'poi' | 'barrier';
+export type DetailKind = 'road' | 'poi' | 'barrier' | 'history';
 
 /** Ways a motor vehicle can move on, from motorways down to tracks, paths and bridleways. */
 const ROAD_VALUES = '^((motorway|trunk|primary|secondary|tertiary)(_link)?|unclassified|residential|living_street|service|track|road|path|bridleway|busway)$';
@@ -17,7 +18,38 @@ const ROAD = new RegExp(ROAD_VALUES);
 
 /** Keys of places to go to; leisure and historic places count where they have a name. */
 const POI_KEYS = ['amenity', 'shop', 'tourism', 'craft', 'office', 'healthcare'];
-const NAMED_POI_KEYS = ['leisure', 'historic'];
+const NAMED_POI_KEYS = ['leisure'];
+
+/** Keys that make an object history, whatever their value: historic places, bunkers, former military sites. */
+const HISTORY_KEYS = ['historic', 'bunker_type', 'abandoned:military', 'disused:military', 'historic:military'];
+/** Tags that make an object history. */
+const HISTORY_TAGS: Record<string, string> = { military: 'bunker', building: 'bunker' };
+/**
+ * Words in the names of sites mapped with no such tag: former special weapons depots,
+ * missile sites and bunkers of the Cold War are often a meadow or a locality with a name.
+ */
+const HISTORY_NAMES = [
+  'sonderwaffenlager',
+  'munitionslager',
+  'munitionsdepot',
+  'special ammunition',
+  'atomwaffenlager',
+  'nike-',
+  'hawk-',
+  'raketenstellung',
+  'raketenbasis',
+  'pershing',
+  'ausweichsitz',
+  'bunker',
+  'westwall',
+];
+
+function isHistory(tags: Record<string, string>): boolean {
+  if (HISTORY_KEYS.some((key) => tags[key] && tags[key] !== 'no')) return true;
+  if (Object.entries(HISTORY_TAGS).some(([key, value]) => tags[key] === value)) return true;
+  const name = tags.name?.toLowerCase();
+  return name !== undefined && HISTORY_NAMES.some((word) => name.includes(word));
+}
 
 /** Amenities that are street furniture rather than places to go to. */
 const FURNITURE = new Set([
@@ -46,6 +78,7 @@ const FURNITURE = new Set([
 export function kindOf({ type, tags }: OsmObject): DetailKind | undefined {
   if (type === 'node' && tags.barrier && tags.barrier !== 'kerb') return 'barrier';
   if (type === 'way' && ROAD.test(tags.highway ?? '')) return 'road';
+  if (isHistory(tags)) return 'history';
   if (poiKey(tags)) return 'poi';
   return undefined;
 }
@@ -77,6 +110,9 @@ export function overpassDetailsQuery([lng, lat]: LngLat, radius: number): string
     `way.near["highway"~"${ROAD_VALUES}"];`,
     ...POI_KEYS.map((key) => `nwr.near["${key}"];`),
     ...NAMED_POI_KEYS.map((key) => `nwr.near["${key}"]["name"];`),
+    ...HISTORY_KEYS.map((key) => `nwr.near["${key}"];`),
+    ...Object.entries(HISTORY_TAGS).map(([key, value]) => `nwr.near["${key}"="${value}"];`),
+    `nwr.near["name"~"${HISTORY_NAMES.join('|')}",i];`,
     `node.near["barrier"];`,
   ];
   const [west, south, east, north] = boxAround([lng, lat], 2 * radius);
@@ -109,7 +145,11 @@ export function postpassDetailsQuery([lng, lat]: LngLat, radius: number): string
   const near = `geom && ${envelope(radius)} AND ST_DWithin(geom::geography, ${spot}::geography, ${Math.round(radius)})`;
   return selectObjects(`CASE WHEN osm_type = 'R' THEN ST_Intersection(${outline}, ${envelope(2 * radius)}) ELSE ${outline} END`, [
     `${near} AND ((osm_type = 'W' AND tags->>'highway' ~ ${sql(ROAD_VALUES)}) OR tags ?| ${keys(POI_KEYS)} ` +
-      `OR (tags ?| ${keys(NAMED_POI_KEYS)} AND tags ? 'name') OR (osm_type = 'N' AND tags ? 'barrier'))`,
+      `OR (tags ?| ${keys(NAMED_POI_KEYS)} AND tags ? 'name') OR (osm_type = 'N' AND tags ? 'barrier') ` +
+      `OR tags ?| ${keys(HISTORY_KEYS)} OR ${Object.entries(HISTORY_TAGS)
+        .map(([key, value]) => `tags @> ${sql(JSON.stringify({ [key]: value }))}::jsonb`)
+        .join(' OR ')} ` +
+      `OR tags->>'name' ILIKE ANY (ARRAY[${HISTORY_NAMES.map((word) => sql(`%${word}%`)).join(', ')}]))`,
   ]);
 }
 
@@ -226,7 +266,10 @@ export type RowIcon =
   | 'address'
   | 'phone'
   | 'website'
-  | 'hours';
+  | 'hours'
+  | 'date'
+  | 'heritage'
+  | 'text';
 
 export interface DetailRow {
   icon: RowIcon;
@@ -314,8 +357,35 @@ const ACCESS_VALUES: Record<string, string> = {
   discouraged: 'Discouraged',
 };
 
+const BUNKER_TITLES: Record<string, string> = {
+  munitions: 'Munition bunker',
+  pillbox: 'Pillbox',
+  hardened_aircraft_shelter: 'Hardened aircraft shelter',
+  bomb_shelter: 'Bomb shelter',
+  air_raid_shelter: 'Air-raid shelter',
+  personnel_shelter: 'Personnel shelter',
+  gun_emplacement: 'Gun emplacement',
+  mg_nest: 'Machine-gun nest',
+  missile_silo: 'Missile silo',
+  observation: 'Observation bunker',
+  command: 'Command bunker',
+};
+
+/** What a piece of history is: a bunker by its type, a former military site, a historic place, or a site known by its name. */
+function historyTitle(tags: Record<string, string>): string {
+  if (tags.bunker_type || tags.military === 'bunker' || tags.building === 'bunker' || tags.historic === 'bunker') {
+    return BUNKER_TITLES[tags.bunker_type ?? ''] ?? 'Bunker';
+  }
+  if (tags.historic === 'memorial' && tags.memorial === 'war_memorial') return 'War memorial';
+  if (tags.historic && tags.historic !== 'yes') return words(tags.historic);
+  const former = tags['abandoned:military'] ?? tags['disused:military'] ?? tags['historic:military'];
+  if (former) return `Former ${words(former).toLowerCase()}`;
+  return 'Historic site';
+}
+
 function titleOf(kind: DetailKind, tags: Record<string, string>): string {
   if (kind === 'barrier') return words(tags.barrier!);
+  if (kind === 'history') return historyTitle(tags);
   if (kind === 'road') {
     const highway = tags.highway!;
     const link = /^(\w+)_link$/.exec(highway);
@@ -374,6 +444,25 @@ function poiRows(tags: Record<string, string>): DetailRow[] {
   return [...rows, ...hoursRow(tags), ...accessRows(tags)];
 }
 
+/** A link to a `wikipedia` tag's article, written `de:Westwall`. */
+function wikipediaRow(value: string): DetailRow[] {
+  const [, language, title] = /^([a-z-]+):(.+)$/.exec(value) ?? [];
+  if (!language || !title) return [];
+  return [{ icon: 'website', label: 'Wikipedia', value: title, href: `https://${language}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}` }];
+}
+
+function historyRows(tags: Record<string, string>): DetailRow[] {
+  const rows: DetailRow[] = [];
+  const built = tags.start_date ?? tags.construction_date;
+  if (built) rows.push({ icon: 'date', label: 'Built', value: built });
+  if (tags.end_date) rows.push({ icon: 'date', label: 'Until', value: tags.end_date });
+  if (tags.heritage || tags['heritage:operator']) rows.push({ icon: 'heritage', label: 'Heritage', value: 'Listed monument' });
+  if (tags.inscription) rows.push({ icon: 'text', label: 'Inscription', value: tags.inscription });
+  if (tags.description) rows.push({ icon: 'text', label: 'Description', value: tags.description });
+  if (tags.wikipedia) rows.push(...wikipediaRow(tags.wikipedia));
+  return [...rows, ...accessRows(tags)];
+}
+
 function barrierRows(tags: Record<string, string>): DetailRow[] {
   const rows = hoursRow(tags);
   if (tags.locked === 'yes') rows.push({ icon: 'locked', label: 'Locked', value: 'Yes' });
@@ -382,7 +471,7 @@ function barrierRows(tags: Record<string, string>): DetailRow[] {
 
 export function describe({ kind, object: { type, id, tags, geometry }, distance }: Nearby): Details {
   const name = tags.name ?? tags.brand ?? tags.operator;
-  const rows = kind === 'road' ? roadRows(tags) : kind === 'poi' ? poiRows(tags) : barrierRows(tags);
+  const rows = { road: roadRows, poi: poiRows, barrier: barrierRows, history: historyRows }[kind](tags);
   return {
     kind,
     title: titleOf(kind, tags),

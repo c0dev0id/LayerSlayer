@@ -9,15 +9,18 @@ import { errorMessage, map } from '../state/ui';
 import {
   BarrierIcon,
   BothWaysIcon,
+  CalendarIcon,
   ClockIcon,
   GaugeIcon,
   IconGlyph,
   KeyIcon,
   LockIcon,
   MapPinIcon,
+  MonumentIcon,
   MountainIcon,
   OneWayIcon,
   PhoneIcon,
+  QuoteIcon,
   RoadIcon,
   RulerIcon,
   TagIcon,
@@ -42,9 +45,12 @@ const ROW_ICONS: Record<RowIcon, () => JSX.Element> = {
   phone: PhoneIcon,
   website: WorldIcon,
   hours: ClockIcon,
+  date: CalendarIcon,
+  heritage: MonumentIcon,
+  text: QuoteIcon,
 };
 
-const KIND_ICONS: Record<DetailKind, () => JSX.Element> = { road: RoadIcon, poi: MapPinIcon, barrier: BarrierIcon };
+const KIND_ICONS: Record<DetailKind, () => JSX.Element> = { road: RoadIcon, poi: MapPinIcon, barrier: BarrierIcon, history: MonumentIcon };
 
 /**
  * Details in a sheet beside the map, which stays usable: what OpenStreetMap knows of a spot

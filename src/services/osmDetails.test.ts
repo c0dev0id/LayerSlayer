@@ -18,6 +18,15 @@ group('kindOf', () => {
     expect(kindOf(node(1, 0, 0, { barrier: 'gate' }))).toBe('barrier');
   });
 
+  it('takes bunkers, historic places, former military sites and Cold War sites known by name as history', () => {
+    expect(kindOf(node(1, 0, 0, { military: 'bunker', bunker_type: 'pillbox' }))).toBe('history');
+    expect(kindOf(node(1, 0, 0, { historic: 'memorial', memorial: 'war_memorial' }))).toBe('history');
+    expect(kindOf(node(1, 0, 0, { historic: 'castle', name: 'Burg Berwartstein', tourism: 'attraction' }))).toBe('history');
+    expect(kindOf(way(1, [[0, 0], [1, 1]], { 'abandoned:military': 'barracks' }))).toBe('history');
+    expect(kindOf(way(1, [[0, 0], [1, 1]], { natural: 'heath', name: 'ehmalige NIKE-Abschussstellung Salzwoog' }))).toBe('history');
+    expect(kindOf(node(1, 0, 0, { historic: 'no', amenity: 'cafe' }))).toBe('poi');
+  });
+
   it('leaves out footways, street furniture, kerbs and unnamed boards', () => {
     expect(kindOf(way(1, [[0, 0], [1, 1]], { highway: 'footway' }))).toBeUndefined();
     expect(kindOf(way(1, [[0, 0], [1, 1]], { landuse: 'farmland' }))).toBeUndefined();
@@ -128,6 +137,35 @@ group('describe', () => {
     ]);
   });
 
+  it('tells history by what it is, when it was, whether it is listed and what is written on it', () => {
+    const details = describe({
+      kind: 'history',
+      distance: 12,
+      object: node(6, 0, 0, {
+        military: 'bunker',
+        bunker_type: 'munitions',
+        start_date: '1961',
+        end_date: '1990',
+        heritage: '4',
+        inscription: 'Area 1',
+        wikipedia: 'de:Sondermunitionslager Fischbach',
+      }),
+    });
+    expect(details.title).toBe('Munition bunker');
+    expect(details.rows).toEqual([
+      { icon: 'date', label: 'Built', value: '1961' },
+      { icon: 'date', label: 'Until', value: '1990' },
+      { icon: 'heritage', label: 'Heritage', value: 'Listed monument' },
+      { icon: 'text', label: 'Inscription', value: 'Area 1' },
+      { icon: 'website', label: 'Wikipedia', value: 'Sondermunitionslager Fischbach', href: 'https://de.wikipedia.org/wiki/Sondermunitionslager_Fischbach' },
+    ]);
+    const title = (tags: Record<string, string>) => describe({ kind: 'history', distance: 0, object: node(7, 0, 0, tags) }).title;
+    expect(title({ historic: 'memorial', memorial: 'war_memorial' })).toBe('War memorial');
+    expect(title({ historic: 'wayside_cross' })).toBe('Wayside cross');
+    expect(title({ 'disused:military': 'barracks' })).toBe('Former barracks');
+    expect(title({ name: 'Denkmalzone ehemaliges Sonderwaffenlager Fischbach' })).toBe('Historic site');
+  });
+
   it('tells a barrier by type, opening hours, lock and access', () => {
     const details = describe({ kind: 'barrier', distance: 5, object: node(5, 0, 0, { barrier: 'lift_gate', locked: 'yes', access: 'private' }) });
     expect(details.title).toBe('Lift gate');
@@ -146,6 +184,9 @@ group('the query', () => {
     expect(query).toContain('way.near["highway"~"^((motorway|trunk|primary|secondary|tertiary)(_link)?|');
     expect(query).toContain('nwr.near["amenity"];');
     expect(query).toContain('nwr.near["leisure"]["name"];');
+    expect(query).toContain('nwr.near["historic"];');
+    expect(query).toContain('nwr.near["military"="bunker"];');
+    expect(query).toContain('nwr.near["name"~"sonderwaffenlager|munitionslager|');
     expect(query).toContain('node.near["barrier"];');
   });
 
@@ -160,7 +201,10 @@ group('the query', () => {
     expect(query).toContain('ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint(8.400000, 49.000000), 4326)::geography, 63)');
     expect(query).toContain("(osm_type = 'W' AND tags->>'highway' ~ '^((motorway|trunk|primary|secondary|tertiary)(_link)?|");
     expect(query).toContain("tags ?| ARRAY['amenity', 'shop', 'tourism', 'craft', 'office', 'healthcare']");
-    expect(query).toContain("(tags ?| ARRAY['leisure', 'historic'] AND tags ? 'name')");
+    expect(query).toContain("(tags ?| ARRAY['leisure'] AND tags ? 'name')");
+    expect(query).toContain("OR tags ?| ARRAY['historic', 'bunker_type', 'abandoned:military', 'disused:military', 'historic:military']");
+    expect(query).toContain(`OR tags @> '{"military":"bunker"}'::jsonb`);
+    expect(query).toContain("tags->>'name' ILIKE ANY (ARRAY['%sonderwaffenlager%',");
     expect(query).toContain("(osm_type = 'N' AND tags ? 'barrier')");
   });
 
