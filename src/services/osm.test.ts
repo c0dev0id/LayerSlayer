@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatFilter, matchesFilter, parseFilter, postpassOrOverpass } from './osm';
+import { formatFilter, matchesFilter, parseFilter, postpassOrOverpass, searchesOf } from './osm';
 
 describe('parseFilter', () => {
   it('reads tags with a value or any value', () => {
@@ -49,6 +49,17 @@ describe('formatFilter', () => {
     expect(formatFilter(parseFilter('amenity = bench  shop'))).toBe('amenity=bench shop=*');
     expect(formatFilter(parseFilter('operator="Deutsche Bahn" name="*" ref=""'))).toBe('operator="Deutsche Bahn" name="*" ref=""');
     expect(formatFilter(parseFilter('name ~ "Special Ammunition" ref~*'))).toBe('name~"Special Ammunition" ref~*');
+  });
+});
+
+describe('searchesOf', () => {
+  it('joins filters that only search a text in the same key, where the first of them stood', () => {
+    expect(searchesOf(['name~Nike-', 'military=bunker', 'name~Hawk-', 'ref~WH', 'name~Pershing military=*'])).toEqual([
+      { key: 'name', texts: ['Nike-', 'Hawk-'] },
+      { conditions: [{ key: 'military', op: 'eq', value: 'bunker' }] },
+      { key: 'ref', texts: ['WH'] },
+      { conditions: [{ key: 'name', op: 'contains', value: 'Pershing' }, { key: 'military', op: 'any' }] },
+    ]);
   });
 });
 

@@ -54,6 +54,35 @@ export function formatFilter(conditions: readonly TagCondition[]): string {
     .join(' ');
 }
 
+/** What a query asks a source for: the tags of a filter, or a value containing any of the texts. */
+export type Search = { conditions: TagCondition[] } | { key: string; texts: string[] };
+
+/**
+ * The filters as a query asks for them. Filters that only look for a text in the same key
+ * become one search for any of their texts: no index finds text within values, so each
+ * such search reads every object in the area, and joined they read the objects once.
+ */
+export function searchesOf(filters: readonly string[]): Search[] {
+  const searches: Search[] = [];
+  const textSearches = new Map<string, { key: string; texts: string[] }>();
+  for (const filter of filters) {
+    const conditions = parseFilter(filter);
+    const only = conditions.length === 1 ? conditions[0]! : undefined;
+    if (only?.op !== 'contains') {
+      searches.push({ conditions });
+      continue;
+    }
+    const search = textSearches.get(only.key);
+    if (search) search.texts.push(only.value);
+    else {
+      const created = { key: only.key, texts: [only.value] };
+      textSearches.set(only.key, created);
+      searches.push(created);
+    }
+  }
+  return searches;
+}
+
 /** Whether OSM tags match a filter, as the sources find them. */
 export function matchesFilter(filter: string, tags: Readonly<Record<string, string>>): boolean {
   return parseFilter(filter).every((condition) => {

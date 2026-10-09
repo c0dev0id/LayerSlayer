@@ -23,8 +23,15 @@ describe('postpassQuery', () => {
   });
 
   it('finds values containing a text literally, whatever its case', () => {
-    expect(postpassQuery(['name~Sonderwaffenlager'], area)).toContain("(tags->>'name' ILIKE '%Sonderwaffenlager%')");
-    expect(postpassQuery([`name~"it's 100%_x"`], area)).toContain("(tags->>'name' ILIKE '%it''s 100\\%\\_x%')");
+    expect(postpassQuery(['name~Sonderwaffenlager'], area)).toContain("(tags->>'name' ILIKE ANY (ARRAY['%Sonderwaffenlager%']))");
+    expect(postpassQuery([`name~"it's 100%_x"`], area)).toContain("(tags->>'name' ILIKE ANY (ARRAY['%it''s 100\\%\\_x%']))");
+    expect(postpassQuery(['name~Pershing military=*'], area)).toContain("(tags->>'name' ILIKE '%Pershing%' AND tags ? 'military')");
+  });
+
+  it('searches the texts of one key with one query, reading the objects once', () => {
+    const query = postpassQuery(['name~Nike-', 'military=bunker', 'name~Hawk-'], area);
+    expect(query).toContain("(tags->>'name' ILIKE ANY (ARRAY['%Nike-%', '%Hawk-%']))");
+    expect(query.match(/UNION ALL/g)).toHaveLength(1);
   });
 
   it('quotes keys and values for SQL and JSON', () => {

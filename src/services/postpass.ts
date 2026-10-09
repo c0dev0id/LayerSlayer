@@ -1,7 +1,7 @@
 import type { LngLat } from '../model/route';
 import { roundLngLat } from '../routing/legs';
 import { fetchResource } from '../state/net';
-import { parseFilter, type OsmObject } from './osm';
+import { searchesOf, type OsmObject, type Search, type TagCondition } from './osm';
 
 /**
  * OpenStreetMap features found with Postpass (github.com/woodpeck/postpass), a public
@@ -19,15 +19,21 @@ export const sql = (s: string) => `'${s.replace(/'/g, "''")}'`;
 /** Text that LIKE matches literally: its wildcards and the escape character escaped. */
 const likeLiteral = (s: string) => s.replace(/[\\%_]/g, '\\$&');
 
-/** One filter as an SQL condition: tags with a value, any value, or a value containing the text. */
-function condition(filter: string): string {
-  const parts = parseFilter(filter).map((condition) => {
-    const { key } = condition;
-    if (condition.op === 'any') return `tags ? ${sql(key)}`;
-    if (condition.op === 'contains') return `tags->>${sql(key)} ILIKE ${sql(`%${likeLiteral(condition.value)}%`)}`;
-    return `tags @> ${sql(JSON.stringify({ [key]: condition.value }))}::jsonb`;
-  });
-  return `(${parts.join(' AND ')})`;
+/** A text as a LIKE pattern finding it within a value. */
+const containing = (text: string) => sql(`%${likeLiteral(text)}%`);
+
+/** A tag as an SQL condition: with any value, with the value, or with a value containing the text. */
+function tagCondition(condition: TagCondition): string {
+  const { key } = condition;
+  if (condition.op === 'any') return `tags ? ${sql(key)}`;
+  if (condition.op === 'contains') return `tags->>${sql(key)} ILIKE ${containing(condition.value)}`;
+  return `tags @> ${sql(JSON.stringify({ [key]: condition.value }))}::jsonb`;
+}
+
+/** A search as an SQL condition: all of its tags, or a value containing any of its texts. */
+function condition(search: Search): string {
+  if ('conditions' in search) return `(${search.conditions.map(tagCondition).join(' AND ')})`;
+  return `(tags->>${sql(search.key)} ILIKE ANY (ARRAY[${search.texts.map(containing).join(', ')}]))`;
 }
 
 /**
@@ -45,7 +51,7 @@ export function selectObjects(geom: string, conditions: readonly string[]): stri
 export function postpassQuery(filters: readonly string[], area: readonly LngLat[]): string {
   const ring = [...area, area[0]!].map(roundLngLat).map(([lng, lat]) => `${lng} ${lat}`);
   const within = `ST_Intersects(geom, ST_GeomFromText('POLYGON((${ring.join(',')}))', 4326))`;
-  return selectObjects('geom', filters.map((filter) => `${within} AND ${condition(filter)}`));
+  return selectObjects('geom', searchesOf(filters).map((search) => `${within} AND ${condition(search)}`));
 }
 
 const OSM_TYPES: Record<string, OsmObject['type']> = { N: 'node', W: 'way', R: 'relation' };

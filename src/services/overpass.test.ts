@@ -27,6 +27,12 @@ describe('overpassQuery', () => {
     // The dot is no wildcard: escaped for the regular expression, whose backslash is escaped for the string.
     expect(overpassQuery(['name~St.'], area)).toContain('["name"~"St\\\\.",i]');
   });
+
+  it('searches the texts of one key in one statement', () => {
+    const query = overpassQuery(['name~Nike-', 'name~Hawk-', 'name~Pershing military=*'], area);
+    expect(query).toContain('nwr["name"~"Nike-|Hawk-",i](poly:');
+    expect(query).toContain('nwr["name"~"Pershing",i]["military"](poly:');
+  });
 });
 
 describe('checkAnswer', () => {

@@ -1,7 +1,7 @@
 import type { LngLat } from '../model/route';
 import { roundLngLat } from '../routing/legs';
 import { fetchResource } from '../state/net';
-import { parseFilter, type OsmObject } from './osm';
+import { searchesOf, type OsmObject } from './osm';
 
 /**
  * OpenStreetMap features found with the Overpass API (wiki.openstreetmap.org/wiki/Overpass_API)
@@ -27,8 +27,9 @@ export function overpassQuery(filters: readonly string[], area: readonly LngLat[
     .map(roundLngLat)
     .map(([lng, lat]) => `${lat} ${lng}`)
     .join(' ');
-  const statements = filters.map((filter) => {
-    const tags = parseFilter(filter).map((condition) => {
+  const statements = searchesOf(filters).map((search) => {
+    if (!('conditions' in search)) return `nwr[${ql(search.key)}~${ql(search.texts.map(regexLiteral).join('|'))},i](poly:"${poly}");`;
+    const tags = search.conditions.map((condition) => {
       const key = ql(condition.key);
       if (condition.op === 'any') return `[${key}]`;
       if (condition.op === 'contains') return `[${key}~${ql(regexLiteral(condition.value))},i]`;
