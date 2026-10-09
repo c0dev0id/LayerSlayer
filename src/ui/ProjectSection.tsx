@@ -11,7 +11,7 @@ async function open(file: File): Promise<void> {
 }
 
 /**
- * The app's name, with saving everything to a .webmap file and opening one in its place;
+ * The app's name, with saving everything to a .lslay file and opening one in its place;
  * on narrow screens, where the panel lies under the map, a button folds it to this header.
  */
 export function ProjectSection() {
@@ -22,11 +22,11 @@ export function ProjectSection() {
         <img class="logo" src={`${import.meta.env.BASE_URL}logo.png`} alt="" />
         <h1 class="grow">Layer Slayer</h1>
         <button
-          title="Download the layers, routes, focus area and imported files as a .webmap file, to open in another browser or after clearing this one"
+          title="Download the layers, routes, focus area and imported files as a .lslay file, to open in another browser or after clearing this one"
           onClick={async () => {
             setError(undefined);
             try {
-              downloadBlob(await saveProject(), `layer-slayer-${new Date().toISOString().slice(0, 10)}.webmap`);
+              downloadBlob(await saveProject(), `layer-slayer-${new Date().toISOString().slice(0, 10)}.lslay`);
             } catch (e) {
               setError(`The project could not be saved: ${errorMessage(e)}`);
             }
@@ -34,12 +34,12 @@ export function ProjectSection() {
         >
           Save
         </button>
-        <label class="button" title="Open a .webmap file in place of the layers, routes and focus area here">
+        <label class="button" title="Open a .lslay (or older .webmap) file in place of the layers, routes and focus area here">
           Open
           <input
             type="file"
             hidden
-            accept=".webmap,application/zip"
+            accept=".lslay,.webmap,application/zip"
             onChange={async (e) => {
               const file = e.currentTarget.files?.[0];
               e.currentTarget.value = '';

@@ -48,8 +48,22 @@ describe('project file', () => {
     expect(() => decodeProjectFile(zipSync({ 'project.json': strToU8('{"layers":[]}') }))).toThrow('This is not a Layer Slayer project file.');
   });
 
+  it('marks the file as a Layer Slayer project', async () => {
+    const json = JSON.parse(strFromU8(unzipSync(await encodeProjectFile(project))['project.json']!));
+    expect(json.app).toBe('layerslayer');
+  });
+
+  it('opens .webmap files saved before the rename', async () => {
+    const entries = unzipSync(await encodeProjectFile(project));
+    const json = { ...JSON.parse(strFromU8(entries['project.json']!)), app: 'webmap' };
+    const read = decodeProjectFile(zipSync({ ...entries, 'project.json': strToU8(JSON.stringify(json)) }));
+    expect(read.state.layers).toEqual(project.state.layers);
+    expect(read.routes).toEqual(routes);
+    expect(await read.files.get('f1')!.text()).toBe('{"type":"FeatureCollection","features":[]}');
+  });
+
   it('turns away a project whose layer file is missing', () => {
-    const json = JSON.stringify({ app: 'webmap', layers: [file], view: base.view });
+    const json = JSON.stringify({ app: 'layerslayer', layers: [file], view: base.view });
     expect(() => decodeProjectFile(zipSync({ 'project.json': strToU8(json) }))).toThrow(/walk.kml/);
   });
 });

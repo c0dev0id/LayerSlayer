@@ -12,7 +12,7 @@ import { map } from './ui';
  * fflate with it, loads when it is first needed.
  */
 
-/** The project as a .webmap file, with the stored files of its layers. */
+/** The project as a .lslay file, with the stored files of its layers. */
 export async function saveProject(): Promise<Blob> {
   const current = unwrap(state);
   const files = new Map<string, Blob>();

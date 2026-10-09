@@ -5,14 +5,16 @@ import { parseRouteData } from './routes';
 import { parseState, type AppState } from './store';
 
 /**
- * A project file (.webmap) is a ZIP archive: `project.json` with the layers, the view, the
+ * A project file (.lslay) is a ZIP archive: `project.json` with the layers, the view, the
  * focus area, the hosts sent through the CORS proxy, the routes and the waypoints, and the
  * files the layers are made from as `files/<key>`. The proxy address is left out: it is a
  * setting of the browser and may carry an account key.
  */
 
-/** The format's mark in project.json: the app's code name, kept when it was renamed Layer Slayer. */
-const APP = 'webmap';
+/** The format's mark in project.json. */
+const APP = 'layerslayer';
+/** The mark of .webmap files, saved before the app was renamed from webmap: the same format, read as it is. */
+const FORMER_APP = 'webmap';
 const NOT_A_PROJECT = 'This is not a Layer Slayer project file.';
 
 export interface Project {
@@ -57,7 +59,7 @@ export function decodeProjectFile(data: Uint8Array): Project {
   } catch {
     throw new Error('The project.json of this file is not readable.');
   }
-  if (raw?.app !== APP) throw new Error(NOT_A_PROJECT);
+  if (raw?.app !== APP && raw?.app !== FORMER_APP) throw new Error(NOT_A_PROJECT);
   const state = parseState(text);
   const types = typeof raw.files === 'object' && raw.files !== null ? (raw.files as Record<string, unknown>) : {};
   const files = new Map<string, Blob>();
