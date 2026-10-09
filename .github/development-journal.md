@@ -264,6 +264,22 @@ It is a static single-page app on GitHub Pages; there is no server component.
   on: BLM land managers, wilderness and study areas, NPS park roads and trails, USGS mines
   (MRDS), NOAA's smoke forecast and EPA AirNow's air quality layers. HIFLD's transmission
   lines stay, noted as archived by their publisher.
+  - German history: the History category holds what was found open, with CORS and in Web
+    Mercator: Berlin's course of the Wall of 1989 (WMS with the aerial photo it was traced
+    from, and WFS), the BKG's GDR map 1:200 000 in its restricted state edition and its
+    public one, the Reich 1:25 000 maps of Brandenburg, North Rhine-Westphalia's 1:25 000
+    of 1936–1945 (drawn at 1:2 000 to 1:27 000 only), Saxony's historical maps (with the
+    GDR's restricted 1:25 000 state edition) and the monument lists of Bavaria and Saxony.
+    Left out: Rhineland-Palatinate's Westwall objects (its capabilities say no
+    constraints, but every map answers "Permission denied", and the WFS asks for a login),
+    Lower Saxony's monuments and Mecklenburg-Vorpommern's Messtischblätter (use
+    restricted), Saarland's 1935–1940 maps (embedding needs a contract), Trier's former
+    French military sites (no CORS) and Bavaria's index of 1941–1945 aerial photos (its
+    address no longer answers). No public service maps US forces in Germany or bunkers as
+    such; OpenStreetMap has them, so OSM Query has a History and military group whose tags
+    were chosen by how often they are used in Germany (taginfo): `military=bunker` about
+    10 800 times, `bunker_type=munitions` 2 500, `bunker_type=hardened_aircraft_shelter`
+    440, and about 120 features with a US Army or US Air Force `operator`.
   - An entry's technical details come from two places. What the library holds (address,
     type, CORS, zooms, attribution) shows at once; the kind of data and the formats are
     read from the layers the service offers (`library/entryInfo.ts`), since a WMS's
