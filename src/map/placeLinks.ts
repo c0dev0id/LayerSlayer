@@ -1,8 +1,9 @@
 import type { LngLat } from '../model/route';
 
 /**
- * A spot on the map for other apps: its coordinates as text, and Google Maps and Street View
- * opened at it through Google's documented Maps URLs (developers.google.com/maps/documentation/urls).
+ * A spot on the map for other apps: its coordinates as text, Google Maps and Street View
+ * opened at it through Google's documented Maps URLs (developers.google.com/maps/documentation/urls),
+ * and a link that opens Layer Slayer itself there.
  */
 
 /** "lat,lon" with six decimals (about 0.1 m), the order most apps read. */
@@ -18,4 +19,30 @@ export function googleMapsUrl(lngLat: LngLat): string {
 /** Google Street View at the panorama nearest the spot. */
 export function streetViewUrl(lngLat: LngLat): string {
   return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latLonText(lngLat)}`;
+}
+
+/** A spot and a zoom to open the map at. */
+export interface SpotView {
+  center: LngLat;
+  zoom: number;
+}
+
+/** `#map=zoom/lat/lon`, as openstreetmap.org writes it; the zoom may have decimals. */
+const MAP_HASH = /^#map=(\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/;
+
+/**
+ * The page at `page` (its address without query or hash) opened at the spot and zoom:
+ * `#map=zoom/lat/lon` with five decimals (about a metre), as openstreetmap.org links.
+ */
+export function spotLink(page: string, [lng, lat]: LngLat, zoom: number): string {
+  return `${page}#map=${Math.round(zoom * 100) / 100}/${lat.toFixed(5)}/${lng.toFixed(5)}`;
+}
+
+/** The spot and zoom a page address's hash opens the map at, if it names one the map can show. */
+export function readSpotLink(hash: string): SpotView | undefined {
+  const match = MAP_HASH.exec(hash);
+  if (!match) return undefined;
+  const [zoom, lat, lng] = match.slice(1).map(Number) as [number, number, number];
+  if (zoom > 24 || Math.abs(lat) > 85.0511 || Math.abs(lng) > 180) return undefined;
+  return { center: [lng, lat], zoom };
 }

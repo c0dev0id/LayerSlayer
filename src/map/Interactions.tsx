@@ -24,7 +24,7 @@ import { appendPoint, redo, undo } from '../state/routes';
 import { state } from '../state/store';
 import { featuresAt } from './layerFeatures';
 import { fromMarker } from './markers';
-import { googleMapsUrl, latLonText, streetViewUrl } from './placeLinks';
+import { googleMapsUrl, latLonText, spotLink, streetViewUrl } from './placeLinks';
 import { insertPointOnLine } from './routeTools';
 import { TapFilter, type PointerSample } from './tapFilter';
 
@@ -87,6 +87,10 @@ export function Interactions(props: { map: MapLibreMap }) {
       items: [
         { label: 'Show details', run: () => showDetails(spot, searchRadius(lat, map.getZoom())) },
         { label: 'Copy coordinates', run: () => void navigator.clipboard?.writeText(latLonText(spot)).catch(() => {}) },
+        {
+          label: 'Copy link',
+          run: () => void navigator.clipboard?.writeText(spotLink(location.origin + location.pathname, spot, map.getZoom())).catch(() => {}),
+        },
         { label: 'Open Google Maps', run: () => window.open(googleMapsUrl(spot), '_blank', 'noopener') },
         { label: 'Open Street View', run: () => window.open(streetViewUrl(spot), '_blank', 'noopener') },
       ],

@@ -14,6 +14,7 @@ import { detailsOverlay } from './detailsOverlay';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
 import { withOverlays } from './overlays';
+import { readSpotLink, type SpotView } from './placeLinks';
 import { drawDisc, drawGlyph, parsePoiImageId, POI_DISC } from './poiIcons';
 import { loadCachedTile, loadPmtiles, loadTile } from './protocols';
 import { routeOverlay } from './routeOverlay';
@@ -43,10 +44,22 @@ function layerOf(sourceId: string | undefined): string | undefined {
   return state.layers.some((l) => l.id === id) ? id : undefined;
 }
 
+/**
+ * The spot and zoom a link to the page opens the map at (`#map=zoom/lat/lon`), taken from
+ * the address: the address loses it, so that reloading later opens the map as it was left.
+ */
+function takeSpotLink(): SpotView | undefined {
+  const view = readSpotLink(location.hash);
+  if (view) history.replaceState(history.state, '', location.pathname + location.search);
+  return view;
+}
+
 export function MapView() {
   let container!: HTMLDivElement;
 
   onMount(() => {
+    const linked = takeSpotLink();
+    if (linked) setView({ ...linked, bearing: 0, pitch: 0 });
     const { center, zoom, bearing, pitch } = unwrap(state.view);
     const map = new maplibregl.Map({
       container,
@@ -137,7 +150,14 @@ export function MapView() {
         createEffect(on(overlay.data, (data) => map.getSource<maplibregl.GeoJSONSource>(overlay.id)?.setData(data), { defer: true }));
       }
     });
+    // A link pasted into the address bar of the open page.
+    const onHashChange = () => {
+      const view = takeSpotLink();
+      if (view) map.jumpTo({ ...view, bearing: 0, pitch: 0 });
+    };
+    window.addEventListener('hashchange', onHashChange);
     onCleanup(() => {
+      window.removeEventListener('hashchange', onHashChange);
       setMap(undefined);
       map.remove();
     });
