@@ -37,14 +37,17 @@ function condition(search: Search): string {
 }
 
 /**
- * The OSM objects matching any of the conditions, `geom` being what each is given as. Each
- * condition is a query of its own, so that each can use the index that fits it (tags or
- * geometry), which an OR across them all would rule out. A boundary relation is in the
- * lines and the polygons alike; one row of each object is kept, its polygon where it has one.
+ * The OSM objects matching any of the conditions, `geom` being what each is given as, with
+ * the `columns` asked for besides (name and SQL expression). Each condition is a query of
+ * its own, so that each can use the index that fits it (tags or geometry), which an OR
+ * across them all would rule out. A boundary relation is in the lines and the polygons
+ * alike; one row of each object is kept, its polygon where it has one.
  */
-export function selectObjects(geom: string, conditions: readonly string[]): string {
-  const rows = conditions.map((where) => `SELECT osm_type, osm_id, tags, ${geom} AS geom, area_m2 FROM postpass_pointlinepolygon WHERE ${where}`);
-  return `SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, geom FROM (${rows.join(' UNION ALL ')}) AS found ORDER BY osm_type, osm_id, area_m2 IS NULL`;
+export function selectObjects(geom: string, conditions: readonly string[], columns: Readonly<Record<string, string>> = {}): string {
+  const extra = Object.entries(columns).map(([name, expression]) => `, ${expression} AS ${name}`).join('');
+  const names = Object.keys(columns).map((name) => `, ${name}`).join('');
+  const rows = conditions.map((where) => `SELECT osm_type, osm_id, tags, ${geom} AS geom${extra}, area_m2 FROM postpass_pointlinepolygon WHERE ${where}`);
+  return `SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, geom${names} FROM (${rows.join(' UNION ALL ')}) AS found ORDER BY osm_type, osm_id, area_m2 IS NULL`;
 }
 
 /** The query for the features matching any of the filters within the polygon. */
@@ -59,7 +62,7 @@ const OSM_TYPES: Record<string, OsmObject['type']> = { N: 'node', W: 'way', R: '
 interface PostpassFeature {
   type: 'Feature';
   geometry: GeoJSON.Geometry;
-  properties: { osm_type: string; osm_id: number; tags: Record<string, string> | null };
+  properties: { osm_type: string; osm_id: number; tags: Record<string, string> | null; within?: boolean };
 }
 
 /** A multi-geometry of one part as that part, as osmtogeojson writes single ways. */
@@ -75,11 +78,12 @@ export function readPostpass(json: unknown): OsmObject[] {
   if (answer?.type !== 'FeatureCollection' || !Array.isArray(answer.features)) {
     throw new Error('Postpass did not answer with OpenStreetMap data.');
   }
-  return (answer.features as PostpassFeature[]).map(({ geometry, properties: { osm_type, osm_id, tags } }) => ({
+  return (answer.features as PostpassFeature[]).map(({ geometry, properties: { osm_type, osm_id, tags, within } }) => ({
     type: OSM_TYPES[osm_type] ?? 'node',
     id: osm_id,
     tags: tags ?? {},
     geometry: single(geometry),
+    ...(within && { within }),
   }));
 }
 

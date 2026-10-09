@@ -78,6 +78,12 @@ describe('readPostpass and asFeatures', () => {
     expect(features[1]!.geometry).toEqual({ type: 'Polygon', coordinates: [[[8, 49], [8.1, 49], [8.1, 49.1], [8, 49]]] });
   });
 
+  it('reads whether the spot asked about lies within an object, where the query asks', () => {
+    const lake = { type: 'Feature', geometry: { type: 'GeometryCollection', geometries: [] }, properties: { osm_type: 'R', osm_id: 4, tags: {}, within: true } };
+    const shore = { ...lake, properties: { ...lake.properties, osm_id: 5, within: false } };
+    expect(readPostpass({ type: 'FeatureCollection', features: [lake, shore] }).map((o) => o.within)).toEqual([true, undefined]);
+  });
+
   it('turns away what is no feature collection', () => {
     expect(() => readPostpass({ error: 'x' })).toThrow('Postpass did not answer with OpenStreetMap data.');
     expect(() => readPostpass(null)).toThrow('Postpass did not answer');

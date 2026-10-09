@@ -99,6 +99,8 @@ export interface OsmObject {
   id: number;
   tags: Record<string, string>;
   geometry: GeoJSON.Geometry;
+  /** Whether the spot a lookup was made around lies within the object's area, where the source says. */
+  within?: boolean;
 }
 
 /**

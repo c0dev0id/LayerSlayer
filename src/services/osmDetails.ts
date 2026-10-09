@@ -5,12 +5,13 @@ import { askPostpass, selectObjects, sql } from './postpass';
 
 /**
  * What lies at a spot on the map, for people on the move: the nearest road or trail, the
- * nearest place to go to (a POI), the nearest barrier and the nearest piece of history
- * (a bunker, a memorial, a former military site), each described in words rather than
- * OpenStreetMap tags. Street furniture, fields and the like are left out.
+ * nearest place to go to (a POI), the nearest barrier, the nearest piece of history (a
+ * bunker, a monument, a former military site), the nearest water (a lake, a river, a bay)
+ * and the nearest bridge, each described in words rather than OpenStreetMap tags. Street
+ * furniture, fields and the like are left out.
  */
 
-export type DetailKind = 'road' | 'poi' | 'barrier' | 'history';
+export type DetailKind = 'road' | 'poi' | 'barrier' | 'history' | 'water' | 'bridge';
 
 /** Ways a motor vehicle can move on, from motorways down to tracks, paths and bridleways. */
 const ROAD_VALUES = '^((motorway|trunk|primary|secondary|tertiary)(_link)?|unclassified|residential|living_street|service|track|road|path|bridleway|busway)$';
@@ -20,8 +21,8 @@ const ROAD = new RegExp(ROAD_VALUES);
 const POI_KEYS = ['amenity', 'shop', 'tourism', 'craft', 'office', 'healthcare'];
 const NAMED_POI_KEYS = ['leisure'];
 
-/** Keys that make an object history, whatever their value: historic places, bunkers, former military sites. */
-const HISTORY_KEYS = ['historic', 'bunker_type', 'abandoned:military', 'disused:military', 'historic:military'];
+/** Keys that make an object history, whatever their value: historic places, bunkers, former military sites, listed monuments. */
+const HISTORY_KEYS = ['historic', 'bunker_type', 'abandoned:military', 'disused:military', 'historic:military', 'heritage'];
 /** Tags that make an object history. */
 const HISTORY_TAGS: Record<string, string> = { military: 'bunker', building: 'bunker' };
 /**
@@ -51,6 +52,18 @@ function isHistory(tags: Record<string, string>): boolean {
   return name !== undefined && HISTORY_NAMES.some((word) => name.includes(word));
 }
 
+/** Tags of water: lakes, ponds and reservoirs, bays and straits of the sea, rivers, streams and canals. */
+const WATER_TAGS: Record<string, string[]> = { natural: ['water', 'bay', 'strait'], waterway: ['river', 'stream', 'canal'], landuse: ['reservoir'] };
+
+function isWater(tags: Record<string, string>): boolean {
+  return Object.entries(WATER_TAGS).some(([key, values]) => values.includes(tags[key] ?? ''));
+}
+
+/** A bridge's own outline, or a way that is a bridge: the road, railway or path on it. */
+function isBridge({ type, tags }: OsmObject): boolean {
+  return tags.man_made === 'bridge' || (type === 'way' && !!tags.bridge && tags.bridge !== 'no');
+}
+
 /** Amenities that are street furniture rather than places to go to. */
 const FURNITURE = new Set([
   'bench',
@@ -74,13 +87,20 @@ const FURNITURE = new Set([
   'telephone',
 ]);
 
-/** What an object is to someone on the move, if anything. */
-export function kindOf({ type, tags }: OsmObject): DetailKind | undefined {
-  if (type === 'node' && tags.barrier && tags.barrier !== 'kerb') return 'barrier';
-  if (type === 'way' && ROAD.test(tags.highway ?? '')) return 'road';
-  if (isHistory(tags)) return 'history';
-  if (poiKey(tags)) return 'poi';
-  return undefined;
+/**
+ * What an object is to someone on the move: a barrier, a road, history or a place to go to,
+ * and besides water or a bridge; a road on a bridge is both.
+ */
+export function kindsOf(object: OsmObject): DetailKind[] {
+  const { type, tags } = object;
+  const kinds: DetailKind[] = [];
+  if (type === 'node' && tags.barrier && tags.barrier !== 'kerb') kinds.push('barrier');
+  else if (type === 'way' && ROAD.test(tags.highway ?? '')) kinds.push('road');
+  else if (isHistory(tags)) kinds.push('history');
+  else if (poiKey(tags)) kinds.push('poi');
+  if (isWater(tags)) kinds.push('water');
+  if (isBridge(object)) kinds.push('bridge');
+  return kinds;
 }
 
 /** The tag that makes the element a place to go to. */
@@ -114,6 +134,9 @@ export function overpassDetailsQuery([lng, lat]: LngLat, radius: number): string
     ...Object.entries(HISTORY_TAGS).map(([key, value]) => `nwr.near["${key}"="${value}"];`),
     `nwr.near["name"~"${HISTORY_NAMES.join('|')}",i];`,
     `node.near["barrier"];`,
+    ...Object.entries(WATER_TAGS).map(([key, values]) => `nwr.near["${key}"~"^(${values.join('|')})$"];`),
+    `nwr.near["man_made"="bridge"];`,
+    `way.near["bridge"]["bridge"!="no"];`,
   ];
   const [west, south, east, north] = boxAround([lng, lat], 2 * radius);
   const box = [south, west, north, east].map((v) => v.toFixed(6)).join(',');
@@ -131,10 +154,12 @@ function boxAround([lng, lat]: LngLat, size: number): [number, number, number, n
 }
 
 /**
- * The same as SQL for Postpass: drivable ways, places to go to and barrier nodes within
- * `radius` metres of the spot. Areas come as their outlines, which is what the details
- * measure to and draw, and those of relations clipped to the box twice the radius, as from
- * Overpass. A boundary relation is a line and a polygon there; one row of it is kept.
+ * The same as SQL for Postpass: drivable ways, places to go to, barrier nodes, history,
+ * water and bridges within `radius` metres of the spot. Areas come as their outlines, which
+ * is what the details draw, and those of relations clipped to the box twice the radius, as
+ * from Overpass; `within` says whether the spot lies inside an area, which its outline
+ * cannot tell once clipped, as in the middle of a large lake. A boundary relation is a
+ * line and a polygon there; one row of it is kept.
  */
 export function postpassDetailsQuery([lng, lat]: LngLat, radius: number): string {
   const spot = `ST_SetSRID(ST_MakePoint(${lng.toFixed(6)}, ${lat.toFixed(6)}), 4326)`;
@@ -149,8 +174,12 @@ export function postpassDetailsQuery([lng, lat]: LngLat, radius: number): string
       `OR tags ?| ${keys(HISTORY_KEYS)} OR ${Object.entries(HISTORY_TAGS)
         .map(([key, value]) => `tags @> ${sql(JSON.stringify({ [key]: value }))}::jsonb`)
         .join(' OR ')} ` +
-      `OR tags->>'name' ILIKE ANY (ARRAY[${HISTORY_NAMES.map((word) => sql(`%${word}%`)).join(', ')}]))`,
-  ]);
+      `OR tags->>'name' ILIKE ANY (ARRAY[${HISTORY_NAMES.map((word) => sql(`%${word}%`)).join(', ')}]) ` +
+      `OR ${Object.entries(WATER_TAGS)
+        .map(([key, values]) => `tags->>${sql(key)} IN (${values.map(sql).join(', ')})`)
+        .join(' OR ')} ` +
+      `OR tags @> '{"man_made":"bridge"}'::jsonb OR (osm_type = 'W' AND tags ? 'bridge' AND tags->>'bridge' <> 'no'))`,
+  ], { within: `ST_Intersects(geom, ${spot})` });
 }
 
 /** How far around a spot to look: 40 CSS pixels at the map's zoom, between 15 and 250 metres. */
@@ -222,10 +251,11 @@ function runsOf(geometry: GeoJSON.Geometry): GeoJSON.Position[][] {
 
 /**
  * Metres from the spot to the object: to a point, to the nearest part of a line, none
- * within a closed ring. An area clipped to a box is no ring any more, so it is measured to
- * its edge.
+ * within a closed ring or an area the source says the spot lies in. An area clipped to a
+ * box is no ring any more, so without that word it is measured to its edge.
  */
-export function distanceTo({ geometry }: OsmObject, spot: LngLat): number | undefined {
+export function distanceTo({ geometry, within }: OsmObject, spot: LngLat): number | undefined {
+  if (within) return 0;
   const toPlane = plane(spot);
   const nearest = Math.min(...runsOf(geometry).map((run) => lineDistance(run.map(toPlane))));
   return Number.isFinite(nearest) ? nearest : undefined;
@@ -242,11 +272,13 @@ interface Nearby {
 export function nearestByKind(objects: readonly OsmObject[], spot: LngLat): Nearby[] {
   const nearest = new Map<DetailKind, Nearby>();
   for (const object of objects) {
-    const kind = kindOf(object);
-    const distance = kind && distanceTo(object, spot);
-    if (!kind || distance === undefined) continue;
-    const known = nearest.get(kind);
-    if (!known || distance < known.distance) nearest.set(kind, { kind, object, distance });
+    const kinds = kindsOf(object);
+    const distance = kinds.length > 0 ? distanceTo(object, spot) : undefined;
+    if (distance === undefined) continue;
+    for (const kind of kinds) {
+      const known = nearest.get(kind);
+      if (!known || distance < known.distance) nearest.set(kind, { kind, object, distance });
+    }
   }
   return [...nearest.values()].sort((a, b) => a.distance - b.distance);
 }
@@ -269,7 +301,8 @@ export type RowIcon =
   | 'hours'
   | 'date'
   | 'heritage'
-  | 'text';
+  | 'text'
+  | 'weight';
 
 export interface DetailRow {
   icon: RowIcon;
@@ -380,12 +413,53 @@ function historyTitle(tags: Record<string, string>): string {
   if (tags.historic && tags.historic !== 'yes') return words(tags.historic);
   const former = tags['abandoned:military'] ?? tags['disused:military'] ?? tags['historic:military'];
   if (former) return `Former ${words(former).toLowerCase()}`;
+  if (tags.heritage) return tags.building && tags.building !== 'no' ? 'Listed building' : 'Listed monument';
   return 'Historic site';
 }
+
+/** Titles of water by a tag, looked at in the order of `WATER_TITLE_KEYS`. */
+const WATER_TITLES: Record<string, string> = {
+  'waterway=river': 'River',
+  'waterway=stream': 'Stream',
+  'waterway=canal': 'Canal',
+  'water=lake': 'Lake',
+  'water=reservoir': 'Reservoir',
+  'water=pond': 'Pond',
+  'water=river': 'River',
+  'water=stream': 'Stream',
+  'water=canal': 'Canal',
+  'water=oxbow': 'Oxbow lake',
+  'water=lagoon': 'Lagoon',
+  'natural=bay': 'Bay',
+  'natural=strait': 'Strait',
+  'landuse=reservoir': 'Reservoir',
+};
+const WATER_TITLE_KEYS = ['waterway', 'water', 'natural', 'landuse'];
+
+/** What water is: a river by its waterway, a lake or pond by its kind of water, a bay, a strait. */
+function waterTitle(tags: Record<string, string>): string {
+  for (const key of WATER_TITLE_KEYS) {
+    const title = WATER_TITLES[`${key}=${tags[key]}`];
+    if (title) return title;
+  }
+  return tags.water ? words(tags.water) : 'Water';
+}
+
+const BRIDGE_TITLES: Record<string, string> = {
+  viaduct: 'Viaduct',
+  aqueduct: 'Aqueduct',
+  boardwalk: 'Boardwalk',
+  covered: 'Covered bridge',
+  movable: 'Movable bridge',
+  trestle: 'Trestle bridge',
+  cantilever: 'Cantilever bridge',
+};
 
 function titleOf(kind: DetailKind, tags: Record<string, string>): string {
   if (kind === 'barrier') return words(tags.barrier!);
   if (kind === 'history') return historyTitle(tags);
+  if (kind === 'water') return waterTitle(tags);
+  if (kind === 'bridge') return BRIDGE_TITLES[tags.bridge ?? ''] ?? 'Bridge';
   if (kind === 'road') {
     const highway = tags.highway!;
     const link = /^(\w+)_link$/.exec(highway);
@@ -463,6 +537,37 @@ function historyRows(tags: Record<string, string>): DetailRow[] {
   return [...rows, ...accessRows(tags)];
 }
 
+function waterRows(tags: Record<string, string>): DetailRow[] {
+  const rows: DetailRow[] = [];
+  if (tags.intermittent === 'yes') rows.push({ icon: 'date', label: 'Seasonal', value: 'Dries up at times' });
+  if (tags.salt === 'yes') rows.push({ icon: 'text', label: 'Water', value: 'Salt' });
+  if (tags.description) rows.push({ icon: 'text', label: 'Description', value: tags.description });
+  if (tags.wikipedia) rows.push(...wikipediaRow(tags.wikipedia));
+  return rows;
+}
+
+/** What a bridge carries and what it is, and of a bridge's own outline its article. */
+function bridgeRows(tags: Record<string, string>): DetailRow[] {
+  const rows: DetailRow[] = [];
+  const carries = tags.highway ? (ROAD_TITLES[tags.highway] ?? words(tags.highway)) : tags.railway ? words(tags.railway) : tags.waterway && words(tags.waterway);
+  if (carries) rows.push({ icon: 'ref', label: 'Carries', value: carries });
+  if (tags.maxweight) rows.push({ icon: 'weight', label: 'Weight limit', value: /^\d+(\.\d+)?$/.test(tags.maxweight) ? `${tags.maxweight} t` : tags.maxweight });
+  if (tags['bridge:structure']) rows.push({ icon: 'text', label: 'Structure', value: words(tags['bridge:structure']) });
+  if (tags.man_made === 'bridge') {
+    const built = tags.start_date ?? tags.construction_date;
+    if (built) rows.push({ icon: 'date', label: 'Built', value: built });
+    if (tags.heritage) rows.push({ icon: 'heritage', label: 'Heritage', value: 'Listed monument' });
+    if (tags.wikipedia) rows.push(...wikipediaRow(tags.wikipedia));
+  }
+  return rows;
+}
+
+/** The name of what the details are about: a bridge's own name rather than the road's on it. */
+function nameOf(kind: DetailKind, tags: Record<string, string>): string | undefined {
+  if (kind === 'bridge') return tags['bridge:name'] ?? (tags.man_made === 'bridge' ? tags.name : undefined);
+  return tags.name ?? tags.brand ?? tags.operator;
+}
+
 function barrierRows(tags: Record<string, string>): DetailRow[] {
   const rows = hoursRow(tags);
   if (tags.locked === 'yes') rows.push({ icon: 'locked', label: 'Locked', value: 'Yes' });
@@ -470,8 +575,8 @@ function barrierRows(tags: Record<string, string>): DetailRow[] {
 }
 
 export function describe({ kind, object: { type, id, tags, geometry }, distance }: Nearby): Details {
-  const name = tags.name ?? tags.brand ?? tags.operator;
-  const rows = { road: roadRows, poi: poiRows, barrier: barrierRows, history: historyRows }[kind](tags);
+  const name = nameOf(kind, tags);
+  const rows = { road: roadRows, poi: poiRows, barrier: barrierRows, history: historyRows, water: waterRows, bridge: bridgeRows }[kind](tags);
   return {
     kind,
     title: titleOf(kind, tags),
@@ -485,8 +590,9 @@ export function describe({ kind, object: { type, id, tags, geometry }, distance 
 }
 
 /**
- * The nearest road or trail, place and barrier within `radius` metres of the spot,
- * described: from Postpass, or from the Overpass API where Postpass fails.
+ * The nearest road or trail, place, barrier, piece of history, water and bridge within
+ * `radius` metres of the spot, described: from Postpass, or from the Overpass API where
+ * Postpass fails. Overpass finds an area only where its edge is near the spot.
  */
 export async function findDetails(spot: LngLat, radius: number): Promise<Details[]> {
   const objects = await postpassOrOverpass(

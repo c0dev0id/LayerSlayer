@@ -1,5 +1,5 @@
 import { describe as group, expect, it } from 'vitest';
-import { describe, distanceTo, kindOf, nearestByKind, overpassDetailsQuery, postpassDetailsQuery, searchRadius, words } from './osmDetails';
+import { describe, distanceTo, kindsOf, nearestByKind, overpassDetailsQuery, postpassDetailsQuery, searchRadius, words } from './osmDetails';
 import { fromOverpass, type OsmElement } from './overpass';
 
 const spot: [number, number] = [8.4, 49.0];
@@ -9,32 +9,44 @@ const node = (id: number, east: number, north: number, tags: Record<string, stri
 const way = (id: number, points: [number, number][], tags: Record<string, string>) =>
   fromOverpass({ type: 'way', id, geometry: points.map(([e, n]) => at(e, n)), tags });
 
-group('kindOf', () => {
+group('kindsOf', () => {
   it('takes drivable ways, places to go to and barriers', () => {
-    expect(kindOf(way(1, [[0, 0], [1, 1]], { highway: 'track' }))).toBe('road');
-    expect(kindOf(way(1, [[0, 0], [1, 1]], { highway: 'primary_link' }))).toBe('road');
-    expect(kindOf(node(1, 0, 0, { amenity: 'fuel' }))).toBe('poi');
-    expect(kindOf(node(1, 0, 0, { shop: 'bakery' }))).toBe('poi');
-    expect(kindOf(node(1, 0, 0, { barrier: 'gate' }))).toBe('barrier');
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { highway: 'track' }))).toEqual(['road']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { highway: 'primary_link' }))).toEqual(['road']);
+    expect(kindsOf(node(1, 0, 0, { amenity: 'fuel' }))).toEqual(['poi']);
+    expect(kindsOf(node(1, 0, 0, { shop: 'bakery' }))).toEqual(['poi']);
+    expect(kindsOf(node(1, 0, 0, { barrier: 'gate' }))).toEqual(['barrier']);
   });
 
   it('takes bunkers, historic places, former military sites and Cold War sites known by name as history', () => {
-    expect(kindOf(node(1, 0, 0, { military: 'bunker', bunker_type: 'pillbox' }))).toBe('history');
-    expect(kindOf(node(1, 0, 0, { historic: 'memorial', memorial: 'war_memorial' }))).toBe('history');
-    expect(kindOf(node(1, 0, 0, { historic: 'castle', name: 'Burg Berwartstein', tourism: 'attraction' }))).toBe('history');
-    expect(kindOf(way(1, [[0, 0], [1, 1]], { 'abandoned:military': 'barracks' }))).toBe('history');
-    expect(kindOf(way(1, [[0, 0], [1, 1]], { natural: 'heath', name: 'ehmalige NIKE-Abschussstellung Salzwoog' }))).toBe('history');
-    expect(kindOf(node(1, 0, 0, { historic: 'no', amenity: 'cafe' }))).toBe('poi');
+    expect(kindsOf(node(1, 0, 0, { military: 'bunker', bunker_type: 'pillbox' }))).toEqual(['history']);
+    expect(kindsOf(node(1, 0, 0, { historic: 'memorial', memorial: 'war_memorial' }))).toEqual(['history']);
+    expect(kindsOf(node(1, 0, 0, { historic: 'castle', name: 'Burg Berwartstein', tourism: 'attraction' }))).toEqual(['history']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { 'abandoned:military': 'barracks' }))).toEqual(['history']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { natural: 'heath', name: 'ehmalige NIKE-Abschussstellung Salzwoog' }))).toEqual(['history']);
+    expect(kindsOf(node(1, 0, 0, { historic: 'no', amenity: 'cafe' }))).toEqual(['poi']);
+  });
+
+  it('takes lakes, bays, rivers and bridges besides what else they are; a road on a bridge is both', () => {
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { natural: 'water', water: 'lake', name: 'Bodensee' }))).toEqual(['water']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { waterway: 'river', name: 'Rhein' }))).toEqual(['water']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { natural: 'bay' }))).toEqual(['water']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { highway: 'trunk', bridge: 'yes' }))).toEqual(['road', 'bridge']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { man_made: 'bridge', name: 'Rheinbrücke Maxau' }))).toEqual(['bridge']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { highway: 'footway', bridge: 'yes' }))).toEqual(['bridge']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { heritage: '4', building: 'church' }))).toEqual(['history']);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { waterway: 'ditch' }))).toEqual([]);
+    expect(kindsOf(node(1, 0, 0, { bridge: 'yes' }))).toEqual([]);
   });
 
   it('leaves out footways, street furniture, kerbs and unnamed boards', () => {
-    expect(kindOf(way(1, [[0, 0], [1, 1]], { highway: 'footway' }))).toBeUndefined();
-    expect(kindOf(way(1, [[0, 0], [1, 1]], { landuse: 'farmland' }))).toBeUndefined();
-    expect(kindOf(node(1, 0, 0, { amenity: 'bench', backrest: 'yes' }))).toBeUndefined();
-    expect(kindOf(node(1, 0, 0, { barrier: 'kerb' }))).toBeUndefined();
-    expect(kindOf(node(1, 0, 0, { tourism: 'information', information: 'board' }))).toBeUndefined();
-    expect(kindOf(node(1, 0, 0, { leisure: 'picnic_table' }))).toBeUndefined();
-    expect(kindOf(node(1, 0, 0, { leisure: 'park', name: 'Schlossgarten' }))).toBe('poi');
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { highway: 'footway' }))).toEqual([]);
+    expect(kindsOf(way(1, [[0, 0], [1, 1]], { landuse: 'farmland' }))).toEqual([]);
+    expect(kindsOf(node(1, 0, 0, { amenity: 'bench', backrest: 'yes' }))).toEqual([]);
+    expect(kindsOf(node(1, 0, 0, { barrier: 'kerb' }))).toEqual([]);
+    expect(kindsOf(node(1, 0, 0, { tourism: 'information', information: 'board' }))).toEqual([]);
+    expect(kindsOf(node(1, 0, 0, { leisure: 'picnic_table' }))).toEqual([]);
+    expect(kindsOf(node(1, 0, 0, { leisure: 'park', name: 'Schlossgarten' }))).toEqual(['poi']);
   });
 });
 
@@ -67,6 +79,11 @@ group('distanceTo', () => {
     expect(distanceTo(fromOverpass(clipped), spot)).toBeCloseTo(10, 0);
     expect(distanceTo(fromOverpass({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, null] }] }), spot)).toBeUndefined();
   });
+
+  it('measures none to an area the source says the spot lies in, even with no outline left in the box', () => {
+    const lake = { type: 'relation' as const, id: 1, tags: { natural: 'water' }, geometry: { type: 'GeometryCollection' as const, geometries: [] }, within: true };
+    expect(distanceTo(lake, spot)).toBe(0);
+  });
 });
 
 group('nearestByKind', () => {
@@ -85,6 +102,14 @@ group('nearestByKind', () => {
       ['barrier', 5],
       ['road', 2],
       ['poi', 4],
+    ]);
+  });
+
+  it('counts an object as each of its kinds', () => {
+    const found = nearestByKind([way(1, [[-100, 5], [100, 5]], { highway: 'primary', bridge: 'yes' }), way(2, [[-100, 20], [100, 20]], { highway: 'track' })], spot);
+    expect(found.map((f) => [f.kind, f.object.id])).toEqual([
+      ['road', 1],
+      ['bridge', 1],
     ]);
   });
 });
@@ -164,6 +189,39 @@ group('describe', () => {
     expect(title({ historic: 'wayside_cross' })).toBe('Wayside cross');
     expect(title({ 'disused:military': 'barracks' })).toBe('Former barracks');
     expect(title({ name: 'Denkmalzone ehemaliges Sonderwaffenlager Fischbach' })).toBe('Historic site');
+    expect(title({ heritage: '4', building: 'church' })).toBe('Listed building');
+    expect(title({ heritage: '4', man_made: 'cross' })).toBe('Listed monument');
+  });
+
+  it('tells water by what it is, and whether it dries up', () => {
+    const water = (tags: Record<string, string>) => describe({ kind: 'water', distance: 0, object: way(8, [[0, 0], [1, 1]], tags) });
+    expect(water({ natural: 'water', water: 'lake', name: 'Bodensee', wikipedia: 'de:Bodensee' })).toMatchObject({
+      title: 'Lake',
+      name: 'Bodensee',
+      rows: [{ label: 'Wikipedia', href: 'https://de.wikipedia.org/wiki/Bodensee' }],
+    });
+    expect(water({ waterway: 'stream', name: 'Fischbach', intermittent: 'yes' }).rows).toEqual([{ icon: 'date', label: 'Seasonal', value: 'Dries up at times' }]);
+    expect(water({ natural: 'water', water: 'oxbow' }).title).toBe('Oxbow lake');
+    expect(water({ natural: 'water', water: 'fishpond' }).title).toBe('Fishpond');
+    expect(water({ natural: 'water' }).title).toBe('Water');
+    expect(water({ natural: 'bay', name: 'Kieler Bucht' }).title).toBe('Bay');
+  });
+
+  it("tells a bridge by its own name, what it carries and its weight limit, not the road's name", () => {
+    const bridge = (tags: Record<string, string>) => describe({ kind: 'bridge', distance: 3, object: way(9, [[0, 0], [1, 1]], tags) });
+    expect(bridge({ highway: 'trunk', bridge: 'yes', name: 'B 10', maxweight: '30' })).toMatchObject({
+      title: 'Bridge',
+      rows: [
+        { label: 'Carries', value: 'Trunk road' },
+        { label: 'Weight limit', value: '30 t' },
+      ],
+    });
+    expect(bridge({ highway: 'trunk', bridge: 'yes', name: 'B 10' }).name).toBeUndefined();
+    expect(bridge({ railway: 'rail', bridge: 'viaduct', 'bridge:name': 'Hochbrücke' })).toMatchObject({ title: 'Viaduct', name: 'Hochbrücke' });
+    expect(bridge({ man_made: 'bridge', name: 'Rheinbrücke Maxau', start_date: '1966' })).toMatchObject({
+      name: 'Rheinbrücke Maxau',
+      rows: [{ label: 'Built', value: '1966' }],
+    });
   });
 
   it('tells a barrier by type, opening hours, lock and access', () => {
@@ -188,6 +246,8 @@ group('the query', () => {
     expect(query).toContain('nwr.near["military"="bunker"];');
     expect(query).toContain('nwr.near["name"~"sonderwaffenlager|munitionslager|');
     expect(query).toContain('node.near["barrier"];');
+    expect(query).toContain('nwr.near["natural"~"^(water|bay|strait)$"];nwr.near["waterway"~"^(river|stream|canal)$"];');
+    expect(query).toContain('nwr.near["man_made"="bridge"];way.near["bridge"]["bridge"!="no"];');
   });
 
   it('clips relations to a box twice the radius around the spot', () => {
@@ -202,10 +262,18 @@ group('the query', () => {
     expect(query).toContain("(osm_type = 'W' AND tags->>'highway' ~ '^((motorway|trunk|primary|secondary|tertiary)(_link)?|");
     expect(query).toContain("tags ?| ARRAY['amenity', 'shop', 'tourism', 'craft', 'office', 'healthcare']");
     expect(query).toContain("(tags ?| ARRAY['leisure'] AND tags ? 'name')");
-    expect(query).toContain("OR tags ?| ARRAY['historic', 'bunker_type', 'abandoned:military', 'disused:military', 'historic:military']");
+    expect(query).toContain("OR tags ?| ARRAY['historic', 'bunker_type', 'abandoned:military', 'disused:military', 'historic:military', 'heritage']");
     expect(query).toContain(`OR tags @> '{"military":"bunker"}'::jsonb`);
     expect(query).toContain("tags->>'name' ILIKE ANY (ARRAY['%sonderwaffenlager%',");
     expect(query).toContain("(osm_type = 'N' AND tags ? 'barrier')");
+    expect(query).toContain("OR tags->>'natural' IN ('water', 'bay', 'strait') OR tags->>'waterway' IN ('river', 'stream', 'canal')");
+    expect(query).toContain(`OR tags @> '{"man_made":"bridge"}'::jsonb OR (osm_type = 'W' AND tags ? 'bridge' AND tags->>'bridge' <> 'no')`);
+  });
+
+  it('asks Postpass whether the spot lies within each area', () => {
+    const query = postpassDetailsQuery(spot, 63.4);
+    expect(query).toMatch(/^SELECT DISTINCT ON \(osm_type, osm_id\) osm_type, osm_id, tags, geom, within FROM/);
+    expect(query).toContain('ST_Intersects(geom, ST_SetSRID(ST_MakePoint(8.400000, 49.000000), 4326)) AS within');
   });
 
   it('gives Postpass areas as outlines, those of relations clipped to the same box', () => {

@@ -299,6 +299,34 @@ export const WaveIcon = () => (
   </Icon>
 );
 
+/** Water: a lake, a river, a sea (Tabler's ripple). */
+export const RippleIcon = () => (
+  <Icon>
+    <path d="M3 7c3 -2 6 -2 9 0s6 2 9 0" />
+    <path d="M3 17c3 -2 6 -2 9 0s6 2 9 0" />
+    <path d="M3 12c3 -2 6 -2 9 0s6 2 9 0" />
+  </Icon>
+);
+
+/** A bridge (Tabler's building-bridge). */
+export const BridgeIcon = () => (
+  <Icon>
+    <path d="M6 5l0 14" />
+    <path d="M18 5l0 14" />
+    <path d="M2 15l20 0" />
+    <path d="M3 8a7.5 7.5 0 0 0 3 -2a6.5 6.5 0 0 0 12 0a7.5 7.5 0 0 0 3 2" />
+    <path d="M12 10l0 5" />
+  </Icon>
+);
+
+/** A weight limit (Tabler's weight). */
+export const WeightIcon = () => (
+  <Icon>
+    <path d="M12 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+    <path d="M6.835 9h10.33a1 1 0 0 1 .984 .821l1.637 9a1 1 0 0 1 -.984 1.179h-13.604a1 1 0 0 1 -.984 -1.179l1.637 -9a1 1 0 0 1 .984 -.821z" />
+  </Icon>
+);
+
 /** A width (Tabler's ruler-measure). */
 export const RulerIcon = () => (
   <Icon>

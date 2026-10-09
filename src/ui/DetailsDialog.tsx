@@ -9,6 +9,7 @@ import { errorMessage, map } from '../state/ui';
 import {
   BarrierIcon,
   BothWaysIcon,
+  BridgeIcon,
   CalendarIcon,
   ClockIcon,
   GaugeIcon,
@@ -21,11 +22,13 @@ import {
   OneWayIcon,
   PhoneIcon,
   QuoteIcon,
+  RippleIcon,
   RoadIcon,
   RulerIcon,
   TagIcon,
   TextureIcon,
   WaveIcon,
+  WeightIcon,
   WorldIcon,
 } from './icons';
 import { showWhile } from './modal';
@@ -48,13 +51,21 @@ const ROW_ICONS: Record<RowIcon, () => JSX.Element> = {
   date: CalendarIcon,
   heritage: MonumentIcon,
   text: QuoteIcon,
+  weight: WeightIcon,
 };
 
-const KIND_ICONS: Record<DetailKind, () => JSX.Element> = { road: RoadIcon, poi: MapPinIcon, barrier: BarrierIcon, history: MonumentIcon };
+const KIND_ICONS: Record<DetailKind, () => JSX.Element> = {
+  road: RoadIcon,
+  poi: MapPinIcon,
+  barrier: BarrierIcon,
+  history: MonumentIcon,
+  water: RippleIcon,
+  bridge: BridgeIcon,
+};
 
 /**
  * Details in a sheet beside the map, which stays usable: what OpenStreetMap knows of a spot
- * (the nearest road or trail, place and barrier, nearest first, each in words with the link
+ * (the nearest road or trail, place, barrier, history, water and bridge, nearest first, each in words with the link
  * to all its tags), or the features of the map's layers tapped. The map highlights them
  * meanwhile, and other details replace these.
  */
@@ -122,7 +133,7 @@ function OsmDetails() {
             <p class="note error">{errorMessage(details.error)}</p>
           </Match>
           <Match when={details()?.length === 0}>
-            <p class="muted">No road or trail, place or barrier here. Zoom in closer, or right-click nearer to one.</p>
+            <p class="muted">No road or trail, place, barrier, history, water or bridge here. Zoom in closer, or right-click nearer to one.</p>
           </Match>
           <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={presets()} />}</For>}</Match>
         </Switch>
