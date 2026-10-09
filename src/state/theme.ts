@@ -17,9 +17,11 @@ export function parseTheme(value: string | undefined): Theme | undefined {
   return value === 'light' || value === 'dark' ? value : undefined;
 }
 
+export const otherTheme = (theme: Theme): Theme => (theme === 'dark' ? 'light' : 'dark');
+
 /** The choice to keep when the toggle turns `current` into the other theme: none when that is the browser's. */
 export function toggledChoice(current: Theme, preferred: Theme): Theme | undefined {
-  const next: Theme = current === 'dark' ? 'light' : 'dark';
+  const next = otherTheme(current);
   return next === preferred ? undefined : next;
 }
 

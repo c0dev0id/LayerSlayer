@@ -1,6 +1,6 @@
 import { createSignal, Show } from 'solid-js';
 import { openProject, readProject, saveProject } from '../state/project';
-import { theme, toggleTheme } from '../state/theme';
+import { otherTheme, theme, toggleTheme } from '../state/theme';
 import { errorMessage, panelCollapsed, setPanelCollapsed } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { downloadBlob } from './download';
@@ -18,6 +18,7 @@ async function open(file: File): Promise<void> {
  */
 export function ProjectSection() {
   const [error, setError] = createSignal<string>();
+  const next = () => otherTheme(theme());
   return (
     <header class="section">
       <div class="row">
@@ -25,11 +26,10 @@ export function ProjectSection() {
         <h1 class="grow">Layer Slayer</h1>
         <button
           class="icon"
-          title={theme() === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme'}
-          aria-label={theme() === 'dark' ? 'Light theme' : 'Dark theme'}
+          title={`Switch to the ${next()} theme`}
           onClick={toggleTheme}
         >
-          {theme() === 'dark' ? <SunIcon /> : <MoonIcon />}
+          {next() === 'light' ? <SunIcon /> : <MoonIcon />}
         </button>
         <button
           title="Download the layers, routes, focus area and imported files as a .lslay file, to open in another browser or after clearing this one"
