@@ -1,12 +1,13 @@
 import { describe as group, expect, it } from 'vitest';
 import type { OsmElement } from './overpass';
-import { describe, detailsQuery, distanceTo, geometryOf, kindOf, nearestByKind, searchRadius, words } from './osmDetails';
+import { describe, distanceTo, fromOverpass, geometryOf, kindOf, nearestByKind, overpassDetailsQuery, postpassDetailsQuery, searchRadius, words } from './osmDetails';
 
 const spot: [number, number] = [8.4, 49.0];
 /** A point `east` and `north` metres from the spot. */
 const at = (east: number, north: number) => ({ lat: 49 + north / 110_574, lon: 8.4 + east / (111_320 * Math.cos((49 * Math.PI) / 180)) });
-const node = (id: number, east: number, north: number, tags: Record<string, string>): OsmElement => ({ type: 'node', id, ...at(east, north), tags });
-const way = (id: number, points: [number, number][], tags: Record<string, string>): OsmElement => ({ type: 'way', id, geometry: points.map(([e, n]) => at(e, n)), tags });
+const node = (id: number, east: number, north: number, tags: Record<string, string>) => fromOverpass({ type: 'node', id, ...at(east, north), tags });
+const way = (id: number, points: [number, number][], tags: Record<string, string>) =>
+  fromOverpass({ type: 'way', id, geometry: points.map(([e, n]) => at(e, n)), tags });
 
 group('kindOf', () => {
   it('takes drivable ways, places to go to and barriers', () => {
@@ -33,15 +34,29 @@ group('distanceTo', () => {
     expect(distanceTo(node(1, 30, 40, {}), spot)).toBeCloseTo(50, 0);
     expect(distanceTo(way(1, [[-100, 20], [100, 20]], {}), spot)).toBeCloseTo(20, 0);
     expect(distanceTo(way(1, [[-10, -10], [10, -10], [10, 10], [-10, 10], [-10, -10]], {}), spot)).toBe(0);
-    expect(distanceTo({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [at(5, -50), at(5, 50)] }] }, spot)).toBeCloseTo(5, 0);
-    expect(distanceTo({ type: 'way', id: 1 }, spot)).toBeUndefined();
+    expect(distanceTo(fromOverpass({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [at(5, -50), at(5, 50)] }] }), spot)).toBeCloseTo(5, 0);
+    expect(distanceTo(fromOverpass({ type: 'way', id: 1 }), spot)).toBeUndefined();
+  });
+
+  it('measures to geometry as Postpass gives it: rings, and pieces clipped to a box', () => {
+    const lngLat = (east: number, north: number) => [at(east, north).lon, at(east, north).lat];
+    const ring = [lngLat(-10, -10), lngLat(10, -10), lngLat(10, 10), lngLat(-10, 10), lngLat(-10, -10)];
+    expect(distanceTo({ type: 'way', id: 1, tags: {}, geometry: { type: 'Polygon', coordinates: [ring] } }, spot)).toBe(0);
+    const pieces: GeoJSON.Geometry = {
+      type: 'GeometryCollection',
+      geometries: [
+        { type: 'Point', coordinates: lngLat(0, 40) },
+        { type: 'LineString', coordinates: [lngLat(-50, 25), lngLat(50, 25)] },
+      ],
+    };
+    expect(distanceTo({ type: 'relation', id: 1, tags: {}, geometry: pieces }, spot)).toBeCloseTo(25, 0);
   });
 
   it('measures a clipped area to the edge left in the box, as it is no ring any more', () => {
     const ring = [at(-300, -10), at(-10, -10), at(-10, 10), at(-300, 10), at(-300, -10)];
-    const clipped = { type: 'relation' as const, id: 1, members: [{ type: 'way', geometry: [null, ring[1]!, ring[2]!, null, null] }] };
-    expect(distanceTo(clipped, spot)).toBeCloseTo(10, 0);
-    expect(distanceTo({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, null] }] }, spot)).toBeUndefined();
+    const clipped: OsmElement = { type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, ring[1]!, ring[2]!, null, null] }] };
+    expect(distanceTo(fromOverpass(clipped), spot)).toBeCloseTo(10, 0);
+    expect(distanceTo(fromOverpass({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, null] }] }), spot)).toBeUndefined();
   });
 });
 
@@ -150,7 +165,7 @@ group('describe', () => {
 
 group('the query', () => {
   it('looks around the spot once and picks drivable ways, places and barriers from there', () => {
-    const query = detailsQuery(spot, 63.4);
+    const query = overpassDetailsQuery(spot, 63.4);
     expect(query).toMatch(/^\[out:json\]\[timeout:10\];nwr\(around:63,49\.000000,8\.400000\)->\.near;\(.*\)->\.found;/);
     expect(query.match(/around/g)).toHaveLength(1);
     expect(query).toContain('way.near["highway"~"^((motorway|trunk|primary|secondary|tertiary)(_link)?|');
@@ -160,9 +175,25 @@ group('the query', () => {
   });
 
   it('clips relations to a box twice the radius around the spot', () => {
-    expect(detailsQuery(spot, 63.4)).toMatch(
+    expect(overpassDetailsQuery(spot, 63.4)).toMatch(
       /\(node\.found;way\.found;\);out tags geom;relation\.found;out geom\(48\.998853,8\.398264,49\.001147,8\.401736\);$/,
     );
+  });
+
+  it('asks Postpass the same: drivable ways, places and barrier nodes within the radius', () => {
+    const query = postpassDetailsQuery(spot, 63.4);
+    expect(query).toContain('ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint(8.400000, 49.000000), 4326)::geography, 63)');
+    expect(query).toContain("(osm_type = 'W' AND tags->>'highway' ~ '^((motorway|trunk|primary|secondary|tertiary)(_link)?|");
+    expect(query).toContain("tags ?| ARRAY['amenity', 'shop', 'tourism', 'craft', 'office', 'healthcare']");
+    expect(query).toContain("(tags ?| ARRAY['leisure', 'historic'] AND tags ? 'name')");
+    expect(query).toContain("(osm_type = 'N' AND tags ? 'barrier')");
+  });
+
+  it('gives Postpass areas as outlines, those of relations clipped to the same box', () => {
+    const query = postpassDetailsQuery(spot, 63.4);
+    const box = 'ST_MakeEnvelope(8.398264, 48.998853, 8.401736, 49.001147, 4326)';
+    expect(query).toContain(`CASE WHEN osm_type = 'R' THEN ST_Intersection(CASE WHEN GeometryType(geom) IN ('POLYGON', 'MULTIPOLYGON') THEN ST_Boundary(geom) ELSE geom END, ${box})`);
+    expect(query).toContain(`WHERE geom && ${box} AND`);
   });
 
   it('looks about 40 pixels around, between 15 and 250 metres', () => {

@@ -1,5 +1,7 @@
 import type { LngLat } from '../model/route';
+import { firstAnswer } from './osmSearch';
 import { askOverpass, type LatLon, type OsmElement } from './overpass';
+import { askPostpass, type OsmObject } from './postpass';
 
 /**
  * What lies at a spot on the map, for people on the move: the nearest road or trail, the
@@ -40,9 +42,9 @@ const FURNITURE = new Set([
   'telephone',
 ]);
 
-/** What an element is to someone on the move, if anything. */
-export function kindOf(element: OsmElement): DetailKind | undefined {
-  const tags = element.tags ?? {};
+/** What an object is to someone on the move, if anything. */
+export function kindOf(element: OsmObject): DetailKind | undefined {
+  const tags = element.tags;
   if (element.type === 'node' && tags.barrier && tags.barrier !== 'kerb') return 'barrier';
   if (element.type === 'way' && ROAD.test(tags.highway ?? '')) return 'road';
   if (poiKey(tags)) return 'poi';
@@ -64,13 +66,13 @@ function poiKey(tags: Record<string, string>): string | undefined {
 }
 
 /**
- * The query for what may be of interest within `radius` metres of the spot, with geometry.
- * Everything around the spot is looked up once and filtered from there, far less work for
- * the server than a lookup per tag; openstreetmap.org builds its "Query features" query the
- * same way. Relations come clipped to a box twice the radius around the spot: a large park
- * would otherwise bring all of its outline.
+ * The Overpass query for what may be of interest within `radius` metres of the spot, with
+ * geometry. Everything around the spot is looked up once and filtered from there, far less
+ * work for the server than a lookup per tag; openstreetmap.org builds its "Query features"
+ * query the same way. Relations come clipped to a box twice the radius around the spot: a
+ * large park would otherwise bring all of its outline.
  */
-export function detailsQuery([lng, lat]: LngLat, radius: number): string {
+export function overpassDetailsQuery([lng, lat]: LngLat, radius: number): string {
   const around = `(around:${Math.round(radius)},${lat.toFixed(6)},${lng.toFixed(6)})`;
   const filters = [
     `way.near["highway"~"${ROAD_VALUES}"];`,
@@ -78,12 +80,42 @@ export function detailsQuery([lng, lat]: LngLat, radius: number): string {
     ...NAMED_POI_KEYS.map((key) => `nwr.near["${key}"]["name"];`),
     `node.near["barrier"];`,
   ];
-  const [east, north] = metresPerDegree(lat);
-  const [dLng, dLat] = [(2 * radius) / east, (2 * radius) / north];
-  const box = [lat - dLat, lng - dLng, lat + dLat, lng + dLng].map((v) => v.toFixed(6)).join(',');
+  const [west, south, east, north] = boxAround([lng, lat], radius);
+  const box = [south, west, north, east].map((v) => v.toFixed(6)).join(',');
   return (
     `[out:json][timeout:10];nwr${around}->.near;(${filters.join('')})->.found;` +
     `(node.found;way.found;);out tags geom;relation.found;out geom(${box});`
+  );
+}
+
+/** A box twice the radius around the spot, as west, south, east and north. */
+function boxAround([lng, lat]: LngLat, radius: number): [number, number, number, number] {
+  const [east, north] = metresPerDegree(lat);
+  const [dLng, dLat] = [(2 * radius) / east, (2 * radius) / north];
+  return [lng - dLng, lat - dLat, lng + dLng, lat + dLat];
+}
+
+/**
+ * The same as SQL for Postpass: drivable ways, places to go to and barrier nodes within
+ * `radius` metres of the spot. Areas come as their outlines, which is what the details
+ * measure to and draw, and those of relations clipped to the box twice the radius, as from
+ * Overpass. A boundary relation is a line and a polygon there; one row of it is kept.
+ */
+export function postpassDetailsQuery([lng, lat]: LngLat, radius: number): string {
+  const spot = `ST_SetSRID(ST_MakePoint(${lng.toFixed(6)}, ${lat.toFixed(6)}), 4326)`;
+  const box = `ST_MakeEnvelope(${boxAround([lng, lat], radius)
+    .map((v) => v.toFixed(6))
+    .join(', ')}, 4326)`;
+  const keys = (list: readonly string[]) => `ARRAY[${list.map((key) => `'${key}'`).join(', ')}]`;
+  const outline = "CASE WHEN GeometryType(geom) IN ('POLYGON', 'MULTIPOLYGON') THEN ST_Boundary(geom) ELSE geom END";
+  return (
+    'SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, ' +
+    `CASE WHEN osm_type = 'R' THEN ST_Intersection(${outline}, ${box}) ELSE ${outline} END AS geom ` +
+    `FROM postpass_pointlinepolygon WHERE geom && ${box} ` +
+    `AND ST_DWithin(geom::geography, ${spot}::geography, ${Math.round(radius)}) ` +
+    `AND ((osm_type = 'W' AND tags->>'highway' ~ '${ROAD_VALUES}') OR tags ?| ${keys(POI_KEYS)} ` +
+    `OR (tags ?| ${keys(NAMED_POI_KEYS)} AND tags ? 'name') OR (osm_type = 'N' AND tags ? 'barrier')) ` +
+    'ORDER BY osm_type, osm_id, area_m2 IS NULL'
   );
 }
 
@@ -101,9 +133,9 @@ function metresPerDegree(lat: number): Point {
 }
 
 /** Positions as metres east and north of the spot; plane enough within a few hundred metres. */
-function plane([lng, lat]: LngLat): (p: { lat: number; lon: number }) => Point {
+function plane([lng, lat]: LngLat): (p: GeoJSON.Position) => Point {
   const [east, north] = metresPerDegree(lat);
-  return (p) => [(p.lon - lng) * east, (p.lat - lat) * north];
+  return ([x, y]) => [(x! - lng) * east, (y! - lat) * north];
 }
 
 function segmentDistance([px, py]: Point, [ax, ay]: Point, [bx, by]: Point): number {
@@ -145,27 +177,39 @@ function stretches(points: readonly (LatLon | null)[] | undefined): LatLon[][] {
   return runs.filter((run) => run.length > 0);
 }
 
-/**
- * Metres from the spot to the element: to a node, to a way's line or area, to a relation's
- * members. An area clipped to a box is no ring any more, so it is measured to its edge.
- */
-export function distanceTo(element: OsmElement, spot: LngLat): number | undefined {
-  const toPlane = plane(spot);
-  const lines: Point[][] = [];
-  if (element.lat !== undefined && element.lon !== undefined) lines.push([toPlane({ lat: element.lat, lon: element.lon })]);
-  const toLines = (points: readonly (LatLon | null)[] | undefined) => stretches(points).map((run) => run.map(toPlane));
-  lines.push(...toLines(element.geometry));
-  for (const member of element.members ?? []) {
-    if (member.geometry) lines.push(...toLines(member.geometry));
-    else if (member.lat !== undefined && member.lon !== undefined) lines.push([toPlane({ lat: member.lat, lon: member.lon })]);
+/** A geometry's points as runs: a point alone, a line, a ring. */
+function runsOf(geometry: GeoJSON.Geometry): GeoJSON.Position[][] {
+  switch (geometry.type) {
+    case 'Point':
+      return [[geometry.coordinates]];
+    case 'MultiPoint':
+      return geometry.coordinates.map((p) => [p]);
+    case 'LineString':
+      return [geometry.coordinates];
+    case 'MultiLineString':
+    case 'Polygon':
+      return geometry.coordinates;
+    case 'MultiPolygon':
+      return geometry.coordinates.flat();
+    case 'GeometryCollection':
+      return geometry.geometries.flatMap(runsOf);
   }
-  const nearest = Math.min(...lines.map(lineDistance));
+}
+
+/**
+ * Metres from the spot to the object: to a point, to the nearest part of a line, none
+ * within a closed ring. An area clipped to a box is no ring any more, so it is measured to
+ * its edge.
+ */
+export function distanceTo(element: OsmObject, spot: LngLat): number | undefined {
+  const toPlane = plane(spot);
+  const nearest = Math.min(...runsOf(element.geometry).map((run) => lineDistance(run.map(toPlane))));
   return Number.isFinite(nearest) ? nearest : undefined;
 }
 
-/** The nearest element of each kind, nearest first. */
-export function nearestByKind(elements: readonly OsmElement[], spot: LngLat): { kind: DetailKind; element: OsmElement; distance: number }[] {
-  const nearest = new Map<DetailKind, { kind: DetailKind; element: OsmElement; distance: number }>();
+/** The nearest object of each kind, nearest first. */
+export function nearestByKind(elements: readonly OsmObject[], spot: LngLat): { kind: DetailKind; element: OsmObject; distance: number }[] {
+  const nearest = new Map<DetailKind, { kind: DetailKind; element: OsmObject; distance: number }>();
   for (const element of elements) {
     const kind = kindOf(element);
     const distance = kind && distanceTo(element, spot);
@@ -216,7 +260,12 @@ export interface Details {
   geometry: GeoJSON.Geometry;
 }
 
-/** An element's geometry as GeoJSON: areas as their outlines, which is what a highlight draws. */
+/** An Overpass element as an OSM object, as Postpass gives them. */
+export function fromOverpass(element: OsmElement): OsmObject {
+  return { type: element.type, id: element.id, tags: element.tags ?? {}, geometry: geometryOf(element) };
+}
+
+/** An Overpass element's geometry as GeoJSON: areas as their outlines, which is what a highlight draws. */
 export function geometryOf(element: OsmElement): GeoJSON.Geometry {
   if (element.lat !== undefined && element.lon !== undefined) return { type: 'Point', coordinates: [element.lon, element.lat] };
   const toLine = (run: LatLon[]) => run.map((p) => [p.lon, p.lat]);
@@ -359,8 +408,8 @@ function barrierRows(tags: Record<string, string>): DetailRow[] {
   return [...rows, ...accessRows(tags)];
 }
 
-export function describe({ kind, element, distance }: { kind: DetailKind; element: OsmElement; distance: number }): Details {
-  const tags = element.tags ?? {};
+export function describe({ kind, element, distance }: { kind: DetailKind; element: OsmObject; distance: number }): Details {
+  const tags = element.tags;
   const name = tags.name ?? tags.brand ?? tags.operator;
   const rows = kind === 'road' ? roadRows(tags) : kind === 'poi' ? poiRows(tags) : barrierRows(tags);
   return {
@@ -371,12 +420,18 @@ export function describe({ kind, element, distance }: { kind: DetailKind; elemen
     rows,
     url: `https://www.openstreetmap.org/${element.type}/${element.id}`,
     tags,
-    geometry: geometryOf(element),
+    geometry: element.geometry,
   };
 }
 
-/** The nearest road or trail, place and barrier within `radius` metres of the spot, described. */
+/**
+ * The nearest road or trail, place and barrier within `radius` metres of the spot,
+ * described: from Postpass, or from the Overpass API where Postpass fails.
+ */
 export async function findDetails(spot: LngLat, radius: number): Promise<Details[]> {
-  const { elements } = await askOverpass(detailsQuery(spot, radius));
-  return nearestByKind(elements, spot).map(describe);
+  const objects = await firstAnswer([
+    { name: 'Postpass', ask: () => askPostpass(postpassDetailsQuery(spot, radius)) },
+    { name: 'Overpass API', ask: async () => (await askOverpass(overpassDetailsQuery(spot, radius))).elements.map(fromOverpass) },
+  ]);
+  return nearestByKind(objects, spot).map(describe);
 }

@@ -120,7 +120,7 @@ function OsmDetails() {
           <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={presets()} />}</For>}</Match>
         </Switch>
       </div>
-      <p class="muted hint">Data © OpenStreetMap contributors, found with the Overpass API.</p>
+      <p class="muted hint">Data © OpenStreetMap contributors, found with Postpass, or the Overpass API where Postpass fails.</p>
     </>
   );
 }
