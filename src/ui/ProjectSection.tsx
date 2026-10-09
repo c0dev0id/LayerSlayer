@@ -1,9 +1,10 @@
 import { createSignal, Show } from 'solid-js';
 import { openProject, readProject, saveProject } from '../state/project';
+import { theme, toggleTheme } from '../state/theme';
 import { errorMessage, panelCollapsed, setPanelCollapsed } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { downloadBlob } from './download';
-import { ChevronDownIcon, ChevronUpIcon } from './icons';
+import { ChevronDownIcon, ChevronUpIcon, MoonIcon, SunIcon } from './icons';
 
 async function open(file: File): Promise<void> {
   const project = await readProject(file);
@@ -11,8 +12,9 @@ async function open(file: File): Promise<void> {
 }
 
 /**
- * The app's name, with saving everything to a .lslay file and opening one in its place;
- * on narrow screens, where the panel lies under the map, a button folds it to this header.
+ * The app's name, with the light/dark toggle (showing the theme it switches to), saving
+ * everything to a .lslay file and opening one in its place; on narrow screens, where the
+ * panel lies under the map, a button folds it to this header.
  */
 export function ProjectSection() {
   const [error, setError] = createSignal<string>();
@@ -21,6 +23,14 @@ export function ProjectSection() {
       <div class="row">
         <img class="logo" src={`${import.meta.env.BASE_URL}logo.png`} alt="" />
         <h1 class="grow">Layer Slayer</h1>
+        <button
+          class="icon"
+          title={theme() === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme'}
+          aria-label={theme() === 'dark' ? 'Light theme' : 'Dark theme'}
+          onClick={toggleTheme}
+        >
+          {theme() === 'dark' ? <SunIcon /> : <MoonIcon />}
+        </button>
         <button
           title="Download the layers, routes, focus area and imported files as a .lslay file, to open in another browser or after clearing this one"
           onClick={async () => {

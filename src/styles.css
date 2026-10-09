@@ -106,6 +106,11 @@ a {
   font-size: 18px;
 }
 
+/* Tighter than other rows, so the name fits on one line beside its buttons at the panel's usual width. */
+header.section > .row {
+  gap: 4px;
+}
+
 .logo {
   width: 28px;
   height: 28px;
