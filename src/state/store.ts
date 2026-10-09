@@ -14,7 +14,7 @@ import {
   type LayerSource,
 } from '../model/layer';
 import { isLngLat, type LngLat } from '../model/route';
-import { importFile } from '../services/importFile';
+import { fileSourceType, importFile } from '../services/importFile';
 import { deleteFile } from './files';
 import { setProxy } from './net';
 import { persistedStore } from './persist';
@@ -169,15 +169,15 @@ export function replaceLayerSource(id: string, source: LayerSource, bounds: Boun
  * GeoPDF for features, features for a GeoPDF's picture) is turned away.
  */
 export async function replaceLayerFile(id: string, file: File): Promise<void> {
-  const draft = await importFile(file, file.name);
   const layer = state.layers.find((l) => l.id === id);
-  if (layer?.source.type !== draft.source.type) {
-    const key = storedFile(draft.source);
-    if (key) void deleteFile(key);
-    if (!layer) return;
+  if (!layer) return;
+  if (fileSourceType(file, file.name) !== layer.source.type) {
     const wanted = layer.source.type === 'image' ? 'a GeoPDF' : 'a GeoJSON, GPX, KML or KMZ file';
     throw new Error(`${file.name} cannot replace the file of ${layer.name}: choose ${wanted}.`);
   }
+  const draft = await importFile(file, file.name);
+  // Removed while the file was read: its new file goes, as the old one did.
+  if (!state.layers.some((l) => l.id === id)) return void deleteFile(storedFile(draft.source)!);
   replaceLayerSource(id, draft.source, draft.bounds);
 }
 

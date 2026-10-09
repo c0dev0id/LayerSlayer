@@ -81,7 +81,7 @@ describe('replaceLayerFile', () => {
     expect(stored.has(old)).toBe(false);
   });
 
-  it('turns away a file of the other kind, and does not keep it', async () => {
+  it('turns away a file of the other kind before reading it', async () => {
     const picture = addLayer({ name: 'Map', source: { type: 'image', data: { file: 'picture', name: 'map.pdf' }, coordinates: [[0, 1], [1, 1], [1, 0], [0, 0]] } });
     const before = stored.size;
     await expect(replaceLayerFile(picture.id, new File([line([1, 2], [3, 4])], 'roads.geojson'))).rejects.toThrow(

@@ -29,16 +29,31 @@ const FILE_KINDS = {
 
 type FileKind = keyof typeof FILE_KINDS;
 
-/** What the file chooser offers. */
-export const IMPORT_ACCEPT = Object.values(FILE_KINDS)
-  .flatMap((kind) => [...kind.extensions.map((e) => `.${e}`), ...kind.types])
-  .join(',');
+/** The kind of source a file becomes: a GeoPDF a picture, any other file features. */
+export type FileSourceType = 'image' | 'geojson';
+
+const sourceType = (kind: FileKind): FileSourceType => (kind === 'pdf' ? 'image' : 'geojson');
+
+/** What the file chooser offers: every kind of file, or those that become a source of `type`. */
+export function importAccept(type?: FileSourceType): string {
+  return (Object.keys(FILE_KINDS) as FileKind[])
+    .filter((kind) => !type || sourceType(kind) === type)
+    .flatMap((kind) => [...FILE_KINDS[kind].extensions.map((e) => `.${e}`), ...FILE_KINDS[kind].types])
+    .join(',');
+}
+
+export const IMPORT_ACCEPT = importAccept();
 
 /** A file's kind by its media type or extension; GeoJSON where neither says otherwise. */
 function fileKind(blob: Blob, name: string): FileKind {
   const extension = /\.([a-z0-9]+)$/i.exec(name)?.[1]?.toLowerCase() ?? '';
   const kinds = Object.keys(FILE_KINDS) as FileKind[];
   return kinds.find((k) => FILE_KINDS[k].types.includes(blob.type) || FILE_KINDS[k].extensions.includes(extension)) ?? 'geojson';
+}
+
+/** The kind of source a file becomes, known before it is read. */
+export function fileSourceType(file: Blob, name: string): FileSourceType {
+  return sourceType(fileKind(file, name));
 }
 
 /**

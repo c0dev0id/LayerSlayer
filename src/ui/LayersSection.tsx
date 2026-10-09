@@ -23,7 +23,7 @@ import {
   type RasterAdjustments,
 } from '../model/layer';
 import { propertyKeys } from '../services/featureProperties';
-import { IMPORT_ACCEPT } from '../services/importFile';
+import { importAccept } from '../services/importFile';
 import { hostOf } from '../state/net';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { moveLayer, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
@@ -368,7 +368,7 @@ function FileRows(props: { layer: Layer; file: FileResource }) {
           <input
             type="file"
             hidden
-            accept={IMPORT_ACCEPT}
+            accept={importAccept(props.layer.source.type === 'image' ? 'image' : 'geojson')}
             aria-label={`Replace the file of ${props.layer.name}`}
             disabled={replaced.running()}
             onChange={(e) => {
