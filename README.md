@@ -21,7 +21,11 @@ in the browser.
     is added or removed by tapping its entry; others open their list of layers, and
     *‹ Sources* goes back to the library as it was left. Tapping a group adds what of it
     is missing, or removes it when all of it is on the map. Layers a service cannot show
-    in Web Mercator are listed with the reason.
+    in Web Mercator are listed with the reason. Some entries are files whose server does
+    not let web pages read them, such as mintelonline.de's motorcycle road closures in
+    Germany, Austria, Switzerland, the Netherlands and Belgium: the arrow beside the entry
+    downloads the file (a link needs no CORS), and tapping the entry asks for the
+    downloaded file.
   - An **address** can be a WMS, WMTS or WFS capabilities URL, an OGC API – Features
     landing page or collection, an ArcGIS MapServer or FeatureServer (or one of its
     layers), a tile template with `{z}/{x}/{y}` (raster, or vector tiles ending in `.pbf`
@@ -32,7 +36,8 @@ in the browser.
   - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
     imported under Routes), the placemarks of KML and KMZ files, and GeoPDFs with an ISO
     32000 geospatial viewport, added as they are chosen. Each new GeoJSON, GPX or KML
-    layer takes the next colour of a palette, which its settings can change.
+    layer takes the next colour of a palette, which its settings can change. *Replace* in
+    a file layer's settings takes a newer version of its file.
   - **OSM Query** makes a layer of OpenStreetMap features in the focus area, found with
     the Overpass API; without a focus area it offers to draw one, since Overpass answers
     queries for limited areas only. Choose features from the list, which starts with
@@ -55,8 +60,8 @@ in the browser.
   it, and the frame icon flies to the area the layer covers (layers that span most of the
   world have none). A layer shown in grey italics is outside its zoom range at the current
   zoom; a red triangle carries the last error loading it. Under each name, a small line
-  shows its opacity, colour, zoom range (z5–15), and *cache* and *proxy* where its
-  tiles are kept or its server goes through the CORS proxy. *Background*, below the last
+  shows its opacity, colour, zoom range (z5–15), and *label*, *cache* and *proxy* where
+  it labels its features, its tiles are kept or its server goes through the CORS proxy. *Background*, below the last
   layer, sets the colour the map is drawn on (white unless chosen); it shows wherever the
   layers leave the map uncovered or see-through.
 - Clicking a layer's name opens its **settings** in its place in the list, closing those
@@ -75,15 +80,27 @@ in the browser.
   features (bollard, cattle grid, lift gate, water tap, fuel), and Material Design Icons
   for nearly everything else. *Size* draws the icon up to three times larger; × goes back
   to dots. Layers that come with an icon, such as OSM queries of a preset, start at 100%
-  opacity instead of 50%.
+  opacity instead of 50%. *Label* writes a property of each feature beside it (along
+  lines, next to points and areas), chosen from the properties its features have; the
+  labels use a font of the style that brings the map's fonts, or OpenFreeMap's.
   OSM query layers show their tags and when they were queried; *Update* queries again in
-  the focus area as it is now and replaces the layer's data.
+  the focus area as it is now and replaces the layer's data. Other file layers show when
+  their file was changed and *Replace*, which takes a newer version of the file and keeps
+  the layer's settings; one added from a library file entry also has the arrow that
+  downloads the newest file, so refreshing it is a download and a Replace.
 - **3D** (with the map's controls on the right) raises the ground by its elevation, shades
   its relief on the bottom layer (layers above stay unshaded), and tilts the map to show
   it; a second tap levels it again. Elevation comes from
   Mapterhorn's open terrain tiles: about 30 m worldwide, and finer (down to a metre or so)
   where countries publish detailed elevation, such as much of Europe. Tilt and turn the
   map with the right mouse button, Ctrl and drag, or two fingers.
+- **Tap a feature** of a vector layer (GeoJSON, GPX, KML, vector tiles, feature services)
+  to see its properties in the details sheet, without the ones that only say how a KML
+  file drew it; the map highlights it. A tap beside the features closes the sheet. The
+  motorcycle road closures of mintelonline.de are read from their names: closed both ways
+  between two places or one way only, when (dates, days and hours as written), whether
+  only motorcycles louder than 95 dB are meant, the postcode and country, and whether all
+  motor vehicles are kept out.
 - **Right-click** a spot on the map (long press on touch screens) to copy its coordinates
   as `lat,lon`, or to open it in Google Maps or Google Street View in a new tab. *Show
   details* asks OpenStreetMap what is there and shows, nearest first, the nearest road or
@@ -209,10 +226,13 @@ answers, which corsproxy.io's free plan refuses.
 [mappic](https://github.com/c0dev0id/mappic), and WFS, OGC API and vector tile services,
 each with its type, region and category.
 
+Entries of type `file` are files the user downloads by a link and opens, for servers that
+do not let web pages read them.
+
 `npm run check-library` reads every entry with the app's own parsers, prints how many
 layers each offers and can show, and marks entries whose server sends no valid CORS header
-with `"cors": false`, which the library shows as needing a proxy. It reads live services,
-so it runs by hand rather than in CI.
+with `"cors": false`, which the library shows as needing a proxy. File entries are only
+checked to be there. It reads live services, so it runs by hand rather than in CI.
 
 ## Development
 

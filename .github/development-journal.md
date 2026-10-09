@@ -516,6 +516,40 @@ It is a static single-page app on GitHub Pages; there is no server component.
   instead of opening a list of one. A group (a heading in the layer tree) toggles the
   layers under it, each added as its own layer so each keeps its own opacity and order;
   adding more than 20 at once asks first, since each is fetched and drawn separately.
+- **Files a page may not read are downloaded by hand.** mintelonline.de publishes its
+  motorcycle road closures as GPX, KMZ and a Garmin GDB, without CORS headers, and
+  corsproxy.io's free plan refuses the GPX (served as octet-stream). A link downloads a
+  file whatever its CORS headers, so a library entry of type `file` offers that link and
+  asks for the downloaded file. The layer remembers the address as `download` on its file
+  and keeps it through *Replace*, so refreshing it is a download and a replace, with the
+  file's date (from the chosen file) shown to tell when it is due. The KMZ was chosen
+  over the GPX: its routes are full geometries (13 000 points, from the Garmin route
+  extension in the GPX) and its signs carry an icon saying whether motorcycles or all
+  motor vehicles are kept out. The GDB is MapSource's binary format. Routing the routes
+  again was not needed, since their geometry is there.
+- **Road closures are read from their names, not converted.** The closure names carry
+  postcode, dates, `>95dB`, days, hours and places, one place meaning one way only and
+  two both ways (as the site explains). The details sheet reads them when a feature is
+  tapped, recognised by a postcode or a closure sign icon, and the file stays as it was:
+  the generic property list would show the raw name otherwise, and a converted file could
+  not be replaced with a newer download as it is. Conditions are shown as written rather
+  than parsed into dates, as their notation varies (`1.4.- 31.10.`, `Fr 22h - Mo 8h`,
+  `1.3.-31-10`).
+- **Labels use the map's one font source.** MapLibre takes glyphs from one URL per map,
+  and font names differ between servers (OpenFreeMap's `Noto Sans Regular`, VersaTiles'
+  `noto_sans_regular`). Labels of vector layers are therefore written in a font the
+  style bringing the glyphs uses itself, preferring a regular one, and only without any
+  style do they use OpenFreeMap's fonts, which allow any origin. Line labels are placed
+  along the line, beside it; MapLibre's point placement on lines anchors at a tile's
+  first vertex, so it was not used. The label list offers the text and number
+  properties the features have (all of a GeoJSON file, those of the loaded tiles
+  otherwise), most common first, without KML styling properties.
+- **Tapping features queries what is drawn.** A tap outside route and focus area drawing
+  asks MapLibre for the rendered features within the tap radius, keeps those of visible
+  vector layers (style layers are named `<layer id>/<part>`), and shows each once, as a
+  line and its label or two tiles return the same feature. The highlight joins the
+  feature's parts from all loaded tiles, so a long line is marked beyond the tile tapped.
+  Nothing is fetched: what was drawn is what is described.
 
 ## Core features
 
@@ -529,6 +563,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
   and a filter for services with hundreds of layers.
 - Layer list with drag and keyboard reordering, visibility, removal, flying to the layer's
   area, opacity, zoom range, colour for vector layers, and per-layer error marks.
+- Labels for vector layers from a feature property, and the properties of a tapped feature
+  in words in the details sheet.
+- File layers that take a newer version of their file, keeping their settings; library
+  entries for files that pages may not read, downloaded by a link, among them the
+  motorcycle road closures of mintelonline.de, read from their names.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
