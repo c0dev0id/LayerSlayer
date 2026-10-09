@@ -520,8 +520,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   motorcycle road closures as GPX, KMZ and a Garmin GDB, without CORS headers, and
   corsproxy.io's free plan refuses the GPX (served as octet-stream). A link downloads a
   file whatever its CORS headers, so a library entry of type `file` offers that link and
-  asks for the downloaded file. The layer remembers the address as `download` on its file
-  and keeps it through *Replace*, so refreshing it is a download and a replace, with the
+  asks for the downloaded file. The layer keeps the address as its `origin`, which
+  *Replace* leaves alone, so refreshing it is a download and a replace, with the
   file's date (from the chosen file) shown to tell when it is due. The KMZ was chosen
   over the GPX: its routes are full geometries (13 000 points, from the Garmin route
   extension in the GPX) and its signs carry an icon saying whether motorcycles or all

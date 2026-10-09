@@ -1,4 +1,4 @@
-import { withDownload, type Bounds, type LayerDraft } from '../model/layer';
+import type { Bounds, LayerDraft } from '../model/layer';
 import type { ServiceInfo, ServiceType } from '../services/types';
 import { parseTemplate } from '../services/vectorTiles';
 import { tileTemplates } from '../services/xyz';
@@ -87,14 +87,8 @@ export function withEntry(info: ServiceInfo, entry: LibraryEntry): ServiceInfo {
 
 /**
  * The layer of a library file the user downloaded and opened: named and credited as the
- * entry, and remembering where the file is published, for downloading a newer version.
+ * entry, with the file's address as its origin, for downloading a newer version.
  */
 export function downloadedLayer(draft: LayerDraft, entry: LibraryEntry): LayerDraft {
-  return {
-    ...draft,
-    name: entry.name,
-    source: withDownload(draft.source, entry.url),
-    origin: entry.url,
-    ...(entry.attribution && { attribution: entry.attribution }),
-  };
+  return { ...draft, name: entry.name, origin: entry.url, ...(entry.attribution && { attribution: entry.attribution }) };
 }

@@ -3,13 +3,11 @@ import { reconcile } from 'solid-js/store';
 import { cornersBounds } from '../geo/bounds';
 import {
   createLayer,
-  fileResource,
   MAX_ZOOM,
   MIN_ZOOM,
   SOURCE_KINDS,
   storedFile,
   storedFiles,
-  withDownload,
   type Bounds,
   type Layer,
   type LayerDraft,
@@ -167,8 +165,8 @@ export function replaceLayerSource(id: string, source: LayerSource, bounds: Boun
 
 /**
  * Gives a layer made from a file a newer version of it: the layer keeps its settings and
- * where the file is published, and the file it had is deleted with the change. A file of
- * the other kind (a GeoPDF for features, features for a GeoPDF's picture) is turned away.
+ * origin, and the file it had is deleted with the change. A file of the other kind (a
+ * GeoPDF for features, features for a GeoPDF's picture) is turned away.
  */
 export async function replaceLayerFile(id: string, file: File): Promise<void> {
   const draft = await importFile(file, file.name);
@@ -180,7 +178,7 @@ export async function replaceLayerFile(id: string, file: File): Promise<void> {
     const wanted = layer.source.type === 'image' ? 'a GeoPDF' : 'a GeoJSON, GPX, KML or KMZ file';
     throw new Error(`${file.name} cannot replace the file of ${layer.name}: choose ${wanted}.`);
   }
-  replaceLayerSource(id, withDownload(draft.source, fileResource(layer.source)?.download), draft.bounds);
+  replaceLayerSource(id, draft.source, draft.bounds);
 }
 
 export function removeLayer(id: string): void {

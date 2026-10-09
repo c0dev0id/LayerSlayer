@@ -86,8 +86,8 @@ in the browser.
   OSM query layers show their tags and when they were queried; *Update* queries again in
   the focus area as it is now and replaces the layer's data. Other file layers show when
   their file was changed and *Replace*, which takes a newer version of the file and keeps
-  the layer's settings; one added from a library file entry also has the arrow that
-  downloads the newest file, so refreshing it is a download and a Replace.
+  the layer's settings; one added from a library file entry or a GeoPDF address also has
+  the arrow that downloads the newest file, so refreshing it is a download and a Replace.
 - **3D** (with the map's controls on the right) raises the ground by its elevation, shades
   its relief on the bottom layer (layers above stay unshaded), and tilts the map to show
   it; a second tap levels it again. Elevation comes from

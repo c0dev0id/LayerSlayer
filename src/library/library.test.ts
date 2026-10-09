@@ -86,7 +86,7 @@ describe('library', () => {
     expect(info.offers[0]!.draft).toMatchObject({ name: 'OpenTopoMap', source: { maxzoom: 17 }, attribution: expect.stringContaining('OpenTopoMap') });
   });
 
-  it('names the layer of a downloaded file after its entry, remembering where the file is published', () => {
+  it('names the layer of a downloaded file after its entry, with the file address as its origin', () => {
     const entry = entries.find((e) => e.type === 'file')!;
     const draft = downloadedLayer(
       { name: 'Streckensperrungen_Motorrad', source: { type: 'geojson', data: { file: 'key', name: 'Streckensperrungen_Motorrad.kmz' } }, bounds: [4, 46, 14, 53] },
@@ -94,7 +94,7 @@ describe('library', () => {
     );
     expect(draft).toEqual({
       name: entry.name,
-      source: { type: 'geojson', data: { file: 'key', name: 'Streckensperrungen_Motorrad.kmz', download: entry.url } },
+      source: { type: 'geojson', data: { file: 'key', name: 'Streckensperrungen_Motorrad.kmz' } },
       bounds: [4, 46, 14, 53],
       origin: entry.url,
       attribution: entry.attribution,

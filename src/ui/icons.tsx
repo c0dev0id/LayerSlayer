@@ -87,6 +87,18 @@ export const DownloadIcon = () => (
   </Icon>
 );
 
+/**
+ * A link that downloads a file from its server, which needs no CORS where the page itself
+ * may not read the file; in a new tab, in case the browser shows the file instead.
+ */
+export function DownloadLink(props: { href: string; of: string; class?: string }) {
+  return (
+    <a class={`icon ${props.class ?? ''}`} href={props.href} target="_blank" rel="noopener" title="Download the file" aria-label={`Download the file of ${props.of}`}>
+      <DownloadIcon />
+    </a>
+  );
+}
+
 /** Fold up (Tabler's chevron-down): the panel under the map goes down out of the way. */
 export const ChevronDownIcon = () => (
   <Icon>

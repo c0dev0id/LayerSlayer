@@ -11,7 +11,7 @@ import { hostOf, isProxied } from '../state/net';
 import { addLayer, focusBounds, removeLayersWhere, setHostProxied, state } from '../state/store';
 import { errorMessage } from '../state/ui';
 import { askConfirmation } from './confirm';
-import { CloseIcon, DownloadIcon } from './icons';
+import { CloseIcon, DownloadLink } from './icons';
 import { showModalWhile } from './modal';
 import { OsmQueryTab } from './OsmQueryTab';
 import { groupMembers, isFromSource, originOf, selection, type Selection } from './offers';
@@ -325,10 +325,7 @@ function LibraryTab(props: {
                   </Show>
                 </button>
                 <Show when={entry.type === 'file'}>
-                  {/* A link, which downloads the file where the page itself may not read it. */}
-                  <a class="icon download-link" href={entry.url} target="_blank" rel="noopener" title="Download the file" aria-label={`Download the file of ${entry.name}`}>
-                    <DownloadIcon />
-                  </a>
+                  <DownloadLink class="download-link" href={entry.url} of={entry.name} />
                 </Show>
               </li>
             );
