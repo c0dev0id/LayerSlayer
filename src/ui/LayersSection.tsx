@@ -4,6 +4,7 @@ import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import { parsePmtilesUrl } from '../map/urls';
 import {
   canCache,
+  fileResource,
   isRaster,
   isVector,
   keepsTiles,
@@ -14,14 +15,16 @@ import {
   MIN_ZOOM,
   NO_ADJUSTMENTS,
   SOURCE_KINDS,
+  type FileResource,
   type Layer,
   type LineDash,
   type OsmQuery,
   type RasterAdjustments,
 } from '../model/layer';
+import { IMPORT_ACCEPT } from '../services/importFile';
 import { hostOf } from '../state/net';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
-import { moveLayer, removeLayer, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
+import { moveLayer, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
 import { layerErrors, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
@@ -337,11 +340,48 @@ function OsmQueryRows(props: { id: string; query: OsmQuery }) {
   );
 }
 
+/** When the file of a layer was changed, and choosing a newer version in its place; the layer keeps its settings. */
+function FileRows(props: { layer: Layer; file: FileResource }) {
+  const replaced = createOutcome();
+  const replace = (file: File) =>
+    replaced.run(async () => {
+      await replaceLayerFile(props.layer.id, file);
+      return `Replaced with ${file.name}.`;
+    });
+
+  return (
+    <>
+      <div class="row">
+        <span class="muted label">File</span>
+        <span class="grow" title="When the file was last changed, as far as the browser said">
+          {props.file.modified && `dated ${new Date(props.file.modified).toLocaleDateString(undefined, { dateStyle: 'medium' })}`}
+        </span>
+        <label class="button" classList={{ disabled: replaced.running() }} title="Choose a newer version of the file; the layer keeps its settings">
+          {replaced.running() ? 'Reading…' : 'Replace…'}
+          <input
+            type="file"
+            hidden
+            accept={IMPORT_ACCEPT}
+            aria-label={`Replace the file of ${props.layer.name}`}
+            disabled={replaced.running()}
+            onChange={(e) => {
+              const file = e.currentTarget.files?.[0];
+              e.currentTarget.value = '';
+              if (file) void replace(file);
+            }}
+          />
+        </label>
+      </div>
+      <OutcomeNote outcome={replaced.outcome()} />
+    </>
+  );
+}
+
 /** Opacity, zoom range, colour and source of the active layer. */
 function ActiveLayer(props: { layer: Layer }) {
   const layer = props.layer;
   const host = () => layerHost(layer);
-  const fileName = () => ('data' in layer.source && 'file' in layer.source.data ? layer.source.data.name : undefined);
+  const fileName = () => fileResource(layer.source)?.name;
   const zoomInput = (key: 'minzoom' | 'maxzoom', label: string) => (
     <input
       class="zoom-input"
@@ -441,6 +481,10 @@ function ActiveLayer(props: { layer: Layer }) {
       </Show>
       <Show when={layer.source.type === 'geojson' ? layer.source.query : undefined}>
         {(query) => <OsmQueryRows id={layer.id} query={query()} />}
+      </Show>
+      {/* An OSM query's file is updated by running the query again. */}
+      <Show when={!(layer.source.type === 'geojson' && layer.source.query) && fileResource(layer.source)}>
+        {(file) => <FileRows layer={layer} file={file()} />}
       </Show>
       <div class="row">
         <span class="muted label">Source</span>

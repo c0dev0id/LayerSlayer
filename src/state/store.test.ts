@@ -1,5 +1,18 @@
-import { describe, expect, it } from 'vitest';
-import { defaultState, moveItem, parseState } from './store';
+import { describe, expect, it, vi } from 'vitest';
+import { storedFile } from '../model/layer';
+import { importFile } from '../services/importFile';
+import { addLayer, defaultState, moveItem, parseState, replaceLayerFile, state, updateLayer } from './store';
+
+// Stored files in memory, as IndexedDB is not at hand.
+const stored = vi.hoisted(() => new Map<string, Blob>());
+vi.mock('./files', () => ({
+  storeFile: async (blob: Blob) => {
+    const key = crypto.randomUUID();
+    stored.set(key, blob);
+    return key;
+  },
+  deleteFile: async (key: string) => void stored.delete(key),
+}));
 
 describe('parseState', () => {
   it('keeps valid layers and drops malformed ones', () => {
@@ -49,5 +62,31 @@ describe('moveItem', () => {
     expect(moveItem(['a', 'b', 'c'], 2, 0)).toEqual(['c', 'a', 'b']);
     expect(moveItem(['a', 'b', 'c'], 1, 9)).toEqual(['a', 'c', 'b']);
     expect(moveItem(['a', 'b', 'c'], -1, 1)).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('replaceLayerFile', () => {
+  const line = (...coordinates: number[][]) => JSON.stringify({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates } });
+  const AUGUST = Date.UTC(2026, 7, 11);
+
+  it('gives a file layer the new file, keeping its settings and deleting the old file', async () => {
+    const layer = addLayer(await importFile(new File([line([1, 2], [3, 4])], 'closures.geojson'), 'closures.geojson'));
+    updateLayer(layer.id, { color: '#123456', opacity: 0.8 });
+    const old = storedFile(layer.source)!;
+    await replaceLayerFile(layer.id, new File([line([5, 6], [7, 9])], 'closures-2.geojson', { lastModified: AUGUST }));
+    const now = state.layers.find((l) => l.id === layer.id)!;
+    expect(now).toMatchObject({ color: '#123456', opacity: 0.8, bounds: [5, 6, 7, 9] });
+    expect(now.source).toEqual({ type: 'geojson', data: { file: expect.any(String), name: 'closures-2.geojson', modified: '2026-08-11T00:00:00.000Z' } });
+    expect(stored.has(old)).toBe(false);
+  });
+
+  it('turns away a file of the other kind, and does not keep it', async () => {
+    const picture = addLayer({ name: 'Map', source: { type: 'image', data: { file: 'picture', name: 'map.pdf' }, coordinates: [[0, 1], [1, 1], [1, 0], [0, 0]] } });
+    const before = stored.size;
+    await expect(replaceLayerFile(picture.id, new File([line([1, 2], [3, 4])], 'roads.geojson'))).rejects.toThrow(
+      'roads.geojson cannot replace the file of Map: choose a GeoPDF.',
+    );
+    expect(stored.size).toBe(before);
+    expect(state.layers.find((l) => l.id === picture.id)!.source).toMatchObject({ data: { file: 'picture' } });
   });
 });

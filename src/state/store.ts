@@ -1,8 +1,9 @@
 import { createEffect, createMemo, createRoot } from 'solid-js';
 import { reconcile } from 'solid-js/store';
 import { cornersBounds } from '../geo/bounds';
-import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFiles, type Bounds, type Layer, type LayerDraft, type LayerSource } from '../model/layer';
+import { createLayer, MAX_ZOOM, MIN_ZOOM, SOURCE_KINDS, storedFile, storedFiles, type Bounds, type Layer, type LayerDraft, type LayerSource } from '../model/layer';
 import { isLngLat, type LngLat } from '../model/route';
+import { importFile } from '../services/importFile';
 import { deleteFile } from './files';
 import { setProxy } from './net';
 import { persistedStore } from './persist';
@@ -149,6 +150,24 @@ export function updateLayer(id: string, patch: LayerSettings): void {
 /** Gives a layer new data from where it came from, as updating an OSM query does. */
 export function replaceLayerSource(id: string, source: LayerSource, bounds: Bounds | undefined): void {
   setState('layers', (l) => l.id === id, { source, bounds });
+}
+
+/**
+ * Gives a layer made from a file a newer version of it: the layer keeps its settings, and
+ * the file it had is deleted with the change. A file of the other kind (a GeoPDF for
+ * features, features for a GeoPDF's picture) is turned away.
+ */
+export async function replaceLayerFile(id: string, file: File): Promise<void> {
+  const draft = await importFile(file, file.name);
+  const layer = state.layers.find((l) => l.id === id);
+  if (layer?.source.type !== draft.source.type) {
+    const key = storedFile(draft.source);
+    if (key) void deleteFile(key);
+    if (!layer) return;
+    const wanted = layer.source.type === 'image' ? 'a GeoPDF' : 'a GeoJSON, GPX, KML or KMZ file';
+    throw new Error(`${file.name} cannot replace the file of ${layer.name}: choose ${wanted}.`);
+  }
+  replaceLayerSource(id, draft.source, draft.bounds);
 }
 
 export function removeLayer(id: string): void {

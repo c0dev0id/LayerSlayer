@@ -1,5 +1,5 @@
 import { cornersBounds, geojsonBounds } from '../geo/bounds';
-import type { LayerDraft } from '../model/layer';
+import type { FileResource, LayerDraft } from '../model/layer';
 import { storeFile } from '../state/files';
 import { fetchResource } from '../state/net';
 import { renderGeoPdf } from './geopdf';
@@ -48,16 +48,17 @@ function fileKind(blob: Blob, name: string): FileKind {
 export async function importFile(file: Blob, name: string): Promise<LayerDraft> {
   const title = fileName(name);
   const kind = fileKind(file, name);
+  // A file chosen from disk says when it was changed; one fetched does not.
+  const modified = file instanceof File ? new Date(file.lastModified).toISOString() : undefined;
+  const stored = async (blob: Blob): Promise<FileResource> => ({ file: await storeFile(blob), name, ...(modified && { modified }) });
   if (kind === 'pdf') {
     const { blob, coordinates } = await renderGeoPdf(await file.arrayBuffer());
-    const key = await storeFile(blob);
     const bounds = cornersBounds(coordinates);
-    return { name: title, source: { type: 'image', data: { file: key, name }, coordinates }, ...(bounds && { bounds }) };
+    return { name: title, source: { type: 'image', data: await stored(blob), coordinates }, ...(bounds && { bounds }) };
   }
   const [geojson, blob] = await readFeatures(file, name, kind);
-  const key = await storeFile(blob);
   const bounds = geojsonBounds(geojson);
-  return { name: title, source: { type: 'geojson', data: { file: key, name } }, ...(bounds && { bounds }) };
+  return { name: title, source: { type: 'geojson', data: await stored(blob) }, ...(bounds && { bounds }) };
 }
 
 /** A GeoJSON file, kept as it is. */

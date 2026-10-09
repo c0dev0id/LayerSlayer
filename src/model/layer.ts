@@ -6,8 +6,16 @@ export type Bounds = [number, number, number, number];
 /** Longitude and latitude of an image's corners: top left, top right, bottom right, bottom left. */
 export type Corners = [[number, number], [number, number], [number, number], [number, number]];
 
-/** Data the map reads from the network, or from a file kept in the browser under `file`. */
-export type Resource = { url: string } | { file: string; name: string };
+/** Data the map reads from the network, or from a file kept in the browser. */
+export type Resource = { url: string } | FileResource;
+
+/** A file kept in the browser under `file`, chosen as `name`. */
+export interface FileResource {
+  file: string;
+  name: string;
+  /** When the file was last changed, as an ISO 8601 time, where the browser said. */
+  modified?: string;
+}
 
 /** Raster tiles addressed by an XYZ (or TMS) template; one template per subdomain. */
 export interface XyzSource {
@@ -293,8 +301,13 @@ export function canCache(source: LayerSource): boolean {
 }
 
 /** The file a layer keeps in the browser, if any. */
+export function fileResource(source: LayerSource): FileResource | undefined {
+  return (source.type === 'geojson' || source.type === 'image') && 'file' in source.data ? source.data : undefined;
+}
+
+/** The key of the file a layer keeps in the browser, if any. */
 export function storedFile(source: LayerSource): string | undefined {
-  return (source.type === 'geojson' || source.type === 'image') && 'file' in source.data ? source.data.file : undefined;
+  return fileResource(source)?.file;
 }
 
 /** The files the layers keep in the browser. */

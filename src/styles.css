@@ -172,7 +172,8 @@ a {
   background: var(--hover);
 }
 
-:where(.panel, .dialog, .hint-bar) button:disabled {
+:where(.panel, .dialog, .hint-bar) button:disabled,
+.button.disabled {
   opacity: 0.5;
   cursor: default;
 }
