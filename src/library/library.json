@@ -1220,6 +1220,33 @@
       "note": "The state's map sheets as updated from 1936 to 1945; drawn only when zoomed in closely."
     },
     {
+      "name": "Rhineland-Palatinate — topographic 1:25 000, 1887–2024",
+      "type": "wms",
+      "url": "https://geo4.service24.rlp.de/wms/hktk25.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "Every edition of the state's map sheets; choose the year in the layer's settings, which starts at 2024. Which years a sheet has varies: around Dahn the first is 1937.",
+      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
+    },
+    {
+      "name": "Rhineland-Palatinate — Palatinate survey, 1836–1841",
+      "type": "wms",
+      "url": "https://geo4.service24.rlp.de/wms/hkpb.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "The original 1:25 000 survey sheets of the Palatinate, then part of the Kingdom of Bavaria.",
+      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
+    },
+    {
+      "name": "Rhineland-Palatinate — aerial photos since 1994",
+      "type": "wms",
+      "url": "https://geo4.service24.rlp.de/wms/rp_hkdop20.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "Germany",
+      "category": "History",
+      "note": "One layer per year from 1994; each year shows the part of the state flown that year, so a place appears every two to three years.",
+      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
+    },
+    {
       "name": "Saxony — historical maps 1:25 000",
       "type": "wms",
       "url": "https://geodienste.sachsen.de/wms_geosn_hist/guest?SERVICE=WMS&REQUEST=GetCapabilities",
