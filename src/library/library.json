@@ -1068,7 +1068,7 @@
       "url": "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/US_Electric_Power_Transmission_Lines/FeatureServer",
       "region": "United States",
       "category": "Infrastructure",
-      "note": "High-voltage transmission lines with their voltage and owner."
+      "note": "High-voltage transmission lines with their voltage and owner. HIFLD has archived the layer: it is no longer updated."
     },
     {
       "name": "EPA AirNow — air quality index",
