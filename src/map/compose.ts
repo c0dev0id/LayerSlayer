@@ -339,6 +339,7 @@ export function rasterTiles(src: XyzSource | WmsSource | WmtsSource | ArcGisMapS
           BBOX: '{bbox-epsg-3857}',
           WIDTH: DYNAMIC_TILE_SIZE,
           HEIGHT: DYNAMIC_TILE_SIZE,
+          ...(src.time && { TIME: src.time.value }),
         }),
       ];
     case 'wmts':

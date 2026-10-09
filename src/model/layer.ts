@@ -39,6 +39,16 @@ export interface WmsSource {
   format: string;
   /** The service's name for Web Mercator, e.g. EPSG:3857 or EPSG:900913. */
   crs: string;
+  /** For a layer with maps of several times: which it has, and the one drawn. */
+  time?: WmsTime;
+}
+
+/** A WMS layer's time dimension. */
+export interface WmsTime {
+  /** The times as the capabilities list them: values and start/end/period ranges, separated by commas. */
+  extent: string;
+  /** The time drawn, sent as GetMap's TIME. */
+  value: string;
 }
 
 /** A WMTS layer in a tile matrix set that lines up with Web Mercator tiles. */

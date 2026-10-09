@@ -18,16 +18,19 @@ import {
   SOURCE_KINDS,
   type FileResource,
   type Layer,
+  type LayerSource,
   type LineDash,
   type OsmQuery,
   type RasterAdjustments,
+  type WmsTime,
 } from '../model/layer';
 import { lineWidth } from '../model/line';
 import { propertyKeys } from '../services/featureProperties';
 import { importAccept } from '../services/importFile';
 import { hostOf } from '../state/net';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
-import { moveLayer, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
+import { timeValues } from '../services/wmsTime';
+import { moveLayer, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, state, updateLayer } from '../state/store';
 import { layerErrors, map, onlyLayerId, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
@@ -180,6 +183,7 @@ function LayerSummary(props: { layer: Layer }) {
       <Show when={layer.ownStyle}>
         <span title="Drawn with the service's own symbols">own symbols</span>
       </Show>
+      <Show when={timeOf(layer.source)}>{(time) => <span title="The time it is drawn at">{time().value}</span>}</Show>
       <span title={`Drawn from zoom ${layer.minzoom} to ${layer.maxzoom}`}>
         z{layer.minzoom}–{layer.maxzoom}
       </span>
@@ -428,6 +432,53 @@ function LabelRow(props: { layer: Layer }) {
   );
 }
 
+/** The time dimension of a WMS layer that has maps of several times. */
+const timeOf = (source: LayerSource) => (source.type === 'wms' ? source.time : undefined);
+
+/**
+ * The time a layer with maps of several times is drawn at: chosen from the times the
+ * service lists, or typed where they are too many to list.
+ */
+function TimeRow(props: { layer: Layer; time: WmsTime }) {
+  const options = () => {
+    const values = timeValues(props.time.extent);
+    return values && !values.includes(props.time.value) ? [props.time.value, ...values] : values;
+  };
+  return (
+    <div class="row" title={`The times the service has: ${props.time.extent}`}>
+      <span class="muted label">Time</span>
+      <Show
+        when={options()}
+        fallback={
+          <input
+            class="grow"
+            type="text"
+            aria-label={`Time of ${props.layer.name}`}
+            value={props.time.value}
+            onChange={(e) => {
+              const value = e.currentTarget.value.trim();
+              if (value) setLayerTime(props.layer.id, value);
+              else e.currentTarget.value = props.time.value;
+            }}
+          />
+        }
+      >
+        {(values) => (
+          <select aria-label={`Time of ${props.layer.name}`} onChange={(e) => setLayerTime(props.layer.id, e.currentTarget.value)}>
+            <For each={values()}>
+              {(value) => (
+                <option value={value} selected={value === props.time.value}>
+                  {value}
+                </option>
+              )}
+            </For>
+          </select>
+        )}
+      </Show>
+    </div>
+  );
+}
+
 /** Opacity, zoom range, colour and source of the active layer. */
 function ActiveLayer(props: { layer: Layer }) {
   const layer = props.layer;
@@ -475,6 +526,7 @@ function ActiveLayer(props: { layer: Layer }) {
           map {zoom().toFixed(1)}
         </span>
       </div>
+      <Show when={timeOf(layer.source)}>{(time) => <TimeRow layer={layer} time={time()} />}</Show>
       <Show when={isRaster(layer.source)}>
         <Adjustments layer={layer} />
       </Show>

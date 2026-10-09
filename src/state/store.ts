@@ -160,6 +160,13 @@ export function updateLayer(id: string, patch: LayerSettings): void {
   setState('layers', (l) => l.id === id, patch);
 }
 
+/** Draws a WMS layer with maps of several times at another of them. */
+export function setLayerTime(id: string, value: string): void {
+  setState('layers', (l) => l.id === id, 'source', (source) =>
+    source.type === 'wms' && source.time ? { ...source, time: { ...source.time, value } } : source,
+  );
+}
+
 /** Gives a layer new data from where it came from, as updating an OSM query does. */
 export function replaceLayerSource(id: string, source: LayerSource, bounds: Bounds | undefined): void {
   setState('layers', (l) => l.id === id, { source, bounds });

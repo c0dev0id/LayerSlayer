@@ -136,6 +136,25 @@ describe('composeStyle', () => {
     expect(wms('1.1.1').tileSize).toBe(512);
   });
 
+  it('asks a WMS for the time a layer is drawn at', () => {
+    const style = compose([
+      layer({
+        name: 'w',
+        source: {
+          type: 'wms',
+          url: 'https://w.example/wms',
+          version: '1.3.0',
+          layers: 'a',
+          styles: '',
+          format: 'image/png',
+          crs: 'EPSG:3857',
+          time: { extent: '1887/2024/P1Y', value: '1960' },
+        },
+      }, { cache: false }),
+    ]);
+    expect((style.sources.L as { tiles: string[] }).tiles[0]).toMatch(/&TIME=1960$/);
+  });
+
   it('requests ArcGIS exports in Web Mercator', () => {
     const style = compose([
       layer({ name: 'a', source: { type: 'arcgis-map', url: 'https://a.example/rest/services/X/MapServer', layers: 'show:3', format: 'png32' } }, { cache: false }),

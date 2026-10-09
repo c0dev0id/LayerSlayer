@@ -1,6 +1,7 @@
 import { scaleToZoom, validBounds, WEB_MERCATOR_CODES } from '../geo/mercator';
-import type { Bounds } from '../model/layer';
+import type { Bounds, WmsTime } from '../model/layer';
 import type { Offer, ServiceInfo } from './types';
+import { lastTime } from './wmsTime';
 import { child, children, parseXml, text, xlinkHref } from './xml';
 
 /** Names services use for Web Mercator, in the order they are preferred. */
@@ -16,6 +17,7 @@ interface Inherited {
   minScale?: number;
   maxScale?: number;
   attribution?: string;
+  time?: WmsTime;
 }
 
 /** Reads a WMS 1.1.1 or 1.3.0 capabilities document. */
@@ -42,7 +44,7 @@ export function parseWms(xml: string, capabilitiesUrl: string): ServiceInfo {
       if (crs) {
         offer.draft = {
           name: title,
-          source: { type: 'wms', url, version, layers: name, styles: '', format, crs },
+          source: { type: 'wms', url, version, layers: name, styles: '', format, crs, ...(own.time && { time: own.time }) },
           ...(own.bounds && { bounds: own.bounds }),
           ...(own.maxScale && { minzoom: Math.max(0, Math.floor(scaleToZoom(own.maxScale) * 10) / 10) }),
           ...(own.minScale && { maxzoom: Math.min(24, Math.ceil(scaleToZoom(own.minScale) * 10) / 10) }),
@@ -79,6 +81,8 @@ function inherit(layer: Element, parent: Inherited, version: string): Inherited 
   if (bounds) own.bounds = bounds;
   const attribution = text(layer, 'Attribution', 'Title');
   if (attribution) own.attribution = attribution;
+  const time = timeDimension(layer, version);
+  if (time) own.time = time;
 
   if (version === '1.3.0') {
     const min = Number(text(layer, 'MinScaleDenominator'));
@@ -95,6 +99,14 @@ function inherit(layer: Element, parent: Inherited, version: string): Inherited 
     if (max && Number.isFinite(max)) own.maxScale = max;
   }
   return own;
+}
+
+/** The layer's time dimension: in 1.3.0 a Dimension with the times, in 1.1.1 an Extent beside it. */
+function timeDimension(layer: Element, version: string): WmsTime | undefined {
+  const element = children(layer, version === '1.3.0' ? 'Dimension' : 'Extent').find((e) => e.getAttribute('name')?.toLowerCase() === 'time');
+  const extent = element?.textContent?.trim();
+  if (!element || !extent) return undefined;
+  return { extent, value: element.getAttribute('default')?.trim() || lastTime(extent) };
 }
 
 function layerBounds(layer: Element): Bounds | undefined {

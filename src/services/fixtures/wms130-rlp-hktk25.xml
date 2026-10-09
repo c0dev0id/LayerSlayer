@@ -1,0 +1,265 @@
+<?xml version='1.0' encoding="UTF-8" standalone="no" ?>
+<WMS_Capabilities version="1.3.0"  xmlns="http://www.opengis.net/wms"   xmlns:sld="http://www.opengis.net/sld"   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   xmlns:ms="http://mapserver.gis.umn.edu/mapserver"   xsi:schemaLocation="http://www.opengis.net/wms http://schemas.opengis.net/wms/1.3.0/capabilities_1_3_0.xsd  http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/sld_capabilities.xsd  http://mapserver.gis.umn.edu/mapserver https://geo4.service24.rlp.de/wms/hktk25.fcgi?service=WMS&amp;version=1.3.0&amp;request=GetSchemaExtension">
+
+ 
+
+<Service>
+  <Name>WMS</Name>
+  <Title>HKTK25</Title>
+  <Abstract>HKTK25</Abstract>
+  <KeywordList>
+      <Keyword>HKTK25</Keyword>
+      <Keyword>AdVMIS</Keyword>
+  </KeywordList>
+  <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?"/>
+  <ContactInformation>
+    <ContactPersonPrimary>
+      <ContactPerson>Andreas Becker</ContactPerson>
+      <ContactOrganization>Landesamt für Vermessung und Geobasisinformation (LVermGeo) Rheinland-Pfalz</ContactOrganization>
+    </ContactPersonPrimary>
+      <ContactPosition>Geoinformationsdienste</ContactPosition>
+    <ContactAddress>
+        <AddressType>postal</AddressType>
+        <Address>Von-Kuhl-Straße 49</Address>
+        <City>Koblenz</City>
+        <StateOrProvince>DE-RP</StateOrProvince>
+        <PostCode>56070</PostCode>
+        <Country>DE</Country>
+    </ContactAddress>
+      <ContactVoiceTelephone>+49 261 492 515</ContactVoiceTelephone>
+      <ContactFacsimileTelephone>+49 261 492 492</ContactFacsimileTelephone>
+  <ContactElectronicMailAddress>vertrieb-geodienste@vermkv.rlp.de</ContactElectronicMailAddress>
+  </ContactInformation>
+  <Fees>geldleistungsfrei, Datenlizenz Deutschland – Namensnennung – Version 2.0, URL: https://www.govdata.de/dl-de/by-2-0</Fees>
+  <AccessConstraints>Datenlizenz Deutschland – Namensnennung – Version 2.0; URL: https://www.govdata.de/dl-de/by-2-0 Die Namensnennung der Vermessungs- und Katasterverwaltung Rheinland-Pfalz als Rechteinhaberin hat in folgender Weise zu erfolgen: ©GeoBasis-DE / LVermGeoRP (Jahr des Datenbezugs), dl-de/by-2-0, http://www.lvermgeo.rlp.de [Daten bearbeitet]; Es gelten folgende Regelungen zu Gewährleistung und Haftung; URL:https://lvermgeo.rlp.de/geodaten-geoshop/open-data/gewaehrleistung-haftung/</AccessConstraints>
+  <MaxWidth>10000</MaxWidth>
+  <MaxHeight>10000</MaxHeight>
+</Service>
+
+<Capability>
+  <Request>
+    <GetCapabilities>
+      <Format>text/xml</Format>
+      <DCPType>
+        <HTTP>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?"/></Post>
+        </HTTP>
+      </DCPType>
+    </GetCapabilities>
+    <GetMap>
+      <Format>image/png</Format>
+      <Format>image/jpeg</Format>
+      <Format>image/tiff</Format>
+      <Format>image/vnd.jpeg-png</Format>
+      <Format>image/vnd.jpeg-png8</Format>
+      <Format>image/webp</Format>
+      <Format>image/vnd.jpeg-webp</Format>
+      <DCPType>
+        <HTTP>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?"/></Post>
+        </HTTP>
+      </DCPType>
+    </GetMap>
+    <GetFeatureInfo>
+      <Format>text/html</Format>
+      <Format>application/vnd.ogc.gml</Format>
+      <Format>text/plain</Format>
+      <DCPType>
+        <HTTP>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?"/></Post>
+        </HTTP>
+      </DCPType>
+    </GetFeatureInfo>
+  </Request>
+  <Exception>
+    <Format>XML</Format>
+    <Format>INIMAGE</Format>
+    <Format>BLANK</Format>
+  </Exception>
+  <Layer queryable="1">
+    <Name>OGC:WMS</Name>
+    <Title>HKTK25</Title>
+    <Abstract>HKTK25</Abstract>
+    <KeywordList>
+        <Keyword>HKTK25</Keyword>
+        <Keyword>AdVMIS</Keyword>
+    </KeywordList>
+    <CRS>EPSG:25831</CRS>
+    <CRS>EPSG:25832</CRS>
+    <CRS>EPSG:25833</CRS>
+    <CRS>EPSG:3857</CRS>
+    <CRS>EPSG:4258</CRS>
+    <CRS>EPSG:4326</CRS>
+    <CRS>EPSG:31466</CRS>
+    <CRS>EPSG:31467</CRS>
+    <CRS>EPSG:31468</CRS>
+    <CRS>EPSG:31469</CRS>
+    <CRS>EPSG:3035</CRS>
+    <CRS>EPSG:3034</CRS>
+    <CRS>EPSG:3044</CRS>
+    <CRS>EPSG:3045</CRS>
+    <CRS>EPSG:5649</CRS>
+    <CRS>EPSG:4647</CRS>
+    <CRS>EPSG:5650</CRS>
+    <CRS>EPSG:5651</CRS>
+    <CRS>EPSG:5652</CRS>
+    <CRS>EPSG:5653</CRS>
+    <CRS>EPSG:3043</CRS>
+    <CRS>EPSG:9935832</CRS>
+    <EX_GeographicBoundingBox>
+        <westBoundLongitude>5.908602</westBoundLongitude>
+        <eastBoundLongitude>8.686868</eastBoundLongitude>
+        <southBoundLatitude>48.751167</southBoundLatitude>
+        <northBoundLatitude>51.019100</northBoundLatitude>
+    </EX_GeographicBoundingBox>
+    <BoundingBox CRS="EPSG:25832"
+                minx="283000" miny="5.404e+06" maxx="477000" maxy="5.652e+06" />
+    <MaxScaleDenominator>3e+06</MaxScaleDenominator>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>rp_hktk25</Name>
+        <Title>HKTK25 RP</Title>
+        <Abstract>HKTK25-Ebene</Abstract>
+        <KeywordList>
+            <Keyword>HKTK25</Keyword>
+        </KeywordList>
+        <CRS>EPSG:25831</CRS>
+        <CRS>EPSG:25832</CRS>
+        <CRS>EPSG:25833</CRS>
+        <CRS>EPSG:3857</CRS>
+        <CRS>EPSG:4258</CRS>
+        <CRS>EPSG:4326</CRS>
+        <CRS>EPSG:31466</CRS>
+        <CRS>EPSG:31467</CRS>
+        <CRS>EPSG:31468</CRS>
+        <CRS>EPSG:31469</CRS>
+        <CRS>EPSG:3035</CRS>
+        <CRS>EPSG:3034</CRS>
+        <CRS>EPSG:3044</CRS>
+        <CRS>EPSG:3045</CRS>
+        <CRS>EPSG:5649</CRS>
+        <CRS>EPSG:4647</CRS>
+        <CRS>EPSG:5650</CRS>
+        <CRS>EPSG:5651</CRS>
+        <CRS>EPSG:5652</CRS>
+        <CRS>EPSG:5653</CRS>
+        <CRS>EPSG:3043</CRS>
+        <CRS>EPSG:9935832</CRS>
+        <EX_GeographicBoundingBox>
+            <westBoundLongitude>5.908602</westBoundLongitude>
+            <eastBoundLongitude>8.686868</eastBoundLongitude>
+            <southBoundLatitude>48.751167</southBoundLatitude>
+            <northBoundLatitude>51.019100</northBoundLatitude>
+        </EX_GeographicBoundingBox>
+        <BoundingBox CRS="EPSG:25831"
+                    minx="704171" miny="5.40428e+06" maxx="917619" maxy="5.66727e+06" />
+        <Dimension name="time" units="ISO8601" default="2024" nearestValue="0">1887/2024/P1Y</Dimension>
+        <MetadataURL type="TC211">
+          <Format>text/xml</Format>
+          <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?request=GetMetadata&amp;layer=rp_hktk25"/>
+        </MetadataURL>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>rp_hktk25_qgis</Name>
+        <Title>HKTK25 RP qgis</Title>
+        <Abstract>HKTK25-Ebene qgis</Abstract>
+        <KeywordList>
+            <Keyword>HKTK25</Keyword>
+        </KeywordList>
+        <CRS>EPSG:25831</CRS>
+        <CRS>EPSG:25832</CRS>
+        <CRS>EPSG:25833</CRS>
+        <CRS>EPSG:3857</CRS>
+        <CRS>EPSG:4258</CRS>
+        <CRS>EPSG:4326</CRS>
+        <CRS>EPSG:31466</CRS>
+        <CRS>EPSG:31467</CRS>
+        <CRS>EPSG:31468</CRS>
+        <CRS>EPSG:31469</CRS>
+        <CRS>EPSG:3035</CRS>
+        <CRS>EPSG:3034</CRS>
+        <CRS>EPSG:3044</CRS>
+        <CRS>EPSG:3045</CRS>
+        <CRS>EPSG:5649</CRS>
+        <CRS>EPSG:4647</CRS>
+        <CRS>EPSG:5650</CRS>
+        <CRS>EPSG:5651</CRS>
+        <CRS>EPSG:5652</CRS>
+        <CRS>EPSG:5653</CRS>
+        <CRS>EPSG:3043</CRS>
+        <CRS>EPSG:9935832</CRS>
+        <EX_GeographicBoundingBox>
+            <westBoundLongitude>5.908602</westBoundLongitude>
+            <eastBoundLongitude>8.686868</eastBoundLongitude>
+            <southBoundLatitude>48.751167</southBoundLatitude>
+            <northBoundLatitude>51.019100</northBoundLatitude>
+        </EX_GeographicBoundingBox>
+        <BoundingBox CRS="EPSG:25831"
+                    minx="704171" miny="5.40428e+06" maxx="917619" maxy="5.66727e+06" />
+        <Dimension name="time" units="ISO8601" default="2024-01-01" nearestValue="0">1887-01-01/2024-01-01/P1Y</Dimension>
+        <MetadataURL type="TC211">
+          <Format>text/xml</Format>
+          <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?request=GetMetadata&amp;layer=rp_hktk25_qgis"/>
+        </MetadataURL>
+    </Layer>
+    <Layer queryable="1" opaque="0" cascaded="0">
+        <Name>rp_hktk25_metadaten</Name>
+<!-- WARNING: Mandatory metadata "wms_title" or "ows_title" was missing in this context. -->
+        <Title>rp_hktk25_metadaten</Title>
+        <Abstract>HKTK25-Metadaten</Abstract>
+        <CRS>EPSG:25832</CRS>
+        <EX_GeographicBoundingBox>
+            <westBoundLongitude>5.931095</westBoundLongitude>
+            <eastBoundLongitude>8.669685</eastBoundLongitude>
+            <southBoundLatitude>48.863454</southBoundLatitude>
+            <northBoundLatitude>51.005843</northBoundLatitude>
+        </EX_GeographicBoundingBox>
+        <BoundingBox CRS="EPSG:25832"
+                    minx="284520" miny="5.41644e+06" maxx="475792" maxy="5.65053e+06" />
+        <Dimension name="time" units="ISO8601" default="2024" nearestValue="0">1887/2024/P1Y</Dimension>
+        <MetadataURL type="TC211">
+          <Format>text/xml</Format>
+          <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?request=GetMetadata&amp;layer=rp_hktk25_metadaten"/>
+        </MetadataURL>
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="92" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?version=1.3.0&amp;service=WMS&amp;request=GetLegendGraphic&amp;sld_version=1.1.0&amp;layer=rp_hktk25_metadaten&amp;format=image/png&amp;STYLE=default"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="1" opaque="0" cascaded="0">
+        <Name>rp_hktk25_metadaten_qgis</Name>
+<!-- WARNING: Mandatory metadata "wms_title" or "ows_title" was missing in this context. -->
+        <Title>rp_hktk25_metadaten_qgis</Title>
+        <Abstract>HKTK25-Metadaten qgis</Abstract>
+        <CRS>EPSG:25832</CRS>
+        <EX_GeographicBoundingBox>
+            <westBoundLongitude>5.931095</westBoundLongitude>
+            <eastBoundLongitude>8.669685</eastBoundLongitude>
+            <southBoundLatitude>48.863454</southBoundLatitude>
+            <northBoundLatitude>51.005843</northBoundLatitude>
+        </EX_GeographicBoundingBox>
+        <BoundingBox CRS="EPSG:25832"
+                    minx="284520" miny="5.41644e+06" maxx="475792" maxy="5.65053e+06" />
+        <Dimension name="time" units="ISO8601" default="2024-01-01" nearestValue="0">1887-01-01/2024-01-01/P1Y</Dimension>
+        <MetadataURL type="TC211">
+          <Format>text/xml</Format>
+          <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?request=GetMetadata&amp;layer=rp_hktk25_metadaten_qgis"/>
+        </MetadataURL>
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="92" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://geo4.service24.rlp.de/wms/hktk25.fcgi?version=1.3.0&amp;service=WMS&amp;request=GetLegendGraphic&amp;sld_version=1.1.0&amp;layer=rp_hktk25_metadaten_qgis&amp;format=image/png&amp;STYLE=default"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+  </Layer>
+</Capability>
+</WMS_Capabilities>
