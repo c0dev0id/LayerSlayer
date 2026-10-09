@@ -14,6 +14,9 @@ routes, settings and imported files stay in the browser.
 
 ## Using it
 
+A first visit starts with OpenTopoMap, a topographic map with contour lines and hill
+shading.
+
 - **Add layer** opens the library, an address field, a file picker and OSM Query. The
   dialog stays open until *Close*: a tap adds a layer in the background and a second tap
   removes it, and what is on the map is highlighted.
