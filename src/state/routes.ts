@@ -11,7 +11,7 @@ import { persistedStore } from './persist';
  * (a plain object set merges and would keep stale keys).
  */
 
-const STORAGE_KEY = 'webmap-routes';
+const STORAGE_KEY = 'layerslayer-routes';
 
 function isRoute(value: unknown): value is Route {
   const r = value as Route;

@@ -6,11 +6,13 @@
  */
 
 /** Bumped when what is kept for a tile changes, so old entries are not read back. */
-const CACHE_NAME = 'webmap-tiles-v2';
+const CACHE_NAME = 'layerslayer-tiles-v1';
+/** Tile caches of earlier versions, and of the app before it was renamed from webmap. */
+const TILE_CACHE = /^(layerslayer|webmap)-tiles/;
 
 export const TILE_MAX_AGE_HOURS = 24;
 const MAX_AGE_MS = TILE_MAX_AGE_HOURS * 3600_000;
-const STORED_AT = 'x-webmap-stored-at';
+const STORED_AT = 'x-layerslayer-stored-at';
 
 /** Cache Storage, where the page has it (secure contexts only). */
 function storage(): CacheStorage | undefined {
@@ -36,11 +38,11 @@ export async function storeTile(key: string, data: ArrayBuffer, caches = storage
   await (await caches.open(CACHE_NAME)).put(key, response);
 }
 
-/** Deletes tiles past the maximum age, and tile caches of earlier versions. */
+/** Deletes tiles past the maximum age, and tile caches of earlier versions and names. */
 export async function sweepTileCache(caches = storage(), now = Date.now()): Promise<void> {
   if (!caches) return;
   for (const name of await caches.keys()) {
-    if (name.startsWith('webmap-') && name.includes('tiles') && name !== CACHE_NAME) await caches.delete(name);
+    if (TILE_CACHE.test(name) && name !== CACHE_NAME) await caches.delete(name);
   }
   const cache = await caches.open(CACHE_NAME);
   await Promise.all(

@@ -13,7 +13,7 @@ export function showBounds(bounds: Bounds, maxZoom = 16): void {
   map()?.fitBounds(bounds, { padding: 40, maxZoom });
 }
 
-const PANEL_COLLAPSED_KEY = 'webmap-panel-collapsed';
+const PANEL_COLLAPSED_KEY = 'layerslayer-panel-collapsed';
 
 /**
  * Whether the panel is folded to its header, which narrow screens offer to give the map

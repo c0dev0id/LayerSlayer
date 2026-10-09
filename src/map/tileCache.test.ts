@@ -50,6 +50,14 @@ describe('tile cache', () => {
     expect(await tileCacheStats(caches)).toEqual({ tiles: 0, bytes: 0 });
   });
 
+  it('deletes tile caches of earlier versions and names, and leaves other caches alone', async () => {
+    const caches = fakeCaches();
+    for (const name of ['webmap-tiles-v2', 'layerslayer-tiles-v0', 'other-app']) await caches.open(name);
+    await storeTile('https://a/q', new ArrayBuffer(1), caches, 0);
+    await sweepTileCache(caches, 1);
+    expect(await caches.keys()).toEqual(['other-app', 'layerslayer-tiles-v1']);
+  });
+
   it('does nothing where the page has no Cache Storage', async () => {
     expect(await cachedTile('https://a/q', undefined)).toBeUndefined();
     await storeTile('https://a/q', new ArrayBuffer(1), undefined);

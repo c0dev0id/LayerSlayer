@@ -1,7 +1,7 @@
 import { createStore, del, get, keys, set } from 'idb-keyval';
 
 /** Files the layers are made from (GeoJSON, rendered GeoPDF pages), kept in IndexedDB. */
-const db = createStore('webmap', 'files');
+const db = createStore('layerslayer', 'files');
 
 /** Stores a file under a new key, which it returns. */
 export async function storeFile(blob: Blob): Promise<string> {

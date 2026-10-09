@@ -7,7 +7,7 @@ import { keepStored, readStored } from '../state/persist';
  * convenience, kept in local storage rather than in projects.
  */
 
-const STORAGE_KEY = 'webmap-panel-width';
+const STORAGE_KEY = 'layerslayer-panel-width';
 export const DEFAULT_PANEL_WIDTH = 320;
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 720;

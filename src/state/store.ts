@@ -51,7 +51,7 @@ export interface AppState {
   focus?: LngLat[];
 }
 
-const STORAGE_KEY = 'webmap';
+const STORAGE_KEY = 'layerslayer';
 
 /** What a first visit starts with: a vector base map that needs no key. */
 const FIRST_LAYER: LayerDraft = {
