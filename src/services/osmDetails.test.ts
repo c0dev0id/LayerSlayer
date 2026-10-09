@@ -72,7 +72,7 @@ group('nearestByKind', () => {
       ],
       spot,
     );
-    expect(found.map((f) => [f.kind, f.element.id])).toEqual([
+    expect(found.map((f) => [f.kind, f.object.id])).toEqual([
       ['barrier', 5],
       ['road', 2],
       ['poi', 4],
@@ -85,7 +85,7 @@ group('describe', () => {
     const details = describe({
       kind: 'road',
       distance: 12,
-      element: way(7, [[0, 0], [1, 1]], { highway: 'track', name: 'Waldweg', tracktype: 'grade3', surface: 'fine_gravel', maxspeed: '30', oneway: 'no', motor_vehicle: 'forestry', '4wd_only': 'yes' }),
+      object: way(7, [[0, 0], [1, 1]], { highway: 'track', name: 'Waldweg', tracktype: 'grade3', surface: 'fine_gravel', maxspeed: '30', oneway: 'no', motor_vehicle: 'forestry', '4wd_only': 'yes' }),
     });
     expect(details).toMatchObject({ kind: 'road', title: 'Track', name: 'Waldweg', url: 'https://www.openstreetmap.org/way/7' });
     expect(details.rows.map((r) => [r.label, r.value])).toEqual([
@@ -96,18 +96,18 @@ group('describe', () => {
       ['Motor vehicles', 'Forestry only'],
       ['Four-wheel drive', 'Required'],
     ]);
-    expect(describe({ kind: 'road', distance: 0, element: way(8, [], { highway: 'secondary_link', junction: 'roundabout' }) })).toMatchObject({
+    expect(describe({ kind: 'road', distance: 0, object: way(8, [], { highway: 'secondary_link', junction: 'roundabout' }) })).toMatchObject({
       title: 'Secondary slip road',
       rows: [{ label: 'Direction', value: 'One way' }],
     });
-    expect(describe({ kind: 'road', distance: 0, element: way(9, [], { highway: 'service', service: 'driveway' }) }).title).toBe('Driveway');
+    expect(describe({ kind: 'road', distance: 0, object: way(9, [], { highway: 'service', service: 'driveway' }) }).title).toBe('Driveway');
   });
 
   it('tells a place by type, name, address, phone, website and opening hours', () => {
     const details = describe({
       kind: 'poi',
       distance: 40,
-      element: node(3, 0, 0, {
+      object: node(3, 0, 0, {
         amenity: 'fuel',
         brand: 'Aral',
         'addr:street': 'Hauptstraße',
@@ -129,7 +129,7 @@ group('describe', () => {
   });
 
   it('tells a barrier by type, opening hours, lock and access', () => {
-    const details = describe({ kind: 'barrier', distance: 5, element: node(5, 0, 0, { barrier: 'lift_gate', locked: 'yes', access: 'private' }) });
+    const details = describe({ kind: 'barrier', distance: 5, object: node(5, 0, 0, { barrier: 'lift_gate', locked: 'yes', access: 'private' }) });
     expect(details.title).toBe('Lift gate');
     expect(details.rows.map((r) => [r.label, r.value])).toEqual([
       ['Locked', 'Yes'],

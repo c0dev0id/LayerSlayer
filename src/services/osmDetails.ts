@@ -43,10 +43,9 @@ const FURNITURE = new Set([
 ]);
 
 /** What an object is to someone on the move, if anything. */
-export function kindOf(element: OsmObject): DetailKind | undefined {
-  const tags = element.tags;
-  if (element.type === 'node' && tags.barrier && tags.barrier !== 'kerb') return 'barrier';
-  if (element.type === 'way' && ROAD.test(tags.highway ?? '')) return 'road';
+export function kindOf({ type, tags }: OsmObject): DetailKind | undefined {
+  if (type === 'node' && tags.barrier && tags.barrier !== 'kerb') return 'barrier';
+  if (type === 'way' && ROAD.test(tags.highway ?? '')) return 'road';
   if (poiKey(tags)) return 'poi';
   return undefined;
 }
@@ -186,21 +185,28 @@ function runsOf(geometry: GeoJSON.Geometry): GeoJSON.Position[][] {
  * within a closed ring. An area clipped to a box is no ring any more, so it is measured to
  * its edge.
  */
-export function distanceTo(element: OsmObject, spot: LngLat): number | undefined {
+export function distanceTo({ geometry }: OsmObject, spot: LngLat): number | undefined {
   const toPlane = plane(spot);
-  const nearest = Math.min(...runsOf(element.geometry).map((run) => lineDistance(run.map(toPlane))));
+  const nearest = Math.min(...runsOf(geometry).map((run) => lineDistance(run.map(toPlane))));
   return Number.isFinite(nearest) ? nearest : undefined;
 }
 
+/** An object near the spot, what it is to someone on the move and how far it is. */
+interface Nearby {
+  kind: DetailKind;
+  object: OsmObject;
+  distance: number;
+}
+
 /** The nearest object of each kind, nearest first. */
-export function nearestByKind(elements: readonly OsmObject[], spot: LngLat): { kind: DetailKind; element: OsmObject; distance: number }[] {
-  const nearest = new Map<DetailKind, { kind: DetailKind; element: OsmObject; distance: number }>();
-  for (const element of elements) {
-    const kind = kindOf(element);
-    const distance = kind && distanceTo(element, spot);
+export function nearestByKind(objects: readonly OsmObject[], spot: LngLat): Nearby[] {
+  const nearest = new Map<DetailKind, Nearby>();
+  for (const object of objects) {
+    const kind = kindOf(object);
+    const distance = kind && distanceTo(object, spot);
     if (!kind || distance === undefined) continue;
     const known = nearest.get(kind);
-    if (!known || distance < known.distance) nearest.set(kind, { kind, element, distance });
+    if (!known || distance < known.distance) nearest.set(kind, { kind, object, distance });
   }
   return [...nearest.values()].sort((a, b) => a.distance - b.distance);
 }
@@ -374,8 +380,7 @@ function barrierRows(tags: Record<string, string>): DetailRow[] {
   return [...rows, ...accessRows(tags)];
 }
 
-export function describe({ kind, element, distance }: { kind: DetailKind; element: OsmObject; distance: number }): Details {
-  const tags = element.tags;
+export function describe({ kind, object: { type, id, tags, geometry }, distance }: Nearby): Details {
   const name = tags.name ?? tags.brand ?? tags.operator;
   const rows = kind === 'road' ? roadRows(tags) : kind === 'poi' ? poiRows(tags) : barrierRows(tags);
   return {
@@ -384,9 +389,9 @@ export function describe({ kind, element, distance }: { kind: DetailKind; elemen
     ...(name && { name }),
     distance,
     rows,
-    url: `https://www.openstreetmap.org/${element.type}/${element.id}`,
+    url: `https://www.openstreetmap.org/${type}/${id}`,
     tags,
-    geometry: element.geometry,
+    geometry,
   };
 }
 
