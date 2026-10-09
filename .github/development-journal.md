@@ -44,7 +44,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   from their packages at build time by a Vite plugin (`tools/iconSets.ts`); dev
   dependencies only, each set a chunk that loads with the icon picker.
 - Routing by the FOSSGIS OSRM servers (routing.openstreetmap.de), car, bike and foot.
-- OSM queries and spot details by the Overpass API (overpass-api.de); place search by
+- OSM queries by Postpass (postpass.geofabrik.de), with the Overpass API as fallback; spot
+  details by the Overpass API (overpass-api.de); place search by
   Nominatim (nominatim.openstreetmap.org).
 - Fonts for labels of vector layers from OpenFreeMap (tiles.openfreemap.org) where no
   style on the map brings fonts.
@@ -492,6 +493,24 @@ It is a static single-page app on GitHub Pages; there is no server component.
   as the failure it is; its 429 and 504 pages, like any busy server's, are put in words by
   `statusMessage`. One layer has one colour; features that should look different go in
   separate layers.
+  - Postpass first, Overpass as fallback. overpass-api.de was often too busy to answer at
+    all ("Dispatcher_Client … timeout", 504 even for one node), and its mirrors refused or
+    failed in turn. Postpass (github.com/woodpeck/postpass, run by Geofabrik) is an
+    osm2pgsql import queried with SQL and answering GeoJSON, with CORS: tagged nodes as
+    points, ways and route and boundary relations as lines, closed ways and multipolygon
+    and boundary relations as polygons, tags as jsonb with a GIN index. The same filters
+    become SQL (`services/postpass.ts`): `tags @> '{"k":"v"}'` and `tags ? 'k'`, which use
+    the index, `tags->>'k' ILIKE '%…%'` with its wildcards escaped for `key~text`, the
+    focus polygon through `ST_Intersects`, and `DISTINCT ON (osm_type, osm_id)` preferring
+    the polygon, since a boundary relation is a line and a polygon. Answers are reshaped
+    like osmtogeojson's (`way/123` ids, tags as properties, one-part multi-geometries
+    single), so layers do not depend on where their features came from. Measured from
+    here: Postpass answered the History presets around Fischbach in about a second; the
+    main Overpass instance took 8 to 11 s or failed. Without an area to narrow it, a name
+    search over all of Germany timed out on Postpass too. `services/osmSearch.ts` asks the
+    sources in order and names every reason when none answers. QLever's OSM endpoint was
+    tried as well: a name search over the planet timed out, and its nearby search measures
+    to centroids only, so it is no source for either use.
 - **GeoJSON loaded from an address survives style diffs.** MapLibre 6 keeps the GeoJSON it
   loaded from an address in place of the address, so every diffed `setStyle` saw such a
   source as changed and fetched and indexed it again, on any change of any layer (each
@@ -555,6 +574,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
   the radius (`out geom(box)`, points outside are null), so a large park does not send its
   whole outline; a clipped area is measured to its edge. openstreetmap.org's tool runs on
   its own Overpass server (query.openstreetmap.org), which only that site may use.
+  Postpass answers such a lookup (roads, places and barriers within 40 m, `ST_DWithin` on
+  geography after a box test) in 0.6 to 1.6 s where Overpass took up to 11 s or failed;
+  moving details to it means rebuilding what the details read from Overpass elements
+  (way geometry, relations clipped to a box) from its GeoJSON, which is not done yet.
   The area query of OSM Query layers stays one statement per filter: over a large area the
   tag index narrows first, and everything within the area would be far too much.
   Street furniture (benches, bins, vending machines, post boxes, …), kerbs

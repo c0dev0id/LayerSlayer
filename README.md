@@ -45,7 +45,8 @@ routes, settings and imported files stay in the browser.
     settings can change. *Replace* in a file layer's settings takes a newer version of its
     file.
   - **OSM Query** makes a layer of OpenStreetMap features in the focus area, found with
-    the Overpass API; without a focus area it offers to draw one, since Overpass answers
+    Postpass, Geofabrik's public PostGIS copy of OpenStreetMap, or with the Overpass API
+    where Postpass fails; without a focus area it offers to draw one, since both answer
     queries for limited areas only. Choose features from the list, which starts with what
     matters off the road: tracks by grade, unpaved and rough ways, fords, trails rated for
     mountain bikes and hikers, gates, barriers and ways closed to motor vehicles, then
@@ -195,7 +196,7 @@ an account key; which servers go through it is saved.
 | PMTiles | the archive's header and metadata, by range requests | Tiles read from the archive by range requests: vector archives one layer per tile layer like vector tiles, image archives (PNG, JPEG, WebP, AVIF) as raster tiles of the size their tiles have. MapLibre styles that name archives as `pmtiles://` sources are drawn too |
 | XYZ template | the template | Raster tiles; `{s}`, `{a-c}`, `{-y}`, `{q}` and `{r}` spellings are converted |
 | GeoJSON | URL or file | GeoJSON source, drawn in the layer's colour |
-| OSM query | the Overpass API, within the focus area | Converted to GeoJSON (osmtogeojson) once and kept in the browser, drawn in the layer's colour |
+| OSM query | Postpass, or the Overpass API where it fails, within the focus area | GeoJSON (Postpass's own, or converted with osmtogeojson) kept in the browser, drawn in the layer's colour |
 | GPX tracks | file | Converted to GeoJSON when imported, a line per track |
 | KML / KMZ | file | Placemarks converted to GeoJSON when imported; ground overlays, network links and KML styles are left out |
 | MapLibre style | style JSON | The style's own sources and layers |
