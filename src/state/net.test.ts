@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { describeLoadError, proxyTarget, requestUrl, setProxy, statusMessage } from './net';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describeLoadError, fetchResource, proxyTarget, requestUrl, setProxy, statusMessage } from './net';
 
 describe('requestUrl', () => {
   afterEach(() => setProxy('', []));
@@ -70,5 +70,16 @@ describe('error messages', () => {
     const error = { status: 404, url: 'https://a.example/1/2/3.png', body: new Blob(['No tile here']), message: 'AJAXError' };
     expect(await describeLoadError(error)).toBe('a.example answered 404: No tile here');
     expect(await describeLoadError(new Error('Could not decode image'))).toBe('Could not decode image');
+  });
+});
+
+describe('fetchResource', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('says a server did not answer in time, rather than that it cannot be reached', async () => {
+    vi.stubGlobal('fetch', () => Promise.reject(new DOMException('signal timed out', 'TimeoutError')));
+    await expect(fetchResource('https://postpass.example/api')).rejects.toThrow('postpass.example did not answer in time.');
+    vi.stubGlobal('fetch', () => Promise.reject(new TypeError('Failed to fetch')));
+    await expect(fetchResource('https://postpass.example/api')).rejects.toThrow('could not be read');
   });
 });

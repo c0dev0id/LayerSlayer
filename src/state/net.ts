@@ -128,6 +128,7 @@ export async function fetchResource(url: string, init?: RequestInit): Promise<Re
     response = await fetch(requestUrl(url), init);
   } catch (error) {
     if ((error as Error).name === 'AbortError') throw error;
+    if ((error as Error).name === 'TimeoutError') throw new Error(`${hostOf(url) ?? url} did not answer in time.`, { cause: error });
     throw new Error(unreachableMessage(url), { cause: error });
   }
   if (!response.ok) {

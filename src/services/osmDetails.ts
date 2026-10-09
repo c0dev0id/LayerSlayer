@@ -1,7 +1,7 @@
 import type { LngLat } from '../model/route';
 import { postpassOrOverpass, type OsmObject } from './osm';
 import { askOverpass, fromOverpass } from './overpass';
-import { askPostpass } from './postpass';
+import { askPostpass, selectObjects, sql } from './postpass';
 
 /**
  * What lies at a spot on the map, for people on the move: the nearest road or trail, the
@@ -80,7 +80,7 @@ export function overpassDetailsQuery([lng, lat]: LngLat, radius: number): string
     ...NAMED_POI_KEYS.map((key) => `nwr.near["${key}"]["name"];`),
     `node.near["barrier"];`,
   ];
-  const [west, south, east, north] = boxAround([lng, lat], radius);
+  const [west, south, east, north] = boxAround([lng, lat], 2 * radius);
   const box = [south, west, north, east].map((v) => v.toFixed(6)).join(',');
   return (
     `[out:json][timeout:10];nwr${around}->.near;(${filters.join('')})->.found;` +
@@ -88,10 +88,10 @@ export function overpassDetailsQuery([lng, lat]: LngLat, radius: number): string
   );
 }
 
-/** A box twice the radius around the spot, as west, south, east and north. */
-function boxAround([lng, lat]: LngLat, radius: number): [number, number, number, number] {
+/** A box `size` metres out from the spot on each side, as west, south, east and north. */
+function boxAround([lng, lat]: LngLat, size: number): [number, number, number, number] {
   const [east, north] = metresPerDegree(lat);
-  const [dLng, dLat] = [(2 * radius) / east, (2 * radius) / north];
+  const [dLng, dLat] = [size / east, size / north];
   return [lng - dLng, lat - dLat, lng + dLng, lat + dLat];
 }
 
@@ -103,20 +103,15 @@ function boxAround([lng, lat]: LngLat, radius: number): [number, number, number,
  */
 export function postpassDetailsQuery([lng, lat]: LngLat, radius: number): string {
   const spot = `ST_SetSRID(ST_MakePoint(${lng.toFixed(6)}, ${lat.toFixed(6)}), 4326)`;
-  const box = `ST_MakeEnvelope(${boxAround([lng, lat], radius)
-    .map((v) => v.toFixed(6))
-    .join(', ')}, 4326)`;
-  const keys = (list: readonly string[]) => `ARRAY[${list.map((key) => `'${key}'`).join(', ')}]`;
+  const envelope = (size: number) => `ST_MakeEnvelope(${boxAround([lng, lat], size).map((v) => v.toFixed(6)).join(', ')}, 4326)`;
+  const keys = (list: readonly string[]) => `ARRAY[${list.map(sql).join(', ')}]`;
   const outline = "CASE WHEN GeometryType(geom) IN ('POLYGON', 'MULTIPOLYGON') THEN ST_Boundary(geom) ELSE geom END";
-  return (
-    'SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, ' +
-    `CASE WHEN osm_type = 'R' THEN ST_Intersection(${outline}, ${box}) ELSE ${outline} END AS geom ` +
-    `FROM postpass_pointlinepolygon WHERE geom && ${box} ` +
-    `AND ST_DWithin(geom::geography, ${spot}::geography, ${Math.round(radius)}) ` +
-    `AND ((osm_type = 'W' AND tags->>'highway' ~ '${ROAD_VALUES}') OR tags ?| ${keys(POI_KEYS)} ` +
-    `OR (tags ?| ${keys(NAMED_POI_KEYS)} AND tags ? 'name') OR (osm_type = 'N' AND tags ? 'barrier')) ` +
-    'ORDER BY osm_type, osm_id, area_m2 IS NULL'
-  );
+  // Anything within the radius meets the box of the radius, which the geometry index finds.
+  const near = `geom && ${envelope(radius)} AND ST_DWithin(geom::geography, ${spot}::geography, ${Math.round(radius)})`;
+  return selectObjects(`CASE WHEN osm_type = 'R' THEN ST_Intersection(${outline}, ${envelope(2 * radius)}) ELSE ${outline} END`, [
+    `${near} AND ((osm_type = 'W' AND tags->>'highway' ~ ${sql(ROAD_VALUES)}) OR tags ?| ${keys(POI_KEYS)} ` +
+      `OR (tags ?| ${keys(NAMED_POI_KEYS)} AND tags ? 'name') OR (osm_type = 'N' AND tags ? 'barrier'))`,
+  ]);
 }
 
 /** How far around a spot to look: 40 CSS pixels at the map's zoom, between 15 and 250 metres. */
@@ -401,7 +396,7 @@ export function describe({ kind, element, distance }: { kind: DetailKind; elemen
  */
 export async function findDetails(spot: LngLat, radius: number): Promise<Details[]> {
   const objects = await postpassOrOverpass(
-    () => askPostpass(postpassDetailsQuery(spot, radius)),
+    () => askPostpass(postpassDetailsQuery(spot, radius), 10),
     async () => (await askOverpass(overpassDetailsQuery(spot, radius))).elements.map(fromOverpass),
   );
   return nearestByKind(objects, spot).map(describe);

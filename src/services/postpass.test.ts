@@ -8,12 +8,17 @@ const area: [number, number][] = [
 ];
 
 describe('postpassQuery', () => {
-  it('asks for features matching any filter within the polygon, keeping one row per OSM object', () => {
+  it('asks for features matching each filter within the polygon, keeping one row per OSM object', () => {
+    const within = "ST_Intersects(geom, ST_GeomFromText('POLYGON((8.38 49,8.42 49,8.4 49.02,8.38 49))', 4326))";
+    const rows = (where: string) => `SELECT osm_type, osm_id, tags, geom AS geom, area_m2 FROM postpass_pointlinepolygon WHERE ${within} AND ${where}`;
     expect(postpassQuery(['amenity=drinking_water', 'power=generator generator:source=wind', 'shop=*'], area)).toBe(
-      'SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, geom FROM postpass_pointlinepolygon ' +
-        "WHERE ST_Intersects(geom, ST_GeomFromText('POLYGON((8.38 49,8.42 49,8.4 49.02,8.38 49))', 4326)) " +
-        `AND ((tags @> '{"amenity":"drinking_water"}'::jsonb) OR (tags @> '{"power":"generator"}'::jsonb AND tags @> '{"generator:source":"wind"}'::jsonb) OR (tags ? 'shop')) ` +
-        'ORDER BY osm_type, osm_id, area_m2 IS NULL',
+      'SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, geom FROM (' +
+        [
+          rows(`(tags @> '{"amenity":"drinking_water"}'::jsonb)`),
+          rows(`(tags @> '{"power":"generator"}'::jsonb AND tags @> '{"generator:source":"wind"}'::jsonb)`),
+          rows("(tags ? 'shop')"),
+        ].join(' UNION ALL ') +
+        ') AS found ORDER BY osm_type, osm_id, area_m2 IS NULL',
     );
   });
 
@@ -24,7 +29,9 @@ describe('postpassQuery', () => {
 
   it('quotes keys and values for SQL and JSON', () => {
     // A backslash is escaped for JSON, an apostrophe for SQL.
-    expect(postpassQuery(["name=O'Brien\\Pub", `"it's"=*`], area)).toContain(`(tags @> '{"name":"O''Brien\\\\Pub"}'::jsonb) OR (tags ? 'it''s')`);
+    const query = postpassQuery(["name=O'Brien\\Pub", `"it's"=*`], area);
+    expect(query).toContain(`(tags @> '{"name":"O''Brien\\\\Pub"}'::jsonb)`);
+    expect(query).toContain("(tags ? 'it''s')");
   });
 });
 

@@ -168,7 +168,8 @@ group('the query', () => {
     const query = postpassDetailsQuery(spot, 63.4);
     const box = 'ST_MakeEnvelope(8.398264, 48.998853, 8.401736, 49.001147, 4326)';
     expect(query).toContain(`CASE WHEN osm_type = 'R' THEN ST_Intersection(CASE WHEN GeometryType(geom) IN ('POLYGON', 'MULTIPOLYGON') THEN ST_Boundary(geom) ELSE geom END, ${box})`);
-    expect(query).toContain(`WHERE geom && ${box} AND`);
+    // Rows are found by the box of the radius, half as wide.
+    expect(query).toContain('WHERE geom && ST_MakeEnvelope(8.399132, 48.999427, 8.400868, 49.000573, 4326) AND ST_DWithin');
   });
 
   it('looks about 40 pixels around, between 15 and 250 metres', () => {

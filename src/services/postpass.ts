@@ -14,7 +14,7 @@ import { parseFilter, type OsmObject } from './osm';
 export const POSTPASS_URL = 'https://postpass.geofabrik.de/api/interpreter';
 
 /** A string in SQL. */
-const sql = (s: string) => `'${s.replace(/'/g, "''")}'`;
+export const sql = (s: string) => `'${s.replace(/'/g, "''")}'`;
 
 /** Text that LIKE matches literally: its wildcards and the escape character escaped. */
 const likeLiteral = (s: string) => s.replace(/[\\%_]/g, '\\$&');
@@ -31,17 +31,21 @@ function condition(filter: string): string {
 }
 
 /**
- * The query for the features matching any of the filters within the polygon. A boundary
- * relation is in the lines and the polygons alike; only its polygon is kept.
+ * The OSM objects matching any of the conditions, `geom` being what each is given as. Each
+ * condition is a query of its own, so that each can use the index that fits it (tags or
+ * geometry), which an OR across them all would rule out. A boundary relation is in the
+ * lines and the polygons alike; one row of each object is kept, its polygon where it has one.
  */
+export function selectObjects(geom: string, conditions: readonly string[]): string {
+  const rows = conditions.map((where) => `SELECT osm_type, osm_id, tags, ${geom} AS geom, area_m2 FROM postpass_pointlinepolygon WHERE ${where}`);
+  return `SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, geom FROM (${rows.join(' UNION ALL ')}) AS found ORDER BY osm_type, osm_id, area_m2 IS NULL`;
+}
+
+/** The query for the features matching any of the filters within the polygon. */
 export function postpassQuery(filters: readonly string[], area: readonly LngLat[]): string {
   const ring = [...area, area[0]!].map(roundLngLat).map(([lng, lat]) => `${lng} ${lat}`);
-  return (
-    'SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, geom FROM postpass_pointlinepolygon ' +
-    `WHERE ST_Intersects(geom, ST_GeomFromText('POLYGON((${ring.join(',')}))', 4326)) ` +
-    `AND (${filters.map(condition).join(' OR ')}) ` +
-    'ORDER BY osm_type, osm_id, area_m2 IS NULL'
-  );
+  const within = `ST_Intersects(geom, ST_GeomFromText('POLYGON((${ring.join(',')}))', 4326))`;
+  return selectObjects('geom', filters.map((filter) => `${within} AND ${condition(filter)}`));
 }
 
 const OSM_TYPES: Record<string, OsmObject['type']> = { N: 'node', W: 'way', R: 'relation' };
@@ -85,13 +89,16 @@ export function asFeatures(objects: readonly OsmObject[]): GeoJSON.FeatureCollec
   return { type: 'FeatureCollection', features };
 }
 
-/** Sends an SQL query to Postpass and reads the OSM objects it answers with. */
-export async function askPostpass(query: string): Promise<OsmObject[]> {
-  const response = await fetchResource(POSTPASS_URL, { method: 'POST', body: new URLSearchParams({ data: query }) });
-  return readPostpass(await response.json());
+/**
+ * Sends an SQL query to Postpass and reads the OSM objects it answers with, giving up after
+ * `seconds` so that the Overpass API is asked in time when Postpass is overloaded.
+ */
+export async function askPostpass(query: string, seconds: number): Promise<OsmObject[]> {
+  const init = { method: 'POST', body: new URLSearchParams({ data: query }), signal: AbortSignal.timeout(seconds * 1000) };
+  return readPostpass(await (await fetchResource(POSTPASS_URL, init)).json());
 }
 
 /** The OSM features matching any of the filters within the polygon, from Postpass. */
 export async function findWithPostpass(filters: readonly string[], area: readonly LngLat[]): Promise<GeoJSON.FeatureCollection> {
-  return asFeatures(await askPostpass(postpassQuery(filters, area)));
+  return asFeatures(await askPostpass(postpassQuery(filters, area), 60));
 }
