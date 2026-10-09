@@ -25,7 +25,11 @@ routes, settings and imported files stay in the browser.
     not let web pages read them, such as mintelonline.de's motorcycle road closures in
     Germany, Austria, Switzerland, the Netherlands and Belgium: the arrow beside the entry
     downloads the file (a link needs no CORS), and tapping the entry asks for the
-    downloaded file.
+    downloaded file. The ⓘ beside an entry shows its technical details under it: the
+    address, the kind of service and its version, whether the data is raster or vector,
+    the format of its tiles or features and how they are asked for, the number of layers,
+    its tile zooms and whether the browser reaches it directly or through the CORS proxy.
+    The service is read for them, as when the entry is opened.
   - An **address** can be a WMS, WMTS or WFS capabilities URL, an OGC API – Features
     landing page or collection, an ArcGIS MapServer or FeatureServer (or one of its
     layers), a tile template with `{z}/{x}/{y}` (raster, or vector tiles ending in `.pbf`

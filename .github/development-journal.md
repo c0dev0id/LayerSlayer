@@ -264,6 +264,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
   on: BLM land managers, wilderness and study areas, NPS park roads and trails, USGS mines
   (MRDS), NOAA's smoke forecast and EPA AirNow's air quality layers. HIFLD's transmission
   lines stay, noted as archived by their publisher.
+  - An entry's technical details come from two places. What the library holds (address,
+    type, CORS, zooms, attribution) shows at once; the kind of data and the formats are
+    read from the layers the service offers (`library/entryInfo.ts`), since a WMS's
+    image format or a PMTiles archive's tile type is only known from the service. The
+    read is the session's one per source that opening the entry also uses, so showing
+    the details costs no extra request when the entry is opened, and the other way round.
+    A style's kinds and formats come from its sources. Reading is not routed through the
+    proxy on its own, unlike opening an entry marked `cors: false`: looking at details
+    changes no setting, so such an entry shows why it could not be read.
 - **Data a provider keeps to itself stays out.** Rumo's PMTiles archives and styles allow
   only Rumo's own site by their CORS rules, and the MapTiler key in them is limited to
   that domain; OsmAnd's off-road tiles answer other pages' requests with 502. A CORS proxy
