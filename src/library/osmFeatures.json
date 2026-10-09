@@ -155,6 +155,21 @@
     { "name": "Farmland", "category": "Land use", "icon": "maki:farm", "filters": ["landuse=farmland"] },
     { "name": "Allotments", "category": "Land use", "icon": "maki:garden", "filters": ["landuse=allotments"] },
     { "name": "Cemeteries", "category": "Land use", "icon": "maki:cemetery", "filters": ["landuse=cemetery"] },
-    { "name": "Military areas", "category": "Land use", "icon": "temaki:military", "filters": ["landuse=military"] }
+    { "name": "Military areas", "category": "Land use", "icon": "temaki:military", "filters": ["landuse=military"] },
+    { "name": "Bunkers", "category": "History and military", "icon": "temaki:bunker", "filters": ["military=bunker", "building=bunker", "historic=bunker", "abandoned:military=bunker", "disused:military=bunker"] },
+    { "name": "Munition bunkers and depots", "category": "History and military", "icon": "mdi:ammunition", "filters": ["bunker_type=munitions", "military=ammunition", "military=depot", "abandoned:military=ammunition", "disused:military=ammunition"] },
+    { "name": "Air-raid and civil shelters", "category": "History and military", "icon": "mdi:bomb", "filters": ["bunker_type=bomb_shelter", "bunker_type=air_raid_shelter", "bunker_type=personnel_shelter", "bunker_type=civil_shelter", "military=civil_shelter"] },
+    { "name": "Pillboxes and gun emplacements", "category": "History and military", "icon": "temaki:bunker_silo", "filters": ["bunker_type=pillbox", "bunker_type=gun_emplacement", "bunker_type=mg_nest", "military=gun_emplacement"] },
+    { "name": "Hardened aircraft shelters", "category": "History and military", "icon": "temaki:hangar", "filters": ["bunker_type=hardened_aircraft_shelter"] },
+    { "name": "Missile sites", "category": "History and military", "icon": "maki:rocket", "filters": ["military=missile_base", "abandoned:military=missile_base", "bunker_type=missile_silo", "military=launchpad"] },
+    { "name": "Barracks", "category": "History and military", "icon": "temaki:military", "filters": ["military=barracks", "disused:military=barracks", "abandoned:military=barracks"] },
+    { "name": "Former military sites", "category": "History and military", "icon": "temaki:military", "filters": ["abandoned:military=*", "disused:military=*"] },
+    { "name": "US forces sites", "category": "History and military", "icon": "temaki:military", "filters": ["operator=\"US Army\"", "operator=\"U.S. Army\"", "operator=\"United States Army\"", "operator=\"US Army Garrison Rheinland Pfalz\"", "operator=\"US Air Force\"", "operator=\"United States Air Force\"", "operator=\"United States Armed Forces\""] },
+    { "name": "Trenches", "category": "History and military", "lines": true, "filters": ["military=trench", "abandoned:military=trench"] },
+    { "name": "Tank traps and dragon's teeth", "category": "History and military", "lines": true, "filters": ["barrier=tank_trap", "abandoned:military=tank_trap", "historic:military=tank_trap", "military=dragons_teeth"] },
+    { "name": "Bomb craters", "category": "History and military", "icon": "maki:danger", "filters": ["military=bombcrater"] },
+    { "name": "War memorials", "category": "History and military", "icon": "maki:monument", "filters": ["historic=memorial memorial=war_memorial"] },
+    { "name": "Battlefields", "category": "History and military", "icon": "maki:historic", "filters": ["historic=battlefield"] },
+    { "name": "Forts", "category": "History and military", "icon": "maki:castle", "filters": ["historic=fort"] }
   ]
 }
