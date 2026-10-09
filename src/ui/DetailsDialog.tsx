@@ -3,8 +3,9 @@ import { loadOsmFeatures, matchingFeature, type OsmFeature } from '../library/os
 import { latLonText } from '../map/placeLinks';
 import type { LngLat } from '../model/route';
 import { OSM_CREDIT } from '../services/osm';
+import { SEA_CREDIT, type Sea } from '../services/seas';
 import type { DetailKind, Details, RowIcon } from '../services/osmDetails';
-import { closeDetails, details, detailsRequest, osmRequest, type LayerFeature } from '../state/details';
+import { closeDetails, details, detailsRequest, osmRequest, sea, type LayerFeature } from '../state/details';
 import { errorMessage, map } from '../state/ui';
 import {
   BarrierIcon,
@@ -132,13 +133,18 @@ function OsmDetails() {
           <Match when={details.error as unknown}>
             <p class="note error">{errorMessage(details.error)}</p>
           </Match>
-          <Match when={details()?.length === 0}>
+          <Match when={details()?.length === 0 && !sea()}>
             <p class="muted">No road or trail, place, barrier, history, water or bridge here. Zoom in closer, or right-click nearer to one.</p>
           </Match>
           <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={presets()} />}</For>}</Match>
         </Switch>
+        {/* The sea comes from elsewhere and more slowly, so after what OpenStreetMap has. */}
+        <Show when={!details.loading && sea()}>{(found) => <SeaCard sea={found()} />}</Show>
       </div>
-      <p class="muted hint">{OSM_CREDIT}</p>
+      <p class="muted hint">
+        {OSM_CREDIT}
+        <Show when={sea()}> {SEA_CREDIT}</Show>
+      </p>
     </>
   );
 }
@@ -210,6 +216,27 @@ function keepInView(spot: LngLat, sheet: HTMLElement): void {
   if (x > box.right + 24) return;
   // Into the middle of the map to the right of the sheet.
   m.panBy([x - (box.right + canvas.right) / 2, 0]);
+}
+
+function SeaCard(props: { sea: Sea }) {
+  return (
+    <section class="detail-card">
+      <div class="row">
+        <span class="detail-icon">
+          <RippleIcon />
+        </span>
+        <span class="grow">
+          <strong>{props.sea.title}</strong>
+          <br />
+          {props.sea.name}
+        </span>
+      </div>
+      <DetailRows rows={props.sea.alsoIn.length > 0 ? [{ label: 'Also in', value: props.sea.alsoIn.join(', ') }] : []} />
+      <a class="muted osm-link" href={props.sea.url} target="_blank" rel="noopener">
+        More on Marine Regions
+      </a>
+    </section>
+  );
 }
 
 function DetailCard(props: { details: Details; presets: OsmFeature[] | undefined }) {

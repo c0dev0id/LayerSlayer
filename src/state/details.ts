@@ -2,6 +2,7 @@ import { createMemo, createResource, createRoot, createSignal } from 'solid-js';
 import type { LngLat } from '../model/route';
 import type { FeatureDescription } from '../services/featureDetails';
 import { findDetails } from '../services/osmDetails';
+import { findSea } from '../services/seas';
 
 /**
  * The details that are open: what OpenStreetMap has around a spot on the map, or the
@@ -59,6 +60,13 @@ export const osmRequest = createRoot(() =>
 
 /** What OpenStreetMap has around the spot, while those details are open. */
 export const [details] = createRoot(() => createResource(osmRequest, ({ spot, radius }) => findDetails(spot, radius)));
+
+/**
+ * The sea or ocean the spot lies in, asked for beside OpenStreetMap, which maps none as an
+ * area. It adds to the details rather than making them, so where it cannot be found there
+ * is just no sea.
+ */
+export const [sea] = createRoot(() => createResource(osmRequest, ({ spot }) => findSea(spot).catch(() => undefined)));
 
 const NOTHING: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
 
