@@ -74,8 +74,9 @@ function route(rte: Element): GpxContent['routes'][number] {
   const rtepts = children(rte, 'rtept');
   const name = text(rte, 'name');
   const points = positions(rtepts);
-  if (!rtepts.some((p) => garminShape(p).length > 0)) return { name, points };
-  return { name, points, course: positions(rtepts.flatMap((p) => [p, ...garminShape(p)])) };
+  const shapes = rtepts.map(garminShape);
+  if (!shapes.some((shape) => shape.length > 0)) return { name, points };
+  return { name, points, course: positions(rtepts.flatMap((p, i) => [p, ...shapes[i]!])) };
 }
 
 /** Reads a GPX 1.0 or 1.1 document. */

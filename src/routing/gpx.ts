@@ -33,7 +33,7 @@ export function gpxToRouteData(
   options: { fileName: string; profile: Profile; existing: readonly Route[]; newId: () => string },
 ): RouteData {
   const lines: { name?: string | undefined; points: LngLat[]; routed: boolean }[] = [
-    ...gpx.routes.map((r) => (r.course ? { name: r.name, points: r.course, routed: false } : { name: r.name, points: r.points, routed: true })),
+    ...gpx.routes.map((r) => ({ name: r.name, points: r.course ?? r.points, routed: !r.course })),
     ...gpx.tracks.map((t) => ({ name: t.name, points: t.segments.flat(), routed: false })),
   ].filter((l) => l.points.length > 0);
   // Waypoints without a route or track get a route of their own, without points.
