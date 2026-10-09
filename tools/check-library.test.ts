@@ -81,6 +81,11 @@ async function parse(entry: Entry, body: string, url: string): Promise<ServiceIn
 
 async function check(entry: Entry): Promise<string> {
   const url = documentUrl(entry).replace(/^http:/, 'https:');
+  // A file is downloaded by a link, which needs no CORS: it only has to be there.
+  if (entry.type === 'file') {
+    const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(30_000) }).catch((error: Error) => error);
+    return response instanceof Error ? `failed: ${response.message}` : `download, HTTP ${response.status}`;
+  }
   try {
     // OGC APIs answer HTML without Accept; a COG is read only as far as its header.
     const headers = {
@@ -118,7 +123,8 @@ it('checks the library', { timeout: 600_000 }, async () => {
     }),
   );
   for (const entry of library.entries) {
-    console.log(`${entry.cors ? 'cors ' : 'NO CORS'}  ${entry.name}: ${results.get(entry)}`);
+    const mark = entry.type === 'file' ? 'file   ' : entry.cors ? 'cors   ' : 'NO CORS';
+    console.log(`${mark}  ${entry.name}: ${results.get(entry)}`);
     if (entry.cors) delete entry.cors;
   }
   writeFileSync(LIBRARY, `${JSON.stringify(library, null, 2)}\n`);

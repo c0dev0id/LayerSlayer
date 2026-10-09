@@ -30,7 +30,7 @@ import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
 import { createOutcome, OutcomeNote } from './outcome';
-import { AlertIcon, AreaIcon, CloseIcon, EyeIcon, EyeOffIcon, GripIcon, IconBadge } from './icons';
+import { AlertIcon, AreaIcon, CloseIcon, DownloadIcon, EyeIcon, EyeOffIcon, GripIcon, IconBadge } from './icons';
 import { reorderTarget } from './reorder';
 
 export function LayersSection(props: { onAdd: () => void }) {
@@ -340,7 +340,10 @@ function OsmQueryRows(props: { id: string; query: OsmQuery }) {
   );
 }
 
-/** When the file of a layer was changed, and choosing a newer version in its place; the layer keeps its settings. */
+/**
+ * When the file of a layer was changed, the link to where it is published, and choosing a
+ * newer version in its place; the layer keeps its settings.
+ */
 function FileRows(props: { layer: Layer; file: FileResource }) {
   const replaced = createOutcome();
   const replace = (file: File) =>
@@ -354,8 +357,15 @@ function FileRows(props: { layer: Layer; file: FileResource }) {
       <div class="row">
         <span class="muted label">File</span>
         <span class="grow" title="When the file was last changed, as far as the browser said">
-          {props.file.modified && `dated ${new Date(props.file.modified).toLocaleDateString(undefined, { dateStyle: 'medium' })}`}
+          {props.file.modified && new Date(props.file.modified).toLocaleDateString(undefined, { dateStyle: 'medium' })}
         </span>
+        <Show when={props.file.download}>
+          {(url) => (
+            <a class="icon" href={url()} target="_blank" rel="noopener" title="Download the newest version of the file" aria-label={`Download the file of ${props.layer.name}`}>
+              <DownloadIcon />
+            </a>
+          )}
+        </Show>
         <label class="button" classList={{ disabled: replaced.running() }} title="Choose a newer version of the file; the layer keeps its settings">
           {replaced.running() ? 'Reading…' : 'Replace…'}
           <input

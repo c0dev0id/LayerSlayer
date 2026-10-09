@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { storedFile } from '../model/layer';
+import { storedFile, withDownload } from '../model/layer';
 import { importFile } from '../services/importFile';
 import { addLayer, defaultState, moveItem, parseState, replaceLayerFile, state, updateLayer } from './store';
 
@@ -69,14 +69,18 @@ describe('replaceLayerFile', () => {
   const line = (...coordinates: number[][]) => JSON.stringify({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates } });
   const AUGUST = Date.UTC(2026, 7, 11);
 
-  it('gives a file layer the new file, keeping its settings and deleting the old file', async () => {
-    const layer = addLayer(await importFile(new File([line([1, 2], [3, 4])], 'closures.geojson'), 'closures.geojson'));
+  it('gives a file layer the new file, keeping its settings and where it is published, and deleting the old file', async () => {
+    const draft = await importFile(new File([line([1, 2], [3, 4])], 'closures.geojson'), 'closures.geojson');
+    const layer = addLayer({ ...draft, source: withDownload(draft.source, 'https://data.example/closures.geojson') });
     updateLayer(layer.id, { color: '#123456', opacity: 0.8 });
     const old = storedFile(layer.source)!;
     await replaceLayerFile(layer.id, new File([line([5, 6], [7, 9])], 'closures-2.geojson', { lastModified: AUGUST }));
     const now = state.layers.find((l) => l.id === layer.id)!;
     expect(now).toMatchObject({ color: '#123456', opacity: 0.8, bounds: [5, 6, 7, 9] });
-    expect(now.source).toEqual({ type: 'geojson', data: { file: expect.any(String), name: 'closures-2.geojson', modified: '2026-08-11T00:00:00.000Z' } });
+    expect(now.source).toEqual({
+      type: 'geojson',
+      data: { file: expect.any(String), name: 'closures-2.geojson', modified: '2026-08-11T00:00:00.000Z', download: 'https://data.example/closures.geojson' },
+    });
     expect(stored.has(old)).toBe(false);
   });
 

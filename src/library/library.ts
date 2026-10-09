@@ -1,13 +1,17 @@
-import type { Bounds, LayerDraft } from '../model/layer';
+import { withDownload, type Bounds, type LayerDraft } from '../model/layer';
 import type { ServiceInfo, ServiceType } from '../services/types';
 import { parseTemplate } from '../services/vectorTiles';
 import { tileTemplates } from '../services/xyz';
 import { REGION_BOUNDS } from './regions';
 
-/** A service in the library: where it is, what it covers and what it is for. */
+/** A service or a file in the library: where it is, what it covers and what it is for. */
 export interface LibraryEntry {
   name: string;
-  type: ServiceType;
+  /**
+   * The kind of service, or `file` for a file whose server does not let web pages read it:
+   * it is downloaded by a link, which needs no CORS, and then opened from disk.
+   */
+  type: ServiceType | 'file';
   url: string;
   region: string;
   category: string;
@@ -78,5 +82,19 @@ export function withEntry(info: ServiceInfo, entry: LibraryEntry): ServiceInfo {
       }
       return { ...offer, title: single ? entry.name : offer.title, draft };
     }),
+  };
+}
+
+/**
+ * The layer of a library file the user downloaded and opened: named and credited as the
+ * entry, and remembering where the file is published, for downloading a newer version.
+ */
+export function downloadedLayer(draft: LayerDraft, entry: LibraryEntry): LayerDraft {
+  return {
+    ...draft,
+    name: entry.name,
+    source: withDownload(draft.source, entry.url),
+    origin: entry.url,
+    ...(entry.attribution && { attribution: entry.attribution }),
   };
 }

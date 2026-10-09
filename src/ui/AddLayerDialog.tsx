@@ -1,6 +1,6 @@
 import { createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
 import { allOutside } from '../geo/bounds';
-import { entryAreas, entryService, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
+import { downloadedLayer, entryAreas, entryService, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
 import type { Bounds } from '../model/layer';
 import { decodePlaceholders, parsePmtilesUrl } from '../map/urls';
 import { detectServiceType } from '../services/detect';
@@ -11,7 +11,7 @@ import { hostOf, isProxied } from '../state/net';
 import { addLayer, focusBounds, removeLayersWhere, setHostProxied, state } from '../state/store';
 import { errorMessage } from '../state/ui';
 import { askConfirmation } from './confirm';
-import { CloseIcon } from './icons';
+import { CloseIcon, DownloadIcon } from './icons';
 import { showModalWhile } from './modal';
 import { OsmQueryTab } from './OsmQueryTab';
 import { groupMembers, isFromSource, originOf, selection, type Selection } from './offers';
@@ -137,6 +137,19 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
     }
   }
 
+  /** Opens the file of a library entry that the user downloaded. */
+  async function openDownloaded(entry: LibraryEntry, file: File) {
+    setFailure(undefined);
+    setReading(entry.url, true);
+    try {
+      addLayer(downloadedLayer(await importFile(file, file.name), entry));
+    } catch (error) {
+      setFailure({ message: `${entry.name}: ${errorMessage(error)}` });
+    } finally {
+      setReading(entry.url, false);
+    }
+  }
+
   return (
     <dialog
       ref={dialog}
@@ -165,7 +178,12 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
           </For>
         </div>
         <div class="tab-panel" role="tabpanel" hidden={tab() !== 'library'}>
-          <LibraryTab busy={busy()} sizes={sizes()} onOpen={(entry) => void open({ type: entry.type as Source['type'], url: entry.url, entry })} />
+          <LibraryTab
+            busy={busy()}
+            sizes={sizes()}
+            onOpen={(entry, type) => void open({ type, url: entry.url, entry })}
+            onFile={(entry, file) => void openDownloaded(entry, file)}
+          />
         </div>
         <div class="tab-panel" role="tabpanel" hidden={tab() !== 'address'}>
           <AddressTab busy={busy()} onOpen={(source) => void open(source)} onFailure={setFailure} />
@@ -216,8 +234,28 @@ function FailureNote(props: { failure: Failure; onRetry: (source: Source) => voi
   );
 }
 
-function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<string, number>; onOpen: (entry: LibraryEntry) => void }) {
+/**
+ * The library's entries, searched and filtered. A service entry opens the service; a file
+ * entry, whose server does not let the page read it, has a link that downloads the file
+ * and asks for the downloaded file when tapped.
+ */
+function LibraryTab(props: {
+  busy: ReadonlySet<string>;
+  sizes: ReadonlyMap<string, number>;
+  onOpen: (entry: LibraryEntry, type: Source['type']) => void;
+  onFile: (entry: LibraryEntry, file: File) => void;
+}) {
   const [library] = createResource(loadLibrary);
+  let chooser!: HTMLInputElement;
+  /** The file entry whose file is being chosen. */
+  let choosing: LibraryEntry | undefined;
+  /** A tap on an entry: a service opens; a file is asked for, or removed when it is on the map. */
+  const tap = (entry: LibraryEntry, onMap: boolean) => {
+    if (entry.type !== 'file') return props.onOpen(entry, entry.type as Source['type']);
+    if (onMap) return removeLayersWhere((l) => l.origin === entry.url);
+    choosing = entry;
+    chooser.click();
+  };
   const [query, setQuery] = createSignal('');
   const [region, setRegion] = createSignal('');
   const [category, setCategory] = createSignal('');
@@ -237,6 +275,17 @@ function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<strin
           <For each={distinct('category').sort()}>{(c) => <option>{c}</option>}</For>
         </select>
       </div>
+      <input
+        ref={chooser}
+        type="file"
+        hidden
+        accept={IMPORT_ACCEPT}
+        onChange={(e) => {
+          const file = e.currentTarget.files?.[0];
+          e.currentTarget.value = '';
+          if (file && choosing) props.onFile(choosing, file);
+        }}
+      />
       <ul class="entries">
         <For each={entries()} fallback={<li class="muted">{library.loading ? 'Loading…' : 'Nothing matches.'}</li>}>
           {(entry) => {
@@ -245,8 +294,8 @@ function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<strin
             const areas = entryAreas(entry);
             const outside = () => outsideFocus(areas);
             return (
-              <li>
-                <button class="entry" classList={{ added: onMap() > 0, outside: outside() }} onClick={() => props.onOpen(entry)}>
+              <li classList={{ download: entry.type === 'file' }}>
+                <button class="entry" classList={{ added: onMap() > 0, outside: outside() }} onClick={() => tap(entry, onMap() > 0)}>
                   <span class="row">
                     <strong class="grow">{entry.name}</strong>
                     <Show when={props.busy.has(entry.url)}>
@@ -268,13 +317,19 @@ function LibraryTab(props: { busy: ReadonlySet<string>; sizes: ReadonlyMap<strin
                     </Show>
                   </span>
                   <span class="muted">
-                    {entry.region} · {entry.category} · {SERVICE_TYPES.find((t) => t.value === entry.type)?.label}
+                    {entry.region} · {entry.category} · {SERVICE_TYPES.find((t) => t.value === entry.type)?.label ?? 'File to download'}
                     <Show when={outside()}> · outside the focus area</Show>
                   </span>
                   <Show when={entry.note}>
                     <span class="note-text">{entry.note}</span>
                   </Show>
                 </button>
+                <Show when={entry.type === 'file'}>
+                  {/* A link, which downloads the file where the page itself may not read it. */}
+                  <a class="icon download-link" href={entry.url} target="_blank" rel="noopener" title="Download the file" aria-label={`Download the file of ${entry.name}`}>
+                    <DownloadIcon />
+                  </a>
+                </Show>
               </li>
             );
           }}

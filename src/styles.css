@@ -145,7 +145,7 @@ a {
 
 /* Buttons */
 
-:where(.panel, .dialog, .hint-bar) button.icon {
+:where(.panel, .dialog, .hint-bar) :is(button, a).icon {
   display: inline-grid;
   place-items: center;
   padding: 2px 4px;
@@ -688,6 +688,20 @@ input.swatch {
 .dialog button.offer.added:hover:not(:disabled),
 .dialog button.offer.partial:hover:not(:disabled) {
   background: #d0ebff;
+}
+
+/* A file to download: the entry, and the link that downloads the file beside it. */
+.entries li.download {
+  display: flex;
+}
+
+.entries .download-link {
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.entries .download-link:hover {
+  background: var(--hover);
 }
 
 /* Known to lie outside the focus area: still there, but out of the way of what lies inside. */
@@ -1243,7 +1257,7 @@ input.swatch {
     font-size: 16px;
   }
 
-  :where(.panel, .dialog, .hint-bar) button.icon {
+  :where(.panel, .dialog, .hint-bar) :is(button, a).icon {
     min-width: 34px;
     min-height: 34px;
   }

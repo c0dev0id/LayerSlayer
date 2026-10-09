@@ -1141,6 +1141,21 @@
       "cors": false
     },
     {
+      "name": "Motorcycle road closures",
+      "type": "file",
+      "url": "https://www.mintelonline.de/streckensperrungen/Streckensperrungen_Motorrad.kmz",
+      "region": "Europe",
+      "category": "Traffic",
+      "note": "Roads closed to motorcycles on certain days or hours in Germany, Austria, Switzerland, the Netherlands and Belgium, collected by mintelonline.de. Its server does not let web pages read the file: download it with the arrow, then choose it here. Updated every few weeks; Replace in the layer's settings takes a newer download.",
+      "attribution": "<a href=\"https://www.mintelonline.de/streckensperrungen/\">mintelonline.de</a>",
+      "bounds": [
+        4.2,
+        46.4,
+        14.2,
+        53.3
+      ]
+    },
+    {
       "name": "DWD — weather observations and warnings (WFS)",
       "type": "wfs",
       "url": "https://maps.dwd.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",

@@ -1,18 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { detectServiceType } from '../services/detect';
+import { IMPORT_ACCEPT } from '../services/importFile';
 import { SERVICE_TYPES } from '../services/types';
 import { parseXyz } from '../services/xyz';
 import { defaultState } from '../state/store';
 import library from './library.json';
 import { validBounds } from '../geo/mercator';
-import { entryAreas, entryService, filterLibrary, withEntry, type LibraryEntry } from './library';
+import { downloadedLayer, entryAreas, entryService, filterLibrary, withEntry, type LibraryEntry } from './library';
 import { REGION_BOUNDS } from './regions';
 
 const entries = library.entries as LibraryEntry[];
 
 describe('library', () => {
   it('has complete entries of known types with unique addresses', () => {
-    const types = new Set(SERVICE_TYPES.map((t) => t.value));
+    const types = new Set<string>([...SERVICE_TYPES.map((t) => t.value), 'file']);
     for (const entry of entries) {
       expect(entry.name, entry.url).toBeTruthy();
       expect(entry.region, entry.name).toBeTruthy();
@@ -23,8 +24,11 @@ describe('library', () => {
     expect(new Set(entries.map((e) => e.url)).size).toBe(entries.length);
   });
 
-  it('names types the address detection agrees with', () => {
-    for (const entry of entries) expect(detectServiceType(entry.url), entry.name).toBe(entry.type);
+  it('names types the address detection agrees with, and files the import reads', () => {
+    for (const entry of entries) {
+      if (entry.type === 'file') expect(IMPORT_ACCEPT.split(','), entry.name).toContain(/\.[a-z]+$/.exec(entry.url)?.[0]);
+      else expect(detectServiceType(entry.url), entry.name).toBe(entry.type);
+    }
   });
 
   it('holds the default layer, so its entry shows it as on the map', () => {
@@ -80,5 +84,20 @@ describe('library', () => {
     const info = withEntry(parseXyz(entry.url), entry);
     expect(info.title).toBe('OpenTopoMap');
     expect(info.offers[0]!.draft).toMatchObject({ name: 'OpenTopoMap', source: { maxzoom: 17 }, attribution: expect.stringContaining('OpenTopoMap') });
+  });
+
+  it('names the layer of a downloaded file after its entry, remembering where the file is published', () => {
+    const entry = entries.find((e) => e.type === 'file')!;
+    const draft = downloadedLayer(
+      { name: 'Streckensperrungen_Motorrad', source: { type: 'geojson', data: { file: 'key', name: 'Streckensperrungen_Motorrad.kmz' } }, bounds: [4, 46, 14, 53] },
+      entry,
+    );
+    expect(draft).toEqual({
+      name: entry.name,
+      source: { type: 'geojson', data: { file: 'key', name: 'Streckensperrungen_Motorrad.kmz', download: entry.url } },
+      bounds: [4, 46, 14, 53],
+      origin: entry.url,
+      attribution: entry.attribution,
+    });
   });
 });

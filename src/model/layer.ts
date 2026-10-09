@@ -15,6 +15,11 @@ export interface FileResource {
   name: string;
   /** When the file was last changed, as an ISO 8601 time, where the browser said. */
   modified?: string;
+  /**
+   * Where the file is published, for downloading a newer version by hand: its server does
+   * not let web pages read it (CORS), but a link to it downloads it.
+   */
+  download?: string;
 }
 
 /** Raster tiles addressed by an XYZ (or TMS) template; one template per subdomain. */
@@ -303,6 +308,12 @@ export function canCache(source: LayerSource): boolean {
 /** The file a layer keeps in the browser, if any. */
 export function fileResource(source: LayerSource): FileResource | undefined {
   return (source.type === 'geojson' || source.type === 'image') && 'file' in source.data ? source.data : undefined;
+}
+
+/** A file layer's source remembering where its file is published; other sources as they are. */
+export function withDownload(source: LayerSource, download: string | undefined): LayerSource {
+  if (!download || (source.type !== 'geojson' && source.type !== 'image') || !('file' in source.data)) return source;
+  return { ...source, data: { ...source.data, download } };
 }
 
 /** The key of the file a layer keeps in the browser, if any. */
