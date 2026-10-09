@@ -54,6 +54,14 @@ export function resolveUrl(url: string, base: string): string {
   return new URL(masked, base).href.replace(/__token(\d+)__/g, (_, i: string) => tokens[Number(i)]!);
 }
 
+/**
+ * Placeholders of a tile template as a browser copies an address, percent-encoded
+ * (`%7Bz%7D`), back in braces; the rest of the address keeps its encoding.
+ */
+export function decodePlaceholders(url: string): string {
+  return url.replace(/%7B([A-Za-z0-9_-]+)%7D/gi, '{$1}');
+}
+
 /** A tile address of one of the app's protocols, `scheme://{z}/{x}/{y}?params`, which the map fills in per tile. */
 export function protocolTileUrl(scheme: string, params: Record<string, string>): string {
   return `${scheme}://{z}/{x}/{y}?${new URLSearchParams(params)}`;

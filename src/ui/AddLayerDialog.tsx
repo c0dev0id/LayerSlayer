@@ -2,7 +2,7 @@ import { createMemo, createResource, createRoot, createSignal, For, Index, Show 
 import { allOutside } from '../geo/bounds';
 import { entryAreas, entryService, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
 import type { Bounds } from '../model/layer';
-import { parsePmtilesUrl } from '../map/urls';
+import { decodePlaceholders, parsePmtilesUrl } from '../map/urls';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
 import { readService } from '../services/read';
@@ -288,9 +288,11 @@ function AddressTab(props: { busy: ReadonlySet<string>; onOpen: (source: Source)
   const [url, setUrl] = createSignal('');
   const [chosen, setChosen] = createSignal<ServiceType | ''>('');
   const [added, setAdded] = createSignal<string>();
-  const detected = () => detectServiceType(url());
+  /** The address as entered, with tile placeholders a browser copied percent-encoded (`%7Bz%7D`) in braces again. */
+  const entered = () => decodePlaceholders(url().trim());
+  const detected = () => detectServiceType(entered());
   /** The address read: a PMTiles archive copied with the scheme styles name it by, without it. */
-  const address = () => parsePmtilesUrl(url().trim())?.archive ?? url().trim();
+  const address = () => parsePmtilesUrl(entered())?.archive ?? entered();
   const type = () => chosen() || detected();
 
   async function importPdf(address: string) {

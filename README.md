@@ -27,7 +27,8 @@ in the browser.
     layers), a tile template with `{z}/{x}/{y}` (raster, or vector tiles ending in `.pbf`
     or `.mvt`), a TileJSON, a PMTiles archive (`.pmtiles`), a GeoJSON file, a MapLibre
     style, a Cloud Optimized GeoTIFF or a GeoPDF. The kind of service is guessed from the address
-    and can be changed. *Open* shows the source's layers.
+    and can be changed. *Open* shows the source's layers. Placeholders that a browser
+    copied percent-encoded (`%7Bz%7D/%7Bx%7D/%7By%7D`) are read as `{z}/{x}/{y}`.
   - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
     imported under Routes), the placemarks of KML and KMZ files, and GeoPDFs with an ISO
     32000 geospatial viewport, added as they are chosen. Each new GeoJSON, GPX or KML
