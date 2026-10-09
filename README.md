@@ -154,6 +154,10 @@ routes, settings and imported files stay in the browser.
     Its waypoints belong to the first of them, or to a route of their own, named after
     the file, if it has none. A leg the routing cannot find stays a red dashed line until
     one of its points is moved.
+- **Light and dark**: the interface follows the browser's light or dark preference. The
+  sun or moon beside the name switches to the other one, and this browser keeps that
+  choice; switching back to the browser's own follows the browser again. The map itself
+  is drawn the same in both, on the background its project sets.
 - **Narrow screens** (phones): the panel lies under the map, and the chevron beside *Open*
   folds it to its header for more map (it stays folded after a reload). The search is a
   button at the top left that opens it; moving or tapping the map, or Esc, folds it again

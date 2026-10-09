@@ -93,5 +93,8 @@ chunk loaded with the icon picker. UI icons are Tabler SVG paths in `src/ui/icon
   before the rename. Everything else uses the name `layerslayer`.
 - Unit tests sit beside their modules (`*.test.ts`) and cover the pure modules; service
   parsers are tested against captured responses in `src/services/fixtures/`.
+- Colours in `styles.css` are tokens on `:root` with a light and a dark value
+  (`light-dark()`); use or add a token rather than a literal colour, except for the map's
+  own content and white on accent fills.
 - README and journal are prose wrapped at 90 columns, describing behaviour in plain words
   rather than code terms. Update both when behaviour or a design decision changes.

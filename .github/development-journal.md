@@ -413,6 +413,20 @@ It is a static single-page app on GitHub Pages; there is no server component.
   as the panel width is), the search is a button until opened, and the route toolbar is
   one bar of icons in one row (eight tools fit 360 px), its captions kept as the buttons'
   accessible names while the hint bar says what the active tool does.
+- **Light and dark interface.** Every colour of the stylesheet is a token on `:root`
+  with a light and a dark value (`light-dark()`), so each colour is written once and the
+  page shows the browser's preference from the first paint, before any script runs; the
+  native controls (inputs, sliders, dialogs, scroll bars) follow `color-scheme` by
+  themselves. `state/theme.ts` sets `data-theme` on the root element to the theme shown,
+  which fixes `color-scheme` to it. The choice is kept only where it differs from the
+  browser's preference: a toggle back to the browser's theme forgets it, so the page
+  follows the browser again without a third, "automatic" state to pick. It is this
+  browser's convenience like the panel width, not part of projects. Lightning CSS
+  lowers `light-dark()` for the build target into its own variables, switched by the
+  same `color-scheme` rules. MapLibre's controls take the tokens; their icons are dark
+  images, inverted in the dark theme. The map's content is not themed: an empty map
+  stays on the background the project sets (white by default), since how a project
+  looks should not depend on the browser that opens it.
 - **Place search with Nominatim.** OpenStreetMap's geocoder needs no key and sends CORS
   headers, so the page asks it directly (through the proxy only if its host is proxied).
   Its usage policy forbids search as you type and allows one request per second, so a
@@ -640,6 +654,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
   140 led by what off-road riders look for (tracks, trails, surfaces, barriers, access)
   or typed as tags, queried with Overpass once and updated on demand.
 - Optional CORS proxy, used per host.
+- Light and dark interface, following the browser unless switched.
 - A focus area: a polygon outside whose bounds no layer but the bottom one requests
   tiles, with the map around it dimmed.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
