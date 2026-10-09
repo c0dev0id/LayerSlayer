@@ -7,13 +7,13 @@ FeatureServer, plain XYZ tile templates, MapLibre styles over vector tiles, GeoJ
 and feeds, GeoPDFs. Viewers usually support a few of them, or flatten all of them into
 raster tiles (as WMSproxy does for navigation apps that only take XYZ).
 
-Layer Slayer (code name webmap) is a browser map viewer that stacks base maps and overlays from all of these and
-supports each properly: it reads the service's own description (capabilities document,
-service JSON, the georeference inside a PDF) and draws it with the MapLibre source that
-fits, so WMS stays a GetMap per tile, a FeatureServer stays vector data, a style keeps its
-vector rendering. A layer list controls order, visibility, opacity and zoom range; the
-configuration survives a browser restart. A library of services, grown from WMSproxy's,
-offers ready-made layers.
+Layer Slayer (code name webmap) is a browser map viewer that stacks base maps and overlays
+from all of these and supports each properly: it reads the service's own description
+(capabilities document, service JSON, the georeference inside a PDF) and draws it with the
+MapLibre source that fits, so WMS stays a GetMap per tile, a FeatureServer stays vector
+data, a style keeps its vector rendering. A layer list controls order, visibility, opacity
+and zoom range; the configuration survives a browser restart. A library of services, grown
+from WMSproxy's, offers ready-made layers.
 
 A route tool, taken from mappic, draws routes over the layers: points tapped on the map are
 joined along the roads by OSRM routing or by straight lines, with waypoints, undo and redo,
@@ -68,9 +68,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
   and mappic's approach of custom layers that copy the framebuffer and blend in a shader.
   For MapLibre's own layers the latter needs a pair of custom layers around each blended
   layer (copy and clear before, blend after) and a 3D custom layer at the bottom, because
-  layers below the first 3D layer draw their opaque fills in an earlier top-down pass. Custom
-  layers are not serialised, so `setStyle` diffs leave them alone and they can be put back
-  in place after each diff.
+  layers below the first 3D layer draw their opaque fills in an earlier top-down pass.
+  Custom layers are not serialised, so `setStyle` diffs leave them alone and they can be
+  put back in place after each diff.
 - **Colour adjustments instead of blend modes.** What MapLibre offers within its own
   rendering is five raster paint properties, applied per pixel in this order: hue
   rotation, saturation, contrast, then a brightness range (black and white become
@@ -168,19 +168,19 @@ It is a static single-page app on GitHub Pages; there is no server component.
     file is fetched by the protocol itself, outside MapLibre's request transform, so the
     CORS proxy does not apply to COGs, and the tile cache does not either.
   - PMTiles: the archive's tiles are the existing kinds, so a vector archive becomes
-    vector tile layers and an image archive an XYZ layer, with `pmtiles://<archive>/{z}/{x}/{y}`
-    as the template; colours, raster adjustments, the focus area and the tile cache
-    (`cache+pmtiles://`) then work as for any tile layer. The app's own protocol handler
-    reads them with the pmtiles library's `PMTiles` class rather than its `Protocol`,
-    whose archives fetch directly and so would bypass the CORS proxy: each archive is
-    opened through `requestUrl`, kept per request address so that routing a host through
-    the proxy opens it anew, and failed reads become the app's readable messages. The
-    addresses are those of the library's protocol, and a bare `pmtiles://<archive>`
-    answers its TileJSON, so styles written for PMTiles (Protomaps) draw unchanged. A
-    tile the archive lacks is answered empty, drawn as nothing rather than as an error.
-    The header has no tile size, so it is read from the image of one tile. Layers are
-    named after the file: tippecanoe writes the paths of its input files as the name and
-    description. MapLibre Tiles (MLT) archives are turned away.
+    vector tile layers and an image archive an XYZ layer, with
+    `pmtiles://<archive>/{z}/{x}/{y}` as the template; colours, raster adjustments, the
+    focus area and the tile cache (`cache+pmtiles://`) then work as for any tile layer.
+    The app's own protocol handler reads them with the pmtiles library's `PMTiles` class
+    rather than its `Protocol`, whose archives fetch directly and so would bypass the CORS
+    proxy: each archive is opened through `requestUrl`, kept per request address so that
+    routing a host through the proxy opens it anew, and failed reads become the app's
+    readable messages. The addresses are those of the library's protocol, and a bare
+    `pmtiles://<archive>` answers its TileJSON, so styles written for PMTiles (Protomaps)
+    draw unchanged. A tile the archive lacks is answered empty, drawn as nothing rather
+    than as an error. The header has no tile size, so it is read from the image of one
+    tile. Layers are named after the file: tippecanoe writes the paths of its input files
+    as the name and description. MapLibre Tiles (MLT) archives are turned away.
   - XYZ: Leaflet and OpenLayers spellings are converted (`{s}` and `{a-c}` to one template
     per subdomain, `{-y}` to the TMS scheme, `{q}` to `{quadkey}`, `{r}` to `{ratio}`).
   - MapLibre style: sources and layers prefixed with the layer id, URLs made absolute
@@ -196,10 +196,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - **Persistence.** Layers, settings and the view are JSON in local storage (synchronous,
   so the map starts where it was), saved by `persistedStore` after writes through the
   store's setter, once per batch of writes, rather than by an effect that serialises the
-  store and so subscribes to every property; imported files are Blobs in IndexedDB, referenced by key,
-  deleted by one store effect once no layer uses them (removed, given new data, or replaced
-  by an opened project) and swept at start-up. Before 1.0 there is no migration: stored
-  layers that no longer have the current shape are dropped one by one.
+  store and so subscribes to every property; imported files are Blobs in IndexedDB,
+  referenced by key, deleted by one store effect once no layer uses them (removed, given
+  new data, or replaced by an opened project) and swept at start-up. Before 1.0 there is
+  no migration: stored layers that no longer have the current shape are dropped one by
+  one.
 - **Named Layer Slayer, code name webmap.** The name shows in the page title, the panel,
   messages, GPX files and saved project names. The repository and its Pages address, the
   storage keys (local storage, IndexedDB, the tile cache) and the project file format
@@ -222,8 +223,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   through one function (`requestUrl`), used by MapLibre's `transformRequest` and by the
   app's own fetches and protocols: plain HTTP is upgraded on an HTTPS page, and hosts the
   user marks go through a CORS proxy of their choice (`{url}` template). Proxying is per
-  host because a server either sends CORS headers or does not. No proxy is built in.
-  The header must hold exactly one value: mobil.trk.de sends `Access-Control-Allow-Origin: *`
+  host because a server either sends CORS headers or does not. No proxy is built in. The
+  header must hold exactly one value: mobil.trk.de sends `Access-Control-Allow-Origin: *`
   twice when a request carries an Origin, and Chromium refuses that for fetches and for
   `crossorigin` images, while a plain `<img>` (Leaflet's tiles) still loads. Such servers
   work in DOM-based viewers but need the proxy here. Library entries marked `cors: false`
@@ -262,23 +263,23 @@ It is a static single-page app on GitHub Pages; there is no server component.
   lacks, so its legacy build is used.
 - **Tile caching is on by default, per layer.** Slow servers often forbid HTTP caching too
   (ArcGIS Online sends `max-age=300`), so the browser cache does not help. A tiled layer
-  (XYZ, WMS, WMTS, ArcGIS export and features) whose `cache` is not false has its tile addresses
-  prefixed with `cache+` (`cache+https://…`, `cache+wmts-matrix://…`); MapLibre hands
-  every scheme it does not know to the protocol registered for it, and one protocol
+  (XYZ, WMS, WMTS, ArcGIS export and features) whose `cache` is not false has its tile
+  addresses prefixed with `cache+` (`cache+https://…`, `cache+wmts-matrix://…`); MapLibre
+  hands every scheme it does not know to the protocol registered for it, and one protocol
   answers them all from Cache Storage or fetches the tile and keeps it for 24 hours.
-  Caching is thereby a wrapper around fetching rather than part of each source kind.
-  Tiles are kept under the address that answers them (the tile URL, a WMTS tile's resolved
-  URL, a feature tile's query); empty feature tiles are kept too, errors are not, so a
-  missing tile is asked for again. Expired tiles are swept at start-up, and the cache name
-  carries a version so a change in what is kept never reads old entries back. Each tile is
-  stored with its length in `content-length`, so Settings sums the cache's size from the
-  headers (`matchAll`) without reading tile bodies. Cache Storage was chosen over IndexedDB
+  Caching is thereby a wrapper around fetching rather than part of each source kind. Tiles
+  are kept under the address that answers them (the tile URL, a WMTS tile's resolved URL,
+  a feature tile's query); empty feature tiles are kept too, errors are not, so a missing
+  tile is asked for again. Expired tiles are swept at start-up, and the cache name carries
+  a version so a change in what is kept never reads old entries back. Each tile is stored
+  with its length in `content-length`, so Settings sums the cache's size from the headers
+  (`matchAll`) without reading tile bodies. Cache Storage was chosen over IndexedDB
   because it holds HTTP responses by URL as it is, and the browser accounts for it in the
   site's storage. It is on unless switched off because most tiled services are static and
   slow enough for kept tiles to pay off; it serves tiles up to a day old, so layers with
-  live data (radar, traffic) should have it switched off. Styles
-  are left out: their tiles come from addresses inside the style. At most four feature
-  queries run at once per server; queued tiles that scroll out of view are dropped.
+  live data (radar, traffic) should have it switched off. Styles are left out: their tiles
+  come from addresses inside the style. At most four feature queries run at once per
+  server; queued tiles that scroll out of view are dropped.
 - **Flying to a layer.** The layer row offers a frame icon when the layer's bounds span at
   most half the Web Mercator world in width and in height; an area measure was tried first
   and failed for a week of earthquakes, which spans every longitude but leaves out the
@@ -371,13 +372,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   its card, in place of its summary line: below the whole list they were a scroll away
   from the layer once the list grew, and editing several layers meant scrolling between
   list and settings for each. A second click on the name closes them, and none are open
-  after the open layer is removed. Names are renamed in place on the card, a summary line per card (opacity, colour, zoom
-  range, cache, proxy) so the list answers which layer is set how without opening each, pointer drag with arrow keys as the keyboard alternative, Tabler icons, the same
-  panel layout, and the panel below the map on narrow screens. There, everything on the
-  map competes for little room: the panel folds to its header (a flag in local storage,
-  as the panel width is), the search is a button until opened, and the route toolbar is
-  one bar of icons in one row (eight tools fit 360 px), its captions kept as the buttons'
-  accessible names while the hint bar says what the active tool does.
+  after the open layer is removed. Names are renamed in place on the card, a summary line
+  per card (opacity, colour, zoom range, cache, proxy) so the list answers which layer is
+  set how without opening each, pointer drag with arrow keys as the keyboard alternative,
+  Tabler icons, the same panel layout, and the panel below the map on narrow screens.
+  There, everything on the map competes for little room: the panel folds to its header (a
+  flag in local storage, as the panel width is), the search is a button until opened, and
+  the route toolbar is one bar of icons in one row (eight tools fit 360 px), its captions
+  kept as the buttons' accessible names while the hint bar says what the active tool does.
 - **Place search with Nominatim.** OpenStreetMap's geocoder needs no key and sends CORS
   headers, so the page asks it directly (through the proxy only if its host is proxied).
   Its usage policy forbids search as you type and allows one request per second, so a
@@ -426,23 +428,25 @@ It is a static single-page app on GitHub Pages; there is no server component.
   else and bring aliases and categories that make search work. All three draw with plain
   `<path>` elements, so an icon is its viewBox and path data, drawn with `Path2D`. The
   plugin turns each package into a virtual module (MDI about 800 kB gzipped), loaded when
-  the picker opens. A layer keeps its icon's shape, not just its id, so drawing it needs no
-  set loaded and a project file carries it. Its size (1× to 3×) scales the disc, which a
-  distance field allows, and is drawn into the icon image, rendered at that many times
-  the display's resolution and handed to the map at the display's pixel ratio. Layers created with an icon start opaque, the exception to
-  the half-transparent default, since icons on see-through discs read poorly. The OSM
-  feature presets each name an icon, except the 36 found as lines (`"lines": true`): icons
-  mark points and areas, never lines, so roads or fences get none. The plugin serves just
-  those icons (`virtual:osm-feature-icons`, 30 kB, loaded when the OSM tab is first shown)
-  and fails the build on a name no set has. The disc is one signed distance field image for all
+  the picker opens. A layer keeps its icon's shape, not just its id, so drawing it needs
+  no set loaded and a project file carries it. Its size (1× to 3×) scales the disc, which
+  a distance field allows, and is drawn into the icon image, rendered at that many times
+  the display's resolution and handed to the map at the display's pixel ratio. Layers
+  created with an icon start opaque, the exception to the half-transparent default, since
+  icons on see-through discs read poorly. The OSM feature presets each name an icon,
+  except the 36 found as lines (`"lines": true`): icons mark points and areas, never
+  lines, so roads or fences get none. The plugin serves just those icons
+  (`virtual:osm-feature-icons`, 30 kB, loaded when the OSM tab is first shown) and fails
+  the build on a name no set has. The disc is one signed distance field image for all
   layers, tinted with `icon-color` and ringed by a white `icon-halo`: colour and opacity
   stay paint properties, so dragging the colour picker neither lays out tiles again nor
   adds images. The icon is a second symbol layer, one image per icon and size
-  (`poi:set:name:size`). Images are drawn when the map asks, through `setMissingStyleImageResolver`: in MapLibre 6 the
-  `styleimagemissing` event fires only after the asking tile was laid out, so images added
-  there missed it, which ArcGIS symbols suffered from too. Waypoints keep an icon the
-  same way (`MapIcon`), shown white in their pin in place of the dot; GPX export leaves
-  it out, since GPX symbol names are device-specific.
+  (`poi:set:name:size`). Images are drawn when the map asks, through
+  `setMissingStyleImageResolver`: in MapLibre 6 the `styleimagemissing` event fires only
+  after the asking tile was laid out, so images added there missed it, which ArcGIS
+  symbols suffered from too. Waypoints keep an icon the same way (`MapIcon`), shown white
+  in their pin in place of the dot; GPX export leaves it out, since GPX symbol names are
+  device-specific.
 - **3D terrain is part of the composed style.** Every layer change applies the whole
   style with a diff, so terrain set with `map.setTerrain` (as MapLibre's TerrainControl
   does) would be dropped by the next change. The 3D button switches `settings.terrain`

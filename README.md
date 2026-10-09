@@ -2,21 +2,22 @@
 
 A map viewer for the web that stacks base maps and overlays from many kinds of map
 services: WMS, WMTS, WFS, OGC API – Features, ArcGIS MapServer and FeatureServer, XYZ tile
-templates, vector tiles, PMTiles, MapLibre styles, Cloud Optimized GeoTIFF, GeoJSON, GPX, KML and
-GeoPDF, and draws routes over them with GPX export and import. Each service is read the way it describes itself (capabilities
-documents, service descriptions, georeferencing in the PDF) and drawn with the MapLibre
-source that fits it, rather than turned into raster tiles by a proxy.
+templates, vector tiles, PMTiles, MapLibre styles, Cloud Optimized GeoTIFF, GeoJSON, GPX,
+KML and GeoPDF, and draws routes over them with GPX export and import. Each service is
+read the way it describes itself (capabilities documents, service descriptions,
+georeferencing in the PDF) and drawn with the MapLibre source that fits it, rather than
+turned into raster tiles by a proxy.
 
 It is a static page built with SolidJS and MapLibre GL JS and deployed to GitHub Pages by
 GitHub Actions. Its code name, used by the repository, browser storage and the `.webmap`
-project files, is webmap. Nothing runs on a server; layers, routes, settings and imported files stay
-in the browser.
+project files, is webmap. Nothing runs on a server; layers, routes, settings and imported
+files stay in the browser.
 
 ## Using it
 
-- **Add layer** opens the library, an address field, a file picker and OSM Query. The dialog stays
-  open until *Close*: a tap adds a layer in the background and a second tap removes it,
-  and what is on the map is highlighted.
+- **Add layer** opens the library, an address field, a file picker and OSM Query. The
+  dialog stays open until *Close*: a tap adds a layer in the background and a second tap
+  removes it, and what is on the map is highlighted.
   - The **library** lists services by region and category. A service with a single layer
     is added or removed by tapping its entry; others open their list of layers, and
     *‹ Sources* goes back to the library as it was left. Tapping a group adds what of it
@@ -30,9 +31,9 @@ in the browser.
     landing page or collection, an ArcGIS MapServer or FeatureServer (or one of its
     layers), a tile template with `{z}/{x}/{y}` (raster, or vector tiles ending in `.pbf`
     or `.mvt`), a TileJSON, a PMTiles archive (`.pmtiles`), a GeoJSON file, a MapLibre
-    style, a Cloud Optimized GeoTIFF or a GeoPDF. The kind of service is guessed from the address
-    and can be changed. *Open* shows the source's layers. Placeholders that a browser
-    copied percent-encoded (`%7Bz%7D/%7Bx%7D/%7By%7D`) are read as `{z}/{x}/{y}`.
+    style, a Cloud Optimized GeoTIFF or a GeoPDF. The kind of service is guessed from the
+    address and can be changed. *Open* shows the source's layers. Placeholders that a
+    browser copied percent-encoded (`%7Bz%7D/%7Bx%7D/%7By%7D`) are read as `{z}/{x}/{y}`.
   - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
     imported under Routes), the placemarks of KML and KMZ files, and GeoPDFs with an ISO
     32000 geospatial viewport, added as they are chosen. Each new GeoJSON, GPX or KML
@@ -40,54 +41,54 @@ in the browser.
     a file layer's settings takes a newer version of its file.
   - **OSM Query** makes a layer of OpenStreetMap features in the focus area, found with
     the Overpass API; without a focus area it offers to draw one, since Overpass answers
-    queries for limited areas only. Choose features from the list, which starts with
-    what matters off the road: tracks by grade, unpaved and rough ways, fords, trails
-    rated for mountain bikes and hikers, gates, barriers and ways closed to motor
-    vehicles, then roads, fuel and repair, water, camp sites and about a hundred more,
-    each with the tags it stands for and its icon. Or type tags and *Add* them: `key=value`, or
-    `key=*` for any value, with tags separated by spaces all having to match, e.g.
-    `highway=track tracktype=grade4`. *Query* finds everything chosen in one layer,
-    named after it, with the icon of the first chosen feature that has one; the icon
-    button next to the name picks another, or none. Features found as lines (roads,
-    tracks, paths, routes, fences, rivers, power lines) show a line symbol instead of an
-    icon and give their layer none, since icons mark points and areas only. The result is kept in the browser as
-    GeoJSON.
+    queries for limited areas only. Choose features from the list, which starts with what
+    matters off the road: tracks by grade, unpaved and rough ways, fords, trails rated for
+    mountain bikes and hikers, gates, barriers and ways closed to motor vehicles, then
+    roads, fuel and repair, water, camp sites and about a hundred more, each with the tags
+    it stands for and its icon. Or type tags and *Add* them: `key=value`, or `key=*` for
+    any value, with tags separated by spaces all having to match, e.g. `highway=track
+    tracktype=grade4`. *Query* finds everything chosen in one layer, named after it, with
+    the icon of the first chosen feature that has one; the icon button next to the name
+    picks another, or none. Features found as lines (roads, tracks, paths, routes, fences,
+    rivers, power lines) show a line symbol instead of an icon and give their layer none,
+    since icons mark points and areas only. The result is kept in the browser as GeoJSON.
 - The **panel** can be made wider or narrower by dragging its edge (or with the arrow
   keys on it), for longer layer names; a double click on the edge brings it back to its
   usual width.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
-  arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
-  it, and the frame icon flies to the area the layer covers (layers that span most of the
-  world have none). A layer shown in grey italics is outside its zoom range at the current
-  zoom; a red triangle carries the last error loading it. Under each name, a small line
-  shows its opacity, colour, zoom range (z5–15), and *label*, *cache* and *proxy* where
-  it labels its features, its tiles are kept or its server goes through the CORS proxy. *Background*, below the last
-  layer, sets the colour the map is drawn on (white unless chosen); it shows wherever the
-  layers leave the map uncovered or see-through.
+  arrow keys on it) to change the order; the eye hides it, the pencil renames it, ×
+  removes it, and the frame icon flies to the area the layer covers (layers that span most
+  of the world have none). A layer shown in grey italics is outside its zoom range at the
+  current zoom; a red triangle carries the last error loading it. Under each name, a small
+  line shows its opacity, colour, zoom range (z5–15), and *label*, *cache* and *proxy*
+  where it labels its features, its tiles are kept or its server goes through the CORS
+  proxy. *Background*, below the last layer, sets the colour the map is drawn on (white
+  unless chosen); it shows wherever the layers leave the map uncovered or see-through.
 - Clicking a layer's name opens its **settings** in its place in the list, closing those
-  of the layer open before; clicking it again closes them. They hold its opacity, zoom range, colour
-  (vector layers), source, the CORS proxy for its server and, for tiled layers, whether it
-  keeps its tiles in the browser. New layers start at 50% opacity. Raster layers (XYZ, WMS,
-  WMTS, ArcGIS MapServer, GeoTIFF, placed images) have *Colour adjustments*: hue, saturation,
-  contrast, and the brightness black and white become. Black at 100% and white at 0%
-  inverts the image; with the hue turned 180° that gives a dark map that keeps its colours.
-  ArcGIS feature layers can be *drawn with the service's own symbols* (simple, unique value
-  and class breaks renderers with simple and picture symbols) instead of their colour.
-  Vector layers have a *Line* style (solid, dashed, long dashes, dotted) and width for
-  their lines and the outlines of their areas. Vector layers can take an *Icon*: its points, and its areas at their middle, are then
-  marked with it, white on a disc of the layer's colour. The picker searches about 7,900
-  icons by name and keyword: Maki and Temaki, drawn for maps and named after OpenStreetMap's
-  features (bollard, cattle grid, lift gate, water tap, fuel), and Material Design Icons
-  for nearly everything else. *Size* draws the icon up to three times larger; × goes back
-  to dots. Layers that come with an icon, such as OSM queries of a preset, start at 100%
-  opacity instead of 50%. *Label* writes a property of each feature beside it (along
-  lines, next to points and areas), chosen from the properties its features have; the
-  labels use a font of the style that brings the map's fonts, or OpenFreeMap's.
-  OSM query layers show their tags and when they were queried; *Update* queries again in
-  the focus area as it is now and replaces the layer's data. Other file layers show when
-  their file was changed and *Replace*, which takes a newer version of the file and keeps
-  the layer's settings; one added from a library file entry or a GeoPDF address also has
-  the arrow that downloads the newest file, so refreshing it is a download and a Replace.
+  of the layer open before; clicking it again closes them. They hold its opacity, zoom
+  range, colour (vector layers), source, the CORS proxy for its server and, for tiled
+  layers, whether it keeps its tiles in the browser. New layers start at 50% opacity.
+  Raster layers (XYZ, WMS, WMTS, ArcGIS MapServer, GeoTIFF, placed images) have *Colour
+  adjustments*: hue, saturation, contrast, and the brightness black and white become.
+  Black at 100% and white at 0% inverts the image; with the hue turned 180° that gives a
+  dark map that keeps its colours. ArcGIS feature layers can be *drawn with the service's
+  own symbols* (simple, unique value and class breaks renderers with simple and picture
+  symbols) instead of their colour. Vector layers have a *Line* style (solid, dashed, long
+  dashes, dotted) and width for their lines and the outlines of their areas. Vector layers
+  can take an *Icon*: its points, and its areas at their middle, are then marked with it,
+  white on a disc of the layer's colour. The picker searches about 7,900 icons by name and
+  keyword: Maki and Temaki, drawn for maps and named after OpenStreetMap's features
+  (bollard, cattle grid, lift gate, water tap, fuel), and Material Design Icons for nearly
+  everything else. *Size* draws the icon up to three times larger; × goes back to dots.
+  Layers that come with an icon, such as OSM queries of a preset, start at 100% opacity
+  instead of 50%. *Label* writes a property of each feature beside it (along lines, next
+  to points and areas), chosen from the properties its features have; the labels use a
+  font of the style that brings the map's fonts, or OpenFreeMap's. OSM query layers show
+  their tags and when they were queried; *Update* queries again in the focus area as it is
+  now and replaces the layer's data. Other file layers show when their file was changed
+  and *Replace*, which takes a newer version of the file and keeps the layer's settings;
+  one added from a library file entry or a GeoPDF address also has the arrow that
+  downloads the newest file, so refreshing it is a download and a Replace.
 - **Show alone** (the stack button under *3D*) draws only the layer whose settings are
   open, over the bottom layer (usually the base map, shown as its eye says). The open
   layer is drawn even when its eye is off. No layer's eye changes, so a second press shows
@@ -115,10 +116,10 @@ in the browser.
   and the like are left out; each entry links to all its tags on openstreetmap.org. The
   details open in a sheet beside the map, which highlights what they describe in amber;
   right-click another spot to see its details instead.
-- **Search** (top left of the map) finds places and addresses with Nominatim, OpenStreetMap's
-  search, preferring those in view. Enter searches; the first place found gets a pin and the
-  map flies to it, and the list below offers the other places found. × clears the search
-  and the pin.
+- **Search** (top left of the map) finds places and addresses with Nominatim,
+  OpenStreetMap's search, preferring those in view. Enter searches; the first place found
+  gets a pin and the map flies to it, and the list below offers the other places found. ×
+  clears the search and the pin.
 - **Focus area**, above the layers: *Draw* starts a polygon over the map. Each tap places
   a corner and a tap on the first corner closes it; Backspace or *Undo* takes the last
   corner back, Esc or *Cancel* stops. Every layer but the bottom one then requests tiles
@@ -155,12 +156,12 @@ in the browser.
   with its pin kept. The route tools are one row of icons, the hint bar naming what the
   active one does.
 
-Layers, their settings, the focus area, routes and the map view are kept in the browser's local storage,
-files in IndexedDB, so the map is as it was after a restart.
-*Save* (top of the panel) downloads all of it as a `.webmap` file, imported files
-included, and *Open* puts such a file in place of what is there: to move to another
-browser, or to come back after clearing this one. The CORS proxy address stays in the
-browser, since it may carry an account key; which servers go through it is saved.
+Layers, their settings, the focus area, routes and the map view are kept in the browser's
+local storage, files in IndexedDB, so the map is as it was after a restart. *Save* (top of
+the panel) downloads all of it as a `.webmap` file, imported files included, and *Open*
+puts such a file in place of what is there: to move to another browser, or to come back
+after clearing this one. The CORS proxy address stays in the browser, since it may carry
+an account key; which servers go through it is saved.
 
 ## How each source is drawn
 
@@ -186,10 +187,10 @@ browser, since it may carry an account key; which servers go through it is saved
 Only Web Mercator is drawn; services that offer no Web Mercator are refused with a reason.
 
 Slow servers often forbid caching too (ArcGIS Online allows five minutes), so tiled layers
-(XYZ, WMS, WMTS, ArcGIS, vector tiles, PMTiles) keep their tiles in the browser: tiles once loaded are answered
-from the browser's Cache Storage for 24 hours. For layers with live data, such as radar,
-untick *Keep tiles in this browser* in the layer's settings. Settings shows how many tiles
-are kept and their size, and clears them.
+(XYZ, WMS, WMTS, ArcGIS, vector tiles, PMTiles) keep their tiles in the browser: tiles
+once loaded are answered from the browser's Cache Storage for 24 hours. For layers with
+live data, such as radar, untick *Keep tiles in this browser* in the layer's settings.
+Settings shows how many tiles are kept and their size, and clears them.
 
 At most four feature queries run at once per server. Feature layers are shown at every
 zoom, or from the service's own minimum zoom where it sets one. Zoomed far out, a tile
