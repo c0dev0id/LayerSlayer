@@ -53,11 +53,12 @@ routes, settings and imported files stay in the browser.
     and about a hundred more, each with the tags it stands for and its icon. Or type tags
     and *Add* them: `key=value`, or `key=*` for any value, with tags separated by spaces
     all having to match, e.g. `highway=track tracktype=grade4`; values with spaces go in
-    double quotes (`operator="US Army"`). *Query* finds everything chosen in one layer, named after it, with
-    the icon of the first chosen feature that has one; the icon button next to the name
-    picks another, or none. Features found as lines (roads, tracks, paths, routes, fences,
-    rivers, power lines) show a line symbol instead of an icon and give their layer none,
-    since icons mark points and areas only. The result is kept in the browser as GeoJSON.
+    double quotes (`operator="US Army"`). *Query* finds everything chosen in one layer,
+    named after it, with the icon of the first chosen feature that has one; the icon
+    button next to the name picks another, or none. Features found as lines (roads,
+    tracks, paths, routes, fences, rivers, power lines) show a line symbol instead of an
+    icon and give their layer none, since icons mark points and areas only. The result is
+    kept in the browser as GeoJSON.
 - The **panel** can be made wider or narrower by dragging its edge (or with the arrow
   keys on it), for longer layer names; a double click on the edge brings it back to its
   usual width.
