@@ -8,6 +8,7 @@ import {
   rasterAdjustments,
   resolveWmtsTile,
   scaleOpacity,
+  styleFont,
   HILLSHADE_SOURCE,
   TERRAIN_SOURCE,
   wmtsTileUrl,
@@ -176,6 +177,24 @@ describe('composeStyle', () => {
     expect(compose([layer({ name: 'g', source }, { icon, iconSize: 9 })]).layers[4]).toMatchObject({ layout: { 'icon-image': 'poi:maki:fuel:3' } });
   });
 
+  it('labels features with a property beside them, in OpenFreeMap fonts where no style brings fonts', () => {
+    const source = { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } as const;
+    const style = compose([layer({ name: 'g', source }, { label: 'name', opacity: 0.8 })]);
+    expect(style.layers.map((l) => l.id)).toEqual(['L/fill', 'L/outline', 'L/line', 'L/point', 'L/line-label', 'L/label']);
+    expect(style.glyphs).toBe('https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf');
+    expect(style.layers[4]).toMatchObject({
+      type: 'symbol',
+      layout: { 'text-field': ['to-string', ['get', 'name']], 'text-font': ['Noto Sans Regular'], 'symbol-placement': 'line', 'text-offset': [0, -(0.5 + (1.25 + 3) / 12)] },
+      paint: { 'text-halo-color': '#ffffff', 'text-opacity': 0.8 },
+    });
+    // Beside the dot, or beside a larger icon.
+    expect(style.layers[5]!.layout).toMatchObject({ 'text-radial-offset': (5 + 1.5 + 3) / 12 });
+    const icon = { id: 'maki:fuel', size: [15, 15] as [number, number], paths: ['M0 0h15v15z'] };
+    const withIcon = compose([layer({ name: 'g', source }, { label: 'name', icon, iconSize: 2 })]);
+    expect(withIcon.layers.find((l) => l.id === 'L/label')!.layout).toMatchObject({ 'text-radial-offset': (12.5 * 2 + 3) / 12 });
+    expect(compose([layer({ name: 'g', source })])).not.toHaveProperty('glyphs');
+  });
+
   it('queries feature layers as vector tiles through the feature protocol', () => {
     const style = compose([
       layer({
@@ -303,6 +322,21 @@ describe('composeStyle', () => {
       expect(style.layers.find((l) => l.id === 'B/pois')!.layout).toEqual({ 'icon-image': ['concat', 'B:', ['get', 'icon']] });
     });
 
+    it('writes the labels of vector layers in a font of the style that brings the fonts', () => {
+      const lettered: StyleSpecification = {
+        ...base,
+        layers: [
+          ...base.layers,
+          { id: 'towns', type: 'symbol', source: 'osm', 'source-layer': 'place', layout: { 'text-field': '{name}', 'text-font': ['literal', ['Open Sans Bold']] } },
+          { id: 'roads-label', type: 'symbol', source: 'osm', 'source-layer': 'roads', layout: { 'text-field': '{name}', 'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'] } },
+        ],
+      };
+      const labelled = layer({ name: 'g', source: { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } }, { label: 'name' }, 'G');
+      const style = compose([styleLayer('A'), labelled], { A: { style: lettered } });
+      expect(style.glyphs).toBe('https://s.example/fonts/{fontstack}/{range}.pbf');
+      expect(style.layers.find((l) => l.id === 'G/label')!.layout).toMatchObject({ 'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'] });
+    });
+
     it('shares the sprite of a style added twice', () => {
       const style = compose([styleLayer('A'), styleLayer('B')], { A: { style: base }, B: { style: base } });
       expect(style.sprite).toEqual([{ id: 'default', url: 'https://s.example/styles/sprites/base' }]);
@@ -354,6 +388,21 @@ describe('composeStyle with a focus area', () => {
     expect(style.sources['S/tiles']).toMatchObject({ bounds: focus });
     expect(style.sources['S/dem']).toMatchObject({ bounds: [8.5, 48, 9, 49] });
     expect(style.sources['S/points']).not.toHaveProperty('bounds');
+  });
+});
+
+describe('styleFont', () => {
+  const symbol = (font: unknown) => ({ id: String(Math.random()), type: 'symbol', source: 's', layout: { 'text-field': 'x', 'text-font': font } }) as never;
+  const style = (...layers: never[]): StyleSpecification => ({ version: 8, sources: {}, layers });
+
+  it('takes a regular font over bold ones, and the first where none is regular', () => {
+    expect(styleFont(style(symbol(['Bold A']), symbol(['literal', ['Regular B']])))).toEqual(['Regular B']);
+    expect(styleFont(style(symbol(['Bold A']), symbol(['Italic C'])))).toEqual(['Bold A']);
+  });
+
+  it('finds none where fonts are chosen by expressions', () => {
+    expect(styleFont(style(symbol(['step', ['zoom'], ['literal', ['A']], 10, ['literal', ['B']]])))).toBeUndefined();
+    expect(styleFont(style())).toBeUndefined();
   });
 });
 

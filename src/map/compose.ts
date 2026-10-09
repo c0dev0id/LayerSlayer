@@ -25,7 +25,7 @@ import {
 } from '../model/layer';
 import type { Symbology } from '../services/arcgisSymbology';
 import type { Icon } from './icon';
-import { POI_DISC, POI_RING, poiImageId } from './poiIcons';
+import { POI_DISC, POI_REACH, POI_RING, poiImageId } from './poiIcons';
 import { FEATURE_LAYER, FEATURE_PROTOCOL, FEATURE_TILE_MAXZOOM, featureTileUrl } from './featureTiles';
 import { parseProtocolTile, PMTILES_PROTOCOL, protocolTileUrl, resolveUrl, withParams } from './urls';
 
@@ -107,6 +107,14 @@ const TERRAIN: RasterDEMSourceSpecification = {
   attribution: '<a href="https://mapterhorn.com/attribution">© Mapterhorn</a>',
 };
 
+/**
+ * Fonts for the labels of vector layers where no style on the map brings fonts:
+ * OpenFreeMap's, which any page may read. A map has one font source, so where a style
+ * brings it, labels are written in one of that style's fonts instead.
+ */
+const LABEL_GLYPHS = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
+const LABEL_FONT = ['Noto Sans Regular'];
+
 /** One user layer as MapLibre sources and layers, plus what a style layer brings along. */
 interface Fragment {
   sources: Record<string, SourceSpecification>;
@@ -120,7 +128,8 @@ interface Fragment {
  * not arrived yet is left out until they do. Of the styles among the layers, the bottom
  * one brings the fonts and the default sprite; the sprite of any style above it is added
  * under the layer's id and its image references are prefixed to match. A map has one
- * font source, so labels of the upper styles need fonts the bottom one serves.
+ * font source, so labels of the upper styles need fonts the bottom one serves, and the
+ * labels of vector layers are written in one of its fonts (OpenFreeMap's without one).
  *
  * See MapOptions for what is drawn around the layers.
  */
@@ -130,11 +139,21 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   const sprites: { id: string; url: string }[] = [];
   /** Where the layers above the bottom one begin, which the hillshading goes under. */
   let aboveBottom = style.layers.length;
+  /** The focus area a layer requests tiles within; none for the bottom layer. */
+  const withinOf = (index: number) => (index > 0 ? focus : undefined);
+  const drawn = (layer: Layer, index: number) => {
+    const within = withinOf(index);
+    return layer.visible && !(within && layer.bounds && !intersectBounds(layer.bounds, within));
+  };
+  // The first style drawn with fonts brings the map's font source, and the labels' font.
+  const fontStyle = layers
+    .map((layer, index) => (layer.source.type === 'style' && drawn(layer, index) ? assets.get(layer.id)?.style : undefined))
+    .find((s) => s?.glyphs);
+  const labelFont = (fontStyle && styleFont(fontStyle)) ?? LABEL_FONT;
   for (const [index, layer] of layers.entries()) {
-    if (!layer.visible) continue;
-    const within = index > 0 ? focus : undefined;
-    if (within && layer.bounds && !intersectBounds(layer.bounds, within)) continue;
-    const part = fragment(layer, assets.get(layer.id));
+    if (!drawn(layer, index)) continue;
+    const within = withinOf(index);
+    const part = fragment(layer, assets.get(layer.id), labelFont);
     if (!part) continue;
     let partLayers = part.layers;
     const sprite = part.sprite;
@@ -155,6 +174,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     if (part.glyphs && !style.glyphs) style.glyphs = part.glyphs;
   }
   if (sprites.length > 0) style.sprite = sprites;
+  if (!style.glyphs && style.layers.some(hasText)) style.glyphs = LABEL_GLYPHS;
   if (terrain) {
     style.sources[TERRAIN_SOURCE] = TERRAIN;
     style.sources[HILLSHADE_SOURCE] = TERRAIN;
@@ -164,7 +184,27 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   return style;
 }
 
-function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefined {
+/** Whether a style layer writes text, which needs a font source. */
+function hasText(layer: LayerSpecification): boolean {
+  return layer.type === 'symbol' && layer.layout?.['text-field'] !== undefined;
+}
+
+/**
+ * A font a style writes its labels in, which its font source serves: a regular one where
+ * it has one, rather than bold or italic. None where its fonts are chosen by expressions.
+ */
+export function styleFont(style: StyleSpecification): string[] | undefined {
+  const fonts: string[][] = [];
+  for (const layer of style.layers) {
+    const value = layer.type === 'symbol' ? (layer.layout?.['text-font'] as unknown) : undefined;
+    const list = Array.isArray(value) && value[0] === 'literal' ? (value[1] as unknown) : value;
+    if (Array.isArray(list) && list.length > 0 && list.every((f) => typeof f === 'string')) fonts.push(list as string[]);
+  }
+  return fonts.find((f) => /regular/i.test(f[0]!)) ?? fonts[0];
+}
+
+/** One user layer as MapLibre sources and layers; `labelFont` is what the labels of a vector layer are written in. */
+function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[]): Fragment | undefined {
   const src = layer.source;
   switch (src.type) {
     case 'xyz':
@@ -187,11 +227,12 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
     case 'geojson': {
       const data = 'url' in src.data ? src.data.url : assets?.url;
       if (!data) return undefined;
-      return vector(layer, { type: 'geojson', data, ...(layer.attribution && { attribution: layer.attribution }) });
+      return vector(layer, labelFont, { type: 'geojson', data, ...(layer.attribution && { attribution: layer.attribution }) });
     }
     case 'vector-tiles':
       return vector(
         layer,
+        labelFont,
         {
           type: 'vector',
           tiles: cached(layer, src.tiles),
@@ -218,7 +259,7 @@ function fragment(layer: Layer, assets: Assets | undefined): Fragment | undefine
         ...(layer.attribution && { attribution: layer.attribution }),
       };
       // The layer's colour stands in until its own symbology has loaded, or if it cannot.
-      return layer.ownStyle && assets?.symbology ? symbolized(layer, source, assets.symbology) : vector(layer, source, FEATURE_LAYER);
+      return layer.ownStyle && assets?.symbology ? symbolized(layer, source, assets.symbology) : vector(layer, labelFont, source, FEATURE_LAYER);
     }
     case 'style':
       return assets?.style ? fromStyle(layer, assets.style, src.url) : undefined;
@@ -359,14 +400,18 @@ const POINT = ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]] as
  */
 const LINE_DASHES: Record<LineDash, number[]> = { dashed: [2, 3], 'long-dashed': [5, 4], dotted: [0, 2] };
 
+/** Width of lines in pixels where the layer sets none. */
+const LINE_WIDTH = 2.5;
+
 /** Share of a polygon's fill against its outline, so what lies below stays readable. */
 const FILL_SHARE = 0.25;
 
 /**
  * Features drawn in the layer's colour: polygons filled and outlined, lines, and points as
- * dots, or, where the layer has an icon, points and areas marked with it.
+ * dots, or, where the layer has an icon, points and areas marked with it. Where the layer
+ * has a label, its features are labelled on top, in `labelFont`.
  */
-function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string): Fragment {
+function vector(layer: Layer, labelFont: string[], source: SourceSpecification, sourceLayer?: string): Fragment {
   const color = layerColor(layer);
   const base: LayerBase = { source: layer.id, ...(sourceLayer && { 'source-layer': sourceLayer }), ...zoomRange(layer) };
   const opacity = layer.opacity;
@@ -395,11 +440,51 @@ function vector(layer: Layer, source: SourceSpecification, sourceLayer?: string)
         type: 'line',
         filter: LINE as never,
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': color, 'line-width': layer.lineWidth ?? 2.5, 'line-opacity': opacity, ...dash },
+        paint: { 'line-color': color, 'line-width': layer.lineWidth ?? LINE_WIDTH, 'line-opacity': opacity, ...dash },
       },
       ...(layer.icon ? poiLayers(layer, layer.icon, base, color) : [dots(layer, base, color)]),
+      ...(layer.label ? labels(layer, layer.label, base, labelFont) : []),
     ],
   };
+}
+
+/** Size of label text in CSS pixels, which offsets in ems are counted in. */
+const LABEL_SIZE = 12;
+
+/**
+ * A feature property written beside the features: along lines, and next to the dot or icon
+ * of points and areas, on whichever side has room. Dark text ringed in white reads on any
+ * base map; features without the property are left without a label.
+ */
+function labels(layer: Layer, key: string, base: LayerBase, font: string[]): LayerSpecification[] {
+  const text = { 'text-field': ['to-string', ['get', key]] as never, 'text-font': font, 'text-size': LABEL_SIZE };
+  const paint = { 'text-color': '#212529', 'text-halo-color': '#ffffff', 'text-halo-width': 1.5, 'text-opacity': layer.opacity };
+  const reach = layer.icon ? POI_REACH * iconSize(layer.iconSize) : DOT_RADIUS + DOT_STROKE;
+  return [
+    {
+      ...base,
+      id: `${layer.id}/line-label`,
+      type: 'symbol',
+      filter: LINE as never,
+      // Beside the line rather than over it, clear of its width.
+      layout: { ...text, 'symbol-placement': 'line', 'text-offset': [0, -(0.5 + ((layer.lineWidth ?? LINE_WIDTH) / 2 + 3) / LABEL_SIZE)] },
+      paint,
+    },
+    {
+      ...base,
+      id: `${layer.id}/label`,
+      type: 'symbol',
+      filter: ['any', POINT, POLYGON] as never,
+      layout: {
+        ...text,
+        'text-variable-anchor': ['left', 'right', 'top', 'bottom'],
+        'text-radial-offset': (reach + 3) / LABEL_SIZE,
+        'text-justify': 'auto',
+        'text-max-width': 12,
+      },
+      paint,
+    },
+  ];
 }
 
 /** What every style layer of a user layer has: its source, and its zoom range. */
@@ -410,6 +495,10 @@ interface LayerBase {
   maxzoom?: number;
 }
 
+/** Radius of the dots points are drawn as, and of their white ring, in CSS pixels. */
+const DOT_RADIUS = 5;
+const DOT_STROKE = 1.5;
+
 /** Points as dots of the layer's colour. */
 function dots(layer: Layer, base: LayerBase, color: string): LayerSpecification {
   return {
@@ -419,9 +508,9 @@ function dots(layer: Layer, base: LayerBase, color: string): LayerSpecification 
     filter: POINT as never,
     paint: {
       'circle-color': color,
-      'circle-radius': 5,
+      'circle-radius': DOT_RADIUS,
       'circle-stroke-color': '#ffffff',
-      'circle-stroke-width': 1.5,
+      'circle-stroke-width': DOT_STROKE,
       'circle-opacity': layer.opacity,
       'circle-stroke-opacity': layer.opacity,
     },

@@ -15,6 +15,8 @@ export const POI_RING = 1.5;
 
 /** Diameter of the disc and of the icon on it, in CSS pixels at size 1. */
 const DISC = 22;
+/** How far the disc reaches from the point it marks, ring included, in CSS pixels at size 1. */
+export const POI_REACH = DISC / 2 + POI_RING;
 const GLYPH = 13;
 /** Distance field around the disc, room for the ring at any size. */
 const SDF_BUFFER = 4;

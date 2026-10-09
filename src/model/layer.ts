@@ -200,6 +200,8 @@ export interface Layer {
   lineWidth?: number;
   /** How a vector layer's lines and area outlines are dashed; solid where unset. */
   lineDash?: LineDash;
+  /** The feature property a vector layer writes beside its features: along lines, next to points and in areas. */
+  label?: string;
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;

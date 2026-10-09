@@ -1,5 +1,6 @@
-import { For, Show } from 'solid-js';
+import { createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
+import { layerFeatures } from '../map/layerFeatures';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import { parsePmtilesUrl } from '../map/urls';
 import {
@@ -21,11 +22,12 @@ import {
   type OsmQuery,
   type RasterAdjustments,
 } from '../model/layer';
+import { propertyKeys } from '../services/featureProperties';
 import { IMPORT_ACCEPT } from '../services/importFile';
 import { hostOf } from '../state/net';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { moveLayer, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
-import { layerErrors, showBounds, zoom } from '../state/ui';
+import { layerErrors, map, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
@@ -178,6 +180,7 @@ function LayerSummary(props: { layer: Layer }) {
       <Show when={layer.adjust}>
         <span title="Its colours are adjusted">adjusted</span>
       </Show>
+      <Show when={layer.label}>{(label) => <span title={`Labelled with ${label()}`}>label</span>}</Show>
       <Show when={keepsTiles(layer)}>
         <span title={`Keeps its tiles in this browser for ${TILE_MAX_AGE_HOURS} hours`}>cache</span>
       </Show>
@@ -387,6 +390,44 @@ function FileRows(props: { layer: Layer; file: FileResource }) {
   );
 }
 
+/**
+ * The property a vector layer writes beside its features, chosen among those its features
+ * have: read when the settings open, once the map has loaded, and when the list is opened,
+ * as tiles loaded since may bring more.
+ */
+function LabelRow(props: { layer: Layer }) {
+  const layer = props.layer;
+  const [keys, setKeys] = createSignal<string[]>([]);
+  const read = () => {
+    const m = map();
+    if (m) layerFeatures(m, layer).then((features) => setKeys(propertyKeys(features)), () => {});
+  };
+  onMount(() => {
+    read();
+    map()?.once('idle', read);
+  });
+  onCleanup(() => map()?.off('idle', read));
+  const options = () => (layer.label && !keys().includes(layer.label) ? [layer.label, ...keys()] : keys());
+
+  return (
+    <div class="row" title="Writes a property of each feature beside it on the map">
+      <span class="muted label">Label</span>
+      <select aria-label={`Label of ${layer.name}`} onFocus={read} onChange={(e) => updateLayer(layer.id, { label: e.currentTarget.value || undefined })}>
+        <option value="" selected={!layer.label}>
+          None
+        </option>
+        <For each={options()}>
+          {(key) => (
+            <option value={key} selected={key === layer.label}>
+              {key}
+            </option>
+          )}
+        </For>
+      </select>
+    </div>
+  );
+}
+
 /** Opacity, zoom range, colour and source of the active layer. */
 function ActiveLayer(props: { layer: Layer }) {
   const layer = props.layer;
@@ -488,6 +529,7 @@ function ActiveLayer(props: { layer: Layer }) {
             <IconSizeSlider label={`Icon size of ${layer.name}`} value={layer.iconSize} onInput={(iconSize) => updateLayer(layer.id, { iconSize })} />
           </div>
         </Show>
+        <LabelRow layer={layer} />
       </Show>
       <Show when={layer.source.type === 'geojson' ? layer.source.query : undefined}>
         {(query) => <OsmQueryRows id={layer.id} query={query()} />}
