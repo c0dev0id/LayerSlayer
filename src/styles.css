@@ -1,12 +1,41 @@
+/*
+ * Colours of the interface, light and dark: the browser's preference, unless the sun/moon
+ * button chose the other, which state/theme.ts sets as data-theme on the root element.
+ * The map's content is not themed: its background stays what the project sets.
+ */
 :root {
   --accent: #1c7ed6;
-  --border: #dee2e6;
-  --muted: #868e96;
-  --panel: #fff;
-  --text: #212529;
-  --hover: #e9ecef;
-  --active: #e7f5ff;
+  --accent-hover: light-dark(#1971c2, #228be6);
+  /* The accent as text and lines on the panel. */
+  --accent-text: light-dark(#1c7ed6, #4dabf7);
+  --border: light-dark(#dee2e6, #373a40);
+  --control-border: light-dark(#ced4da, #4a4f56);
+  --muted: light-dark(#868e96, #9aa1a9);
+  --subtle: light-dark(#adb5bd, #6c737a);
+  --page: light-dark(#f1f3f5, #141517);
+  --panel: light-dark(#fff, #212327);
+  --button: light-dark(#f8f9fa, #2c2f34);
+  --text: light-dark(#212529, #e9ecef);
+  --tool: light-dark(#343a40, #dee2e6);
+  --hover: light-dark(#e9ecef, #373a40);
+  --active: light-dark(#e7f5ff, #1a3550);
+  --active-hover: light-dark(#d0ebff, #214568);
+  --danger: light-dark(#e03131, #ff6b6b);
+  --error-bg: light-dark(#fff5f5, #3a1d20);
+  --error-text: light-dark(#c92a2a, #ffa8a8);
+  --info-bg: light-dark(#e7f5ff, #1a3550);
+  --info-text: light-dark(#1864ab, #a5d8ff);
+  --warn-bg: light-dark(#fff3bf, #3d3200);
+  --warn-text: light-dark(#8f5f00, #ffe066);
+  color-scheme: light dark;
+}
+
+:root[data-theme='light'] {
   color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 html,
@@ -19,7 +48,7 @@ body,
 body {
   font: 14px/1.4 system-ui, sans-serif;
   color: var(--text);
-  background: #f1f3f5;
+  background: var(--page);
 }
 
 button,
@@ -29,7 +58,7 @@ select {
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .app {
@@ -159,9 +188,9 @@ a {
 :where(.panel, .dialog, .hint-bar) button:not(.icon) {
   display: inline-block;
   padding: 3px 10px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
-  background: #f8f9fa;
+  background: var(--button);
   color: var(--text);
   cursor: pointer;
   white-space: nowrap;
@@ -185,7 +214,7 @@ a {
 }
 
 :where(.panel, .dialog, .hint-bar) button.primary:hover:not(:disabled) {
-  background: #1971c2;
+  background: var(--accent-hover);
 }
 
 /* Layer list: drag handle, visibility, name (selects the layer), error, remove. */
@@ -331,7 +360,7 @@ a {
 
 .error-mark {
   display: inline-grid;
-  color: #e03131;
+  color: var(--danger);
 }
 
 /* Settings of the active layer, open under its entry */
@@ -370,7 +399,7 @@ a {
 .osm-query input {
   box-sizing: border-box;
   padding: 3px 6px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
 }
 
@@ -381,7 +410,7 @@ a {
 .zoom-input {
   width: 52px;
   padding: 2px 4px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
 }
 
@@ -395,7 +424,7 @@ input.swatch {
   width: 34px;
   height: 24px;
   padding: 0;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
   background: none;
   cursor: pointer;
@@ -417,13 +446,13 @@ input.swatch {
 }
 
 .note.error {
-  background: #fff5f5;
-  color: #c92a2a;
+  background: var(--error-bg);
+  color: var(--error-text);
 }
 
 .note.info {
-  background: #e7f5ff;
-  color: #1864ab;
+  background: var(--info-bg);
+  color: var(--info-text);
 }
 
 /* Settings */
@@ -630,7 +659,7 @@ input.swatch {
 
 .dialog .tabs button.selected {
   border-bottom-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .filters {
@@ -644,7 +673,7 @@ input.swatch {
 .filters input,
 .filters select {
   padding: 3px 6px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
 }
 
@@ -694,7 +723,7 @@ input.swatch {
 .dialog button.entry.added:hover,
 .dialog button.offer.added:hover:not(:disabled),
 .dialog button.offer.partial:hover:not(:disabled) {
-  background: #d0ebff;
+  background: var(--active-hover);
 }
 
 /* A file to download: the entry, and the link that downloads the file beside it. */
@@ -723,7 +752,7 @@ input.swatch {
 }
 
 .count {
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
@@ -735,7 +764,7 @@ input.swatch {
   box-sizing: border-box;
   width: 16px;
   height: 16px;
-  border: 2px solid #adb5bd;
+  border: 2px solid var(--subtle);
   border-radius: 3px;
   display: grid;
   place-items: center;
@@ -770,8 +799,8 @@ input.swatch {
 .badge {
   padding: 0 6px;
   border-radius: 8px;
-  background: #fff3bf;
-  color: #8f5f00;
+  background: var(--warn-bg);
+  color: var(--warn-text);
   font-size: 12px;
 }
 
@@ -814,7 +843,7 @@ input.swatch {
 }
 
 .imported .error {
-  color: #c92a2a;
+  color: var(--error-text);
 }
 
 /* Route tool: routes in the panel, markers, toolbar, hint bar and menu over the map. */
@@ -877,9 +906,9 @@ input.swatch {
   overflow: hidden;
   transform: translateY(-50%);
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.92);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  color: #212529;
+  color: var(--text);
   font: 600 12px/1.4 system-ui, sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -916,7 +945,7 @@ input.swatch {
   gap: 2px;
   padding: 3px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.96);
+  background: color-mix(in srgb, var(--panel) 96%, transparent);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
   pointer-events: auto;
 }
@@ -933,7 +962,7 @@ input.swatch {
   border: none;
   border-radius: 8px;
   background: none;
-  color: #343a40;
+  color: var(--tool);
   cursor: pointer;
 }
 
@@ -950,7 +979,7 @@ input.swatch {
 }
 
 .tool:hover:not(:disabled) {
-  background: #f1f3f5;
+  background: var(--hover);
 }
 
 .tool.active,
@@ -997,7 +1026,7 @@ input.swatch {
 .search > .search-note,
 .search-toggle {
   border-radius: 6px;
-  background: #fff;
+  background: var(--panel);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -1018,6 +1047,45 @@ input.swatch {
   font: inherit;
 }
 
+/* MapLibre's controls in the interface's colours; its icons are dark images, inverted in the dark theme. */
+.maplibregl-ctrl-group,
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: var(--panel);
+  color: var(--text);
+}
+
+.maplibregl-ctrl-group button {
+  color: var(--text);
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top-color: var(--border);
+}
+
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background-color: color-mix(in srgb, var(--panel) 50%, transparent);
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--text);
+}
+
+.maplibregl-ctrl-scale {
+  background-color: color-mix(in srgb, var(--panel) 75%, transparent);
+  border-color: var(--text);
+  color: var(--text);
+}
+
+:root[data-theme='dark'] :is(.maplibregl-ctrl-icon, .maplibregl-ctrl-attrib-button) {
+  filter: invert(1);
+}
+
+@media (hover: hover) {
+  :root[data-theme='dark'] .maplibregl-ctrl button:not(:disabled):hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
 .maplibregl-ctrl button.terrain-toggle {
   font-size: 12px;
   font-weight: 700;
@@ -1025,7 +1093,7 @@ input.swatch {
 
 .maplibregl-ctrl button:is(.terrain-toggle, .only-toggle)[aria-pressed='true'] {
   background: var(--active);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .maplibregl-ctrl button.only-toggle {
@@ -1034,7 +1102,7 @@ input.swatch {
 }
 
 .maplibregl-ctrl button.only-toggle:disabled {
-  color: #adb5bd;
+  color: var(--subtle);
 }
 
 .search-form button.icon {
@@ -1090,7 +1158,7 @@ input.swatch {
   margin: 0;
   padding: 4px 0;
   list-style: none;
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
@@ -1136,7 +1204,7 @@ input.swatch {
 .form-dialog textarea {
   box-sizing: border-box;
   padding: 3px 6px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
   font: inherit;
 }
@@ -1205,7 +1273,7 @@ input.swatch {
     width: 40px;
     height: 40px;
     border: none;
-    color: #343a40;
+    color: var(--tool);
     cursor: pointer;
   }
 
@@ -1232,7 +1300,7 @@ input.swatch {
     gap: 0;
     padding: 3px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.96);
+    background: color-mix(in srgb, var(--panel) 96%, transparent);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
     pointer-events: auto;
   }
