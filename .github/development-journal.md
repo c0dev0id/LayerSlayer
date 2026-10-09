@@ -350,7 +350,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
   poles. Bounds the service does not give are found once per session and kept with the
   layer: GeoJSON from MapLibre's `GeoJSONSource.getBounds()` after the data loads, ArcGIS
   feature layers from a `returnExtentOnly` query, since FeatureServers often report the
-  whole world as their extent (WFIGS does).
+  whole world as their extent (WFIGS does). The flight ends at the zoom the area fits at,
+  moved into the layer's zoom range (`areaZoom`): up to its lowest zoom, so a layer drawn
+  only from zoom 17 shows however large its area, and half a zoom short of the zoom it is
+  hidden from, which fitting to the area capped at that zoom had reached exactly.
 - **Imported styles are validated when fetched.** MapLibre validates the whole style on
   every `setStyle`, so one invalid layer of an imported style would stop all updates; with
   validation off, a skipped layer breaks the `before` positions of the diff. Failing layers

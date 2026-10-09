@@ -72,15 +72,15 @@ shading.
   keys on it), for longer layer names; a double click on the edge brings it back to its
   usual width.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
-  arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
-  it, and the frame icon flies to the area the layer covers (layers that span most of the
-  world have none). A layer shown in grey italics is outside its zoom range at the current
-  zoom; a red triangle carries the last error loading it. Under each name, a small line
-  shows its opacity, colour, the time it is drawn at, zoom range (z5–15), and *label*,
-  *cache* and *proxy* where it labels its features, its tiles are kept or its server goes
-  through the CORS proxy.
-  *Background*, below the last layer, sets the colour the map is drawn on (white unless
-  chosen); it shows wherever the layers leave the map uncovered or see-through.
+  arrow keys on it) to change the order; the eye hides it, the pencil renames it, ×
+  removes it, and the frame icon flies to the area the layer covers, at a zoom the layer
+  is drawn at (layers that span most of the world have none). A layer shown in grey
+  italics is outside its zoom range at the current zoom; a red triangle carries the last
+  error loading it. Under each name, a small line shows its opacity, colour, the time it
+  is drawn at, zoom range (z5–15), and *label*, *cache* and *proxy* where it labels its
+  features, its tiles are kept or its server goes through the CORS proxy. *Background*,
+  below the last layer, sets the colour the map is drawn on (white unless chosen); it
+  shows wherever the layers leave the map uncovered or see-through.
 - Clicking a layer's name opens its **settings** in its place in the list, closing those
   of the layer open before; clicking it again closes them. They hold its opacity, zoom
   range, colour (vector layers), source, the CORS proxy for its server and, for tiled
