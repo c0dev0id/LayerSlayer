@@ -1,6 +1,6 @@
 import { describe as group, expect, it } from 'vitest';
-import type { OsmElement } from './overpass';
-import { describe, distanceTo, fromOverpass, geometryOf, kindOf, nearestByKind, overpassDetailsQuery, postpassDetailsQuery, searchRadius, words } from './osmDetails';
+import { describe, distanceTo, kindOf, nearestByKind, overpassDetailsQuery, postpassDetailsQuery, searchRadius, words } from './osmDetails';
+import { fromOverpass, type OsmElement } from './overpass';
 
 const spot: [number, number] = [8.4, 49.0];
 /** A point `east` and `north` metres from the spot. */
@@ -57,31 +57,6 @@ group('distanceTo', () => {
     const clipped: OsmElement = { type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, ring[1]!, ring[2]!, null, null] }] };
     expect(distanceTo(fromOverpass(clipped), spot)).toBeCloseTo(10, 0);
     expect(distanceTo(fromOverpass({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, null] }] }), spot)).toBeUndefined();
-  });
-});
-
-group('geometryOf', () => {
-  it('gives nodes as points, ways as lines and relations as their members', () => {
-    expect(geometryOf({ type: 'node', id: 1, lat: 49, lon: 8 })).toEqual({ type: 'Point', coordinates: [8, 49] });
-    expect(geometryOf({ type: 'way', id: 1, geometry: [{ lat: 49, lon: 8 }, { lat: 49.1, lon: 8.1 }] })).toEqual({ type: 'LineString', coordinates: [[8, 49], [8.1, 49.1]] });
-    expect(geometryOf({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [{ lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }] }, { type: 'node', lat: 49.05, lon: 8.05 }] })).toEqual({
-      type: 'MultiLineString',
-      coordinates: [[[8, 49], [8.1, 49]]],
-    });
-  });
-
-  it('splits clipped lines where points were left out', () => {
-    expect(geometryOf({ type: 'way', id: 1, geometry: [{ lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }, null, { lat: 49.1, lon: 8.2 }, { lat: 49.1, lon: 8.3 }] })).toEqual({
-      type: 'MultiLineString',
-      coordinates: [
-        [[8, 49], [8.1, 49]],
-        [[8.2, 49.1], [8.3, 49.1]],
-      ],
-    });
-    expect(geometryOf({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, { lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }, null] }] })).toEqual({
-      type: 'MultiLineString',
-      coordinates: [[[8, 49], [8.1, 49]]],
-    });
   });
 });
 

@@ -3,8 +3,9 @@ import { geojsonBounds } from '../geo/bounds';
 import type { MapIcon } from '../model/icon';
 import type { GeoJsonSource } from '../model/layer';
 import type { LngLat } from '../model/route';
-import { findOsmFeatures } from '../services/osmSearch';
-import { OSM_ATTRIBUTION } from '../services/overpass';
+import { OSM_ATTRIBUTION, postpassOrOverpass } from '../services/osm';
+import { findWithOverpass } from '../services/overpass';
+import { findWithPostpass } from '../services/postpass';
 import { storeFile } from './files';
 import { addLayer, replaceLayerSource, state } from './store';
 
@@ -13,6 +14,14 @@ import { addLayer, replaceLayerSource, state } from './store';
  * The focus area is required: Postpass and the Overpass API answer queries for limited
  * areas only.
  */
+
+/** The features the filters find in the area. */
+function findOsmFeatures(filters: string[], area: LngLat[]): Promise<GeoJSON.FeatureCollection> {
+  return postpassOrOverpass(
+    () => findWithPostpass(filters, area),
+    () => findWithOverpass(filters, area),
+  );
+}
 
 function focusArea(): LngLat[] {
   if (!state.focus) throw new Error('Draw a focus area first: OSM queries look within it.');

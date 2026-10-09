@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatFilter, parseFilter } from '../services/overpass';
+import { formatFilter, parseFilter } from '../services/osm';
 import list from './osmFeatures.json';
 import { filterOsmFeatures, loadOsmFeatures, matchingFeature, typedFeature, type OsmFeature } from './osmFeatures';
 

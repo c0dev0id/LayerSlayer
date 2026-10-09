@@ -136,3 +136,8 @@ export async function fetchResource(url: string, init?: RequestInit): Promise<Re
   }
   return response;
 }
+
+/** The message of something thrown, whatever it is. */
+export function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}

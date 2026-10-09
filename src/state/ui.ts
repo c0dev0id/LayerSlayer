@@ -60,6 +60,4 @@ export function clearLayerError(layerId: string): void {
   if (layerErrors[layerId] !== undefined) setLayerErrors(layerId, undefined!);
 }
 
-export function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
+export { errorMessage } from './net';

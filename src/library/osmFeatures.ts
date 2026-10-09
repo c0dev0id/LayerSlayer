@@ -1,5 +1,5 @@
 import type { MapIcon } from '../model/icon';
-import { formatFilter, matchesFilter, parseFilter } from '../services/overpass';
+import { formatFilter, matchesFilter, parseFilter } from '../services/osm';
 
 /**
  * A kind of OpenStreetMap feature to query: what it is called, the tag filters that find

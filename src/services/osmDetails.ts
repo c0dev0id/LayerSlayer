@@ -1,7 +1,7 @@
 import type { LngLat } from '../model/route';
-import { firstAnswer } from './osmSearch';
-import { askOverpass, type LatLon, type OsmElement } from './overpass';
-import { askPostpass, type OsmObject } from './postpass';
+import { postpassOrOverpass, type OsmObject } from './osm';
+import { askOverpass, fromOverpass } from './overpass';
+import { askPostpass } from './postpass';
 
 /**
  * What lies at a spot on the map, for people on the move: the nearest road or trail, the
@@ -167,16 +167,6 @@ function lineDistance(points: Point[]): number {
   return nearest;
 }
 
-/** The unbroken stretches of points of a geometry whose points outside a box were left out. */
-function stretches(points: readonly (LatLon | null)[] | undefined): LatLon[][] {
-  const runs: LatLon[][] = [[]];
-  for (const point of points ?? []) {
-    if (point) runs.at(-1)!.push(point);
-    else if (runs.at(-1)!.length > 0) runs.push([]);
-  }
-  return runs.filter((run) => run.length > 0);
-}
-
 /** A geometry's points as runs: a point alone, a line, a ring. */
 function runsOf(geometry: GeoJSON.Geometry): GeoJSON.Position[][] {
   switch (geometry.type) {
@@ -258,25 +248,6 @@ export interface Details {
   tags: Record<string, string>;
   /** Where it lies, for the map to show: a node as a point, a way as a line, a relation as its members' lines. */
   geometry: GeoJSON.Geometry;
-}
-
-/** An Overpass element as an OSM object, as Postpass gives them. */
-export function fromOverpass(element: OsmElement): OsmObject {
-  return { type: element.type, id: element.id, tags: element.tags ?? {}, geometry: geometryOf(element) };
-}
-
-/** An Overpass element's geometry as GeoJSON: areas as their outlines, which is what a highlight draws. */
-export function geometryOf(element: OsmElement): GeoJSON.Geometry {
-  if (element.lat !== undefined && element.lon !== undefined) return { type: 'Point', coordinates: [element.lon, element.lat] };
-  const toLine = (run: LatLon[]) => run.map((p) => [p.lon, p.lat]);
-  if (element.geometry) {
-    const runs = stretches(element.geometry).map(toLine);
-    return runs.length === 1 ? { type: 'LineString', coordinates: runs[0]! } : { type: 'MultiLineString', coordinates: runs };
-  }
-  const members = element.members ?? [];
-  const lines = members.flatMap((m) => stretches(m.geometry).map(toLine));
-  if (lines.length > 0) return { type: 'MultiLineString', coordinates: lines };
-  return { type: 'MultiPoint', coordinates: members.flatMap((m) => (m.lat !== undefined && m.lon !== undefined ? [[m.lon, m.lat]] : [])) };
 }
 
 /** A tag value in words: `lift_gate` becomes "Lift gate". */
@@ -429,9 +400,9 @@ export function describe({ kind, element, distance }: { kind: DetailKind; elemen
  * described: from Postpass, or from the Overpass API where Postpass fails.
  */
 export async function findDetails(spot: LngLat, radius: number): Promise<Details[]> {
-  const objects = await firstAnswer([
-    { name: 'Postpass', ask: () => askPostpass(postpassDetailsQuery(spot, radius)) },
-    { name: 'Overpass API', ask: async () => (await askOverpass(overpassDetailsQuery(spot, radius))).elements.map(fromOverpass) },
-  ]);
+  const objects = await postpassOrOverpass(
+    () => askPostpass(postpassDetailsQuery(spot, radius)),
+    async () => (await askOverpass(overpassDetailsQuery(spot, radius))).elements.map(fromOverpass),
+  );
   return nearestByKind(objects, spot).map(describe);
 }

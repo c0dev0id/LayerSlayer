@@ -1,80 +1,22 @@
 import type { LngLat } from '../model/route';
 import { roundLngLat } from '../routing/legs';
 import { fetchResource } from '../state/net';
+import { parseFilter, type OsmObject } from './osm';
 
 /**
  * OpenStreetMap features found with the Overpass API (wiki.openstreetmap.org/wiki/Overpass_API)
- * within a polygon. Features are asked for by tag filters rather than query code. A filter
- * is one or more tags, separated by spaces, that a feature must all have: `key=value`,
- * `key=*` (or just `key`) for any value, or `key~text` for a value containing the text,
- * whatever its case. Keys and values with spaces go in double quotes.
+ * within a polygon, asked for by the tag filters of services/osm rather than query code.
  */
 
 export const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
-export const OSM_ATTRIBUTION = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 /** Seconds the server may take before it gives up on a query. */
 const TIMEOUT_S = 90;
-
-/**
- * A tag a feature must have: the key with this value, or with any value where none is
- * given; with `contains`, a value that contains this one, whatever its case.
- */
-interface TagCondition {
-  key: string;
-  value?: string;
-  contains?: true;
-}
-
-/** A key, an optional `=` or `~` and value, then a space or the end. */
-const CONDITION = /\s*("[^"]*"|[^\s=~"]+)(?:\s*([=~])\s*("[^"]*"|[^\s"]+))?(?=\s|$)/y;
-
-const unquote = (token: string) => (token.startsWith('"') ? token.slice(1, -1) : token);
-
-/** The tags a filter names. Throws with the reason for one that cannot be read. */
-export function parseFilter(text: string): TagCondition[] {
-  const conditions: TagCondition[] = [];
-  let at = 0;
-  while (text.slice(at).trim()) {
-    CONDITION.lastIndex = at;
-    const match = CONDITION.exec(text);
-    if (!match) throw new Error(`“${text.slice(at).trim()}” is not a tag: write key=value, key=* for any value, or key~text for values containing it.`);
-    at = CONDITION.lastIndex;
-    const key = unquote(match[1]!);
-    if (!key) throw new Error('A tag needs a key.');
-    const [operator, token] = [match[2], match[3]];
-    if (operator === '~') conditions.push({ key, value: unquote(token!), contains: true });
-    else conditions.push(token === undefined || token === '*' ? { key } : { key, value: unquote(token) });
-  }
-  if (conditions.length === 0) throw new Error('Name at least one tag, e.g. amenity=bench.');
-  return conditions;
-}
-
-/** A filter written the one way: `key=value`, `key=*` and `key~text`, quoted where needed. */
-export function formatFilter(conditions: readonly TagCondition[]): string {
-  const token = (s: string, special: RegExp) => (s === '' || special.test(s) ? `"${s}"` : s);
-  return conditions
-    .map(({ key, value, contains }) => {
-      const name = token(key, /[\s=~"]/);
-      if (contains) return `${name}~${token(value!, /[\s"]/)}`;
-      return `${name}=${value === undefined ? '*' : token(value, /[\s"]|^\*$/)}`;
-    })
-    .join(' ');
-}
-
-/** Whether OSM tags match a filter, as Overpass would find them. */
-export function matchesFilter(filter: string, tags: Readonly<Record<string, string>>): boolean {
-  return parseFilter(filter).every(({ key, value, contains }) => {
-    const tag = tags[key];
-    if (value === undefined) return tag !== undefined;
-    return contains ? tag?.toLowerCase().includes(value.toLowerCase()) === true : tag === value;
-  });
-}
 
 /** A string in Overpass QL. */
 const ql = (s: string) => `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 
 /** Text as a regular expression that finds it literally. */
-const literal = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const regexLiteral = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
  * The query for the nodes, ways and relations matching any of the filters within the
@@ -86,9 +28,11 @@ export function overpassQuery(filters: readonly string[], area: readonly LngLat[
     .map(([lng, lat]) => `${lat} ${lng}`)
     .join(' ');
   const statements = filters.map((filter) => {
-    const tags = parseFilter(filter).map(({ key, value, contains }) => {
-      if (value === undefined) return `[${ql(key)}]`;
-      return contains ? `[${ql(key)}~${ql(literal(value))},i]` : `[${ql(key)}=${ql(value)}]`;
+    const tags = parseFilter(filter).map((condition) => {
+      const key = ql(condition.key);
+      if (condition.op === 'any') return `[${key}]`;
+      if (condition.op === 'contains') return `[${key}~${ql(regexLiteral(condition.value))},i]`;
+      return `[${key}=${ql(condition.value)}]`;
     });
     return `nwr${tags.join('')}(poly:"${poly}");`;
   });
@@ -154,4 +98,33 @@ export async function askOverpass(query: string): Promise<OverpassAnswer> {
 /** The OSM features matching any of the filters within the polygon, from the Overpass API. */
 export async function findWithOverpass(filters: readonly string[], area: readonly LngLat[]): Promise<GeoJSON.FeatureCollection> {
   return toGeoJson(await askOverpass(overpassQuery(filters, area)));
+}
+
+/** The unbroken stretches of points of a geometry whose points outside a box were left out. */
+function stretches(points: readonly (LatLon | null)[] | undefined): LatLon[][] {
+  const runs: LatLon[][] = [[]];
+  for (const point of points ?? []) {
+    if (point) runs.at(-1)!.push(point);
+    else if (runs.at(-1)!.length > 0) runs.push([]);
+  }
+  return runs.filter((run) => run.length > 0);
+}
+
+/** An Overpass element as an OSM object, as Postpass answers give them too. */
+export function fromOverpass(element: OsmElement): OsmObject {
+  return { type: element.type, id: element.id, tags: element.tags ?? {}, geometry: geometryOf(element) };
+}
+
+/** An Overpass element's geometry as GeoJSON: areas as their outlines, which is what a highlight draws. */
+export function geometryOf(element: OsmElement): GeoJSON.Geometry {
+  if (element.lat !== undefined && element.lon !== undefined) return { type: 'Point', coordinates: [element.lon, element.lat] };
+  const toLine = (run: LatLon[]) => run.map((p) => [p.lon, p.lat]);
+  if (element.geometry) {
+    const runs = stretches(element.geometry).map(toLine);
+    return runs.length === 1 ? { type: 'LineString', coordinates: runs[0]! } : { type: 'MultiLineString', coordinates: runs };
+  }
+  const members = element.members ?? [];
+  const lines = members.flatMap((m) => stretches(m.geometry).map(toLine));
+  if (lines.length > 0) return { type: 'MultiLineString', coordinates: lines };
+  return { type: 'MultiPoint', coordinates: members.flatMap((m) => (m.lat !== undefined && m.lon !== undefined ? [[m.lon, m.lat]] : [])) };
 }

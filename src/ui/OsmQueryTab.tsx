@@ -1,6 +1,7 @@
 import { createMemo, createResource, createSignal, For, Show } from 'solid-js';
 import { filterOsmFeatures, loadOsmFeatures, typedFeature, type OsmFeature } from '../library/osmFeatures';
 import type { MapIcon } from '../model/icon';
+import { OSM_CREDIT } from '../services/osm';
 import { startFocusDrawing } from '../state/drawing';
 import { addOsmQueryLayer } from '../state/osmQuery';
 import { state } from '../state/store';
@@ -155,7 +156,7 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
         </button>
       </div>
       <OutcomeNote outcome={querying.outcome()} />
-      <p class="muted hint">Data © OpenStreetMap contributors, found with Postpass, or the Overpass API where Postpass fails.</p>
+      <p class="muted hint">{OSM_CREDIT}</p>
     </div>
   );
 }

@@ -1,56 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkAnswer, formatFilter, matchesFilter, overpassQuery, parseFilter, toGeoJson } from './overpass';
-
-describe('parseFilter', () => {
-  it('reads tags with a value or any value', () => {
-    expect(parseFilter('amenity=drinking_water')).toEqual([{ key: 'amenity', value: 'drinking_water' }]);
-    expect(parseFilter('shop=*')).toEqual([{ key: 'shop' }]);
-    expect(parseFilter('  shop ')).toEqual([{ key: 'shop' }]);
-  });
-
-  it('reads several tags, which must all match', () => {
-    expect(parseFilter('power=generator generator:source=wind')).toEqual([
-      { key: 'power', value: 'generator' },
-      { key: 'generator:source', value: 'wind' },
-    ]);
-  });
-
-  it('allows spaces around the equals sign and quotes around spaces', () => {
-    expect(parseFilter('amenity = bench')).toEqual([{ key: 'amenity', value: 'bench' }]);
-    expect(parseFilter('operator="Deutsche Bahn" "a b"=c')).toEqual([
-      { key: 'operator', value: 'Deutsche Bahn' },
-      { key: 'a b', value: 'c' },
-    ]);
-    expect(parseFilter('name="*"')).toEqual([{ key: 'name', value: '*' }]);
-    expect(parseFilter('name=""')).toEqual([{ key: 'name', value: '' }]);
-  });
-
-  it('reads values a tag must contain', () => {
-    expect(parseFilter('name~Sonderwaffenlager')).toEqual([{ key: 'name', value: 'Sonderwaffenlager', contains: true }]);
-    expect(parseFilter('name ~ "Special Ammunition" military=*')).toEqual([
-      { key: 'name', value: 'Special Ammunition', contains: true },
-      { key: 'military' },
-    ]);
-    expect(() => parseFilter('name~')).toThrow('is not a tag');
-  });
-
-  it('says what it cannot read', () => {
-    expect(() => parseFilter('')).toThrow('Name at least one tag');
-    expect(() => parseFilter('amenity=')).toThrow('“amenity=” is not a tag');
-    expect(() => parseFilter('=bench')).toThrow('“=bench” is not a tag');
-    expect(() => parseFilter('name="Main Street')).toThrow('is not a tag');
-    expect(() => parseFilter('a"b"')).toThrow('is not a tag');
-    expect(() => parseFilter('""=x')).toThrow('A tag needs a key.');
-  });
-});
-
-describe('formatFilter', () => {
-  it('writes filters one way, quoting where needed', () => {
-    expect(formatFilter(parseFilter('amenity = bench  shop'))).toBe('amenity=bench shop=*');
-    expect(formatFilter(parseFilter('operator="Deutsche Bahn" name="*" ref=""'))).toBe('operator="Deutsche Bahn" name="*" ref=""');
-    expect(formatFilter(parseFilter('name ~ "Special Ammunition" ref~*'))).toBe('name~"Special Ammunition" ref~*');
-  });
-});
+import { checkAnswer, geometryOf, overpassQuery, toGeoJson } from './overpass';
 
 describe('overpassQuery', () => {
   const area: [number, number][] = [
@@ -77,18 +26,6 @@ describe('overpassQuery', () => {
     expect(overpassQuery(['name~Sonderwaffenlager'], area)).toContain('nwr["name"~"Sonderwaffenlager",i](poly:');
     // The dot is no wildcard: escaped for the regular expression, whose backslash is escaped for the string.
     expect(overpassQuery(['name~St.'], area)).toContain('["name"~"St\\\\.",i]');
-  });
-});
-
-describe('matchesFilter', () => {
-  it('matches tags as Overpass finds them', () => {
-    const tags = { name: 'Ehemaliges US-Sonderwaffenlager Clausen', natural: 'grassland' };
-    expect(matchesFilter('name~sonderwaffenlager', tags)).toBe(true);
-    expect(matchesFilter('name~Sonderwaffenlager natural=grassland', tags)).toBe(true);
-    expect(matchesFilter('name~Raketenstellung', tags)).toBe(false);
-    expect(matchesFilter('natural=*', tags)).toBe(true);
-    expect(matchesFilter('natural=heath', tags)).toBe(false);
-    expect(matchesFilter('landuse=*', tags)).toBe(false);
   });
 });
 
@@ -138,5 +75,30 @@ describe('toGeoJson', () => {
       ['way/3', 'Polygon'],
     ]);
     expect(geojson.features.find((f) => f.id === 'node/1')?.properties).toMatchObject({ amenity: 'drinking_water' });
+  });
+});
+
+describe('geometryOf', () => {
+  it('gives nodes as points, ways as lines and relations as their members', () => {
+    expect(geometryOf({ type: 'node', id: 1, lat: 49, lon: 8 })).toEqual({ type: 'Point', coordinates: [8, 49] });
+    expect(geometryOf({ type: 'way', id: 1, geometry: [{ lat: 49, lon: 8 }, { lat: 49.1, lon: 8.1 }] })).toEqual({ type: 'LineString', coordinates: [[8, 49], [8.1, 49.1]] });
+    expect(geometryOf({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [{ lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }] }, { type: 'node', lat: 49.05, lon: 8.05 }] })).toEqual({
+      type: 'MultiLineString',
+      coordinates: [[[8, 49], [8.1, 49]]],
+    });
+  });
+
+  it('splits clipped lines where points were left out', () => {
+    expect(geometryOf({ type: 'way', id: 1, geometry: [{ lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }, null, { lat: 49.1, lon: 8.2 }, { lat: 49.1, lon: 8.3 }] })).toEqual({
+      type: 'MultiLineString',
+      coordinates: [
+        [[8, 49], [8.1, 49]],
+        [[8.2, 49.1], [8.3, 49.1]],
+      ],
+    });
+    expect(geometryOf({ type: 'relation', id: 1, members: [{ type: 'way', geometry: [null, { lat: 49, lon: 8 }, { lat: 49, lon: 8.1 }, null] }] })).toEqual({
+      type: 'MultiLineString',
+      coordinates: [[[8, 49], [8.1, 49]]],
+    });
   });
 });

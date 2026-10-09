@@ -2,6 +2,7 @@ import { createEffect, createResource, For, Match, on, Show, Switch, type JSX } 
 import { loadOsmFeatures, matchingFeature, type OsmFeature } from '../library/osmFeatures';
 import { latLonText } from '../map/placeLinks';
 import type { LngLat } from '../model/route';
+import { OSM_CREDIT } from '../services/osm';
 import type { DetailKind, Details, RowIcon } from '../services/osmDetails';
 import { closeDetails, details, detailsRequest, osmRequest, type LayerFeature } from '../state/details';
 import { errorMessage, map } from '../state/ui';
@@ -120,7 +121,7 @@ function OsmDetails() {
           <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={presets()} />}</For>}</Match>
         </Switch>
       </div>
-      <p class="muted hint">Data © OpenStreetMap contributors, found with Postpass, or the Overpass API where Postpass fails.</p>
+      <p class="muted hint">{OSM_CREDIT}</p>
     </>
   );
 }

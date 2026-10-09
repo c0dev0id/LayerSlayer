@@ -1,7 +1,7 @@
 import type { LngLat } from '../model/route';
 import { roundLngLat } from '../routing/legs';
 import { fetchResource } from '../state/net';
-import { parseFilter } from './overpass';
+import { parseFilter, type OsmObject } from './osm';
 
 /**
  * OpenStreetMap features found with Postpass (github.com/woodpeck/postpass), a public
@@ -17,14 +17,15 @@ export const POSTPASS_URL = 'https://postpass.geofabrik.de/api/interpreter';
 const sql = (s: string) => `'${s.replace(/'/g, "''")}'`;
 
 /** Text that LIKE matches literally: its wildcards and the escape character escaped. */
-const literal = (s: string) => s.replace(/[\\%_]/g, '\\$&');
+const likeLiteral = (s: string) => s.replace(/[\\%_]/g, '\\$&');
 
 /** One filter as an SQL condition: tags with a value, any value, or a value containing the text. */
 function condition(filter: string): string {
-  const parts = parseFilter(filter).map(({ key, value, contains }) => {
-    if (value === undefined) return `tags ? ${sql(key)}`;
-    if (contains) return `tags->>${sql(key)} ILIKE ${sql(`%${literal(value)}%`)}`;
-    return `tags @> ${sql(JSON.stringify({ [key]: value }))}::jsonb`;
+  const parts = parseFilter(filter).map((condition) => {
+    const { key } = condition;
+    if (condition.op === 'any') return `tags ? ${sql(key)}`;
+    if (condition.op === 'contains') return `tags->>${sql(key)} ILIKE ${sql(`%${likeLiteral(condition.value)}%`)}`;
+    return `tags @> ${sql(JSON.stringify({ [key]: condition.value }))}::jsonb`;
   });
   return `(${parts.join(' AND ')})`;
 }
@@ -44,14 +45,6 @@ export function postpassQuery(filters: readonly string[], area: readonly LngLat[
 }
 
 const OSM_TYPES: Record<string, OsmObject['type']> = { N: 'node', W: 'way', R: 'relation' };
-
-/** An OSM object as Postpass gives it: what it is, its tags and where it lies. */
-export interface OsmObject {
-  type: 'node' | 'way' | 'relation';
-  id: number;
-  tags: Record<string, string>;
-  geometry: GeoJSON.Geometry;
-}
 
 interface PostpassFeature {
   type: 'Feature';
