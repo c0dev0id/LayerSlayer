@@ -61,11 +61,12 @@ fetches must use them, or the proxy and readable error messages are bypassed. Ro
 (OSRM) is the exception and goes out directly.
 
 **State.** `state/store.ts` holds layers, settings, view and focus area, persisted to
-local storage by `persistedStore` (`state/persist.ts`) under the key `webmap`. Routes and
-waypoints are a separate store (`state/routes.ts`, key `webmap-routes`) with its own
-undo/redo history (`state/history.ts`); layer changes are never undo steps. Imported files
-are Blobs in IndexedDB (`state/files.ts`), referenced by key. `state/projectFile.ts`
-reads and writes `.webmap` ZIP project files through the same parsers as local storage.
+local storage by `persistedStore` (`state/persist.ts`) under the key `layerslayer`.
+Routes and waypoints are a separate store (`state/routes.ts`, key `layerslayer-routes`)
+with its own undo/redo history (`state/history.ts`); layer changes are never undo steps.
+Imported files are Blobs in IndexedDB (`state/files.ts`), referenced by key.
+`state/projectFile.ts` reads and writes `.lslay` ZIP project files through the same
+parsers as local storage.
 
 **Routing** (`routing/`) is ported from mappic: routes are point lists, each leg routed
 by OSRM or straight, edits are pure functions in `routeEdit.ts`, and a pull-based pump
@@ -88,9 +89,8 @@ chunk loaded with the icon picker. UI icons are Tabler SVG paths in `src/ui/icon
 - Heavy libraries (pdf.js, pdf-lib, geotiff, pmtiles, togeojson, fflate, osmtogeojson,
   the style spec) are loaded with dynamic `import()` on first use; keep them that way.
 - Below 1.0 there is no migration code: stored layers that no longer parse are dropped.
-- Storage keys and the project format (`.webmap`, `"app": "webmap"`) keep the old name
-  webmap, so stored data and old project files survive the rename; user-facing text says
-  Layer Slayer.
+  The one exception: `decodeProjectFile` accepts `.webmap` files (`"app": "webmap"`) from
+  before the rename. Everything else uses the name `layerslayer`.
 - Unit tests sit beside their modules (`*.test.ts`) and cover the pure modules; service
   parsers are tested against captured responses in `src/services/fixtures/`.
 - README and journal are prose wrapped at 90 columns, describing behaviour in plain words

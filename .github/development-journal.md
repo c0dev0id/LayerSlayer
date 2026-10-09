@@ -208,17 +208,21 @@ It is a static single-page app on GitHub Pages; there is no server component.
   no migration: stored layers that no longer have the current shape are dropped one by
   one.
 - **Named Layer Slayer, formerly webmap.** The name shows in the page title, the panel,
-  messages, GPX files and saved project names. The repository is `c0dev0id/LayerSlayer`
-  and the site `https://shagen.me/LayerSlayer/` (it was `/webmap/`). The storage keys
-  (local storage, IndexedDB, the tile cache) and the project file format (`.webmap`,
-  `"app": "webmap"`) keep the old name: both addresses share the origin `shagen.me`, so
-  browsers keep what they hold, and project files saved before the rename still open.
+  messages, GPX files and saved project names. The repository is `c0dev0id/LayerSlayer`,
+  the site `https://shagen.me/LayerSlayer/` (it was `/webmap/`), the package
+  `layerslayer`. The storage keys (local storage, IndexedDB, the tile cache) moved to
+  `layerslayer` too; what a browser held under `webmap` is not carried over, and the
+  start-up sweep deletes the old tile cache, which is only a cache. Project files went
+  from `.webmap` to `.lslay`, marked `"app": "layerslayer"`. The format is otherwise the
+  same, so *Open* still reads `.webmap` files (`"app": "webmap"`) as they are: the one
+  way to bring a project from before the rename, and the one exception to having no
+  migration before 1.0.
 - **The logo** (a globe cut by a sword) is for now the square around the globe and sword
   cut from the generated prototype, as a 256 px PNG on its navy ground: the browser tab
   icon, the panel header mark and the README image. A trace into SVG looked worse than
   the original and was dropped; a regenerated logo is to replace it. The name is page
   text, not part of the image.
-- **Project files, as in mappic.** *Save* writes a ZIP (`.webmap`): `project.json` with
+- **Project files, as in mappic.** *Save* writes a ZIP (`.lslay`): `project.json` with
   the layers, view, focus area, proxied hosts, routes and waypoints, and each stored file
   as `files/<key>` under the key its layer refers to, so nothing needs rewriting. Reading
   goes through the same `parseState` and `parseRouteData` as local storage, and the whole
@@ -321,10 +325,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
     as they are; a route change or routing result only sets the source's data, which
     spares MapLibre diffing and validating the whole style. The routing credit is that
     source's attribution.
-  - Routes and waypoints are a store of their own under the storage key `webmap-routes`,
-    apart from the layers. Undo and redo cover this store only, so layer changes are never
-    undone; the toolbar and Ctrl+Z work while a route is drawn. Routing results are not
-    undo steps; an undo restores the cached legs with the points.
+  - Routes and waypoints are a store of their own under the storage key
+    `layerslayer-routes`, apart from the layers. Undo and redo cover this store only, so
+    layer changes are never undone; the toolbar and Ctrl+Z work while a route is drawn.
+    Routing results are not undo steps; an undo restores the cached legs with the points.
   - The GPX format, reading and writing, is `services/gpx.ts`; reading keeps track
     segments, which the layer import draws apart and the route import joins.
   - Waypoints belong to a route (`routeId`): the one being drawn when the waypoint is
@@ -523,7 +527,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
   carry `layers`, `minzoom` and `maxzoom` (from the site's own style and sample tiles),
   so opening one reads nothing and no tile below the first zoom is asked for. Open
   Infrastructure Map's solar heatmap was left out: a zoom 5 tile holds 370 000 points in
-  8 MB, drawn as a heatmap there, which webmap's generated styles do not do. Its base map
+  8 MB, drawn as a heatmap there, which the app's generated styles do not do. Its base map
   is left out too: its address carries a build date, and OpenFreeMap serves base maps
   with a style.
 - **The add-layer dialog stays open.** Adding many layers from several sources was a chore
@@ -630,4 +634,5 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
   waypoints, undo and redo, car, bike and foot profiles, GPX export and import.
 - Layers, routes, settings, view and imported files survive a browser restart, and go
-  to another browser as a `.webmap` project file.
+  to another browser as a `.lslay` project file (`.webmap` files from before the
+  rename still open).
