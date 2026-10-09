@@ -12,13 +12,12 @@ import {
   type LibraryEntry,
   type ServiceEntry,
 } from '../library/library';
-import { dataLabel, serviceFacts, styleFacts } from '../library/entryInfo';
+import { dataLabel, entryFacts } from '../library/entryInfo';
 import type { Bounds } from '../model/layer';
-import { decodePlaceholders, parsePmtilesUrl } from '../map/urls';
+import { decodePlaceholders, hasPlaceholders, parsePmtilesUrl } from '../map/urls';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
 import { readService } from '../services/read';
-import { loadStyle } from '../services/style';
 import { htmlText } from '../services/xml';
 import { SERVICE_TYPES, type Offer, type ServiceInfo, type ServiceType } from '../services/types';
 import { hostOf, isProxied } from '../state/net';
@@ -373,21 +372,14 @@ function LibraryTab(props: {
  */
 function EntryInfo(props: { entry: LibraryEntry }) {
   const entry = props.entry;
-  const [facts] = createResource(async () => {
-    if (entry.type === 'file') return undefined;
-    const info = await read({ type: entry.type, url: entry.url, entry });
-    if (entry.type !== 'style') return serviceFacts(info);
-    const style = styleFacts(await loadStyle(entry.url));
-    return serviceFacts(info, () => style);
-  });
-  const service = entry.type === 'file' ? undefined : entry;
-  const zooms = service && (service.minzoom !== undefined || service.maxzoom !== undefined) ? `${service.minzoom ?? 0}–${service.maxzoom ?? '…'}` : undefined;
+  const [facts] = createResource(() => entryFacts(entry, (service) => read({ type: service.type, url: service.url, entry: service })));
+  const zooms =
+    entry.type !== 'file' && (entry.minzoom !== undefined || entry.maxzoom !== undefined) ? `${entry.minzoom ?? 0}–${entry.maxzoom ?? '…'}` : undefined;
   return (
     <dl class="detail-rows entry-info">
       <dt>Address</dt>
       <dd>
-        {/* A tile template is no page to open. */}
-        <Show when={!entry.url.includes('{')} fallback={entry.url}>
+        <Show when={!hasPlaceholders(entry.url)} fallback={entry.url}>
           <a href={entry.url} target="_blank" rel="noopener">
             {entry.url}
           </a>
@@ -398,23 +390,17 @@ function EntryInfo(props: { entry: LibraryEntry }) {
         {entryTypeLabel(entry)}
         {facts.state === 'ready' && facts()?.version ? ` ${facts()!.version}` : ''}
       </dd>
+      <Show when={entry.type !== 'file'}>
+        <dt>Data</dt>
+      </Show>
       <Switch>
         <Match when={facts.loading}>
-          <dt>Data</dt>
           <dd class="muted">Reading the service…</dd>
         </Match>
-        <Match when={facts.error as unknown}>
-          {(error) => (
-            <>
-              <dt>Data</dt>
-              <dd class="muted">Could not be read: {errorMessage(error())}</dd>
-            </>
-          )}
-        </Match>
+        <Match when={facts.error as unknown}>{(error) => <dd class="muted">Could not be read: {errorMessage(error())}</dd>}</Match>
         <Match when={facts.state === 'ready' && facts()}>
           {(f) => (
             <>
-              <dt>Data</dt>
               <dd>{dataLabel(f().data) || 'Unknown'}</dd>
               <dt>Format</dt>
               <dd>{f().formats.join('\n')}</dd>

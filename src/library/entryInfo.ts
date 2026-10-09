@@ -1,8 +1,10 @@
 import type { StyleSpecification } from 'maplibre-gl';
 import { DYNAMIC_TILE_SIZE } from '../map/compose';
 import { getParam, parsePmtilesUrl } from '../map/urls';
-import type { LayerSource } from '../model/layer';
+import { isRaster, isVector, type LayerSource } from '../model/layer';
+import { loadStyle } from '../services/style';
 import type { ServiceInfo } from '../services/types';
+import type { LibraryEntry, ServiceEntry } from './library';
 
 /** Technical facts about a library entry's data, for its info: what it is and how it is fetched. */
 
@@ -30,33 +32,40 @@ const archive = (tiles: readonly string[]) => (parsePmtilesUrl(tiles[0]!) ? ' fr
 /** In the browser, feature query answers are cut into vector tiles. */
 const CUT = 'made into vector tiles in the browser';
 
-export function sourceFacts(source: LayerSource): SourceFacts {
+/** How a source's data is fetched, and in what format and version. */
+function formatOf(source: LayerSource): Omit<SourceFacts, 'data'> {
   switch (source.type) {
     case 'xyz':
-      return { data: ['raster'], format: `${imageFormat(source.tiles[0]!) ?? 'Image'} tiles${archive(source.tiles)}, ${source.tileSize} px` };
+      return { format: `${imageFormat(source.tiles[0]!) ?? 'Image'} tiles${archive(source.tiles)}, ${source.tileSize} px` };
     case 'wmts':
-      return { data: ['raster'], format: `${imageFormat(source.template) ?? 'Image'} tiles, ${source.tileSize} px` };
+      return { format: `${imageFormat(source.template) ?? 'Image'} tiles, ${source.tileSize} px` };
     case 'wms':
-      return { data: ['raster'], format: `${source.format} by GetMap, ${DYNAMIC_TILE_SIZE} px per tile`, version: source.version };
+      return { format: `${source.format} by GetMap, ${DYNAMIC_TILE_SIZE} px per tile`, version: source.version };
     case 'arcgis-map':
-      return { data: ['raster'], format: `${source.format} by export, ${DYNAMIC_TILE_SIZE} px per tile` };
+      return { format: `${source.format} by export, ${DYNAMIC_TILE_SIZE} px per tile` };
     case 'cog':
-      return { data: ['raster'], format: 'GeoTIFF, read in tiles by range requests' };
+      return { format: 'GeoTIFF, read in tiles by range requests' };
     case 'image':
-      return { data: ['raster'], format: 'Picture placed by its corners' };
+      return { format: 'Picture placed by its corners' };
     case 'vector-tiles':
-      return { data: ['vector'], format: `Mapbox Vector Tiles (MVT)${archive(source.tiles)}` };
+      return { format: `Mapbox Vector Tiles (MVT)${archive(source.tiles)}` };
     case 'arcgis-features':
-      return { data: ['vector'], format: `GeoJSON by ${source.tileQueries ? 'tile query' : 'query'} per tile, ${CUT}` };
+      return { format: `GeoJSON by ${source.tileQueries ? 'tile query' : 'query'} per tile, ${CUT}` };
     case 'wfs':
-      return { data: ['vector'], format: `GeoJSON (${source.outputFormat}) by GetFeature per tile, ${CUT}`, version: source.version };
+      return { format: `GeoJSON (${source.outputFormat}) by GetFeature per tile, ${CUT}`, version: source.version };
     case 'ogc-features':
-      return { data: ['vector'], format: `GeoJSON items per tile, ${CUT}` };
+      return { format: `GeoJSON items per tile, ${CUT}` };
     case 'geojson':
-      return { data: ['vector'], format: 'GeoJSON, loaded whole' };
+      return { format: 'GeoJSON, loaded whole' };
     case 'style':
-      return { data: [], format: 'MapLibre style' };
+      return { format: 'MapLibre style' };
   }
+}
+
+/** What kind of data a source holds, as SOURCE_KINDS says, and how it is fetched. */
+export function sourceFacts(source: LayerSource): SourceFacts {
+  const data: DataKind[] = isRaster(source) ? ['raster'] : isVector(source) ? ['vector'] : [];
+  return { data, ...formatOf(source) };
 }
 
 const SOURCE_DATA: Record<string, DataKind | undefined> = { vector: 'vector', geojson: 'vector', raster: 'raster', 'raster-dem': 'raster', image: 'raster' };
@@ -86,11 +95,24 @@ export interface ServiceFacts {
 }
 
 /** What the layers a service offers have in common or not; `facts` reads one layer's source. */
-export function serviceFacts(info: ServiceInfo, facts: (source: LayerSource) => SourceFacts = sourceFacts): ServiceFacts {
-  const all = info.offers.flatMap((o) => (o.draft ? [facts(o.draft.source)] : []));
+export function serviceFacts(info: ServiceInfo): ServiceFacts {
+  const all = info.offers.flatMap((o) => (o.draft ? [sourceFacts(o.draft.source)] : []));
   const data = (['raster', 'vector'] as const).filter((kind) => all.some((f) => f.data.includes(kind)));
   const version = all.find((f) => f.version)?.version;
   return { data, formats: [...new Set(all.map((f) => f.format))], ...(version && { version }), layers: all.length };
+}
+
+/**
+ * The facts of an entry: none for a file; a style's from its sources, as the style is one
+ * layer; a service's from the layers `read` finds it offering.
+ */
+export async function entryFacts(entry: LibraryEntry, read: (entry: ServiceEntry) => Promise<ServiceInfo>): Promise<ServiceFacts | undefined> {
+  if (entry.type === 'file') return undefined;
+  if (entry.type === 'style') {
+    const { data, format } = styleFacts(await loadStyle(entry.url));
+    return { data, formats: [format], layers: 1 };
+  }
+  return serviceFacts(await read(entry));
 }
 
 /** "Raster", "Vector" or "Raster and vector". */

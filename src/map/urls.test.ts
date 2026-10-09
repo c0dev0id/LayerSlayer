@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodePlaceholders, getParam, parsePmtilesUrl, pmtilesTiles, resolveUrl, withParams } from './urls';
+import { decodePlaceholders, getParam, hasPlaceholders, parsePmtilesUrl, pmtilesTiles, resolveUrl, withParams } from './urls';
 
 describe('withParams', () => {
   it('replaces GetCapabilities parameters regardless of case and keeps the rest', () => {
@@ -62,5 +62,12 @@ describe('decodePlaceholders', () => {
     expect(decodePlaceholders('https://tile.example/offroad/%7Bz%7D/%7Bx%7D/%7By%7D.png')).toBe('https://tile.example/offroad/{z}/{x}/{y}.png');
     expect(decodePlaceholders('https://t.example/%7bz%7d/%7Bx%7D/%7B-y%7D.png?key=a%2Fb')).toBe('https://t.example/{z}/{x}/{-y}.png?key=a%2Fb');
     expect(decodePlaceholders('https://w.example/wms?BBOX=%7Bbbox-epsg-3857%7D')).toBe('https://w.example/wms?BBOX={bbox-epsg-3857}');
+  });
+});
+
+describe('hasPlaceholders', () => {
+  it('tells a template from an address to open', () => {
+    expect(hasPlaceholders('https://tile.example/{z}/{x}/{y}.png')).toBe(true);
+    expect(hasPlaceholders('https://gdi.berlin.de/services/wms/berlinermauer?SERVICE=WMS')).toBe(false);
   });
 });

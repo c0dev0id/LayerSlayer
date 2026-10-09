@@ -2,7 +2,7 @@ import type { StyleSpecification } from 'maplibre-gl';
 import { describe, expect, it } from 'vitest';
 import wms130 from '../services/fixtures/wms130-terrestris.xml?raw';
 import { parseWms } from '../services/wms';
-import { dataLabel, imageFormat, serviceFacts, sourceFacts, styleFacts } from './entryInfo';
+import { dataLabel, entryFacts, imageFormat, serviceFacts, sourceFacts, styleFacts } from './entryInfo';
 
 describe('imageFormat', () => {
   it('reads the format a tile address names', () => {
@@ -55,5 +55,15 @@ describe('serviceFacts', () => {
   it('names data of both kinds', () => {
     expect(dataLabel(['raster'])).toBe('Raster');
     expect(dataLabel(['raster', 'vector'])).toBe('Raster and vector');
+  });
+});
+
+describe('entryFacts', () => {
+  it('has none for a file, and reads a service for the rest', async () => {
+    const file = { name: 'Closures', type: 'file', url: 'https://f.example/c.kmz', region: 'Germany', category: 'Traffic' } as const;
+    expect(await entryFacts(file, () => Promise.reject(new Error('read')))).toBeUndefined();
+    const wms = { name: 'OSM', type: 'wms', url: 'https://ows.terrestris.de/osm/service', region: 'Global', category: 'Basemap' } as const;
+    const facts = await entryFacts(wms, () => Promise.resolve(parseWms(wms130, wms.url)));
+    expect(facts?.formats).toEqual(['image/png by GetMap, 512 px per tile']);
   });
 });

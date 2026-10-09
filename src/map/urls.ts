@@ -58,6 +58,11 @@ export function resolveUrl(url: string, base: string): string {
  * Placeholders of a tile template as a browser copies an address, percent-encoded
  * (`%7Bz%7D`), back in braces; the rest of the address keeps its encoding.
  */
+/** Whether an address is a template with placeholders such as {z}, rather than one to open. */
+export function hasPlaceholders(url: string): boolean {
+  return /\{[^{}]+\}/.test(url);
+}
+
 export function decodePlaceholders(url: string): string {
   return url.replace(/%7B([A-Za-z0-9_-]+)%7D/gi, '{$1}');
 }
