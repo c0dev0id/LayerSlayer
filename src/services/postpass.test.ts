@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fromPostpass, postpassQuery } from './postpass';
+import { asFeatures, postpassQuery, readPostpass } from './postpass';
 
 const area: [number, number][] = [
   [8.38, 49],
@@ -28,7 +28,7 @@ describe('postpassQuery', () => {
   });
 });
 
-describe('fromPostpass', () => {
+describe('readPostpass and asFeatures', () => {
   const answer = {
     type: 'FeatureCollection',
     features: [
@@ -46,8 +46,16 @@ describe('fromPostpass', () => {
     ],
   };
 
+  it('reads OSM objects, one-part multi-geometries as their part', () => {
+    expect(readPostpass(answer).map((o) => [o.type, o.id, o.geometry.type, o.tags])).toEqual([
+      ['node', 1, 'Point', { military: 'bunker' }],
+      ['relation', 2, 'Polygon', { historic: 'monument', name: 'Denkmalzone' }],
+      ['way', 3, 'MultiLineString', {}],
+    ]);
+  });
+
   it('identifies features as osmtogeojson does, with the tags as properties', () => {
-    const { features } = fromPostpass(answer);
+    const { features } = asFeatures(readPostpass(answer));
     expect(features.map((f) => [f.id, f.geometry.type, f.properties])).toEqual([
       ['node/1', 'Point', { military: 'bunker', id: 'node/1' }],
       ['relation/2', 'Polygon', { historic: 'monument', name: 'Denkmalzone', id: 'relation/2' }],
@@ -57,7 +65,7 @@ describe('fromPostpass', () => {
   });
 
   it('turns away what is no feature collection', () => {
-    expect(() => fromPostpass({ error: 'x' })).toThrow('Postpass did not answer with OpenStreetMap data.');
-    expect(() => fromPostpass(null)).toThrow('Postpass did not answer');
+    expect(() => readPostpass({ error: 'x' })).toThrow('Postpass did not answer with OpenStreetMap data.');
+    expect(() => readPostpass(null)).toThrow('Postpass did not answer');
   });
 });

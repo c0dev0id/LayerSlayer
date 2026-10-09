@@ -43,7 +43,15 @@ export function postpassQuery(filters: readonly string[], area: readonly LngLat[
   );
 }
 
-const OSM_TYPES: Record<string, string> = { N: 'node', W: 'way', R: 'relation' };
+const OSM_TYPES: Record<string, OsmObject['type']> = { N: 'node', W: 'way', R: 'relation' };
+
+/** An OSM object as Postpass gives it: what it is, its tags and where it lies. */
+export interface OsmObject {
+  type: 'node' | 'way' | 'relation';
+  id: number;
+  tags: Record<string, string>;
+  geometry: GeoJSON.Geometry;
+}
 
 interface PostpassFeature {
   type: 'Feature';
@@ -58,24 +66,39 @@ function single(geometry: GeoJSON.Geometry): GeoJSON.Geometry {
   return geometry;
 }
 
-/**
- * A Postpass answer as the features of an OSM query layer: identified as `way/123`, with
- * the tags as properties beside that `id`, as osmtogeojson gives them for Overpass answers.
- */
-export function fromPostpass(json: unknown): GeoJSON.FeatureCollection {
+/** The OSM objects of a Postpass answer, unless it is none. */
+export function readPostpass(json: unknown): OsmObject[] {
   const answer = json as { type?: unknown; features?: unknown } | null;
   if (answer?.type !== 'FeatureCollection' || !Array.isArray(answer.features)) {
     throw new Error('Postpass did not answer with OpenStreetMap data.');
   }
-  const features = (answer.features as PostpassFeature[]).map(({ geometry, properties: { osm_type, osm_id, tags } }): GeoJSON.Feature => {
-    const id = `${OSM_TYPES[osm_type] ?? osm_type}/${osm_id}`;
-    return { type: 'Feature', id, geometry: single(geometry), properties: { ...tags, id } };
+  return (answer.features as PostpassFeature[]).map(({ geometry, properties: { osm_type, osm_id, tags } }) => ({
+    type: OSM_TYPES[osm_type] ?? 'node',
+    id: osm_id,
+    tags: tags ?? {},
+    geometry: single(geometry),
+  }));
+}
+
+/**
+ * OSM objects as the features of an OSM query layer: identified as `way/123`, with the
+ * tags as properties beside that `id`, as osmtogeojson gives them for Overpass answers.
+ */
+export function asFeatures(objects: readonly OsmObject[]): GeoJSON.FeatureCollection {
+  const features = objects.map(({ type, id, tags, geometry }): GeoJSON.Feature => {
+    const key = `${type}/${id}`;
+    return { type: 'Feature', id: key, geometry, properties: { ...tags, id: key } };
   });
   return { type: 'FeatureCollection', features };
 }
 
+/** Sends an SQL query to Postpass and reads the OSM objects it answers with. */
+export async function askPostpass(query: string): Promise<OsmObject[]> {
+  const response = await fetchResource(POSTPASS_URL, { method: 'POST', body: new URLSearchParams({ data: query }) });
+  return readPostpass(await response.json());
+}
+
 /** The OSM features matching any of the filters within the polygon, from Postpass. */
 export async function findWithPostpass(filters: readonly string[], area: readonly LngLat[]): Promise<GeoJSON.FeatureCollection> {
-  const response = await fetchResource(POSTPASS_URL, { method: 'POST', body: new URLSearchParams({ data: postpassQuery(filters, area) }) });
-  return fromPostpass(await response.json());
+  return asFeatures(await askPostpass(postpassQuery(filters, area)));
 }
