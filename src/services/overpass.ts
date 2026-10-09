@@ -151,7 +151,7 @@ export async function askOverpass(query: string): Promise<OverpassAnswer> {
   return checkAnswer(await response.json());
 }
 
-/** The OSM features matching any of the filters within the polygon. */
-export async function findOsmFeatures(filters: readonly string[], area: readonly LngLat[]): Promise<GeoJSON.FeatureCollection> {
+/** The OSM features matching any of the filters within the polygon, from the Overpass API. */
+export async function findWithOverpass(filters: readonly string[], area: readonly LngLat[]): Promise<GeoJSON.FeatureCollection> {
   return toGeoJson(await askOverpass(overpassQuery(filters, area)));
 }

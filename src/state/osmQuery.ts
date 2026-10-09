@@ -3,13 +3,15 @@ import { geojsonBounds } from '../geo/bounds';
 import type { MapIcon } from '../model/icon';
 import type { GeoJsonSource } from '../model/layer';
 import type { LngLat } from '../model/route';
-import { findOsmFeatures, OSM_ATTRIBUTION } from '../services/overpass';
+import { findOsmFeatures } from '../services/osmSearch';
+import { OSM_ATTRIBUTION } from '../services/overpass';
 import { storeFile } from './files';
 import { addLayer, replaceLayerSource, state } from './store';
 
 /**
  * Layers of OpenStreetMap features, queried in the focus area once and kept as a file.
- * The focus area is required: the Overpass API answers queries for limited areas only.
+ * The focus area is required: Postpass and the Overpass API answer queries for limited
+ * areas only.
  */
 
 function focusArea(): LngLat[] {

@@ -78,7 +78,7 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
     <div class="osm-query">
       <Show when={!state.focus}>
         <div class="note info">
-          <p>OSM queries look within the focus area: the Overpass API answers queries for limited areas only.</p>
+          <p>OSM queries look within the focus area: Postpass and the Overpass API answer queries for limited areas only.</p>
           <button
             onClick={() => {
               props.onClose();
@@ -155,7 +155,7 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
         </button>
       </div>
       <OutcomeNote outcome={querying.outcome()} />
-      <p class="muted hint">Data © OpenStreetMap contributors, found with the Overpass API.</p>
+      <p class="muted hint">Data © OpenStreetMap contributors, found with Postpass, or the Overpass API where Postpass fails.</p>
     </div>
   );
 }
