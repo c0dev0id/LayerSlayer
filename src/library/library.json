@@ -339,7 +339,8 @@
       "url": "https://sgx.geodatenzentrum.de/wmts_topplus_open/1.0.0/WMTSCapabilities.xml",
       "region": "Germany",
       "category": "Basemap",
-      "note": "National topographic basemap, colour and grey."
+      "note": "National topographic basemap, colour and grey.",
+      "attribution": "© <a href=\"https://www.bkg.bund.de\">BKG</a> dl-de/by-2-0, <a href=\"https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_topplusopen.html\">data sources</a>"
     },
     {
       "name": "DWD — weather",
