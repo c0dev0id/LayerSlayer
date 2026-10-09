@@ -1,6 +1,7 @@
 import { HALF_WORLD, isWebMercatorCode, mercatorBounds, scaleToZoom, tileZoom, validBounds } from '../geo/mercator';
 import type { Bounds, Geometry, LayerDraft } from '../model/layer';
 import type { Offer, ServiceInfo } from './types';
+import { htmlText } from './xml';
 
 interface SpatialReference {
   wkid?: number;
@@ -238,7 +239,5 @@ function extentBounds(extent: Extent | undefined): Bounds | undefined {
 
 /** Service descriptions are often HTML; the panel shows them as text. */
 function plainText(html: string | undefined): string | undefined {
-  if (!html) return undefined;
-  const text = new DOMParser().parseFromString(html, 'text/html').body.textContent?.trim();
-  return text ? text : undefined;
+  return (html && htmlText(html).trim()) || undefined;
 }

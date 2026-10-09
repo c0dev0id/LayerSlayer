@@ -1,5 +1,6 @@
 import { isDataProperty } from './featureProperties';
-import { readClosure, type Closure } from './roadClosures';
+import { readClosure, type ClosureFeature } from './roadClosures';
+import { htmlText } from './xml';
 
 /** One line of what a feature is: a property name and its value, both as text. */
 export interface FeatureRow {
@@ -34,13 +35,12 @@ export function describeFeature(properties: Record<string, unknown> | null, fall
   return { title: nameKey ? (props[nameKey] as string) : fallbackTitle, rows };
 }
 
-function describeClosure(closure: Closure & { allVehicles: boolean }, props: Record<string, unknown>): FeatureDescription {
+function describeClosure(closure: ClosureFeature, props: Record<string, unknown>): FeatureDescription {
   const rows: FeatureRow[] = [];
-  const [first, second] = closure.places;
+  const [first, ...others] = closure.places;
   // A route names one place where it is closed one way only; the names of signs say nothing of directions.
-  if (closure.postcode && second) rows.push({ label: 'Closed', value: `both ways, between ${first} and ${closure.places.slice(1).join(', ')}` });
-  else if (closure.postcode) rows.push({ label: 'Closed', value: `one way only, ${first}` });
-  else rows.push({ label: closure.places.length > 1 ? 'Places' : 'Place', value: closure.places.join(', ') });
+  if (closure.postcode) rows.push({ label: 'Closed', value: others.length ? `both ways, between ${first} and ${others.join(', ')}` : `one way only, ${first}` });
+  else rows.push({ label: others.length ? 'Places' : 'Place', value: closure.places.join(', ') });
   rows.push({ label: 'When', value: closure.when || 'always' });
   if (closure.loud) rows.push({ label: 'Only', value: 'motorcycles louder than 95 dB standing noise' });
   if (closure.postcode) rows.push({ label: 'Postcode', value: `${closure.postcode}, ${closure.country}` });
@@ -58,12 +58,6 @@ export function valueText(value: unknown): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'boolean') return value ? 'yes' : 'no';
   if (typeof value === 'object') return JSON.stringify(value);
-  let text = String(value);
-  if (/<[a-z][^>]*>/i.test(text)) text = new DOMParser().parseFromString(text.replace(/<br\s*\/?>/gi, '\n'), 'text/html').body.textContent ?? '';
-  return text
-    .split(/\s*\n\s*/)
-    .filter(Boolean)
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const text = String(value);
+  return (/<[a-z][^>]*>/i.test(text) ? htmlText(text) : text).replace(/\s+/g, ' ').trim();
 }

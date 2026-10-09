@@ -25,7 +25,7 @@ export interface Closure {
 const COUNTRIES: Record<string, string> = { '': 'Germany', A: 'Austria', CH: 'Switzerland', NL: 'Netherlands', B: 'Belgium' };
 
 const POSTCODE = /^(A|CH|NL|B)?(\d{4,5})\s+/i;
-/** A place begins with a hyphen after a space and before a letter; hyphens in dates, times and names do not. */
+/** A place begins with a hyphen at the start or after a space, and before a letter; hyphens in dates, times and names do not. */
 const PLACE = /(?:^|\s)-(?=[^\s\d-])/;
 const LOUD = />\s*95\s*dB/i;
 
@@ -34,16 +34,8 @@ export function parseClosureName(name: string): Closure | undefined {
   const text = name.trim().replace(/\s+/g, ' ');
   const code = POSTCODE.exec(text);
   const rest = code ? text.slice(code[0].length) : text;
-  const start = PLACE.exec(rest);
-  if (!start) return undefined;
-  const places = rest
-    .slice(start.index)
-    .trim()
-    .slice(1)
-    .split(/ -(?=[^\s\d-])/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  const conditions = rest.slice(0, start.index);
+  const [conditions = '', ...places] = rest.split(PLACE).map((part) => part.trim());
+  if (places.length === 0) return undefined;
   const prefix = code?.[1]?.toUpperCase() ?? '';
   return {
     // German postcodes lose their leading zero in the names (1848 for 01848).
@@ -57,12 +49,17 @@ export function parseClosureName(name: string): Closure | undefined {
 /** The sign icons of the closures, by country: a motorcycle or a car in a red ring. */
 const SIGN = /(?:^|\/)(?:D|AT|CH|NL|B)_Verbot_(Motorrad|Kfz)\.png$/;
 
+/** A closure read from a feature, and whether all motor vehicles are kept out, not only motorcycles. */
+export interface ClosureFeature extends Closure {
+  allVehicles: boolean;
+}
+
 /**
  * A feature of the closures as such: a route, named with its postcode, or a sign at one
  * of its ends, marked with the closure's icon. Whether all motor vehicles are kept out,
- * not only motorcycles, the sign's icon or the description says.
+ * the sign's icon or the description says.
  */
-export function readClosure(properties: Record<string, unknown>): (Closure & { allVehicles: boolean }) | undefined {
+export function readClosure(properties: Record<string, unknown>): ClosureFeature | undefined {
   const name = properties['name'];
   if (typeof name !== 'string') return undefined;
   const icon = typeof properties['icon'] === 'string' ? SIGN.exec(properties['icon']) : null;

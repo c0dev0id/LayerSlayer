@@ -60,3 +60,8 @@ export function exceptionText(text: string): string | undefined {
     return undefined;
   }
 }
+
+/** The text of HTML, as descriptions of services and features often are, with its line breaks as new lines. */
+export function htmlText(html: string): string {
+  return new DOMParser().parseFromString(html.replace(/<br\s*\/?>/gi, '\n'), 'text/html').body.textContent ?? '';
+}
