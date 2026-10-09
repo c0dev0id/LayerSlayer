@@ -3,7 +3,7 @@ import { loadOsmFeatures, matchingFeature, type OsmFeature } from '../library/os
 import { latLonText } from '../map/placeLinks';
 import type { LngLat } from '../model/route';
 import type { DetailKind, Details, RowIcon } from '../services/osmDetails';
-import { closeDetails, details, detailsRequest } from '../state/details';
+import { closeDetails, details, detailsRequest, type LayerFeature } from '../state/details';
 import { errorMessage, map } from '../state/ui';
 import {
   BarrierIcon,
@@ -46,15 +46,24 @@ const ROW_ICONS: Record<RowIcon, () => JSX.Element> = {
 const KIND_ICONS: Record<DetailKind, () => JSX.Element> = { road: RoadIcon, poi: MapPinIcon, barrier: BarrierIcon };
 
 /**
- * What OpenStreetMap knows of a spot, in a sheet beside the map, which stays usable: the
- * nearest road or trail, place and barrier, nearest first, each in words with the link to
- * all its tags. The map highlights them meanwhile, and another spot's details replace these.
+ * Details in a sheet beside the map, which stays usable: what OpenStreetMap knows of a spot
+ * (the nearest road or trail, place and barrier, nearest first, each in words with the link
+ * to all its tags), or the features of the map's layers tapped. The map highlights them
+ * meanwhile, and other details replace these.
  */
 export function DetailsDialog() {
   let dialog!: HTMLDialogElement;
   showWhile(() => dialog, () => detailsRequest() !== undefined);
+  const osm = () => {
+    const request = detailsRequest();
+    return request?.kind === 'osm' ? request : undefined;
+  };
+  const tapped = () => {
+    const request = detailsRequest();
+    return request?.kind === 'features' ? request.features : undefined;
+  };
   // The OSM presets give places and barriers their icons.
-  const [presets] = createResource(() => detailsRequest() !== undefined || undefined, loadOsmFeatures);
+  const [presets] = createResource(() => osm() !== undefined || undefined, loadOsmFeatures);
   // A spot under the sheet comes out beside it, so that its highlight shows.
   createEffect(on(detailsRequest, (request) => request && requestAnimationFrame(() => keepInView(request.spot, dialog))));
 
@@ -76,13 +85,31 @@ export function DetailsDialog() {
           Close
         </button>
       </div>
-      <Show when={detailsRequest()}>
-        {(r) => (
-          <p class="muted hint">
-            Near {latLonText(r().spot)}, within {Math.round(r().radius)} m
-          </p>
+      <Show when={tapped()}>
+        {(features) => (
+          <div class="details">
+            <For each={features()}>{(feature) => <FeatureCard feature={feature} />}</For>
+          </div>
         )}
       </Show>
+      <Show when={osm()}>
+        {(r) => (
+          <>
+            <p class="muted hint">
+              Near {latLonText(r().spot)}, within {Math.round(r().radius)} m
+            </p>
+            <OsmDetails presets={presets()} />
+          </>
+        )}
+      </Show>
+    </dialog>
+  );
+}
+
+/** What OpenStreetMap has around the spot, as it comes in. */
+function OsmDetails(props: { presets: OsmFeature[] | undefined }) {
+  return (
+    <>
       <div class="details">
         <Switch>
           <Match when={details.loading}>
@@ -94,11 +121,44 @@ export function DetailsDialog() {
           <Match when={details()?.length === 0}>
             <p class="muted">No road or trail, place or barrier here. Zoom in closer, or right-click nearer to one.</p>
           </Match>
-          <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={presets()} />}</For>}</Match>
+          <Match when={details()}>{(list) => <For each={list()}>{(found) => <DetailCard details={found} presets={props.presets} />}</For>}</Match>
         </Switch>
       </div>
       <p class="muted hint">Data © OpenStreetMap contributors, found with the Overpass API.</p>
-    </dialog>
+    </>
+  );
+}
+
+/** A tapped feature of a layer: its title, the name it was read from, its layer and its properties. */
+function FeatureCard(props: { feature: LayerFeature }) {
+  return (
+    <section class="detail-card feature-card">
+      <div>
+        <strong>{props.feature.title}</strong>
+        <Show when={props.feature.subtitle}>
+          {(subtitle) => (
+            <>
+              <br />
+              {subtitle()}
+            </>
+          )}
+        </Show>
+        <br />
+        <span class="muted">{props.feature.layer}</span>
+      </div>
+      <Show when={props.feature.rows.length > 0}>
+        <dl class="detail-rows">
+          <For each={props.feature.rows}>
+            {(row) => (
+              <>
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+              </>
+            )}
+          </For>
+        </dl>
+      </Show>
+    </section>
   );
 }
 

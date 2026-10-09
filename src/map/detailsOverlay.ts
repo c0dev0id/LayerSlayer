@@ -1,11 +1,14 @@
 import { detailsHighlight } from '../state/details';
 import { ROUND_LINE, type Overlay } from './overlays';
 
-/** What the open details are about, marked on the map: the roads, places and barriers found, and the spot asked about. */
+/**
+ * What the open details are about, marked on the map: the roads, places and barriers found
+ * and the spot asked about, or the features tapped, areas by their outline.
+ */
 
 const HIGHLIGHT_COLOR = '#f59f00';
 const SOURCE = 'details-highlight';
-const LINES = ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]];
+const LINES = ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString', 'Polygon', 'MultiPolygon']]];
 const FOUND_POINTS = ['all', ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]], ['!=', ['get', 'kind'], 'spot']];
 
 export const detailsOverlay: Overlay = {

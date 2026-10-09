@@ -19,17 +19,19 @@ import {
   tool,
 } from '../state/drawing';
 import { searchRadius } from '../services/osmDetails';
-import { showDetails } from '../state/details';
+import { closeDetails, detailsRequest, showDetails, showFeatures } from '../state/details';
 import { appendPoint, redo, undo } from '../state/routes';
+import { state } from '../state/store';
+import { featuresAt } from './layerFeatures';
 import { fromMarker } from './markers';
 import { googleMapsUrl, latLonText, streetViewUrl } from './placeLinks';
 import { insertPointOnLine } from './routeTools';
 import { TapFilter, type PointerSample } from './tapFilter';
 
 /**
- * Taps on the map and keys while a route or the focus area is drawn, and the menu of a spot
- * on the map (right-click or long press): what OSM knows there, its coordinates, Google Maps
- * and Street View.
+ * Taps on the map and keys while a route or the focus area is drawn, taps on the features
+ * of the layers otherwise, and the menu of a spot on the map (right-click or long press):
+ * what OSM knows there, its coordinates, Google Maps and Street View.
  */
 export function Interactions(props: { map: MapLibreMap }) {
   const map = props.map;
@@ -95,7 +97,19 @@ export function Interactions(props: { map: MapLibreMap }) {
       swallowClick = false;
       return;
     }
-    if (editingRouteId() || focusDraft()) taps.click(sample(e.originalEvent), () => onTap(e));
+    taps.click(sample(e.originalEvent), () => (editingRouteId() || focusDraft() ? onTap(e) : onFeatureTap(e)));
+  };
+  /**
+   * A tap that draws nothing opens the details of the layers' features there; a tap beside
+   * them closes the features' details.
+   */
+  const onFeatureTap = (e: MapMouseEvent) => {
+    if (fromMarker(e.originalEvent)) return;
+    const found = featuresAt(map, e.point, tapRadius(), state.layers);
+    if (found.length > 0) {
+      const { lng, lat } = e.lngLat.wrap();
+      showFeatures([lng, lat], found);
+    } else if (detailsRequest()?.kind === 'features') closeDetails();
   };
   /** A click that proved to be a tap: the current tool acts on the route being drawn, or a corner is placed. */
   const onTap = (e: MapMouseEvent) => {

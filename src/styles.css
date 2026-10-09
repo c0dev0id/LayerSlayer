@@ -552,6 +552,11 @@ input.swatch {
   overflow-wrap: anywhere;
 }
 
+/* Without the icon column of OpenStreetMap's details. */
+.feature-card .detail-rows {
+  margin-left: 0;
+}
+
 .detail-card .osm-link {
   margin-left: 38px;
   font-size: 12px;
