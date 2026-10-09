@@ -34,10 +34,12 @@ routes, settings and imported files stay in the browser.
     address and can be changed. *Open* shows the source's layers. Placeholders that a
     browser copied percent-encoded (`%7Bz%7D/%7Bx%7D/%7By%7D`) are read as `{z}/{x}/{y}`.
   - **Files**: GeoJSON, the tracks of GPX files (routes and waypoints in a GPX file are
-    imported under Routes), the placemarks of KML and KMZ files, and GeoPDFs with an ISO
-    32000 geospatial viewport, added as they are chosen. Each new GeoJSON, GPX or KML
-    layer takes the next colour of a palette, which its settings can change. *Replace* in
-    a file layer's settings takes a newer version of its file.
+    imported under Routes, except routes that carry the way a Garmin device or BaseCamp
+    calculated for them, which are drawn like tracks), the placemarks of KML and KMZ
+    files, and GeoPDFs with an ISO 32000 geospatial viewport, added as they are chosen.
+    Each new GeoJSON, GPX or KML layer takes the next colour of a palette, which its
+    settings can change. *Replace* in a file layer's settings takes a newer version of its
+    file.
   - **OSM Query** makes a layer of OpenStreetMap features in the focus area, found with
     the Overpass API; without a focus area it offers to draw one, since Overpass answers
     queries for limited areas only. Choose features from the list, which starts with what
@@ -136,9 +138,10 @@ routes, settings and imported files stay in the browser.
     is placed: the route's entry counts it, *Fly to* includes it, and deleting the route
     deletes it. The points and waypoints of the route being drawn can be dragged;
     right-click or long-press one for its menu.
-  - A route's swatch picks its colour, and the *Waypoints* slider of a route with
-    waypoints draws them up to three times their size, like the icons of a layer. Both
-    are undo steps, one per pick or drag.
+  - A route's swatch picks its colour, its *Line* slider the width of its line (0.5 to
+    10 px, 4 px unless chosen), and the *Waypoints* slider of a route with waypoints draws
+    them up to three times their size, like the icons of a layer. All three are undo
+    steps, one per pick or drag.
   - New points are reached along the roads (*Route*, by OSRM with the route's car, bike or
     foot profile) or by a straight line (*Line*), for ways the routing does not know.
   - *Undo* and *Redo* (Ctrl+Z, Ctrl+Shift+Z) step through route and waypoint edits; layer
@@ -146,6 +149,8 @@ routes, settings and imported files stay in the browser.
   - *Export GPX* writes the waypoints and one track per route. *Import GPX* adds a file's
     routes (`<rte>`) with every point routed, and its tracks (`<trk>`) simplified to at
     most 500 points joined by straight lines, so they keep their shape and stay editable.
+    A route with the way a Garmin device or BaseCamp calculated for it (Garmin's
+    `gpxx:rpt` points) is as good as a track and imported like one, without routing.
     Its waypoints belong to the first of them, or to a route of their own, named after
     the file, if it has none. A leg the routing cannot find stays a red dashed line until
     one of its points is moved.

@@ -337,12 +337,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
     still what a GPX file holds, the line with its waypoints, so a route's deletion takes
     its waypoints along in the same undo step, and only the route being drawn has its
     waypoints draggable. Stored waypoints whose route is missing are dropped when read.
-  - A route's colour and waypoint size are route edits like its name, so they are undo
-    steps: left out of the history, an undo of an earlier edit would restore the snapshot
-    taken before it and quietly revert them. A colour picker and a slider send an input
-    per movement, so edits of one gesture (`recordEdit(label, gesture)`) make one step;
-    the input's change event (`endGesture`) closes it. The waypoint size shares the
-    1–3× range of layer icons (`model/icon.ts`); pins are 27 px wide at 1×.
+  - A route's colour, line width and waypoint size are route edits like its name, so they
+    are undo steps: left out of the history, an undo of an earlier edit would restore the
+    snapshot taken before it and quietly revert them. A colour picker and a slider send an
+    input per movement, so edits of one gesture (`recordEdit(label, gesture)`) make one
+    step; the input's change event (`endGesture`) closes it. The waypoint size shares the
+    1–3× range of layer icons (`model/icon.ts`); pins are 27 px wide at 1×. The line width
+    shares the 0.5–10 px range and the slider of a vector layer's lines; it is a property
+    of each line feature of the route overlay (`width`), read by the line and its casing
+    (1.5 px wider on each side), so one overlay layer draws every route at its own width.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all
@@ -352,11 +355,19 @@ It is a static single-page app on GitHub Pages; there is no server component.
     Douglas–Peucker to at most 500 points joined by straight lines, since every point is
     a marker while the route is drawn and an undo step copies all routes. Straight legs
     keep their shape when the profile changes.
+  - Garmin devices and BaseCamp write the way they calculated for a route into the file:
+    each `<rtept>` carries the points of the road on to the next as `gpxx:rpt` in its
+    `gpxx:RoutePointExtension` (GPX Extensions v3). Such a route is as good as a track,
+    so its route points and their `rpt`s, in order, are read as its course and imported
+    like a `<trk>`: simplified, straight legs, nothing routed. Routing its route points
+    again would replace Garmin's road with OSRM's, which may take another one. A route
+    without `rpt`s is routed as before.
   - A GPX file can also be a layer (Add layer > Files), for tracks to look at rather than
-    edit. Only its tracks are read, converted to GeoJSON at import and kept as a GeoJSON
-    file, so the layer is an ordinary GeoJSON layer with a palette colour and the colour
-    setting; several tracks on the map are told apart that way. Routes and waypoints stay
-    with the route tool's import, which keeps routing out of the add-layer dialog.
+    edit. Only its tracks are read (and routes with Garmin's course, which are as good as
+    tracks), converted to GeoJSON at import and kept as a GeoJSON file, so the layer is an
+    ordinary GeoJSON layer with a palette colour and the colour setting; several tracks on
+    the map are told apart that way. Routes and waypoints stay with the route tool's
+    import, which keeps routing out of the add-layer dialog.
   - KML and KMZ files are layers the same way: their placemarks are converted with
     @tmcw/togeojson (KMZ unzipped with fflate, `doc.kml` or the first KML file) and kept
     as GeoJSON, drawn in the layer's colour. Ground overlays would need a picture placed
