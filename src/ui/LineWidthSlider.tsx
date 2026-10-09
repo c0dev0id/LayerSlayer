@@ -1,4 +1,4 @@
-import { MAX_LINE_WIDTH, MIN_LINE_WIDTH } from '../model/layer';
+import { MAX_LINE_WIDTH, MIN_LINE_WIDTH } from '../model/line';
 
 /**
  * The width of a line in pixels, MIN_LINE_WIDTH to MAX_LINE_WIDTH in half pixels: a vector

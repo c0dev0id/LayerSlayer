@@ -36,5 +36,7 @@ describe('routeFeatures', () => {
   it('draws a route in its own line width', () => {
     const lines = routeFeatures([{ ...route, lineWidth: 7.5 }], new Set());
     expect(lines.features.map((f) => f.properties!['width'])).toEqual([7.5, 7.5, 7.5]);
+    // Whatever a project file says is kept within the slider's bounds.
+    expect(routeFeatures([{ ...route, lineWidth: 500 }], new Set()).features[0]!.properties!['width']).toBe(10);
   });
 });

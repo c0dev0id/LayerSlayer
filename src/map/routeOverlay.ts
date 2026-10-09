@@ -1,5 +1,6 @@
 import type { FilterSpecification, LayerSpecification } from 'maplibre-gl';
 import { createMemo, createRoot } from 'solid-js';
+import { lineWidth } from '../model/line';
 import { ROUTE_LINE_WIDTH, type LngLat, type Route } from '../model/route';
 import { legCoordinates, legState, routeLegs } from '../routing/legs';
 import { ROUTING_ATTRIBUTION } from '../routing/osrm';
@@ -66,7 +67,7 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
   for (const route of routes) {
     for (const leg of routeLegs(route)) {
       const coordinates = legCoordinates(route, leg, decode).map((p): LngLat => [p[0], p[1]]);
-      const properties = { state: legState(route, leg, failed), color: route.color, width: route.lineWidth ?? ROUTE_LINE_WIDTH };
+      const properties = { state: legState(route, leg, failed), color: route.color, width: lineWidth(route.lineWidth, ROUTE_LINE_WIDTH) };
       features.push({ type: 'Feature', properties, geometry: { type: 'LineString', coordinates } });
     }
   }

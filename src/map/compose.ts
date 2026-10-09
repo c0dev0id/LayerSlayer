@@ -7,12 +7,12 @@ import type {
 } from 'maplibre-gl';
 import { intersectBounds } from '../geo/bounds';
 import { iconSize, type MapIcon } from '../model/icon';
+import { lineWidth, MAX_LINE_WIDTH } from '../model/line';
 import {
   isShown,
   keepsTiles,
   layerColor,
   LINE_WIDTH,
-  MAX_LINE_WIDTH,
   MAX_ZOOM,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
@@ -438,7 +438,7 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
         type: 'line',
         filter: POLYGON as never,
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': color, 'line-width': layer.lineWidth ?? 1.5, 'line-opacity': opacity, ...dash },
+        paint: { 'line-color': color, 'line-width': lineWidth(layer.lineWidth, 1.5), 'line-opacity': opacity, ...dash },
       },
       {
         ...base,
@@ -446,7 +446,7 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
         type: 'line',
         filter: LINE as never,
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': color, 'line-width': layer.lineWidth ?? LINE_WIDTH, 'line-opacity': opacity, ...dash },
+        paint: { 'line-color': color, 'line-width': lineWidth(layer.lineWidth, LINE_WIDTH), 'line-opacity': opacity, ...dash },
       },
       ...(layer.icon ? poiLayers(layer, layer.icon, base, color) : [dots(layer, base, color)]),
       ...(layer.label ? labels(layer, layer.label, base, labelFont) : []),

@@ -20,8 +20,6 @@ describe('parseRouteData', () => {
           route('a'),
           { ...route('b'), profile: 'plane' },
           { ...route('c'), points: [{ id: 'p', lngLat: [1] }] },
-          { ...route('d'), lineWidth: 'wide' },
-          { ...route('e'), lineWidth: 6 },
         ],
         waypoints: [
           { id: 'w', routeId: 'a', name: 'W', lngLat: [1, 2] },
@@ -31,7 +29,7 @@ describe('parseRouteData', () => {
         ],
       }),
     );
-    expect(data.routes.map((r) => r.id)).toEqual(['a', 'e']);
+    expect(data.routes.map((r) => r.id)).toEqual(['a']);
     // Without a name, without a route, and with a route that was dropped.
     expect(data.waypoints.map((w) => w.id)).toEqual(['w']);
     expect(parseRouteData('{}')).toEqual({ routes: [], waypoints: [] });

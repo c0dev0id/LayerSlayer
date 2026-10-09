@@ -22,6 +22,7 @@ import {
   type OsmQuery,
   type RasterAdjustments,
 } from '../model/layer';
+import { lineWidth } from '../model/line';
 import { propertyKeys } from '../services/featureProperties';
 import { importAccept } from '../services/importFile';
 import { hostOf } from '../state/net';
@@ -508,7 +509,7 @@ function ActiveLayer(props: { layer: Layer }) {
           </select>
           <LineWidthSlider
             label={`Line width of ${layer.name}`}
-            value={layer.lineWidth ?? LINE_WIDTH}
+            value={lineWidth(layer.lineWidth, LINE_WIDTH)}
             onInput={(lineWidth) => updateLayer(layer.id, { lineWidth })}
           />
         </div>

@@ -25,8 +25,7 @@ function isRoute(value: unknown): value is Route {
     Array.isArray(r.points) &&
     r.points.every((p) => typeof p?.id === 'string' && isLngLat(p.lngLat)) &&
     typeof r.legs === 'object' &&
-    r.legs !== null &&
-    (r.lineWidth === undefined || (typeof r.lineWidth === 'number' && Number.isFinite(r.lineWidth)))
+    r.legs !== null
   );
 }
 

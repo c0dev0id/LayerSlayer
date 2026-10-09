@@ -239,8 +239,6 @@ const DEFAULT_OPACITY = 0.5;
 
 export type LineDash = 'dashed' | 'long-dashed' | 'dotted';
 
-export const MIN_LINE_WIDTH = 0.5;
-export const MAX_LINE_WIDTH = 10;
 /** Width of a vector layer's lines in pixels where it sets none. */
 export const LINE_WIDTH = 2.5;
 

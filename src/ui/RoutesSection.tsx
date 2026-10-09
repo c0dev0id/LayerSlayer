@@ -1,6 +1,7 @@
 import { createMemo, createSignal, For, Show } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { geojsonBounds } from '../geo/bounds';
+import { lineWidth } from '../model/line';
 import { PROFILES, ROUTE_LINE_WIDTH, type LngLat, type Profile, type Route } from '../model/route';
 import { gpxToRouteData, routeTracks } from '../routing/gpx';
 import { routePoints } from '../routing/legs';
@@ -180,7 +181,7 @@ function RouteRow(props: { route: Route }) {
         <span class="muted label">Line</span>
         <LineWidthSlider
           label={`Line width of ${route.name}`}
-          value={route.lineWidth ?? ROUTE_LINE_WIDTH}
+          value={lineWidth(route.lineWidth, ROUTE_LINE_WIDTH)}
           onInput={(width) => setRouteLineWidth(route.id, width)}
           onChange={endGesture}
         />
