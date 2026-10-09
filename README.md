@@ -57,12 +57,14 @@ routes, settings and imported files stay in the browser.
     spaces all having to match, e.g. `highway=track tracktype=grade4`; values with spaces
     go in double quotes (`operator="US Army"`). Former special weapons depots, missile
     sites and government bunkers are often mapped by their name alone, so the presets for
-    them (*by name*) look for the words their names use. *Query* finds everything chosen
-    in one layer, named after it, with the icon of the first chosen feature that has one;
-    the icon button next to the name picks another, or none. Features found as lines
-    (roads, tracks, paths, routes, fences, rivers, power lines) show a line symbol instead
-    of an icon and give their layer none, since icons mark points and areas only. The
-    result is kept in the browser as GeoJSON.
+    them (*by name*) look for the words their names use. A name search reads every object
+    in the area, so it takes longer than a search by tag: about 5 s for
+    Rhineland-Palatinate, half a minute for all of Germany. *Query* finds everything
+    chosen in one layer, named after it, with the icon of the first chosen feature that
+    has one; the icon button next to the name picks another, or none. Features found as
+    lines (roads, tracks, paths, routes, fences, rivers, power lines) show a line symbol
+    instead of an icon and give their layer none, since icons mark points and areas only.
+    The result is kept in the browser as GeoJSON.
 - The **panel** can be made wider or narrower by dragging its edge (or with the arrow
   keys on it), for longer layer names; a double click on the edge brings it back to its
   usual width.
@@ -122,11 +124,14 @@ routes, settings and imported files stay in the browser.
   as `lat,lon`, or to open it in Google Maps or Google Street View in a new tab. *Show
   details* asks OpenStreetMap what is there and shows, nearest first, the nearest road or
   trail (type, name, speed limit, one way or not, surface, track grade, access), place
-  (type, name, address, phone, website, opening hours) and barrier (opening hours, lock,
-  access) within about 40 pixels, in words rather than tags. Benches, bins, kerbs, fields
-  and the like are left out; each entry links to all its tags on openstreetmap.org. The
-  details open in a sheet beside the map, which highlights what they describe in amber;
-  right-click another spot to see its details instead.
+  (type, name, address, phone, website, opening hours), barrier (opening hours, lock,
+  access) and piece of history (bunker, historic place, former military site or Cold War
+  site known by its name; when it was built and given up, whether it is a listed monument,
+  inscription, description, Wikipedia article) within about 40 pixels, in words rather
+  than tags. Benches, bins, kerbs, fields and the like are left out; each entry links to
+  all its tags on openstreetmap.org. The details open in a sheet beside the map, which
+  highlights what they describe in amber; right-click another spot to see its details
+  instead.
 - **Search** (top left of the map) finds places and addresses with Nominatim,
   OpenStreetMap's search, preferring those in view. Enter searches; the first place found
   gets a pin and the map flies to it, and the list below offers the other places found. ×

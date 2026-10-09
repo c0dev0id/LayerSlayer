@@ -504,17 +504,23 @@ It is a static single-page app on GitHub Pages; there is no server component.
     the polygon, since a boundary relation is a line and a polygon. Each filter is a
     SELECT of its own, joined with UNION ALL (`selectObjects`), so that each can use the
     index that fits it; an OR across them made a name search drag every other filter into
-    a scan of the area. Answers are reshaped like osmtogeojson's (`way/123` ids, tags as
-    properties, one-part multi-geometries single), so layers do not depend on where their
-    features came from. Measured from here: Postpass answered the History presets around
-    Fischbach in about a second; the main Overpass instance took 8 to 11 s or failed.
-    Without an area to narrow it, a name search over all of Germany timed out on Postpass
-    too. `services/osm.ts` holds what both sources share: the filter language, the OSM
-    objects details read, and `postpassOrOverpass`, which asks the Overpass API where
-    Postpass fails and names both reasons where neither answers. Postpass gets 10 s for
-    details and 60 s for a layer before the Overpass API is asked. QLever's OSM endpoint
-    was tried as well: a name search over the planet timed out, and its nearby search
-    measures to centroids only, so it is no source for either use.
+    a scan of the area. No index finds text within a value, so a name search reads every
+    object in the area, and Postpass puts such a query in its slow queue (estimated cost
+    above 150,000). A SELECT per name filter read the area once per filter: the six of
+    "Missile sites (by name)" did not answer within 120 s over Rhineland-Palatinate.
+    Filters that only search text in the same key are therefore joined into one search
+    (`searchesOf`): `ILIKE ANY` for Postpass, one alternation for Overpass. That query
+    answered in 4.5 s over Rhineland-Palatinate and in 33 s over all of Germany. Answers
+    are reshaped like osmtogeojson's (`way/123` ids, tags as properties, one-part
+    multi-geometries single), so layers do not depend on where their features came from.
+    Measured from here: Postpass answered the History presets around Fischbach in about a
+    second; the main Overpass instance took 8 to 11 s or failed. `services/osm.ts` holds
+    what both sources share: the filter language, the OSM objects details read, and
+    `postpassOrOverpass`, which asks the Overpass API where Postpass fails and names both
+    reasons where neither answers. Postpass gets 10 s for details and 60 s for a layer
+    before the Overpass API is asked. QLever's OSM endpoint was tried as well: a name
+    search over the planet timed out, and its nearby search measures to centroids only, so
+    it is no source for either use.
 - **GeoJSON loaded from an address survives style diffs.** MapLibre 6 keeps the GeoJSON it
   loaded from an address in place of the address, so every diffed `setStyle` saw such a
   source as changed and fetched and indexed it again, on any change of any layer (each
@@ -570,36 +576,40 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - **Spot details pick what matters on the move.** One Overpass query (`around`, about 40
   pixels at the zoom, 15 to 250 m) asks for drivable ways (motorways down to tracks,
   paths and bridleways; footways and cycleways are left out), places to go to (amenity,
-  shop, tourism, craft, office, healthcare; leisure and historic only with a name) and
-  barrier nodes. The query looks around the spot once (`nwr(around)->.near`) and filters
-  that set by tag, as openstreetmap.org's "Query features" does, rather than a lookup per
-  tag: far less work for overpass-api.de, whose per-address rate limit refused every few
-  clicks before. Its declared timeout is 10 s, and relations come clipped to a box twice
-  the radius (`out geom(box)`, points outside are null), so a large park does not send its
-  whole outline; a clipped area is measured to its edge. openstreetmap.org's tool runs on
-  its own Overpass server (query.openstreetmap.org), which only that site may use.
-  Postpass is asked first and answered such a lookup in 0.6 to 1.6 s where Overpass took
-  up to 11 s or failed. Its SQL asks for the same things (`ST_DWithin` on geography after
-  a test against the same box, `?|` for the place keys), gives areas as their outlines
-  (`ST_Boundary`) and clips relations to the box (`ST_Intersection`), so what it answers
-  is measured and drawn as Overpass's answer was. The details work on OSM objects (type,
-  id, tags, GeoJSON geometry) that both sources are turned into, rather than on Overpass
-  elements; at four spots in Karlsruhe, Berlin and the Palatinate both gave the same
-  details.
-  The area query of OSM Query layers stays one statement per filter: over a large area the
-  tag index narrows first, and everything within the area would be far too much.
-  Street furniture (benches, bins, vending machines, post boxes, …), kerbs
-  and unnamed information boards are dropped. Of each kind the nearest is kept, measured
-  in a local plane to nodes, segments and inside closed rings, and the up to three
-  results are shown nearest first, so a click near a gate on a track shows both. Tags
-  become words (`motor_vehicle=forestry` is "Motor vehicles: Forestry only"), with
-  Tabler icons for the lines and the OSM preset's icon where the element matches one;
-  the link to openstreetmap.org shows everything else. The details are a non-modal sheet
-  beside the map rather than a centred modal, which would hide the very spot: the map
-  stays usable, another spot's details replace them, and an overlay highlights the spot
-  and what was found (lines amber with a white casing, points as amber rings). A spot in
-  the sheet's column is panned beside it; the sheet's height says little, as it grows
-  with its results.
+  shop, tourism, craft, office, healthcare; leisure only with a name), barrier nodes and
+  history: anything historic, bunkers, former military sites (`abandoned:military`,
+  `disused:military`, `historic:military`) and Cold War sites known only by name
+  ("Sonderwaffenlager", "Nike-", "Raketenstellung", …, the words of the by-name presets).
+  History is a kind of its own, so a bunker next to a road is shown beside the road
+  rather than instead of it, with its dates, heritage status, inscription, description
+  and Wikipedia article. The query looks around the spot once (`nwr(around)->.near`) and
+  filters that set by tag, as openstreetmap.org's "Query features" does, rather than a
+  lookup per tag: far less work for overpass-api.de, whose per-address rate limit refused
+  every few clicks before. Its declared timeout is 10 s, and relations come clipped to a
+  box twice the radius (`out geom(box)`, points outside are null), so a large park does
+  not send its whole outline; a clipped area is measured to its edge. openstreetmap.org's
+  tool runs on its own Overpass server (query.openstreetmap.org), which only that site may
+  use. Postpass is asked first and answered such a lookup in 0.6 to 1.6 s where Overpass
+  took up to 11 s or failed. Its SQL asks for the same things (`ST_DWithin` on geography
+  after a test against the same box, `?|` for the place keys), gives areas as their
+  outlines (`ST_Boundary`) and clips relations to the box (`ST_Intersection`), so what it
+  answers is measured and drawn as Overpass's answer was. The details work on OSM objects
+  (type, id, tags, GeoJSON geometry) that both sources are turned into, rather than on
+  Overpass elements; at four spots in Karlsruhe, Berlin and the Palatinate both gave the
+  same details. The area query of OSM Query layers stays one statement per filter: over a
+  large area the tag index narrows first, and everything within the area would be far too
+  much. Street furniture (benches, bins, vending machines, post boxes, …), kerbs and
+  unnamed information boards are dropped. Of each kind the nearest is kept, measured in a
+  local plane to nodes, segments and inside closed rings, and the up to four results are
+  shown nearest first, so a click near a gate on a track shows both. Tags become words
+  (`motor_vehicle=forestry` is "Motor vehicles: Forestry only"), with Tabler icons for the
+  lines and the OSM preset's icon where the element matches one; the link to
+  openstreetmap.org shows everything else. The details are a non-modal sheet beside the
+  map rather than a centred modal, which would hide the very spot: the map stays usable,
+  another spot's details replace them, and an overlay highlights the spot and what was
+  found (lines amber with a white casing, points as amber rings). A spot in the sheet's
+  column is panned beside it; the sheet's height says little, as it grows with its
+  results.
 - **Line styles of vector layers.** Width and dashes (solid, dashed, long dashes, dotted)
   apply to lines and the outlines of areas alike, so the setting means something for
   area layers too; unset, lines stay 2.5 and outlines 1.5 pixels. Dash patterns are in
@@ -710,9 +720,9 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Tiles of slow layers kept in the browser for a day, per layer, and a limit on parallel
   feature queries per server.
 - Place and address search (Nominatim) with a pin on the place found.
-- A menu for any spot on the map: its details from OSM (nearest road or trail, place and
-  barrier, in words), its coordinates, Google Maps and Street View (Google's documented
-  Maps URLs, no key).
+- A menu for any spot on the map: its details from OSM (nearest road or trail, place,
+  barrier and piece of history, in words), its coordinates, Google Maps and Street View
+  (Google's documented Maps URLs, no key).
 - 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched by a button
   on the map.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
