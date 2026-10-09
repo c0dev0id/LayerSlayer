@@ -478,7 +478,7 @@ It is a static single-page app on GitHub Pages; there is no server component.
   riders being the main audience, tracks and trails, access and barriers, roads and
   vehicle services come first) and a field
   for typed tags (`key=value`, `key=*`, several separated by spaces all having to match,
-  quotes around spaces). Filters are parsed and written one way (`services/overpass.ts`),
+  quotes around spaces). Filters are parsed and written one way (`services/osm.ts`),
   so a curated entry and typed tags are the same thing to the query, which joins every
   filter's `nwr` statement with the focus polygon (`poly:`, the polygon itself rather than
   its bounds) and asks for `out geom`. The focus area is required, not just advised: a
@@ -501,15 +501,20 @@ It is a static single-page app on GitHub Pages; there is no server component.
     become SQL (`services/postpass.ts`): `tags @> '{"k":"v"}'` and `tags ? 'k'`, which use
     the index, `tags->>'k' ILIKE '%…%'` with its wildcards escaped for `key~text`, the
     focus polygon through `ST_Intersects`, and `DISTINCT ON (osm_type, osm_id)` preferring
-    the polygon, since a boundary relation is a line and a polygon. Answers are reshaped
-    like osmtogeojson's (`way/123` ids, tags as properties, one-part multi-geometries
-    single), so layers do not depend on where their features came from. Measured from
-    here: Postpass answered the History presets around Fischbach in about a second; the
-    main Overpass instance took 8 to 11 s or failed. Without an area to narrow it, a name
-    search over all of Germany timed out on Postpass too. `services/osmSearch.ts` asks the
-    sources in order and names every reason when none answers. QLever's OSM endpoint was
-    tried as well: a name search over the planet timed out, and its nearby search measures
-    to centroids only, so it is no source for either use.
+    the polygon, since a boundary relation is a line and a polygon. Each filter is a
+    SELECT of its own, joined with UNION ALL (`selectObjects`), so that each can use the
+    index that fits it; an OR across them made a name search drag every other filter into
+    a scan of the area. Answers are reshaped like osmtogeojson's (`way/123` ids, tags as
+    properties, one-part multi-geometries single), so layers do not depend on where their
+    features came from. Measured from here: Postpass answered the History presets around
+    Fischbach in about a second; the main Overpass instance took 8 to 11 s or failed.
+    Without an area to narrow it, a name search over all of Germany timed out on Postpass
+    too. `services/osm.ts` holds what both sources share: the filter language, the OSM
+    objects details read, and `postpassOrOverpass`, which asks the Overpass API where
+    Postpass fails and names both reasons where neither answers. Postpass gets 10 s for
+    details and 60 s for a layer before the Overpass API is asked. QLever's OSM endpoint
+    was tried as well: a name search over the planet timed out, and its nearby search
+    measures to centroids only, so it is no source for either use.
 - **GeoJSON loaded from an address survives style diffs.** MapLibre 6 keeps the GeoJSON it
   loaded from an address in place of the address, so every diffed `setStyle` saw such a
   source as changed and fetched and indexed it again, on any change of any layer (each
