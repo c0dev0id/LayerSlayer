@@ -27,15 +27,16 @@ export interface SpotView {
   zoom: number;
 }
 
-/** `#map=zoom/lat/lon`, as openstreetmap.org writes it; the zoom may have decimals. */
-const MAP_HASH = /^#map=(\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/;
+/** `#map=zoom/lat,lon`, or `#map=zoom/lat/lon` as openstreetmap.org writes it; the zoom may have decimals. */
+const MAP_HASH = /^#map=(\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)[,/](-?\d+(?:\.\d+)?)$/;
 
 /**
  * The page at `page` (its address without query or hash) opened at the spot and zoom:
- * `#map=zoom/lat/lon` with five decimals (about a metre), as openstreetmap.org links.
+ * `#map=zoom/lat,lon`, the coordinates with five decimals (about a metre) and separated
+ * by a comma as most apps read them.
  */
 export function spotLink(page: string, [lng, lat]: LngLat, zoom: number): string {
-  return `${page}#map=${Math.round(zoom * 100) / 100}/${lat.toFixed(5)}/${lng.toFixed(5)}`;
+  return `${page}#map=${Math.round(zoom * 100) / 100}/${lat.toFixed(5)},${lng.toFixed(5)}`;
 }
 
 /** The spot and zoom a page address's hash opens the map at, if it names one the map can show. */

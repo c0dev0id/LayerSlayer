@@ -16,13 +16,14 @@ describe('place links', () => {
 
   it('open Layer Slayer at the spot and zoom, and read that back', () => {
     const link = spotLink('https://shagen.me/LayerSlayer/', spot, 15.4567);
-    expect(link).toBe('https://shagen.me/LayerSlayer/#map=15.46/49.01352/8.40436');
+    expect(link).toBe('https://shagen.me/LayerSlayer/#map=15.46/49.01352,8.40436');
     expect(readSpotLink(new URL(link).hash)).toEqual({ center: [8.40436, 49.01352], zoom: 15.46 });
-    expect(spotLink('https://shagen.me/LayerSlayer/', [-0.1, -33.9], 4)).toBe('https://shagen.me/LayerSlayer/#map=4/-33.90000/-0.10000');
+    expect(spotLink('https://shagen.me/LayerSlayer/', [-0.1, -33.9], 4)).toBe('https://shagen.me/LayerSlayer/#map=4/-33.90000,-0.10000');
   });
 
   it('read openstreetmap.org links, and nothing that names no spot the map can show', () => {
     expect(readSpotLink('#map=17/49.0868/7.7106')).toEqual({ center: [7.7106, 49.0868], zoom: 17 });
+    expect(readSpotLink('#map=17/49.0868,7.7106')).toEqual({ center: [7.7106, 49.0868], zoom: 17 });
     expect(readSpotLink('')).toBeUndefined();
     expect(readSpotLink('#map=17/49.0868')).toBeUndefined();
     expect(readSpotLink('#map=30/49/7')).toBeUndefined();

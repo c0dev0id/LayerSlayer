@@ -14,7 +14,7 @@ import { detailsOverlay } from './detailsOverlay';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
 import { withOverlays } from './overlays';
-import { readSpotLink, type SpotView } from './placeLinks';
+import { latLonText, readSpotLink, type SpotView } from './placeLinks';
 import { drawDisc, drawGlyph, parsePoiImageId, POI_DISC } from './poiIcons';
 import { loadCachedTile, loadPmtiles, loadTile } from './protocols';
 import { routeOverlay } from './routeOverlay';
@@ -150,10 +150,20 @@ export function MapView() {
         createEffect(on(overlay.data, (data) => map.getSource<maplibregl.GeoJSONSource>(overlay.id)?.setData(data), { defer: true }));
       }
     });
+    // The spot a link opened the map at, until the pin is clicked or another link opens.
+    const linkPin = new maplibregl.Marker({ color: '#e03131' });
+    linkPin.getElement().addEventListener('click', () => linkPin.remove());
+    const pinSpot = (view: SpotView) => {
+      linkPin.setLngLat(view.center).addTo(map);
+      linkPin.getElement().title = `${latLonText(view.center)} (click to remove the pin)`;
+    };
+    if (linked) pinSpot(linked);
     // A link pasted into the address bar of the open page.
     const onHashChange = () => {
       const view = takeSpotLink();
-      if (view) map.jumpTo({ ...view, bearing: 0, pitch: 0 });
+      if (!view) return;
+      map.jumpTo({ ...view, bearing: 0, pitch: 0 });
+      pinSpot(view);
     };
     window.addEventListener('hashchange', onHashChange);
     onCleanup(() => {
