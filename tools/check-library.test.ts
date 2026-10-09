@@ -7,7 +7,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { it } from 'vitest';
-import { entryService, type LibraryEntry } from '../src/library/library';
+import { entryService, type ServiceEntry } from '../src/library/library';
 import { getParam, withParams } from '../src/map/urls';
 import { parseFeatureService, parseMapServer, serviceUrl } from '../src/services/arcgis';
 import { collectionsAddress, parseCollections } from '../src/services/ogcFeatures';
@@ -71,7 +71,7 @@ async function parse(entry: Entry, body: string, url: string): Promise<ServiceIn
       return address ? parseCollections(JSON.parse(body), address.collections, address.id) : undefined;
     }
     case 'vector-tiles':
-      return entryService(entry as LibraryEntry) ?? parseTileJson(JSON.parse(body), entry.url);
+      return entryService(entry as ServiceEntry) ?? parseTileJson(JSON.parse(body), entry.url);
     case 'xyz':
       return parseXyz(entry.url);
     default:

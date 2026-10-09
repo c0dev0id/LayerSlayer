@@ -1,6 +1,16 @@
 import { createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
 import { allOutside } from '../geo/bounds';
-import { downloadedLayer, entryAreas, entryService, filterLibrary, loadLibrary, withEntry, type LibraryEntry } from '../library/library';
+import {
+  downloadedLayer,
+  entryAreas,
+  entryService,
+  filterLibrary,
+  loadLibrary,
+  withEntry,
+  type FileEntry,
+  type LibraryEntry,
+  type ServiceEntry,
+} from '../library/library';
 import type { Bounds } from '../model/layer';
 import { decodePlaceholders, parsePmtilesUrl } from '../map/urls';
 import { detectServiceType } from '../services/detect';
@@ -26,9 +36,9 @@ const CONFIRM_ABOVE = 20;
 
 /** A source to read: from the library, or an address typed in. */
 interface Source {
-  type: Exclude<ServiceType, 'geopdf'>;
+  type: ServiceEntry['type'];
   url: string;
-  entry?: LibraryEntry;
+  entry?: ServiceEntry;
 }
 
 interface Failure {
@@ -138,7 +148,7 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
   }
 
   /** Opens the file of a library entry that the user downloaded. */
-  async function openDownloaded(entry: LibraryEntry, file: File) {
+  async function openDownloaded(entry: FileEntry, file: File) {
     setFailure(undefined);
     setReading(entry.url, true);
     try {
@@ -181,7 +191,7 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
           <LibraryTab
             busy={busy()}
             sizes={sizes()}
-            onOpen={(entry, type) => void open({ type, url: entry.url, entry })}
+            onOpen={(entry) => void open({ type: entry.type, url: entry.url, entry })}
             onFile={(entry, file) => void openDownloaded(entry, file)}
           />
         </div>
@@ -242,16 +252,16 @@ function FailureNote(props: { failure: Failure; onRetry: (source: Source) => voi
 function LibraryTab(props: {
   busy: ReadonlySet<string>;
   sizes: ReadonlyMap<string, number>;
-  onOpen: (entry: LibraryEntry, type: Source['type']) => void;
-  onFile: (entry: LibraryEntry, file: File) => void;
+  onOpen: (entry: ServiceEntry) => void;
+  onFile: (entry: FileEntry, file: File) => void;
 }) {
   const [library] = createResource(loadLibrary);
   let chooser!: HTMLInputElement;
   /** The file entry whose file is being chosen. */
-  let choosing: LibraryEntry | undefined;
+  let choosing: FileEntry | undefined;
   /** A tap on an entry: a service opens; a file is asked for, or removed when it is on the map. */
   const tap = (entry: LibraryEntry, onMap: boolean) => {
-    if (entry.type !== 'file') return props.onOpen(entry, entry.type as Source['type']);
+    if (entry.type !== 'file') return props.onOpen(entry);
     if (onMap) return removeLayersWhere((l) => l.origin === entry.url);
     choosing = entry;
     chooser.click();
@@ -304,7 +314,7 @@ function LibraryTab(props: {
                     <Show when={onMap() > 0}>
                       <span class="count">{onMap()} on the map</span>
                     </Show>
-                    <Show when={entry.cors === false}>
+                    <Show when={entry.type !== 'file' && entry.cors === false}>
                       <span
                         class="badge"
                         title="The server does not allow web pages to read it (no valid CORS header). With a CORS proxy set in Settings, it goes through the proxy."

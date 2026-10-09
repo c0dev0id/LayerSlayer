@@ -6,10 +6,11 @@ import { parseXyz } from '../services/xyz';
 import { defaultState } from '../state/store';
 import library from './library.json';
 import { validBounds } from '../geo/mercator';
-import { downloadedLayer, entryAreas, entryService, filterLibrary, withEntry, type LibraryEntry } from './library';
+import { downloadedLayer, entryAreas, entryService, filterLibrary, withEntry, type FileEntry, type LibraryEntry, type ServiceEntry } from './library';
 import { REGION_BOUNDS } from './regions';
 
 const entries = library.entries as LibraryEntry[];
+const service = (name: string) => entries.find((e): e is ServiceEntry => e.name === name && e.type !== 'file')!;
 
 describe('library', () => {
   it('has complete entries of known types with unique addresses', () => {
@@ -53,7 +54,7 @@ describe('library', () => {
   });
 
   it('offers the tile layers a vector tile template lists, within its zooms', () => {
-    const entry = entries.find((e) => e.name === 'Open Infrastructure Map — water')!;
+    const entry = service('Open Infrastructure Map — water');
     const info = withEntry(entryService(entry)!, entry);
     const drafts = info.offers.filter((o) => o.draft).map((o) => o.draft!);
     expect(drafts.map((d) => d.name)).toEqual(entry.layers);
@@ -61,7 +62,7 @@ describe('library', () => {
       source: { type: 'vector-tiles', tiles: ['https://openinframap.org/map/water/{z}/{x}/{y}.pbf'], layer: 'water_pipeline', minzoom: 3, maxzoom: 17 },
       attribution: entry.attribution,
     });
-    expect(entryService(entries.find((e) => e.name === 'OpenTopoMap')!)).toBeUndefined();
+    expect(entryService(service('OpenTopoMap'))).toBeUndefined();
   });
 
   it('filters by words, region and category', () => {
@@ -71,7 +72,7 @@ describe('library', () => {
   });
 
   it('draws feature layers with their own symbols where the entry says so', () => {
-    const entry: LibraryEntry = { name: 'AQI forecast', type: 'arcgis-features', url: 'https://x.example/FeatureServer', region: 'United States', category: 'Weather', ownStyle: true };
+    const entry: ServiceEntry = { name: 'AQI forecast', type: 'arcgis-features', url: 'https://x.example/FeatureServer', region: 'United States', category: 'Weather', ownStyle: true };
     const source = { type: 'arcgis-features' as const, url: `${entry.url}/0`, geometry: 'polygon' as const, maxRecordCount: 2000 };
     const info = withEntry({ title: 'Forecast', offers: [{ title: 'Today', depth: 0, draft: { name: 'Today', source } }] }, entry);
     expect(info.offers[0]!.draft).toMatchObject({ ownStyle: true });
@@ -80,14 +81,14 @@ describe('library', () => {
   });
 
   it('adds what the entry knows to a tile template', () => {
-    const entry = entries.find((e) => e.name === 'OpenTopoMap')!;
+    const entry = service('OpenTopoMap');
     const info = withEntry(parseXyz(entry.url), entry);
     expect(info.title).toBe('OpenTopoMap');
     expect(info.offers[0]!.draft).toMatchObject({ name: 'OpenTopoMap', source: { maxzoom: 17 }, attribution: expect.stringContaining('OpenTopoMap') });
   });
 
   it('names the layer of a downloaded file after its entry, with the file address as its origin', () => {
-    const entry = entries.find((e) => e.type === 'file')!;
+    const entry = entries.find((e): e is FileEntry => e.type === 'file')!;
     const draft = downloadedLayer(
       { name: 'Streckensperrungen_Motorrad', source: { type: 'geojson', data: { file: 'key', name: 'Streckensperrungen_Motorrad.kmz' } }, bounds: [4, 46, 14, 53] },
       entry,
