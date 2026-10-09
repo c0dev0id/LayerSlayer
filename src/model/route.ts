@@ -34,7 +34,12 @@ export interface Route {
   legs: Record<string, string>;
   /** How many times their normal size the route's waypoints are drawn, MIN_ICON_SIZE to MAX_ICON_SIZE; 1 where unset. */
   waypointSize?: number;
+  /** Width of the route's line in pixels; ROUTE_LINE_WIDTH where unset. */
+  lineWidth?: number;
 }
+
+/** Width of a route's line in pixels where it sets none. */
+export const ROUTE_LINE_WIDTH = 4;
 
 /**
  * A named place (a GPX waypoint). It is none of a route's points, but belongs to a route

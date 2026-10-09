@@ -16,7 +16,13 @@ describe('parseRouteData', () => {
     const { parseRouteData } = await freshStore();
     const data = parseRouteData(
       JSON.stringify({
-        routes: [route('a'), { ...route('b'), profile: 'plane' }, { ...route('c'), points: [{ id: 'p', lngLat: [1] }] }],
+        routes: [
+          route('a'),
+          { ...route('b'), profile: 'plane' },
+          { ...route('c'), points: [{ id: 'p', lngLat: [1] }] },
+          { ...route('d'), lineWidth: 'wide' },
+          { ...route('e'), lineWidth: 6 },
+        ],
         waypoints: [
           { id: 'w', routeId: 'a', name: 'W', lngLat: [1, 2] },
           { id: 'x', routeId: 'a', lngLat: [1, 2] },
@@ -25,7 +31,7 @@ describe('parseRouteData', () => {
         ],
       }),
     );
-    expect(data.routes.map((r) => r.id)).toEqual(['a']);
+    expect(data.routes.map((r) => r.id)).toEqual(['a', 'e']);
     // Without a name, without a route, and with a route that was dropped.
     expect(data.waypoints.map((w) => w.id)).toEqual(['w']);
     expect(parseRouteData('{}')).toEqual({ routes: [], waypoints: [] });
@@ -80,14 +86,18 @@ describe('route history', () => {
     expect(s.routeWaypoints('a').map((w) => w.id)).toEqual(['wa']);
   });
 
-  it('makes one undo step of a colour picked or a size dragged in one gesture', async () => {
+  it('makes one undo step of a colour picked or a size or width dragged in one gesture', async () => {
     const s = await freshStore();
     s.addRoute(route('r'));
     for (const color of ['#111111', '#222222', '#333333']) s.setRouteColor('r', color);
     s.endGesture();
     s.setRouteColor('r', '#444444');
     for (const size of [1.25, 1.5, 2]) s.setWaypointSize('r', size);
-    expect(s.routeById('r')).toMatchObject({ color: '#444444', waypointSize: 2 });
+    s.endGesture();
+    for (const width of [5, 6, 7]) s.setRouteLineWidth('r', width);
+    expect(s.routeById('r')).toMatchObject({ color: '#444444', waypointSize: 2, lineWidth: 7 });
+    s.undo();
+    expect(s.routeById('r')?.lineWidth).toBeUndefined();
     s.undo();
     expect(s.routeById('r')).toMatchObject({ color: '#444444' });
     expect(s.routeById('r')?.waypointSize).toBeUndefined();

@@ -1,13 +1,13 @@
 import { createMemo, createSignal, For, Show } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { geojsonBounds } from '../geo/bounds';
-import { PROFILES, type LngLat, type Profile, type Route } from '../model/route';
+import { PROFILES, ROUTE_LINE_WIDTH, type LngLat, type Profile, type Route } from '../model/route';
 import { gpxToRouteData, routeTracks } from '../routing/gpx';
 import { routePoints } from '../routing/legs';
 import { nextRouteColor } from '../routing/routeEdit';
 import { failedLegCount, lastError, pendingLegs, retryFailedLegs } from '../routing/service';
 import { editingRouteId, startDrawing, stopDrawing } from '../state/drawing';
-import { addRoute, endGesture, importRouteData, removeRoute, renameRoute, routeData, routeWaypoints, setRouteColor, setRouteProfile, setWaypointSize } from '../state/routes';
+import { addRoute, endGesture, importRouteData, removeRoute, renameRoute, routeData, routeWaypoints, setRouteColor, setRouteLineWidth, setRouteProfile, setWaypointSize } from '../state/routes';
 import { parseGpx, toGpx } from '../services/gpx';
 import { fileName } from '../services/read';
 import { errorMessage, showBounds } from '../state/ui';
@@ -15,6 +15,7 @@ import { askConfirmation } from './confirm';
 import { downloadBlob } from './download';
 import { EditableName } from './EditableName';
 import { IconSizeSlider } from './IconSizeSlider';
+import { LineWidthSlider } from './LineWidthSlider';
 import { AreaIcon, CloseIcon } from './icons';
 
 /** A number with the word it counts, as `3 points`. */
@@ -174,6 +175,15 @@ function RouteRow(props: { route: Route }) {
           <For each={PROFILES}>{(p) => <option value={p.value}>{p.label}</option>}</For>
         </select>
         <button onClick={() => (editing() ? stopDrawing() : startDrawing(route.id))}>{editing() ? 'Done' : 'Edit'}</button>
+      </div>
+      <div class="row" title="How wide the route's line is drawn">
+        <span class="muted label">Line</span>
+        <LineWidthSlider
+          label={`Line width of ${route.name}`}
+          value={route.lineWidth ?? ROUTE_LINE_WIDTH}
+          onInput={(width) => setRouteLineWidth(route.id, width)}
+          onChange={endGesture}
+        />
       </div>
       <Show when={waypoints() > 0}>
         <div class="row" title="How large the route's waypoints are drawn">

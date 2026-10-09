@@ -25,7 +25,8 @@ function isRoute(value: unknown): value is Route {
     Array.isArray(r.points) &&
     r.points.every((p) => typeof p?.id === 'string' && isLngLat(p.lngLat)) &&
     typeof r.legs === 'object' &&
-    r.legs !== null
+    r.legs !== null &&
+    (r.lineWidth === undefined || (typeof r.lineWidth === 'number' && Number.isFinite(r.lineWidth)))
   );
 }
 
@@ -123,7 +124,7 @@ export function removeRoute(id: string): void {
 }
 
 /** Sets a property of a route as an undo step; with `gesture`, the values set until the gesture ends make one step. */
-function setRouteProperty<K extends 'name' | 'color' | 'waypointSize'>(id: string, key: K, value: Route[K], label: string, gesture = false): void {
+function setRouteProperty<K extends 'name' | 'color' | 'waypointSize' | 'lineWidth'>(id: string, key: K, value: Route[K], label: string, gesture = false): void {
   const index = routeData.routes.findIndex((r) => r.id === id);
   if (index < 0 || routeData.routes[index]![key] === value) return;
   recordEdit(label, gesture ? `${key} ${id}` : undefined);
@@ -142,6 +143,11 @@ export function setRouteColor(id: string, color: string): void {
 /** Sets how large a route's waypoints are drawn; dragging the slider makes one undo step. */
 export function setWaypointSize(id: string, size: number): void {
   setRouteProperty(id, 'waypointSize', size, 'Change waypoint size', true);
+}
+
+/** Sets the width of a route's line; dragging the slider makes one undo step. */
+export function setRouteLineWidth(id: string, width: number): void {
+  setRouteProperty(id, 'lineWidth', width, 'Change line width', true);
 }
 
 /**

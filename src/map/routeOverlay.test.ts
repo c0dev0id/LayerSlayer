@@ -21,9 +21,9 @@ describe('routeFeatures', () => {
   it('draws routed, pending, failed and straight legs', () => {
     const lines = routeFeatures([route], new Set(['car/2,2;3,3']));
     expect(lines.features.map((f) => f.properties)).toEqual([
-      { state: 'routed', color: '#e8590c' },
-      { state: 'failed', color: '#e8590c' },
-      { state: 'straight', color: '#e8590c' },
+      { state: 'routed', color: '#e8590c', width: 4 },
+      { state: 'failed', color: '#e8590c', width: 4 },
+      { state: 'straight', color: '#e8590c', width: 4 },
     ]);
     expect(lines.features[0]!.geometry.coordinates).toEqual([
       [1, 1],
@@ -31,5 +31,10 @@ describe('routeFeatures', () => {
       [2, 2],
     ]);
     expect(routeFeatures([route], new Set()).features[1]!.properties).toMatchObject({ state: 'pending' });
+  });
+
+  it('draws a route in its own line width', () => {
+    const lines = routeFeatures([{ ...route, lineWidth: 7.5 }], new Set());
+    expect(lines.features.map((f) => f.properties!['width'])).toEqual([7.5, 7.5, 7.5]);
   });
 });
