@@ -56,14 +56,14 @@ files stay in the browser.
   keys on it), for longer layer names; a double click on the edge brings it back to its
   usual width.
 - The **layer list** shows the top layer first. Drag a layer by its handle (or press the
-  arrow keys on it) to change the order; the eye hides it, the pencil renames it, ×
-  removes it, and the frame icon flies to the area the layer covers (layers that span most
-  of the world have none). A layer shown in grey italics is outside its zoom range at the
-  current zoom; a red triangle carries the last error loading it. Under each name, a small
-  line shows its opacity, colour, zoom range (z5–15), and *label*, *cache* and *proxy*
-  where it labels its features, its tiles are kept or its server goes through the CORS
-  proxy. *Background*, below the last layer, sets the colour the map is drawn on (white
-  unless chosen); it shows wherever the layers leave the map uncovered or see-through.
+  arrow keys on it) to change the order; the eye hides it, the pencil renames it, × removes
+  it, and the frame icon flies to the area the layer covers (layers that span most of the
+  world have none). A layer shown in grey italics is outside its zoom range at the current
+  zoom; a red triangle carries the last error loading it. Under each name, a small line
+  shows its opacity, colour, zoom range (z5–15), and *label*, *cache* and *proxy* where
+  it labels its features, its tiles are kept or its server goes through the CORS proxy.
+  *Background*, below the last layer, sets the colour the map is drawn on (white unless
+  chosen); it shows wherever the layers leave the map uncovered or see-through.
 - Clicking a layer's name opens its **settings** in its place in the list, closing those
   of the layer open before; clicking it again closes them. They hold its opacity, zoom
   range, colour (vector layers), source, the CORS proxy for its server and, for tiled
@@ -100,13 +100,13 @@ files stay in the browser.
   Mapterhorn's open terrain tiles: about 30 m worldwide, and finer (down to a metre or so)
   where countries publish detailed elevation, such as much of Europe. Tilt and turn the
   map with the right mouse button, Ctrl and drag, or two fingers.
-- **Tap a feature** of a vector layer (GeoJSON, GPX, KML, vector tiles, feature services)
-  to see its properties in the details sheet, without the ones that only say how a KML
-  file drew it; the map highlights it. A tap beside the features closes the sheet. The
-  motorcycle road closures of mintelonline.de are read from their names: closed both ways
-  between two places or one way only, when (dates, days and hours as written), whether
-  only motorcycles louder than 95 dB are meant, the postcode and country, and whether all
-  motor vehicles are kept out.
+- **Tap a feature** of a vector layer (GeoJSON, GPX, KML, vector tiles, feature services),
+  while no route or focus area is being drawn, to see its properties in the details sheet,
+  without the ones that only say how a KML file drew it; the map highlights it. A tap
+  beside the features closes the sheet. The motorcycle road closures of mintelonline.de
+  are read from their names: closed both ways between two places or one way only, when
+  (dates, days and hours as written), whether only motorcycles louder than 95 dB are
+  meant, the postcode and country, and whether all motor vehicles are kept out.
 - **Right-click** a spot on the map (long press on touch screens) to copy its coordinates
   as `lat,lon`, or to open it in Google Maps or Google Street View in a new tab. *Show
   details* asks OpenStreetMap what is there and shows, nearest first, the nearest road or
@@ -223,17 +223,23 @@ plan reads capabilities and feature data but refuses map images, which its paid 
 pass. Keeping a proxied layer's tiles in the browser spares the proxy's request quota.
 PMTiles archives are read by range requests, so their server must allow CORS for them
 (GET with a `Range` header); a proxy for them has to pass range requests and binary
-answers, which corsproxy.io's free plan refuses.
+answers, which corsproxy.io's free plan refuses. A file whose server allows no CORS can
+still be downloaded by a link and opened from disk, which is what the library's file
+entries offer.
 
 ## The library
 
-`src/library/library.json` holds the services offered in the library: the services of
-[WMSproxy](https://github.com/c0dev0id/WMSproxy), the base maps of
-[mappic](https://github.com/c0dev0id/mappic), and WFS, OGC API and vector tile services,
-each with its type, region and category.
+`src/library/library.json` holds the services offered in the library, each with its type,
+region and category: the services of [WMSproxy](https://github.com/c0dev0id/WMSproxy),
+the base maps of [mappic](https://github.com/c0dev0id/mappic), and WFS, OGC API, vector
+tile and ArcGIS services added since, among them the public US layers outdoor apps draw
+on (land managers, forest and park roads and trails, wilderness, mines, fire, smoke and
+air quality). Entries of type `file` are files the user downloads by a link and opens,
+for servers that do not let web pages read them.
 
-Entries of type `file` are files the user downloads by a link and opens, for servers that
-do not let web pages read them.
+Data whose provider keeps it to its own site, by its terms or by refusing requests from
+other pages, is left out even where it could be fetched, as Rumo's PMTiles archives and
+styles and OsmAnd's off-road tiles are.
 
 `npm run check-library` reads every entry with the app's own parsers, prints how many
 layers each offers and can show, and marks entries whose server sends no valid CORS header

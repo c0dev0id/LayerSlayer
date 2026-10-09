@@ -2,10 +2,11 @@
 
 ## Overview and intent
 
-Public map services come in many technologies: OGC WMS and WMTS, ArcGIS MapServer and
-FeatureServer, plain XYZ tile templates, MapLibre styles over vector tiles, GeoJSON files
-and feeds, GeoPDFs. Viewers usually support a few of them, or flatten all of them into
-raster tiles (as WMSproxy does for navigation apps that only take XYZ).
+Public map services come in many technologies: OGC WMS, WMTS and WFS, OGC API – Features,
+ArcGIS MapServer and FeatureServer, plain XYZ tile templates, vector tiles and PMTiles
+archives, MapLibre styles, Cloud Optimized GeoTIFFs, GeoJSON feeds, GPX and KML files,
+GeoPDFs. Viewers usually support a few of them, or flatten all of them into raster tiles
+(as WMSproxy does for navigation apps that only take XYZ).
 
 Layer Slayer (code name webmap) is a browser map viewer that stacks base maps and overlays
 from all of these and supports each properly: it reads the service's own description
@@ -13,7 +14,8 @@ from all of these and supports each properly: it reads the service's own descrip
 MapLibre source that fits, so WMS stays a GetMap per tile, a FeatureServer stays vector
 data, a style keeps its vector rendering. A layer list controls order, visibility, opacity
 and zoom range; the configuration survives a browser restart. A library of services, grown
-from WMSproxy's, offers ready-made layers.
+from WMSproxy's, offers ready-made layers. Vector features can be labelled and tapped for
+their properties in words.
 
 A route tool, taken from mappic, draws routes over the layers: points tapped on the map are
 joined along the roads by OSRM routing or by straight lines, with waypoints, undo and redo,
@@ -42,7 +44,10 @@ It is a static single-page app on GitHub Pages; there is no server component.
   from their packages at build time by a Vite plugin (`tools/iconSets.ts`); dev
   dependencies only, each set a chunk that loads with the icon picker.
 - Routing by the FOSSGIS OSRM servers (routing.openstreetmap.de), car, bike and foot.
-- OSM queries by the Overpass API (overpass-api.de).
+- OSM queries and spot details by the Overpass API (overpass-api.de); place search by
+  Nominatim (nominatim.openstreetmap.org).
+- Fonts for labels of vector layers from OpenFreeMap (tiles.openfreemap.org) where no
+  style on the map brings fonts.
 - Elevation for 3D terrain from Mapterhorn (tiles.mapterhorn.com).
 - Deployment: GitHub Actions to GitHub Pages.
 
@@ -51,10 +56,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - **One map, one composed style.** All user layers are composed by a pure function
   (`composeStyle`) into one MapLibre style, bottom to top, and applied with
   `setStyle(style, { diff: true })`, so MapLibre works out the minimal changes (paint
-  properties, zoom ranges, layer order, sources). Source and layer ids are the user layer's
-  id, or start with it and a slash, which maps errors back to layers. Hidden layers are
-  left out of the style. The style is passed as plain JSON because Solid store proxies
-  cannot be posted to MapLibre's workers.
+  properties, zoom ranges, layer order, sources). Source and layer ids are the user
+  layer's id, or start with it and a slash, which maps errors back to layers. Layers not
+  shown (their eye off, or another layer shown alone) are left out of the style. The style
+  is passed as plain JSON because Solid store proxies cannot be posted to MapLibre's
+  workers.
 - **Opacity is native for every layer kind.** Raster layers use `raster-opacity`, the
   app's vector style its fill, line and circle opacities. An imported MapLibre style gets
   the layer opacity multiplied into the opacity properties of each of its layers; zoom
@@ -249,7 +255,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
   with the distinct rail datasets of geodata.bts.gov; the per-railroad views of the rail
   network were left out as copies of the same lines. Amsterdam's travel time feed, also in
   that list, was left out: its server resets HTTPS connections and gives no answer over
-  HTTP.
+  HTTP. Later additions came from the public sources outdoor apps (onX, Gaia GPS) draw
+  on: BLM land managers, wilderness and study areas, NPS park roads and trails, USGS mines
+  (MRDS), NOAA's smoke forecast and EPA AirNow's air quality layers. HIFLD's transmission
+  lines stay, noted as archived by their publisher.
+- **Data a provider keeps to itself stays out.** Rumo's PMTiles archives and styles allow
+  only Rumo's own site by their CORS rules, and the MapTiler key in them is limited to
+  that domain; OsmAnd's off-road tiles answer other pages' requests with 502. A CORS proxy
+  would get either through, but both are read as the provider's refusal and left out of
+  the library: the test is the provider's intent, not whether a request gets through.
 - **GeoPDF georeferencing.** Only ISO 32000-2 geospatial viewports (Adobe's extension:
   `/VP` with a `/Measure` of subtype `/GEO`, `GPTS` and `LPTS`) are read; the OGC/TerraGo
   `LGIDict` encoding is not. pdf.js gives no access to raw page dictionaries, so pdf-lib
@@ -263,23 +277,25 @@ It is a static single-page app on GitHub Pages; there is no server component.
   lacks, so its legacy build is used.
 - **Tile caching is on by default, per layer.** Slow servers often forbid HTTP caching too
   (ArcGIS Online sends `max-age=300`), so the browser cache does not help. A tiled layer
-  (XYZ, WMS, WMTS, ArcGIS export and features) whose `cache` is not false has its tile
-  addresses prefixed with `cache+` (`cache+https://…`, `cache+wmts-matrix://…`); MapLibre
-  hands every scheme it does not know to the protocol registered for it, and one protocol
+  (XYZ, WMS, WMTS, ArcGIS export, feature sources, vector tiles, PMTiles) whose `cache` is
+  not false has its tile addresses
+  prefixed with `cache+` (`cache+https://…`, `cache+wmts-matrix://…`,
+  `cache+features://…`, `cache+pmtiles://…`); MapLibre hands
+  every scheme it does not know to the protocol registered for it, and one protocol
   answers them all from Cache Storage or fetches the tile and keeps it for 24 hours.
-  Caching is thereby a wrapper around fetching rather than part of each source kind. Tiles
-  are kept under the address that answers them (the tile URL, a WMTS tile's resolved URL,
-  a feature tile's query); empty feature tiles are kept too, errors are not, so a missing
-  tile is asked for again. Expired tiles are swept at start-up, and the cache name carries
-  a version so a change in what is kept never reads old entries back. Each tile is stored
-  with its length in `content-length`, so Settings sums the cache's size from the headers
-  (`matchAll`) without reading tile bodies. Cache Storage was chosen over IndexedDB
+  Caching is thereby a wrapper around fetching rather than part of each source kind.
+  Tiles are kept under the address that answers them (the tile URL, a WMTS tile's resolved
+  URL, a feature tile's query); empty feature tiles are kept too, errors are not, so a
+  missing tile is asked for again. Expired tiles are swept at start-up, and the cache name
+  carries a version so a change in what is kept never reads old entries back. Each tile is
+  stored with its length in `content-length`, so Settings sums the cache's size from the
+  headers (`matchAll`) without reading tile bodies. Cache Storage was chosen over IndexedDB
   because it holds HTTP responses by URL as it is, and the browser accounts for it in the
   site's storage. It is on unless switched off because most tiled services are static and
   slow enough for kept tiles to pay off; it serves tiles up to a day old, so layers with
-  live data (radar, traffic) should have it switched off. Styles are left out: their tiles
-  come from addresses inside the style. At most four feature queries run at once per
-  server; queued tiles that scroll out of view are dropped.
+  live data (radar, traffic) should have it switched off. Styles
+  are left out: their tiles come from addresses inside the style. At most four feature
+  queries run at once per server; queued tiles that scroll out of view are dropped.
 - **Flying to a layer.** The layer row offers a frame icon when the layer's bounds span at
   most half the Web Mercator world in width and in height; an area measure was tried first
   and failed for a week of earthquakes, which spans every longitude but leaves out the
@@ -373,13 +389,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   from the layer once the list grew, and editing several layers meant scrolling between
   list and settings for each. A second click on the name closes them, and none are open
   after the open layer is removed. Names are renamed in place on the card, a summary line
-  per card (opacity, colour, zoom range, cache, proxy) so the list answers which layer is
-  set how without opening each, pointer drag with arrow keys as the keyboard alternative,
-  Tabler icons, the same panel layout, and the panel below the map on narrow screens.
-  There, everything on the map competes for little room: the panel folds to its header (a
-  flag in local storage, as the panel width is), the search is a button until opened, and
-  the route toolbar is one bar of icons in one row (eight tools fit 360 px), its captions
-  kept as the buttons' accessible names while the hint bar says what the active tool does.
+  per card (opacity, colour, zoom range, label, cache, proxy) answers which layer is set
+  how without opening each, pointer drag has the arrow keys as its keyboard alternative,
+  icons are Tabler's, the panel layout is mappic's, and the panel lies below the map on
+  narrow screens. There, everything on the
+  map competes for little room: the panel folds to its header (a flag in local storage,
+  as the panel width is), the search is a button until opened, and the route toolbar is
+  one bar of icons in one row (eight tools fit 360 px), its captions kept as the buttons'
+  accessible names while the hint bar says what the active tool does.
 - **Place search with Nominatim.** OpenStreetMap's geocoder needs no key and sends CORS
   headers, so the page asks it directly (through the proxy only if its host is proxied).
   Its usage policy forbids search as you type and allows one request per second, so a
@@ -525,12 +542,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   corsproxy.io's free plan refuses the GPX (served as octet-stream). A link downloads a
   file whatever its CORS headers, so a library entry of type `file` offers that link and
   asks for the downloaded file. The layer keeps the address as its `origin`, which
-  *Replace* leaves alone, so refreshing it is a download and a replace, with the
-  file's date (from the chosen file) shown to tell when it is due. The KMZ was chosen
-  over the GPX: its routes are full geometries (13 000 points, from the Garmin route
-  extension in the GPX) and its signs carry an icon saying whether motorcycles or all
-  motor vehicles are kept out. The GDB is MapSource's binary format. Routing the routes
-  again was not needed, since their geometry is there.
+  *Replace* leaves alone, so refreshing it is a download and a replace, with the file's
+  date (from the chosen file) shown to tell when it is due. A GeoPDF added by its address
+  has that origin too, and so the same link. Replace tells a GeoPDF from features by the
+  file's name and type before reading it, and turns away the other kind. The KMZ was
+  chosen over the GPX: its routes are full geometries (13 000 points, from the Garmin
+  route extension in the GPX) and its signs carry an icon saying whether motorcycles or
+  all motor vehicles are kept out. The GDB is MapSource's binary format. Routing the
+  routes again was not needed, since their geometry is there.
 - **Road closures are read from their names, not converted.** The closure names carry
   postcode, dates, `>95dB`, days, hours and places, one place meaning one way only and
   two both ways (as the site explains). The details sheet reads them when a feature is
@@ -543,17 +562,23 @@ It is a static single-page app on GitHub Pages; there is no server component.
   and font names differ between servers (OpenFreeMap's `Noto Sans Regular`, VersaTiles'
   `noto_sans_regular`). Labels of vector layers are therefore written in a font the
   style bringing the glyphs uses itself, preferring a regular one, and only without any
-  style do they use OpenFreeMap's fonts, which allow any origin. Line labels are placed
-  along the line, beside it; MapLibre's point placement on lines anchors at a tile's
+  style do they use OpenFreeMap's fonts, which allow any origin; the style that brings
+  the fonts is chosen once, for the glyphs and the labels' font together. Line labels are
+  placed along the line, beside the widest line allowed: `text-offset` is a layout
+  property, so an offset that followed the width would lay out every label again at each
+  step of the width slider. MapLibre's point placement on lines anchors at a tile's
   first vertex, so it was not used. The label list offers the text and number
   properties the features have (all of a GeoJSON file, those of the loaded tiles
   otherwise), most common first, without KML styling properties.
 - **Tapping features queries what is drawn.** A tap outside route and focus area drawing
-  asks MapLibre for the rendered features within the tap radius, keeps those of visible
-  vector layers (style layers are named `<layer id>/<part>`), and shows each once, as a
-  line and its label or two tiles return the same feature. The highlight joins the
-  feature's parts from all loaded tiles, so a long line is marked beyond the tile tapped.
-  Nothing is fetched: what was drawn is what is described.
+  asks MapLibre for the rendered features within the tap radius in the style layers of
+  vector layers only (those whose source is a user layer's, so the base map is not
+  searched), takes each feature's layer from its source, and shows each feature once, as
+  a line and its label or two tiles return the same one. The highlight joins a line's or
+  area's parts from all loaded tiles, so a long line is marked beyond the tile tapped: one
+  `querySourceFeatures` per source, filtered to the simple property values of the
+  features tapped; points are taken as drawn. Nothing is fetched: what was drawn is what
+  is described.
 - **Showing one layer alone is a view, not a change of visibility.** Hiding the other
   layers and restoring them later would need a copy of every eye, kept through reloads
   and edits made meanwhile (an eye toggled while alone: restored over or kept?). Instead a
@@ -566,16 +591,18 @@ It is a static single-page app on GitHub Pages; there is no server component.
 
 ## Core features
 
-- Layers from WMS, WMTS, ArcGIS MapServer and FeatureServer, XYZ templates, PMTiles
-  archives, MapLibre styles, GeoJSON (URL or file), GPX tracks (file) and GeoPDF (file or
+- Layers from WMS, WMTS, WFS, OGC API – Features, ArcGIS MapServer and FeatureServer, XYZ
+  templates, vector tiles, PMTiles archives, MapLibre styles, Cloud Optimized GeoTIFF,
+  GeoJSON (URL or file), GPX tracks and KML or KMZ placemarks (file) and GeoPDF (file or
   URL).
-- A library of about 130 services by region and category, with search.
+- A library of about 140 services and files by region and category, with search.
 - An add-layer dialog that stays open: layers and groups toggle with a tap, what is on
   the map is highlighted, and the library and a service's layers can be switched between
   freely. Every layer a service offers is listed, with reasons for those it cannot show
   and a filter for services with hundreds of layers.
 - Layer list with drag and keyboard reordering, visibility, removal, flying to the layer's
-  area, opacity, zoom range, colour for vector layers, and per-layer error marks.
+  area, opacity, zoom range, colour and line style for vector layers, colour adjustments
+  for raster layers, and per-layer error marks.
 - Labels for vector layers from a feature property, and the properties of a tapped feature
   in words in the details sheet.
 - A map button that shows the open layer alone over the base map, leaving every layer's
