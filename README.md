@@ -128,7 +128,11 @@ mapping agency (BKG), which covers the rest of the world in less detail.
   (dates, days and hours as written), whether only motorcycles louder than 95 dB are
   meant, the postcode and country, and whether all motor vehicles are kept out.
 - **Right-click** a spot on the map (long press on touch screens) to copy its coordinates
-  as `lat,lon`, or to open it in Google Maps or Google Street View in a new tab. *Show
+  as `lat,lon`, or to open it in Google Maps or Google Street View in a new tab. *Copy
+  link* copies an address that opens Layer Slayer at the spot and the zoom of the moment
+  (`…/LayerSlayer/#map=15/49.08680/7.71060`, as openstreetmap.org writes it), over the
+  layers of whoever opens it; the address then loses that ending, so reloading keeps the
+  map as it was left. *Show
   details* asks OpenStreetMap what is there and shows, nearest first, the nearest road or
   trail (type, name, speed limit, one way or not, surface, track grade, access), place
   (type, name, address, phone, website, opening hours), barrier (opening hours, lock,

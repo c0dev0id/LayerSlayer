@@ -474,6 +474,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   images, inverted in the dark theme. The map's content is not themed: an empty map
   stays on the background the project sets (white by default), since how a project
   looks should not depend on the browser that opens it.
+- **Links to a spot are a hash, as openstreetmap.org writes them.** *Copy link* gives the
+  page's address with `#map=zoom/lat/lon` (five decimals, about a metre; the zoom with up
+  to two). A hash needs nothing of a static host and never reaches the server; it carries
+  the view only, not the layers, which stay each browser's own (a project file carries
+  those). On opening, the map starts there instead of the stored view, and a link pasted
+  into the open page moves it there (`hashchange`). The hash is then removed with
+  `history.replaceState`, so that a reload after moving on opens the map as it was left
+  rather than at the link again.
 - **Place search with Nominatim.** OpenStreetMap's geocoder needs no key and sends CORS
   headers, so the page asks it directly (through the proxy only if its host is proxied).
   Its usage policy forbids search as you type and allows one request per second, so a
@@ -746,7 +754,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - Place and address search (Nominatim) with a pin on the place found.
 - A menu for any spot on the map: its details from OSM (nearest road or trail, place,
   barrier, piece of history, water and bridge, in words) and the sea it lies in, its
-  coordinates, Google Maps and Street View (Google's documented Maps URLs, no key).
+  coordinates, a link that opens Layer Slayer there, Google Maps and Street View (Google's
+  documented Maps URLs, no key).
 - 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched by a button
   on the map.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
