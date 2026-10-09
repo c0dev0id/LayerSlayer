@@ -88,6 +88,11 @@ in the browser.
   their file was changed and *Replace*, which takes a newer version of the file and keeps
   the layer's settings; one added from a library file entry or a GeoPDF address also has
   the arrow that downloads the newest file, so refreshing it is a download and a Replace.
+- **Show alone** (the stack button under *3D*) draws only the layer whose settings are
+  open, over the bottom layer (usually the base map, shown as its eye says). The open
+  layer is drawn even when its eye is off. No layer's eye changes, so a second press shows
+  the layers as they were; clicking another layer's name shows that one alone instead,
+  and closing the settings ends it. Entries of the layers not drawn are greyed meanwhile.
 - **3D** (with the map's controls on the right) raises the ground by its elevation, shades
   its relief on the bottom layer (layers above stay unshaded), and tilts the map to show
   it; a second tap levels it again. Elevation comes from

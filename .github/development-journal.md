@@ -550,6 +550,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
   line and its label or two tiles return the same feature. The highlight joins the
   feature's parts from all loaded tiles, so a long line is marked beyond the tile tapped.
   Nothing is fetched: what was drawn is what is described.
+- **Showing one layer alone is a view, not a change of visibility.** Hiding the other
+  layers and restoring them later would need a copy of every eye, kept through reloads
+  and edits made meanwhile (an eye toggled while alone: restored over or kept?). Instead a
+  session-only flag tells the composer to draw only the open layer, whatever its eye, and
+  the bottom layer as its eye says, so the base map stays unless switched off. Every
+  layer's `visible` stays as it was, which makes turning it off a plain return; the flag
+  follows the open layer, so clicking names flips through layers one at a time, and ends
+  when the settings close. One function (`isShown`) decides for the composer and the
+  layer list alike, and taps query what the map draws.
 
 ## Core features
 
@@ -565,6 +574,8 @@ It is a static single-page app on GitHub Pages; there is no server component.
   area, opacity, zoom range, colour for vector layers, and per-layer error marks.
 - Labels for vector layers from a feature property, and the properties of a tapped feature
   in words in the details sheet.
+- A map button that shows the open layer alone over the base map, leaving every layer's
+  visibility as it was.
 - File layers that take a newer version of their file, keeping their settings; library
   entries for files that pages may not read, downloaded by a link, among them the
   motorcycle road closures of mintelonline.de, read from their names.
