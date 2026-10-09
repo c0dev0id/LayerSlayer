@@ -32,7 +32,7 @@ export function App() {
         <RoutesSection />
         <SettingsSection />
         <footer class="footer">
-          Layers, routes and settings are kept in this browser; Save takes them to another. <a href="https://github.com/c0dev0id/webmap">Source</a>
+          Layers, routes and settings are kept in this browser; Save takes them to another. <a href="https://github.com/c0dev0id/LayerSlayer">Source</a>
         </footer>
       </aside>
       <PanelResizer />

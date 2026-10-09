@@ -20,7 +20,7 @@ import { parseWfs } from '../src/services/wfs';
 import { parseXyz } from '../src/services/xyz';
 
 const LIBRARY = 'src/library/library.json';
-/** Where the app is served from: GitHub Pages redirects c0dev0id.github.io/webmap there. */
+/** The origin the app is served from (https://shagen.me/LayerSlayer/). */
 const ORIGIN = 'https://shagen.me';
 
 interface Entry {
