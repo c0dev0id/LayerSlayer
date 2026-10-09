@@ -1086,8 +1086,8 @@ input.swatch {
 }
 
 @media (hover: hover) {
-  :root[data-theme='dark'] .maplibregl-ctrl button:not(:disabled):hover {
-    background-color: rgba(255, 255, 255, 0.08);
+  .maplibregl-ctrl button:not(:disabled):hover {
+    background-color: var(--hover);
   }
 }
 
