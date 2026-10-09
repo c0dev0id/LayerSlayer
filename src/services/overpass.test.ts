@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkAnswer, formatFilter, overpassQuery, parseFilter, toGeoJson } from './overpass';
+import { checkAnswer, formatFilter, matchesFilter, overpassQuery, parseFilter, toGeoJson } from './overpass';
 
 describe('parseFilter', () => {
   it('reads tags with a value or any value', () => {
@@ -25,6 +25,15 @@ describe('parseFilter', () => {
     expect(parseFilter('name=""')).toEqual([{ key: 'name', value: '' }]);
   });
 
+  it('reads values a tag must contain', () => {
+    expect(parseFilter('name~Sonderwaffenlager')).toEqual([{ key: 'name', value: 'Sonderwaffenlager', contains: true }]);
+    expect(parseFilter('name ~ "Special Ammunition" military=*')).toEqual([
+      { key: 'name', value: 'Special Ammunition', contains: true },
+      { key: 'military' },
+    ]);
+    expect(() => parseFilter('name~')).toThrow('is not a tag');
+  });
+
   it('says what it cannot read', () => {
     expect(() => parseFilter('')).toThrow('Name at least one tag');
     expect(() => parseFilter('amenity=')).toThrow('“amenity=” is not a tag');
@@ -39,6 +48,7 @@ describe('formatFilter', () => {
   it('writes filters one way, quoting where needed', () => {
     expect(formatFilter(parseFilter('amenity = bench  shop'))).toBe('amenity=bench shop=*');
     expect(formatFilter(parseFilter('operator="Deutsche Bahn" name="*" ref=""'))).toBe('operator="Deutsche Bahn" name="*" ref=""');
+    expect(formatFilter(parseFilter('name ~ "Special Ammunition" ref~*'))).toBe('name~"Special Ammunition" ref~*');
   });
 });
 
@@ -61,6 +71,24 @@ describe('overpassQuery', () => {
 
   it('escapes quotes and backslashes in values', () => {
     expect(overpassQuery(['name=a\\b'], area)).toContain('["name"="a\\\\b"]');
+  });
+
+  it('finds values containing a text literally, whatever its case', () => {
+    expect(overpassQuery(['name~Sonderwaffenlager'], area)).toContain('nwr["name"~"Sonderwaffenlager",i](poly:');
+    // The dot is no wildcard: escaped for the regular expression, whose backslash is escaped for the string.
+    expect(overpassQuery(['name~St.'], area)).toContain('["name"~"St\\\\.",i]');
+  });
+});
+
+describe('matchesFilter', () => {
+  it('matches tags as Overpass finds them', () => {
+    const tags = { name: 'Ehemaliges US-Sonderwaffenlager Clausen', natural: 'grassland' };
+    expect(matchesFilter('name~sonderwaffenlager', tags)).toBe(true);
+    expect(matchesFilter('name~Sonderwaffenlager natural=grassland', tags)).toBe(true);
+    expect(matchesFilter('name~Raketenstellung', tags)).toBe(false);
+    expect(matchesFilter('natural=*', tags)).toBe(true);
+    expect(matchesFilter('natural=heath', tags)).toBe(false);
+    expect(matchesFilter('landuse=*', tags)).toBe(false);
   });
 });
 

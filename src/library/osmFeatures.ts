@@ -1,5 +1,5 @@
 import type { MapIcon } from '../model/icon';
-import { formatFilter, parseFilter } from '../services/overpass';
+import { formatFilter, matchesFilter, parseFilter } from '../services/overpass';
 
 /**
  * A kind of OpenStreetMap feature to query: what it is called, the tag filters that find
@@ -30,10 +30,7 @@ export function filterOsmFeatures(features: readonly OsmFeature[], query: string
 
 /** The first feature with an icon whose filters the tags match: the icon an OSM element is shown with. */
 export function matchingFeature(features: readonly OsmFeature[], tags: Readonly<Record<string, string>>): OsmFeature | undefined {
-  return features.find(
-    (feature) =>
-      feature.icon && feature.filters.some((filter) => parseFilter(filter).every(({ key, value }) => (value === undefined ? key in tags : tags[key] === value))),
-  );
+  return features.find((feature) => feature.icon && feature.filters.some((filter) => matchesFilter(filter, tags)));
 }
 
 /** Tags typed in as a feature of their own, named by its filter. Throws where the tags cannot be read. */

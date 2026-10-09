@@ -140,7 +140,7 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
           Add
         </button>
       </form>
-      <Show when={tagError()} fallback={<p class="muted hint">key=value, or key=* for any value. Tags separated by spaces must all match.</p>}>
+      <Show when={tagError()} fallback={<p class="muted hint">key=value, key=* for any value, or key~text for values containing the text. Tags separated by spaces must all match.</p>}>
         {(message) => <p class="note error">{message()}</p>}
       </Show>
       <div class="row">
