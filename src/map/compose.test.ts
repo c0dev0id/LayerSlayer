@@ -100,6 +100,17 @@ describe('composeStyle', () => {
     expect(compose([xyz]).layers.map((l) => l.id)).toEqual(['L']);
   });
 
+  it('shows one layer alone over the bottom layer, whatever its eye, the bottom one as its eye says', () => {
+    const tiles = (id: string, visible: boolean) => layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}.example/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 } }, { visible }, id);
+    const ids = (style: StyleSpecification) => style.layers.map((l) => l.id);
+    const layers = [tiles('base', true), tiles('a', true), tiles('b', false)];
+    expect(ids(compose(layers))).toEqual(['base', 'a']);
+    expect(ids(compose(layers, {}, { only: 'b' }))).toEqual(['base', 'b']);
+    expect(ids(compose(layers, {}, { only: 'a' }))).toEqual(['base', 'a']);
+    expect(ids(compose([tiles('base', false), ...layers.slice(1)], {}, { only: 'a' }))).toEqual(['a']);
+    expect(ids(compose([tiles('base', false), ...layers.slice(1)], {}, { only: 'base' }))).toEqual(['base']);
+  });
+
   it('leaves hidden layers and layers waiting for their file out', () => {
     const style = compose([
       layer({ name: 'a', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}'], scheme: 'xyz', tileSize: 256 } }, { visible: false }),

@@ -1,8 +1,9 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
-import { createSignal } from 'solid-js';
+import { createEffect, createRoot, createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { Bounds } from '../model/layer';
 import { keepStored, readStored } from './persist';
+import { state } from './store';
 
 /** The map once it exists, for actions like zooming to a layer. */
 export const [map, setMap] = createSignal<MapLibreMap>();
@@ -25,6 +26,25 @@ export function setPanelCollapsed(collapsed: boolean): void {
   setCollapsed(collapsed);
   keepStored(PANEL_COLLAPSED_KEY, collapsed ? '1' : undefined);
 }
+
+/**
+ * Whether the map shows only the layer whose settings are open, over the bottom layer: a
+ * view of the moment that leaves every layer's eye as it is, so turning it off shows the
+ * layers as they were. Not kept; it ends when the settings close.
+ */
+const [onlyOpen, setOnlyOpen] = createSignal(false);
+export { onlyOpen, setOnlyOpen };
+
+/** The layer shown alone, if one is. */
+export function onlyLayerId(): string | undefined {
+  return onlyOpen() ? state.activeLayerId : undefined;
+}
+
+createRoot(() => {
+  createEffect(() => {
+    if (!state.activeLayerId) setOnlyOpen(false);
+  });
+});
 
 /** The map's current zoom, shown next to a layer's zoom range. */
 export const [zoom, setZoom] = createSignal(0);

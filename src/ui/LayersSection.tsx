@@ -7,6 +7,7 @@ import {
   canCache,
   fileResource,
   isRaster,
+  isShown,
   isVector,
   keepsTiles,
   layerColor,
@@ -28,7 +29,7 @@ import { importAccept } from '../services/importFile';
 import { hostOf } from '../state/net';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { moveLayer, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, state, updateLayer } from '../state/store';
-import { layerErrors, map, showBounds, zoom } from '../state/ui';
+import { layerErrors, map, onlyLayerId, showBounds, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
@@ -93,7 +94,11 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
   let entry!: HTMLLIElement;
 
   return (
-    <li ref={entry} class="layer" classList={{ active: isActive(), hidden: !layer.visible, 'out-of-range': outOfRange(layer) }}>
+    <li
+      ref={entry}
+      class="layer"
+      classList={{ active: isActive(), hidden: !isShown(layer, state.layers.indexOf(layer), onlyLayerId()), 'out-of-range': outOfRange(layer) }}
+    >
       <div class="layer-main">
         <button
           class="icon grip"

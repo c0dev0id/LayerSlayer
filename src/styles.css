@@ -1023,9 +1023,18 @@ input.swatch {
   font-weight: 700;
 }
 
-.maplibregl-ctrl button.terrain-toggle[aria-pressed='true'] {
+.maplibregl-ctrl button:is(.terrain-toggle, .only-toggle)[aria-pressed='true'] {
   background: var(--active);
   color: var(--accent);
+}
+
+.maplibregl-ctrl button.only-toggle {
+  display: grid;
+  place-items: center;
+}
+
+.maplibregl-ctrl button.only-toggle:disabled {
+  color: #adb5bd;
 }
 
 .search-form button.icon {

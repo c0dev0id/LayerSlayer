@@ -31,14 +31,15 @@ export async function layerFeatures(map: MapLibreMap, layer: Layer): Promise<{ p
 const MAX_TAPPED = 10;
 
 /**
- * The features of the vector layers drawn within `radius` pixels of a point, in words:
+ * The features of the vector layers drawn within `radius` pixels of a point, in words
+ * (the map holds the layers shown only):
  * topmost first, each once, though the map draws it in several parts (line and label,
  * tile by tile). Lines and areas have their geometry of all the tiles loaded, not only of
  * those tapped.
  */
 export function featuresAt(map: MapLibreMap, point: { x: number; y: number }, radius: number, layers: readonly Layer[]): LayerFeature[] {
   // A vector layer's source is named by the layer's id.
-  const vector = new Map(layers.filter((l) => l.visible && isVector(l.source)).map((l) => [l.id, l]));
+  const vector = new Map(layers.filter((l) => isVector(l.source)).map((l) => [l.id, l]));
   const styleLayers = map.getLayersOrder().filter((id) => vector.has(map.getLayer(id)?.source ?? ''));
   if (styleLayers.length === 0) return [];
   const box: [PointLike, PointLike] = [

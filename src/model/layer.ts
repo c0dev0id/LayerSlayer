@@ -291,6 +291,15 @@ export function isRaster(source: LayerSource): boolean {
   return SOURCE_KINDS[source.type].raster === true;
 }
 
+/**
+ * Whether the layer at `index` in drawing order is shown: as its eye says, or, while only
+ * one layer is shown (`only`, its id), that layer whatever its eye, and the bottom layer,
+ * usually the base map, as its eye says.
+ */
+export function isShown(layer: Layer, index: number, only?: string): boolean {
+  return only === undefined ? layer.visible : layer.id === only || (index === 0 && layer.visible);
+}
+
 /** Whether the layer keeps its tiles in the browser: where its source allows, unless switched off. */
 export function keepsTiles(layer: Layer): boolean {
   return canCache(layer.source) && layer.cache !== false;

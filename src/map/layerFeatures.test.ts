@@ -53,9 +53,9 @@ describe('featuresAt', () => {
     expect(featuresAt(map, { x: 0, y: 0 }, 10, layers)[0]!.geometry).toEqual({ type: 'GeometryCollection', geometries: [line(1), line(2)] });
   });
 
-  it('leaves out hidden layers', () => {
+  it('finds what the map draws, as a layer shown alone though its eye is off', () => {
     const map = fakeMap([{ layer: 'c/line', properties: { name: 'Road' }, geometry: line(1) }]);
-    expect(featuresAt(map, { x: 0, y: 0 }, 10, [layers[0]!, { ...layers[1]!, visible: false }])).toEqual([]);
+    expect(featuresAt(map, { x: 0, y: 0 }, 10, [layers[0]!, { ...layers[1]!, visible: false }]).map((f) => f.title)).toEqual(['Road']);
   });
 
   it('takes a point as drawn, as points have no parts to join', () => {

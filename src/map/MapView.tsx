@@ -5,7 +5,7 @@ import { createEffect, createMemo, on, onCleanup, onMount, untrack } from 'solid
 import { unwrap } from 'solid-js/store';
 import { describeLoadError, requestUrl } from '../state/net';
 import { focusBounds, setTerrain, setView, state } from '../state/store';
-import { clearLayerError, reportLayerError, setMap, setZoom } from '../state/ui';
+import { clearLayerError, onlyLayerId, onlyOpen, reportLayerError, setMap, setOnlyOpen, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
 import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, HILLSHADE_SOURCE, TERRAIN_SOURCE, WMTS_PROTOCOL } from './compose';
@@ -17,6 +17,7 @@ import { withOverlays } from './overlays';
 import { drawDisc, drawGlyph, parsePoiImageId, POI_DISC } from './poiIcons';
 import { loadCachedTile, loadPmtiles, loadTile } from './protocols';
 import { routeOverlay } from './routeOverlay';
+import { OnlyControl } from './onlyControl';
 import { TerrainControl } from './terrainControl';
 import { PMTILES_PROTOCOL } from './urls';
 
@@ -65,6 +66,9 @@ export function MapView() {
     const terrainControl = new TerrainControl(() => !!state.settings.terrain, setTerrain);
     map.addControl(terrainControl, 'top-right');
     createEffect(() => terrainControl.show(!!state.settings.terrain));
+    const onlyControl = new OnlyControl(() => setOnlyOpen(!onlyOpen()));
+    map.addControl(onlyControl, 'top-right');
+    createEffect(() => onlyControl.show(onlyOpen(), state.layers.find((l) => l.id === state.activeLayerId)?.name));
     map.addControl(new maplibregl.ScaleControl(), 'bottom-left');
 
     setZoom(map.getZoom());
@@ -113,7 +117,12 @@ export function MapView() {
       const layers = createMemo(() =>
         JSON.parse(
           JSON.stringify(
-            composeStyle(state.layers, assets(), { focus: focusBounds(), background: state.settings.background, terrain: state.settings.terrain }),
+            composeStyle(state.layers, assets(), {
+              focus: focusBounds(),
+              background: state.settings.background,
+              terrain: state.settings.terrain,
+              only: onlyLayerId(),
+            }),
           ),
         ),
       );

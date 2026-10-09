@@ -8,6 +8,7 @@ import type {
 import { intersectBounds } from '../geo/bounds';
 import { iconSize, type MapIcon } from '../model/icon';
 import {
+  isShown,
   keepsTiles,
   layerColor,
   LINE_WIDTH,
@@ -86,6 +87,8 @@ export interface MapOptions {
    * bottom layer. The shading lies on the bottom layer, under every layer above it.
    */
   terrain?: boolean;
+  /** The id of the one layer shown, with the bottom layer under it; see `isShown`. */
+  only?: string;
 }
 
 export const TERRAIN_SOURCE = 'terrain';
@@ -134,7 +137,7 @@ interface Fragment {
  *
  * See MapOptions for what is drawn around the layers.
  */
-export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain }: MapOptions = {}): StyleSpecification {
+export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain, only }: MapOptions = {}): StyleSpecification {
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
   if (background) style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
   const sprites: { id: string; url: string }[] = [];
@@ -144,7 +147,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   const withinOf = (index: number) => (index > 0 ? focus : undefined);
   const drawn = (layer: Layer, index: number) => {
     const within = withinOf(index);
-    return layer.visible && !(within && layer.bounds && !intersectBounds(layer.bounds, within));
+    return isShown(layer, index, only) && !(within && layer.bounds && !intersectBounds(layer.bounds, within));
   };
   // The first style drawn with fonts brings the map's font source, and the labels' font.
   let labelFont = LABEL_FONT;
