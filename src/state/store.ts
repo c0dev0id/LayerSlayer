@@ -53,12 +53,14 @@ export interface AppState {
 
 const STORAGE_KEY = 'layerslayer';
 
-/** What a first visit starts with: a vector base map that needs no key. */
+/** What a first visit starts with: OpenTopoMap, as its library entry adds it. */
 const FIRST_LAYER: LayerDraft = {
-  name: 'OpenFreeMap Liberty',
-  source: { type: 'style', url: 'https://tiles.openfreemap.org/styles/liberty' },
+  name: 'OpenTopoMap',
+  source: { type: 'xyz', tiles: ['https://tile.opentopomap.org/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256, maxzoom: 17 },
+  attribution:
+    'Map data: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM · Map style: © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
   // As if added from its library entry, which then shows it as on the map.
-  origin: 'https://tiles.openfreemap.org/styles/liberty',
+  origin: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
   // The map a first visit sees, so not see-through like layers added to it.
   opacity: 1,
 };

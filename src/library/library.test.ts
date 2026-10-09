@@ -32,8 +32,12 @@ describe('library', () => {
     }
   });
 
-  it('holds the default layer, so its entry shows it as on the map', () => {
-    expect(entries.map((e) => e.url)).toContain(defaultState().layers[0]!.origin);
+  it('holds the default layer as its entry adds it, so the entry shows it as on the map', () => {
+    const layer = defaultState().layers[0]!;
+    const entry = service(layer.name);
+    expect(entry.url).toBe(layer.origin);
+    const { name, source, attribution } = withEntry(parseXyz(entry.url), entry).offers[0]!.draft!;
+    expect({ name: layer.name, source: layer.source, attribution: layer.attribution }).toEqual({ name, source, attribution });
   });
 
   it('knows the area of every region but Global, in valid bounds', () => {
