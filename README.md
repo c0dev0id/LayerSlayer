@@ -8,10 +8,10 @@ read the way it describes itself (capabilities documents, service descriptions,
 georeferencing in the PDF) and drawn with the MapLibre source that fits it, rather than
 turned into raster tiles by a proxy.
 
-It is a static page built with SolidJS and MapLibre GL JS and deployed to GitHub Pages by
-GitHub Actions. Its code name, used by the repository, browser storage and the `.webmap`
-project files, is webmap. Nothing runs on a server; layers, routes, settings and imported
-files stay in the browser.
+It runs at <https://shagen.me/LayerSlayer/>: a static page built with SolidJS and MapLibre
+GL JS and deployed to GitHub Pages by GitHub Actions. Its former code name, webmap, lives
+on in browser storage and the `.webmap` project files. Nothing runs on a server; layers,
+routes, settings and imported files stay in the browser.
 
 ## Using it
 

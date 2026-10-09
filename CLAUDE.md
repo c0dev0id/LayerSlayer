@@ -2,10 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Layer Slayer (code name **webmap**) is a static, server-less map viewer: SolidJS +
-MapLibre GL JS, built with Vite, deployed to GitHub Pages. It stacks layers from many map
-service kinds (WMS, WMTS, WFS, OGC API – Features, ArcGIS, XYZ, MVT, PMTiles, MapLibre
-styles, COG, GeoJSON, GPX, KML, GeoPDF) and draws OSRM-routed routes over them.
+Layer Slayer (formerly **webmap**) is a static, server-less map viewer: SolidJS + MapLibre
+GL JS, built with Vite, deployed to GitHub Pages at https://shagen.me/LayerSlayer/. It
+stacks layers from many map service kinds (WMS, WMTS, WFS, OGC API – Features, ArcGIS,
+XYZ, MVT, PMTiles, MapLibre styles, COG, GeoJSON, GPX, KML, GeoPDF) and draws OSRM-routed
+routes over them.
 
 `README.md` describes behaviour from the user's side; `.github/development-journal.md`
 holds the reasoning behind nearly every design choice (its *Key decisions* section). Read
@@ -87,8 +88,9 @@ chunk loaded with the icon picker. UI icons are Tabler SVG paths in `src/ui/icon
 - Heavy libraries (pdf.js, pdf-lib, geotiff, pmtiles, togeojson, fflate, osmtogeojson,
   the style spec) are loaded with dynamic `import()` on first use; keep them that way.
 - Below 1.0 there is no migration code: stored layers that no longer parse are dropped.
-- Storage keys, the project format (`.webmap`, `"app": "webmap"`) and the repository keep
-  the code name; user-facing text says Layer Slayer.
+- Storage keys and the project format (`.webmap`, `"app": "webmap"`) keep the old name
+  webmap, so stored data and old project files survive the rename; user-facing text says
+  Layer Slayer.
 - Unit tests sit beside their modules (`*.test.ts`) and cover the pure modules; service
   parsers are tested against captured responses in `src/services/fixtures/`.
 - README and journal are prose wrapped at 90 columns, describing behaviour in plain words
