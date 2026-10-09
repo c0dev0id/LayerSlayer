@@ -22,6 +22,15 @@ function Icon(props: { children: JSX.Element }) {
   );
 }
 
+/** Technical details (Tabler's info-circle). */
+export const InfoIcon = () => (
+  <Icon>
+    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+    <path d="M12 9h.01" />
+    <path d="M11 12h1v4h1" />
+  </Icon>
+);
+
 /** The light theme (Tabler's sun). */
 export const SunIcon = () => (
   <Icon>

@@ -1,9 +1,10 @@
-import { createMemo, createResource, createRoot, createSignal, For, Index, Show } from 'solid-js';
+import { createMemo, createResource, createRoot, createSignal, For, Index, Match, Show, Switch } from 'solid-js';
 import { allOutside } from '../geo/bounds';
 import {
   downloadedLayer,
   entryAreas,
   entryService,
+  entryTypeLabel,
   filterLibrary,
   loadLibrary,
   withEntry,
@@ -11,17 +12,20 @@ import {
   type LibraryEntry,
   type ServiceEntry,
 } from '../library/library';
+import { dataLabel, serviceFacts, styleFacts } from '../library/entryInfo';
 import type { Bounds } from '../model/layer';
 import { decodePlaceholders, parsePmtilesUrl } from '../map/urls';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
 import { readService } from '../services/read';
+import { loadStyle } from '../services/style';
+import { htmlText } from '../services/xml';
 import { SERVICE_TYPES, type Offer, type ServiceInfo, type ServiceType } from '../services/types';
 import { hostOf, isProxied } from '../state/net';
 import { addLayer, focusBounds, removeLayersWhere, setHostProxied, state } from '../state/store';
 import { errorMessage } from '../state/ui';
 import { askConfirmation } from './confirm';
-import { CloseIcon, DownloadLink } from './icons';
+import { CloseIcon, DownloadLink, InfoIcon } from './icons';
 import { showModalWhile } from './modal';
 import { OsmQueryTab } from './OsmQueryTab';
 import { groupMembers, isFromSource, originOf, selection, type Selection } from './offers';
@@ -247,7 +251,8 @@ function FailureNote(props: { failure: Failure; onRetry: (source: Source) => voi
 /**
  * The library's entries, searched and filtered. A service entry opens the service; a file
  * entry, whose server does not let the page read it, has a link that downloads the file
- * and asks for the downloaded file when tapped.
+ * and asks for the downloaded file when tapped. Each entry's info button shows its
+ * technical details under it.
  */
 function LibraryTab(props: {
   busy: ReadonlySet<string>;
@@ -303,39 +308,54 @@ function LibraryTab(props: {
             const size = () => props.sizes.get(entry.url);
             const areas = entryAreas(entry);
             const outside = () => outsideFocus(areas);
+            const [info, setInfo] = createSignal(false);
             return (
-              <li classList={{ download: entry.type === 'file' }}>
-                <button class="entry" classList={{ added: onMap() > 0, outside: outside() }} onClick={() => tap(entry, onMap() > 0)}>
-                  <span class="row">
-                    <strong class="grow">{entry.name}</strong>
-                    <Show when={props.busy.has(entry.url)}>
-                      <span class="muted">Reading…</span>
+              <li>
+                <div class="entry-line">
+                  <button class="entry" classList={{ added: onMap() > 0, outside: outside() }} onClick={() => tap(entry, onMap() > 0)}>
+                    <span class="row">
+                      <strong class="grow">{entry.name}</strong>
+                      <Show when={props.busy.has(entry.url)}>
+                        <span class="muted">Reading…</span>
+                      </Show>
+                      <Show when={onMap() > 0}>
+                        <span class="count">{onMap()} on the map</span>
+                      </Show>
+                      <Show when={entry.type !== 'file' && entry.cors === false}>
+                        <span
+                          class="badge"
+                          title="The server does not allow web pages to read it (no valid CORS header). With a CORS proxy set in Settings, it goes through the proxy."
+                        >
+                          proxy
+                        </span>
+                      </Show>
+                      <Show when={(size() ?? 0) > 1}>
+                        <span class="muted">{size()} layers ›</span>
+                      </Show>
+                    </span>
+                    <span class="muted">
+                      {entry.region} · {entry.category} · {entryTypeLabel(entry)}
+                      <Show when={outside()}> · outside the focus area</Show>
+                    </span>
+                    <Show when={entry.note}>
+                      <span class="note-text">{entry.note}</span>
                     </Show>
-                    <Show when={onMap() > 0}>
-                      <span class="count">{onMap()} on the map</span>
-                    </Show>
-                    <Show when={entry.type !== 'file' && entry.cors === false}>
-                      <span
-                        class="badge"
-                        title="The server does not allow web pages to read it (no valid CORS header). With a CORS proxy set in Settings, it goes through the proxy."
-                      >
-                        proxy
-                      </span>
-                    </Show>
-                    <Show when={(size() ?? 0) > 1}>
-                      <span class="muted">{size()} layers ›</span>
-                    </Show>
-                  </span>
-                  <span class="muted">
-                    {entry.region} · {entry.category} · {SERVICE_TYPES.find((t) => t.value === entry.type)?.label ?? 'File to download'}
-                    <Show when={outside()}> · outside the focus area</Show>
-                  </span>
-                  <Show when={entry.note}>
-                    <span class="note-text">{entry.note}</span>
+                  </button>
+                  <Show when={entry.type === 'file'}>
+                    <DownloadLink class="entry-action" href={entry.url} of={entry.name} />
                   </Show>
-                </button>
-                <Show when={entry.type === 'file'}>
-                  <DownloadLink class="download-link" href={entry.url} of={entry.name} />
+                  <button
+                    class="icon entry-action"
+                    title="Technical details"
+                    aria-label={`Technical details of ${entry.name}`}
+                    aria-expanded={info()}
+                    onClick={() => setInfo(!info())}
+                  >
+                    <InfoIcon />
+                  </button>
+                </div>
+                <Show when={info()}>
+                  <EntryInfo entry={entry} />
                 </Show>
               </li>
             );
@@ -343,6 +363,90 @@ function LibraryTab(props: {
         </For>
       </ul>
     </div>
+  );
+}
+
+/**
+ * What an entry is, technically: what the library says at once, and what reading the
+ * service adds (its kind of data, formats, version and layers). The read is the one that
+ * opening the entry uses, so either finds it done.
+ */
+function EntryInfo(props: { entry: LibraryEntry }) {
+  const entry = props.entry;
+  const [facts] = createResource(async () => {
+    if (entry.type === 'file') return undefined;
+    const info = await read({ type: entry.type, url: entry.url, entry });
+    if (entry.type !== 'style') return serviceFacts(info);
+    const style = styleFacts(await loadStyle(entry.url));
+    return serviceFacts(info, () => style);
+  });
+  const service = entry.type === 'file' ? undefined : entry;
+  const zooms = service && (service.minzoom !== undefined || service.maxzoom !== undefined) ? `${service.minzoom ?? 0}–${service.maxzoom ?? '…'}` : undefined;
+  return (
+    <dl class="detail-rows entry-info">
+      <dt>Address</dt>
+      <dd>
+        {/* A tile template is no page to open. */}
+        <Show when={!entry.url.includes('{')} fallback={entry.url}>
+          <a href={entry.url} target="_blank" rel="noopener">
+            {entry.url}
+          </a>
+        </Show>
+      </dd>
+      <dt>Service</dt>
+      <dd>
+        {entryTypeLabel(entry)}
+        {facts.state === 'ready' && facts()?.version ? ` ${facts()!.version}` : ''}
+      </dd>
+      <Switch>
+        <Match when={facts.loading}>
+          <dt>Data</dt>
+          <dd class="muted">Reading the service…</dd>
+        </Match>
+        <Match when={facts.error as unknown}>
+          {(error) => (
+            <>
+              <dt>Data</dt>
+              <dd class="muted">Could not be read: {errorMessage(error())}</dd>
+            </>
+          )}
+        </Match>
+        <Match when={facts.state === 'ready' && facts()}>
+          {(f) => (
+            <>
+              <dt>Data</dt>
+              <dd>{dataLabel(f().data) || 'Unknown'}</dd>
+              <dt>Format</dt>
+              <dd>{f().formats.join('\n')}</dd>
+              <Show when={f().layers > 1}>
+                <dt>Layers</dt>
+                <dd>{f().layers}</dd>
+              </Show>
+            </>
+          )}
+        </Match>
+      </Switch>
+      <Show when={zooms}>
+        <dt>Tile zooms</dt>
+        <dd>{zooms}</dd>
+      </Show>
+      <dt>Access</dt>
+      <dd>
+        {entry.type === 'file'
+          ? 'Downloaded by a link: the server does not let web pages read the file'
+          : entry.cors === false
+            ? 'Through a CORS proxy: the server sends no valid CORS header'
+            : 'Direct: the server lets web pages read it (CORS)'}
+      </dd>
+      <Show when={entry.attribution}>
+        {(attribution) => (
+          <>
+            <dt>Attribution</dt>
+            <dd>{htmlText(attribution())}</dd>
+          </>
+        )}
+      </Show>
+    </dl>
   );
 }
 

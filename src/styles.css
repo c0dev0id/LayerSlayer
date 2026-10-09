@@ -731,18 +731,28 @@ input.swatch {
   background: var(--active-hover);
 }
 
-/* A file to download: the entry, and the link that downloads the file beside it. */
-.entries li.download {
+/* An entry and the buttons beside it: technical details, and for a file the link that downloads it. */
+.entries .entry-line {
   display: flex;
 }
 
-.entries .download-link {
-  padding: 0 12px;
+.entries .entry-action {
+  padding: 0 10px;
   border-bottom: 1px solid var(--border);
+  color: var(--muted);
 }
 
-.entries .download-link:hover {
+.entries .entry-action:hover,
+.entries .entry-action[aria-expanded='true'] {
   background: var(--hover);
+  color: var(--text);
+}
+
+.entries .entry-info {
+  margin: 0;
+  padding: 6px 8px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
 }
 
 /* Known to lie outside the focus area: still there, but out of the way of what lies inside. */

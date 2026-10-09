@@ -1,5 +1,5 @@
 import type { Bounds, LayerDraft } from '../model/layer';
-import type { ServiceInfo, ServiceType } from '../services/types';
+import { SERVICE_TYPES, type ServiceInfo, type ServiceType } from '../services/types';
 import { parseTemplate } from '../services/vectorTiles';
 import { tileTemplates } from '../services/xyz';
 import { REGION_BOUNDS } from './regions';
@@ -43,6 +43,11 @@ export type LibraryEntry = ServiceEntry | FileEntry;
 export async function loadLibrary(): Promise<LibraryEntry[]> {
   const { default: library } = await import('./library.json');
   return library.entries as LibraryEntry[];
+}
+
+/** What kind of service an entry is, or that it is a file to download. */
+export function entryTypeLabel(entry: LibraryEntry): string {
+  return SERVICE_TYPES.find((t) => t.value === entry.type)?.label ?? 'File to download';
 }
 
 /** Where an entry has data, as far as the library knows: its own bounds or its region's; none for global services. */
