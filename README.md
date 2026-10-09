@@ -76,14 +76,18 @@ shading.
   it, and the frame icon flies to the area the layer covers (layers that span most of the
   world have none). A layer shown in grey italics is outside its zoom range at the current
   zoom; a red triangle carries the last error loading it. Under each name, a small line
-  shows its opacity, colour, zoom range (z5–15), and *label*, *cache* and *proxy* where
-  it labels its features, its tiles are kept or its server goes through the CORS proxy.
+  shows its opacity, colour, the time it is drawn at, zoom range (z5–15), and *label*,
+  *cache* and *proxy* where it labels its features, its tiles are kept or its server goes
+  through the CORS proxy.
   *Background*, below the last layer, sets the colour the map is drawn on (white unless
   chosen); it shows wherever the layers leave the map uncovered or see-through.
 - Clicking a layer's name opens its **settings** in its place in the list, closing those
   of the layer open before; clicking it again closes them. They hold its opacity, zoom
   range, colour (vector layers), source, the CORS proxy for its server and, for tiled
   layers, whether it keeps its tiles in the browser. New layers start at 50% opacity.
+  WMS layers with maps of several times, such as Rhineland-Palatinate's topographic maps
+  of every year since 1887, have a *Time*: a menu of the years, months or days the service
+  lists, or a field to type a time where it lists times of day or too many to choose from.
   Raster layers (XYZ, WMS, WMTS, ArcGIS MapServer, GeoTIFF, placed images) have *Colour
   adjustments*: hue, saturation, contrast, and the brightness black and white become.
   Black at 100% and white at 0% inverts the image; with the hue turned 180° that gives a

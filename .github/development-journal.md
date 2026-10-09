@@ -106,7 +106,14 @@ It is a static single-page app on GitHub Pages; there is no server component.
   AQI categories of EPA AirNow are; one colour would make such a layer meaningless.
 - **Each service kind maps to a native source.**
   - WMS: a raster source with `{bbox-epsg-3857}` in a GetMap URL, 512 px tiles, the
-    service's name for Web Mercator. Scale denominators become zoom ranges.
+    service's name for Web Mercator. Scale denominators become zoom ranges. A layer's time
+    dimension (`Dimension` in 1.3.0, `Extent` in 1.1.1, inherited like the CRS) is kept
+    with the source as the service lists it, and the time chosen is sent as `TIME`, so a
+    new time is a new tile address and the tile cache needs nothing of its own. The
+    settings list the times where a range steps by years, months or days and has at most
+    a thousand of them, as for map editions (Rhineland-Palatinate's TK25 lists 1887 to
+    2024); times of day, as weather services give, are typed. The service's default is
+    drawn first, else the last time it lists. Other dimensions (elevation) are left out.
   - WMTS: accepted when a linked tile matrix set is Web Mercator with its origin at the
     world's top left, one tile size, and every matrix at a whole zoom's resolution; matrix
     limits narrow it. Matrix identifiers that equal the zoom, or the zoom behind a common
@@ -702,11 +709,12 @@ It is a static single-page app on GitHub Pages; there is no server component.
   templates, vector tiles, PMTiles archives, MapLibre styles, Cloud Optimized GeoTIFF,
   GeoJSON (URL or file), GPX tracks and KML or KMZ placemarks (file) and GeoPDF (file or
   URL).
-- A library of about 140 services and files by region and category, with search.
+- A library of about 150 services and files by region and category, with search.
 - An add-layer dialog that stays open: layers and groups toggle with a tap, what is on
   the map is highlighted, and the library and a service's layers can be switched between
   freely. Every layer a service offers is listed, with reasons for those it cannot show
   and a filter for services with hundreds of layers.
+- WMS layers with maps of several times drawn at the time chosen in their settings.
 - Layer list with drag and keyboard reordering, visibility, removal, flying to the layer's
   area, opacity, zoom range, colour and line style for vector layers, colour adjustments
   for raster layers, and per-layer error marks.
