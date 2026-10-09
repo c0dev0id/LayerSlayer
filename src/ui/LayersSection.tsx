@@ -31,7 +31,7 @@ import { hostOf } from '../state/net';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { timeValues } from '../services/wmsTime';
 import { moveLayer, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, state, updateLayer } from '../state/store';
-import { layerErrors, map, onlyLayerId, showBounds, zoom } from '../state/ui';
+import { layerErrors, map, onlyLayerId, showLayerArea, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
@@ -76,11 +76,6 @@ export function LayersSection(props: { onAdd: () => void }) {
       </div>
     </section>
   );
-}
-
-/** Flies to the layer's bounds, no closer than the layer is drawn. */
-function flyTo(layer: Layer): void {
-  if (layer.bounds) showBounds(layer.bounds, Math.min(layer.maxzoom, 16));
 }
 
 function outOfRange(layer: Layer): boolean {
@@ -141,7 +136,7 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
             class="icon"
             title={`Fly to the area of ${layer.name}`}
             aria-label={`Fly to the area of ${layer.name}`}
-            onClick={() => flyTo(layer)}
+            onClick={() => showLayerArea(layer)}
           >
             <AreaIcon />
           </button>

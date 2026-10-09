@@ -256,6 +256,22 @@ export const LINE_WIDTH = 2.5;
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
 
+/** Closest zoom flying to a layer's area comes to, unless the layer is drawn only closer. */
+const AREA_ZOOM = 16;
+
+/**
+ * The zoom to show a layer's area at, given the zoom its area fits the map at: no further
+ * out than the layer is drawn from and short of the zoom it is hidden from, so the layer
+ * shows once there. A layer drawn only from zoom 17 is flown to at 17, however large its
+ * area.
+ */
+export function areaZoom(fit: number, layer: Pick<Layer, 'minzoom' | 'maxzoom'>): number {
+  const { minzoom, maxzoom } = layer;
+  // Half a zoom short of where the layer is hidden, or its middle where its range is narrower.
+  const closest = Math.min(Math.max(maxzoom - 0.5, (minzoom + maxzoom) / 2), Math.max(AREA_ZOOM, minzoom));
+  return Math.max(minzoom, Math.min(fit, closest));
+}
+
 /** Colours handed out to vector layers in turn; they read on light and dark base maps. */
 export const VECTOR_COLORS = ['#e8590c', '#1c7ed6', '#2f9e44', '#ae3ec9', '#f08c00', '#0c8599', '#e03131'];
 
