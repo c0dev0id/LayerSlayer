@@ -14,8 +14,8 @@ routes, settings and imported files stay in the browser.
 
 ## Using it
 
-A first visit starts with OpenTopoMap, a topographic map with contour lines and hill
-shading.
+A first visit starts with TopPlusOpen, the topographic base map of Germany's federal
+mapping agency (BKG), which covers the rest of the world in less detail.
 
 - **Add layer** opens the library, an address field, a file picker and OSM Query. The
   dialog stays open until *Close*: a tap adds a layer in the background and a second tap

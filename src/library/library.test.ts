@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT } from '../services/importFile';
 import { SERVICE_TYPES } from '../services/types';
+import topplus from '../services/fixtures/wmts-topplus.xml?raw';
+import { parseWmts } from '../services/wmts';
 import { parseXyz } from '../services/xyz';
+import { originOf } from '../ui/offers';
 import { defaultState } from '../state/store';
 import library from './library.json';
 import { validBounds } from '../geo/mercator';
@@ -35,9 +38,9 @@ describe('library', () => {
   it('holds the default layer as its entry adds it, so the entry shows it as on the map', () => {
     const layer = defaultState().layers[0]!;
     const entry = service(layer.name);
-    expect(entry.url).toBe(layer.origin);
-    const { name, source, attribution } = withEntry(parseXyz(entry.url), entry).offers[0]!.draft!;
-    expect({ name: layer.name, source: layer.source, attribution: layer.attribution }).toEqual({ name, source, attribution });
+    const offer = withEntry(parseWmts(topplus, entry.url), entry).offers.find((o) => originOf(entry.url, o) === layer.origin);
+    const { name, source, bounds, attribution } = offer!.draft!;
+    expect({ name: layer.name, source: layer.source, bounds: layer.bounds, attribution: layer.attribution }).toEqual({ name, source, bounds, attribution });
   });
 
   it('knows the area of every region but Global, in valid bounds', () => {

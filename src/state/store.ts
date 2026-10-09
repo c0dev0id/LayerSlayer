@@ -53,14 +53,22 @@ export interface AppState {
 
 const STORAGE_KEY = 'layerslayer';
 
-/** What a first visit starts with: OpenTopoMap, as its library entry adds it. */
+const TOPPLUS = 'https://sgx.geodatenzentrum.de/wmts_topplus_open';
+
+/** What a first visit starts with: TopPlusOpen, as its library entry adds it. */
 const FIRST_LAYER: LayerDraft = {
-  name: 'OpenTopoMap',
-  source: { type: 'xyz', tiles: ['https://tile.opentopomap.org/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256, maxzoom: 17 },
-  attribution:
-    'Map data: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM · Map style: © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
+  name: 'TopPlusOpen',
+  source: {
+    type: 'wmts',
+    template: `${TOPPLUS}/tile/1.0.0/web/default/WEBMERCATOR/{TileMatrix}/{TileRow}/{TileCol}.png`,
+    // Its tile matrices are named 00 to 18, one per zoom.
+    matrices: Object.fromEntries(Array.from({ length: 19 }, (_, z) => [z, String(z).padStart(2, '0')])),
+    tileSize: 256,
+  },
+  bounds: [-180, -85.0511287798, 180, 85.0511287798],
+  attribution: '© <a href="https://www.bkg.bund.de">BKG</a> dl-de/by-2-0, <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_topplusopen.html">data sources</a>',
   // As if added from its library entry, which then shows it as on the map.
-  origin: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
+  origin: `${TOPPLUS}/1.0.0/WMTSCapabilities.xml web`,
   // The map a first visit sees, so not see-through like layers added to it.
   opacity: 1,
 };
