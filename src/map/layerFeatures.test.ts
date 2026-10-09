@@ -5,10 +5,17 @@ import { featuresAt } from './layerFeatures';
 
 const line = (x: number): GeoJSON.LineString => ({ type: 'LineString', coordinates: [[x, 0], [x + 1, 0]] });
 
-/** A map that answers queries with the given features, as MapLibre gives them. */
+/**
+ * A map that answers queries with the given features, as MapLibre gives them: rendered
+ * ones in the style layers asked for, whose source is the part of their id before the slash.
+ */
 function fakeMap(rendered: { layer: string; properties: object; geometry: GeoJSON.Geometry }[], source: Record<string, { properties: object; geometry: GeoJSON.Geometry }[]> = {}) {
+  const sourceOf = (id: string) => id.split('/')[0]!;
   return {
-    queryRenderedFeatures: () => rendered.map((f) => ({ ...f, layer: { id: f.layer } })),
+    getLayersOrder: () => [...new Set(rendered.map((f) => f.layer))],
+    getLayer: (id: string) => ({ source: sourceOf(id) }),
+    queryRenderedFeatures: (_box: unknown, { layers }: { layers: string[] }) =>
+      rendered.filter((f) => layers.includes(f.layer)).map((f) => ({ ...f, source: sourceOf(f.layer), layer: { id: f.layer } })),
     querySourceFeatures: (id: string) => source[id] ?? [],
   } as unknown as MapLibreMap;
 }
@@ -34,7 +41,7 @@ describe('featuresAt', () => {
     ]);
   });
 
-  it('joins the parts of a feature in the tiles loaded', () => {
+  it('joins the parts of a line in the tiles loaded', () => {
     const props = { name: 'Long road' };
     const map = fakeMap([{ layer: 'c/line', properties: props, geometry: line(1) }], {
       c: [
@@ -49,5 +56,12 @@ describe('featuresAt', () => {
   it('leaves out hidden layers', () => {
     const map = fakeMap([{ layer: 'c/line', properties: { name: 'Road' }, geometry: line(1) }]);
     expect(featuresAt(map, { x: 0, y: 0 }, 10, [layers[0]!, { ...layers[1]!, visible: false }])).toEqual([]);
+  });
+
+  it('takes a point as drawn, as points have no parts to join', () => {
+    const map = fakeMap([{ layer: 'c/point', properties: { name: 'Sign' }, geometry: { type: 'Point', coordinates: [1, 0] } }], {
+      c: [{ properties: { name: 'Sign' }, geometry: { type: 'Point', coordinates: [1, 0] } }, { properties: { name: 'Sign' }, geometry: { type: 'Point', coordinates: [1, 0] } }],
+    });
+    expect(featuresAt(map, { x: 0, y: 0 }, 10, layers)[0]!.geometry).toEqual({ type: 'Point', coordinates: [1, 0] });
   });
 });
