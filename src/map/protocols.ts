@@ -78,7 +78,7 @@ export function cacheKey(url: string): string {
  * A tile the map asks for, as `type` says: an image tile must be a whole image, or the map
  * would only say that it could not be decoded.
  */
-async function tileAs(url: string, type: string | undefined, signal: AbortSignal): Promise<ArrayBuffer> {
+export async function loadTileData(url: string, type: string | undefined, signal: AbortSignal): Promise<ArrayBuffer> {
   const data = await tile(url, signal);
   const problem = type === 'image' ? imageProblem(data) : undefined;
   if (problem) {
@@ -89,7 +89,7 @@ async function tileAs(url: string, type: string | undefined, signal: AbortSignal
 }
 
 /** WMTS tiles whose matrix identifiers are not the zoom, and feature tiles. */
-export const loadTile: AddProtocolAction = async (params, abort) => ({ data: await tileAs(params.url, params.type, abort.signal) });
+export const loadTile: AddProtocolAction = async (params, abort) => ({ data: await loadTileData(params.url, params.type, abort.signal) });
 
 /** Tiles of PMTiles archives, and the TileJSON that styles written for PMTiles ask for. */
 export const loadPmtiles: AddProtocolAction = async (params, abort) =>
@@ -105,7 +105,7 @@ export const loadCachedTile: AddProtocolAction = async (params, abort) => {
   const key = cacheKey(url);
   const hit = await cachedTile(key).catch(() => undefined);
   if (hit) return { data: hit };
-  const data = await tileAs(url, params.type, abort.signal);
+  const data = await loadTileData(url, params.type, abort.signal);
   // A copy, since the map may hand the returned buffer to its worker and detach it.
   void storeTile(key, data.slice(0)).catch(() => {});
   return { data };
