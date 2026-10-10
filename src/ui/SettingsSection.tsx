@@ -4,11 +4,12 @@ import { setHostProxied, setProxyAddress, setProxyMode, setTileCacheOff, state, 
 import { askConfirmation } from './confirm';
 import { countText, sizeText } from './format';
 import { CloseIcon, PencilIcon, SaveIcon } from './icons';
+import { Segmented, type SegmentedOption } from './Segmented';
 
-const PROXY_MODES: { mode: ProxyMode; label: string; title: string }[] = [
-  { mode: 'off', label: 'Off', title: 'No request goes through the proxy' },
-  { mode: 'hosts', label: 'Per layer', title: 'Requests to the hosts below go through the proxy' },
-  { mode: 'all', label: 'All layers', title: 'Every layer goes through the proxy, as if each had it ticked' },
+const PROXY_MODES: SegmentedOption<ProxyMode>[] = [
+  { value: 'off', label: 'Off', title: 'No request goes through the proxy' },
+  { value: 'hosts', label: 'Per layer', title: 'Requests to the hosts below go through the proxy' },
+  { value: 'all', label: 'All layers', title: 'Every layer goes through the proxy, as if each had it ticked' },
 ];
 
 /**
@@ -59,21 +60,13 @@ export function SettingsSection() {
       <div class="setting">
         <div class="row">
           <strong class="grow">CORS proxy</strong>
-          <div class="segmented" role="radiogroup" aria-label="Requests through the CORS proxy">
-            <For each={PROXY_MODES}>
-              {({ mode, label, title }) => (
-                <label title={title}>
-                  <input
-                    type="radio"
-                    name="proxy-mode"
-                    checked={(state.settings.proxyMode ?? 'hosts') === mode}
-                    onChange={() => setProxyMode(mode)}
-                  />
-                  <span>{label}</span>
-                </label>
-              )}
-            </For>
-          </div>
+          <Segmented
+            options={PROXY_MODES}
+            value={state.settings.proxyMode ?? 'hosts'}
+            onChange={setProxyMode}
+            name="proxy-mode"
+            label="Requests through the CORS proxy"
+          />
         </div>
         <ProxyAddress />
         <p class="muted hint">
