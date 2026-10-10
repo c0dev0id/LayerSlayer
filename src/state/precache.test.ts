@@ -33,6 +33,7 @@ describe('tileSource', () => {
     expect(tileSource(layer({ name: 's', source: { type: 'style', url: 'https://s.example/style.json' } }, 's'))).toBe('is not drawn from tiles');
     expect(tileSource(layer({ name: 'f', source: { type: 'arcgis-features', url: 'https://a/FeatureServer/0', geometry: 'point', maxRecordCount: 1000 } }, 'f'))).toMatch(/features/);
     expect(tileSource({ ...xyz('https://t.example/{z}/{x}/{y}.png'), cache: false })).toMatch(/keeps no tiles/);
+    expect(tileSource({ ...xyz('https://t.example/{z}/{x}/{y}.png'), visible: false })).toMatchObject({ type: 'image' });
   });
 });
 

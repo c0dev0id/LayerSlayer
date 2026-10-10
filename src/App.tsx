@@ -12,6 +12,7 @@ import { map, panelCollapsed } from './state/ui';
 import { AddLayerDialog } from './ui/AddLayerDialog';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { DetailsDialog } from './ui/DetailsDialog';
+import { PrecacheDialog } from './ui/PrecacheDialog';
 import { IconPicker } from './ui/IconPicker';
 import { PanelResizer, panelWidth } from './ui/PanelResizer';
 import { FocusSection } from './ui/FocusSection';
@@ -59,6 +60,7 @@ export function App() {
       <ConfirmDialog />
       <IconPicker />
       <DetailsDialog />
+      <PrecacheDialog />
     </div>
   );
 }

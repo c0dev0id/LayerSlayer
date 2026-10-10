@@ -47,7 +47,8 @@ export interface TileSource {
  * or it keeps none.
  */
 export function tileSource(layer: Layer): TileSource | string {
-  const spec = composeStyle([layer], new Map(), { tileCache: false }).sources[layer.id];
+  // Composed as shown, as a hidden layer has no source in the style.
+  const spec = composeStyle([{ ...layer, visible: true }], new Map(), { tileCache: false }).sources[layer.id];
   if (!spec || (spec.type !== 'raster' && spec.type !== 'vector') || !spec.tiles?.length) return 'is not drawn from tiles';
   if (spec.tiles.some((t) => t.startsWith(`${PMTILES_PROTOCOL}://`))) return 'is a PMTiles archive, which is not precached';
   if (spec.tiles.some((t) => t.startsWith(`${FEATURE_PROTOCOL}://`))) return 'is queried for features, which are not precached';

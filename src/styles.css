@@ -494,6 +494,75 @@ input.swatch {
   margin-top: 4px;
 }
 
+/* Precaching the focus area: the dialog that sets it up and the progress in the section. */
+.dialog.precache-dialog {
+  width: min(400px, calc(100vw - 32px));
+}
+
+.precache {
+  display: grid;
+  gap: 8px;
+}
+
+.precache h2 {
+  margin: 0;
+}
+
+.precache .label {
+  width: 56px;
+}
+
+.precache-table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.precache-table :is(th, td) {
+  padding: 2px 8px 2px 0;
+  text-align: right;
+}
+
+.precache-table :is(th, td):first-child {
+  text-align: left;
+}
+
+.precache-table tfoot td {
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.precache-layers {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.precache-layers .segmented {
+  margin-top: 4px;
+}
+
+.precache-progress {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.precache-progress progress {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.precache-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Choices side by side, one of them on: radio buttons drawn as joined buttons. */
 .segmented {
   display: inline-flex;
@@ -521,6 +590,11 @@ input.swatch {
   display: block;
   padding: 2px 8px;
   font-size: 13px;
+}
+
+.segmented input:disabled + span {
+  color: var(--muted);
+  cursor: default;
 }
 
 .segmented input:checked + span {

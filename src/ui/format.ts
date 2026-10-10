@@ -11,3 +11,12 @@ export function sizeText(bytes: number): string {
   if (bytes < 1e9) return `${(bytes / 1e6).toFixed(1)} MB`;
   return `${(bytes / 1e9).toFixed(1)} GB`;
 }
+
+/** A duration in the unit that reads best: "40 s", "12 min", "2 h 5 min". */
+export function durationText(seconds: number): string {
+  if (seconds < 60) return `${Math.max(1, Math.round(seconds))} s`;
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  return minutes % 60 ? `${hours} h ${minutes % 60} min` : `${hours} h`;
+}
