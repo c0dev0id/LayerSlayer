@@ -33,7 +33,7 @@ export async function encodeProjectFile({ state, routes, files }: Project): Prom
     // Images are compressed already; GeoJSON shrinks to a fraction.
     zip[`files/${key}`] = [new Uint8Array(await blob.arrayBuffer()), { level: blob.type.startsWith('image/') ? 0 : 6 }];
   }
-  const { proxy: _, ...settings } = state.settings;
+  const { proxy: _, tileCacheOff: __, proxyOff: ___, ...settings } = state.settings;
   const project = { app: APP, ...state, settings, ...routes, files: types };
   zip['project.json'] = [strToU8(JSON.stringify(project, null, 2)), { level: 6 }];
   return zipSync(zip);

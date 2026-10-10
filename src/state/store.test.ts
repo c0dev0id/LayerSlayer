@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { storedFile } from '../model/layer';
 import { importFile } from '../services/importFile';
-import { addLayer, defaultState, moveItem, parseState, replaceLayerFile, state, updateLayer } from './store';
+import { addLayer, browserSettings, defaultState, moveItem, parseState, replaceLayerFile, state, updateLayer } from './store';
 
 // Stored files in memory, as IndexedDB is not at hand.
 const stored = vi.hoisted(() => new Map<string, Blob>());
@@ -45,6 +45,8 @@ describe('parseState', () => {
   it('keeps a background colour only where it is one', () => {
     expect(parseState(JSON.stringify({ layers: [], settings: { background: '#1B2B44' } })).settings.background).toBe('#1B2B44');
     expect(parseState(JSON.stringify({ layers: [], settings: { background: 'red' } })).settings).not.toHaveProperty('background');
+    expect(parseState(JSON.stringify({ layers: [], settings: { tileCacheOff: true, proxyOff: true } })).settings).toMatchObject({ tileCacheOff: true, proxyOff: true });
+    expect(parseState(JSON.stringify({ layers: [], settings: { tileCacheOff: 'yes' } })).settings).not.toHaveProperty('tileCacheOff');
   });
 
   it('keeps an empty layer list empty', () => {
@@ -89,5 +91,12 @@ describe('replaceLayerFile', () => {
     );
     expect(stored.size).toBe(before);
     expect(state.layers.find((l) => l.id === picture.id)!.source).toMatchObject({ data: { file: 'picture' } });
+  });
+});
+
+describe('browserSettings', () => {
+  it('are the proxy address and the switches that are on', () => {
+    expect(browserSettings({ proxy: 'p', proxiedHosts: ['h'], terrain: true, proxyOff: true })).toEqual({ proxy: 'p', proxyOff: true });
+    expect(browserSettings({ proxy: '', proxiedHosts: [], tileCacheOff: false })).toEqual({ proxy: '' });
   });
 });

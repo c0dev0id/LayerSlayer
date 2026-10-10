@@ -165,7 +165,7 @@ function LayerSummary(props: { layer: Layer }) {
   // From the settings rather than net.ts, so the tag follows the proxy checkbox.
   const proxied = () => {
     const host = layerHost(layer);
-    return !!state.settings.proxy && host !== undefined && state.settings.proxiedHosts.includes(host);
+    return !!state.settings.proxy && !state.settings.proxyOff && host !== undefined && state.settings.proxiedHosts.includes(host);
   };
   return (
     <div class="layer-summary">
@@ -186,7 +186,7 @@ function LayerSummary(props: { layer: Layer }) {
         <span title="Its colours are adjusted">adjusted</span>
       </Show>
       <Show when={layer.label}>{(label) => <span title={`Labelled with ${label()}`}>label</span>}</Show>
-      <Show when={keepsTiles(layer)}>
+      <Show when={keepsTiles(layer) && !state.settings.tileCacheOff}>
         <span title={`Keeps its tiles in this browser for ${TILE_MAX_AGE_HOURS} hours`}>cache</span>
       </Show>
       <Show when={proxied()}>
@@ -585,7 +585,10 @@ function ActiveLayer(props: { layer: Layer }) {
       </div>
       <Show when={host()}>
         {(h) => (
-          <label class="row" title={state.settings.proxy ? undefined : 'Set a CORS proxy in Settings first'}>
+          <label
+            class="row"
+            title={!state.settings.proxy ? 'Set a CORS proxy in Settings first' : state.settings.proxyOff ? 'The CORS proxy is switched off in Settings' : undefined}
+          >
             <input
               type="checkbox"
               disabled={!state.settings.proxy}
@@ -597,8 +600,16 @@ function ActiveLayer(props: { layer: Layer }) {
         )}
       </Show>
       <Show when={canCache(layer.source)}>
-        <label class="row" title="For slow servers: tiles once loaded are answered from the browser">
-          <input type="checkbox" checked={keepsTiles(layer)} onChange={(e) => updateLayer(layer.id, { cache: e.currentTarget.checked })} />
+        <label
+          class="row"
+          title={state.settings.tileCacheOff ? 'Tile caching is switched off in Settings' : 'For slow servers: tiles once loaded are answered from the browser'}
+        >
+          <input
+            type="checkbox"
+            disabled={state.settings.tileCacheOff}
+            checked={keepsTiles(layer)}
+            onChange={(e) => updateLayer(layer.id, { cache: e.currentTarget.checked })}
+          />
           <span>Keep tiles in this browser for {TILE_MAX_AGE_HOURS} hours</span>
         </label>
       </Show>

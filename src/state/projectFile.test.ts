@@ -37,9 +37,12 @@ describe('project file', () => {
     expect(await blob.text()).toBe('{"type":"FeatureCollection","features":[]}');
   });
 
-  it('leaves the proxy address out of the file', async () => {
-    const json = strFromU8(unzipSync(await encodeProjectFile(project))['project.json']!);
+  it("leaves the proxy address and this browser's switches out of the file", async () => {
+    const switched = { ...project, state: { ...project.state, settings: { ...project.state.settings, tileCacheOff: true, proxyOff: true } } };
+    const json = strFromU8(unzipSync(await encodeProjectFile(switched))['project.json']!);
     expect(json).not.toContain('secret');
+    expect(json).not.toContain('tileCacheOff');
+    expect(json).not.toContain('proxyOff');
   });
 
   it('turns away what is not a project file', () => {

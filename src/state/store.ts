@@ -28,6 +28,15 @@ export interface Settings {
   background?: string;
   /** The ground in 3D, raised by its elevation. */
   terrain?: boolean;
+  /** No layer keeps tiles, whatever its own setting says: a switch of this browser, for testing. */
+  tileCacheOff?: boolean;
+  /** No request goes through the CORS proxy, whatever hosts use it: a switch of this browser, for testing. */
+  proxyOff?: boolean;
+}
+
+/** The settings that are this browser's own rather than a project's: the proxy and the switches. */
+export function browserSettings({ proxy, tileCacheOff, proxyOff }: Settings): Pick<Settings, 'proxy' | 'tileCacheOff' | 'proxyOff'> {
+  return { proxy, ...(tileCacheOff && { tileCacheOff }), ...(proxyOff && { proxyOff }) };
 }
 
 export interface View {
@@ -123,6 +132,8 @@ export function parseState(json: string): AppState {
       proxiedHosts: Array.isArray(settings?.proxiedHosts) ? settings.proxiedHosts.filter((h) => typeof h === 'string') : [],
       ...(typeof settings?.background === 'string' && /^#[0-9a-f]{6}$/i.test(settings.background) && { background: settings.background }),
       ...(settings?.terrain === true && { terrain: true }),
+      ...(settings?.tileCacheOff === true && { tileCacheOff: true }),
+      ...(settings?.proxyOff === true && { proxyOff: true }),
     },
     view:
       view && Array.isArray(view.center) && typeof view.zoom === 'number'
@@ -136,7 +147,7 @@ const [state, setState] = persistedStore(STORAGE_KEY, 'layers', parseState, defa
 export { state };
 
 createRoot(() => {
-  createEffect(() => setProxy(state.settings.proxy, [...state.settings.proxiedHosts]));
+  createEffect(() => setProxy(state.settings.proxyOff ? '' : state.settings.proxy, [...state.settings.proxiedHosts]));
   // A stored file goes with the last layer that uses it: removed, given other data, or
   // replaced by an opened project.
   let used = storedFiles(state.layers);
@@ -147,9 +158,10 @@ createRoot(() => {
   });
 });
 
-/** Replaces everything with a project's state, as when it is opened; the proxy address stays this browser's. */
+/** Replaces everything with a project's state, as when it is opened; the proxy and the switches stay this browser's. */
 export function replaceState(next: AppState): void {
-  setState(reconcile({ ...next, settings: { ...next.settings, proxy: state.settings.proxy } }, { key: 'id', merge: false }));
+  const { tileCacheOff: _, proxyOff: __, ...settings } = next.settings;
+  setState(reconcile({ ...next, settings: { ...settings, ...browserSettings(state.settings) } }, { key: 'id', merge: false }));
 }
 
 /** Adds a layer on top of the others and makes it the active one. */
@@ -234,6 +246,16 @@ export function setView(view: View): void {
 
 export function setProxyAddress(proxy: string): void {
   setState('settings', 'proxy', proxy.trim());
+}
+
+/** Switches tile caching off for every layer, or back to each layer's own setting. */
+export function setTileCacheOff(off: boolean): void {
+  setState('settings', 'tileCacheOff', off || undefined);
+}
+
+/** Switches the CORS proxy off for every host, or back on for the hosts that use it. */
+export function setProxyOff(off: boolean): void {
+  setState('settings', 'proxyOff', off || undefined);
 }
 
 /** Sets the colour the map is drawn on, or with none goes back to white. */
