@@ -23,7 +23,7 @@ const likeLiteral = (s: string) => s.replace(/[\\%_]/g, '\\$&');
 const containing = (text: string) => sql(`%${likeLiteral(text)}%`);
 
 /** A tag as an SQL condition: with any value, with the value, or with a value containing the text. */
-function tagCondition(condition: TagCondition): string {
+export function tagCondition(condition: TagCondition): string {
   const { key } = condition;
   if (condition.op === 'any') return `tags ? ${sql(key)}`;
   if (condition.op === 'contains') return `tags->>${sql(key)} ILIKE ${containing(condition.value)}`;
@@ -31,23 +31,22 @@ function tagCondition(condition: TagCondition): string {
 }
 
 /** A search as an SQL condition: all of its tags, or a value containing any of its texts. */
-function condition(search: Search): string {
+export function condition(search: Search): string {
   if ('conditions' in search) return `(${search.conditions.map(tagCondition).join(' AND ')})`;
   return `(tags->>${sql(search.key)} ILIKE ANY (ARRAY[${search.texts.map(containing).join(', ')}]))`;
 }
 
 /**
- * The OSM objects matching any of the conditions, `geom` being what each is given as, with
- * the `columns` asked for besides (name and SQL expression). Each condition is a query of
- * its own, so that each can use the index that fits it (tags or geometry), which an OR
- * across them all would rule out. A boundary relation is in the lines and the polygons
- * alike; one row of each object is kept, its polygon where it has one.
+ * The OSM objects matching any of the conditions, `geom` being what each is given as, and
+ * where asked whether the spot lies within each (`within`, read back by `readPostpass`).
+ * Each condition is a query of its own, so that each can use the index that fits it (tags
+ * or geometry), which an OR across them all would rule out. A boundary relation is in the
+ * lines and the polygons alike; one row of each object is kept, its polygon where it has one.
  */
-export function selectObjects(geom: string, conditions: readonly string[], columns: Readonly<Record<string, string>> = {}): string {
-  const extra = Object.entries(columns).map(([name, expression]) => `, ${expression} AS ${name}`).join('');
-  const names = Object.keys(columns).map((name) => `, ${name}`).join('');
-  const rows = conditions.map((where) => `SELECT osm_type, osm_id, tags, ${geom} AS geom${extra}, area_m2 FROM postpass_pointlinepolygon WHERE ${where}`);
-  return `SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, geom${names} FROM (${rows.join(' UNION ALL ')}) AS found ORDER BY osm_type, osm_id, area_m2 IS NULL`;
+export function selectObjects(geom: string, conditions: readonly string[], within?: string): string {
+  const [column, name] = within ? [`, ${within} AS within`, ', within'] : ['', ''];
+  const rows = conditions.map((where) => `SELECT osm_type, osm_id, tags, ${geom} AS geom${column}, area_m2 FROM postpass_pointlinepolygon WHERE ${where}`);
+  return `SELECT DISTINCT ON (osm_type, osm_id) osm_type, osm_id, tags, geom${name} FROM (${rows.join(' UNION ALL ')}) AS found ORDER BY osm_type, osm_id, area_m2 IS NULL`;
 }
 
 /** The query for the features matching any of the filters within the polygon. */

@@ -1,7 +1,7 @@
 import type { LngLat } from '../model/route';
 import { postpassOrOverpass, type OsmObject } from './osm';
 import { askOverpass, fromOverpass } from './overpass';
-import { askPostpass, selectObjects, sql } from './postpass';
+import { askPostpass, condition, selectObjects, sql, tagCondition } from './postpass';
 
 /**
  * What lies at a spot on the map, for people on the move: the nearest road or trail, the
@@ -172,14 +172,14 @@ export function postpassDetailsQuery([lng, lat]: LngLat, radius: number): string
     `${near} AND ((osm_type = 'W' AND tags->>'highway' ~ ${sql(ROAD_VALUES)}) OR tags ?| ${keys(POI_KEYS)} ` +
       `OR (tags ?| ${keys(NAMED_POI_KEYS)} AND tags ? 'name') OR (osm_type = 'N' AND tags ? 'barrier') ` +
       `OR tags ?| ${keys(HISTORY_KEYS)} OR ${Object.entries(HISTORY_TAGS)
-        .map(([key, value]) => `tags @> ${sql(JSON.stringify({ [key]: value }))}::jsonb`)
+        .map(([key, value]) => tagCondition({ key, op: 'eq', value }))
         .join(' OR ')} ` +
-      `OR tags->>'name' ILIKE ANY (ARRAY[${HISTORY_NAMES.map((word) => sql(`%${word}%`)).join(', ')}]) ` +
+      `OR ${condition({ key: 'name', texts: HISTORY_NAMES })} ` +
       `OR ${Object.entries(WATER_TAGS)
         .map(([key, values]) => `tags->>${sql(key)} IN (${values.map(sql).join(', ')})`)
         .join(' OR ')} ` +
-      `OR tags @> '{"man_made":"bridge"}'::jsonb OR (osm_type = 'W' AND tags ? 'bridge' AND tags->>'bridge' <> 'no'))`,
-  ], { within: `ST_Intersects(geom, ${spot})` });
+      `OR ${tagCondition({ key: 'man_made', op: 'eq', value: 'bridge' })} OR (osm_type = 'W' AND tags ? 'bridge' AND tags->>'bridge' <> 'no'))`,
+  ], `ST_Intersects(geom, ${spot})`);
 }
 
 /** How far around a spot to look: 40 CSS pixels at the map's zoom, between 15 and 250 metres. */
@@ -417,29 +417,25 @@ function historyTitle(tags: Record<string, string>): string {
   return 'Historic site';
 }
 
-/** Titles of water by a tag, looked at in the order of `WATER_TITLE_KEYS`. */
+/** Titles of water by the value of a tag of `WATER_TITLE_KEYS`, looked at in that order. */
 const WATER_TITLES: Record<string, string> = {
-  'waterway=river': 'River',
-  'waterway=stream': 'Stream',
-  'waterway=canal': 'Canal',
-  'water=lake': 'Lake',
-  'water=reservoir': 'Reservoir',
-  'water=pond': 'Pond',
-  'water=river': 'River',
-  'water=stream': 'Stream',
-  'water=canal': 'Canal',
-  'water=oxbow': 'Oxbow lake',
-  'water=lagoon': 'Lagoon',
-  'natural=bay': 'Bay',
-  'natural=strait': 'Strait',
-  'landuse=reservoir': 'Reservoir',
+  river: 'River',
+  stream: 'Stream',
+  canal: 'Canal',
+  lake: 'Lake',
+  reservoir: 'Reservoir',
+  pond: 'Pond',
+  oxbow: 'Oxbow lake',
+  lagoon: 'Lagoon',
+  bay: 'Bay',
+  strait: 'Strait',
 };
 const WATER_TITLE_KEYS = ['waterway', 'water', 'natural', 'landuse'];
 
 /** What water is: a river by its waterway, a lake or pond by its kind of water, a bay, a strait. */
 function waterTitle(tags: Record<string, string>): string {
   for (const key of WATER_TITLE_KEYS) {
-    const title = WATER_TITLES[`${key}=${tags[key]}`];
+    const title = WATER_TITLES[tags[key] ?? ''];
     if (title) return title;
   }
   return tags.water ? words(tags.water) : 'Water';
@@ -471,6 +467,9 @@ function titleOf(kind: DetailKind, tags: Record<string, string>): string {
   return POI_TITLES[`${key}=${tags[key]}`] ?? words(tags[key]!);
 }
 
+/** A value with its unit where it is a plain number, as OSM writes widths and weight limits. */
+const withUnit = (value: string, unit: string) => (/^\d+(\.\d+)?$/.test(value) ? `${value} ${unit}` : value);
+
 function speedText(value: string): string {
   if (/^\d+(\.\d+)?$/.test(value)) return `${value} km/h`;
   if (value === 'none') return 'No limit';
@@ -494,7 +493,7 @@ function roadRows(tags: Record<string, string>): DetailRow[] {
   if (tags.surface) rows.push({ icon: 'surface', label: 'Surface', value: words(tags.surface) });
   if (tags.tracktype) rows.push({ icon: 'grade', label: 'Track', value: TRACK_GRADES[tags.tracktype] ?? words(tags.tracktype) });
   if (tags.smoothness) rows.push({ icon: 'smoothness', label: 'Smoothness', value: words(tags.smoothness) });
-  if (tags.width) rows.push({ icon: 'width', label: 'Width', value: /^\d+(\.\d+)?$/.test(tags.width) ? `${tags.width} m` : tags.width });
+  if (tags.width) rows.push({ icon: 'width', label: 'Width', value: withUnit(tags.width, 'm') });
   return [...rows, ...accessRows(tags)];
 }
 
@@ -549,9 +548,9 @@ function waterRows(tags: Record<string, string>): DetailRow[] {
 /** What a bridge carries and what it is, and of a bridge's own outline its article. */
 function bridgeRows(tags: Record<string, string>): DetailRow[] {
   const rows: DetailRow[] = [];
-  const carries = tags.highway ? (ROAD_TITLES[tags.highway] ?? words(tags.highway)) : tags.railway ? words(tags.railway) : tags.waterway && words(tags.waterway);
+  const carries = tags.highway ? titleOf('road', tags) : tags.railway ? words(tags.railway) : tags.waterway && words(tags.waterway);
   if (carries) rows.push({ icon: 'ref', label: 'Carries', value: carries });
-  if (tags.maxweight) rows.push({ icon: 'weight', label: 'Weight limit', value: /^\d+(\.\d+)?$/.test(tags.maxweight) ? `${tags.maxweight} t` : tags.maxweight });
+  if (tags.maxweight) rows.push({ icon: 'weight', label: 'Weight limit', value: withUnit(tags.maxweight, 't') });
   if (tags['bridge:structure']) rows.push({ icon: 'text', label: 'Structure', value: words(tags['bridge:structure']) });
   if (tags.man_made === 'bridge') {
     const built = tags.start_date ?? tags.construction_date;
@@ -574,9 +573,19 @@ function barrierRows(tags: Record<string, string>): DetailRow[] {
   return [...rows, ...accessRows(tags)];
 }
 
+/** What the lines of the description of each kind say. */
+const ROWS: Record<DetailKind, (tags: Record<string, string>) => DetailRow[]> = {
+  road: roadRows,
+  poi: poiRows,
+  barrier: barrierRows,
+  history: historyRows,
+  water: waterRows,
+  bridge: bridgeRows,
+};
+
 export function describe({ kind, object: { type, id, tags, geometry }, distance }: Nearby): Details {
   const name = nameOf(kind, tags);
-  const rows = { road: roadRows, poi: poiRows, barrier: barrierRows, history: historyRows, water: waterRows, bridge: bridgeRows }[kind](tags);
+  const rows = ROWS[kind](tags);
   return {
     kind,
     title: titleOf(kind, tags),
