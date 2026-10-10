@@ -35,7 +35,8 @@ import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
 import { LineWidthSlider } from './LineWidthSlider';
 import { createOutcome, OutcomeNote } from './outcome';
-import { AlertIcon, AreaIcon, CloseIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge } from './icons';
+import { LayerInfo } from './LayerInfo';
+import { AlertIcon, AreaIcon, CloseIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge, InfoIcon } from './icons';
 import { reorderTarget } from './reorder';
 
 export function LayersSection(props: { onAdd: () => void }) {
@@ -459,6 +460,7 @@ function ActiveLayer(props: { layer: Layer }) {
   const layer = props.layer;
   const host = () => layerHost(layer);
   const fileName = () => fileResource(layer.source)?.name;
+  const [info, setInfo] = createSignal(false);
   const zoomInput = (key: 'minzoom' | 'maxzoom', label: string) => (
     <input
       class="zoom-input"
@@ -562,7 +564,13 @@ function ActiveLayer(props: { layer: Layer }) {
         <span class="grow name" title={sourceUrl(layer) ?? fileName()}>
           {SOURCE_KINDS[layer.source.type].label} · {host() ?? fileName() ?? ''}
         </span>
+        <button class="icon" title="Technical details" aria-label={`Technical details of ${layer.name}`} aria-expanded={info()} onClick={() => setInfo(!info())}>
+          <InfoIcon />
+        </button>
       </div>
+      <Show when={info()}>
+        <LayerInfo layer={layer} />
+      </Show>
       <Show when={host()}>
         {(h) => (
           <label class="row" title={proxyNote()}>

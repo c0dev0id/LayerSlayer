@@ -715,6 +715,33 @@ input.swatch {
   overflow-wrap: anywhere;
 }
 
+/* An address in technical details, with its copy button beside it. */
+.detail-rows .address-value {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.address-value > :first-child {
+  min-width: 0;
+}
+
+.address-value .icon {
+  flex: none;
+  color: var(--muted);
+}
+
+.address-value .icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* A layer's technical details, under its source in its settings. */
+.layer-info {
+  margin: 0;
+  font-size: 12px;
+}
+
 /* Without the icon column of OpenStreetMap's details. */
 .feature-card .detail-rows {
   margin-left: 0;

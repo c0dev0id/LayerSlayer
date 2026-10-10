@@ -14,7 +14,7 @@ import {
 } from '../library/library';
 import { dataLabel, entryFacts } from '../library/entryInfo';
 import type { Bounds } from '../model/layer';
-import { decodePlaceholders, hasPlaceholders, parsePmtilesUrl } from '../map/urls';
+import { decodePlaceholders, parsePmtilesUrl } from '../map/urls';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
 import { readService } from '../services/read';
@@ -27,6 +27,7 @@ import { askConfirmation } from './confirm';
 import { CloseIcon, DownloadLink, InfoIcon } from './icons';
 import { showModalWhile } from './modal';
 import { OsmQueryTab } from './OsmQueryTab';
+import { AddressValue } from './LayerInfo';
 import { groupMembers, isFromSource, offerLayer, originOf, selection, type Selection } from './offers';
 
 type Tab = 'library' | 'address' | 'file' | 'osm';
@@ -379,13 +380,7 @@ function EntryInfo(props: { entry: LibraryEntry }) {
   return (
     <dl class="detail-rows entry-info">
       <dt>Address</dt>
-      <dd>
-        <Show when={!hasPlaceholders(entry.url)} fallback={entry.url}>
-          <a href={entry.url} target="_blank" rel="noopener">
-            {entry.url}
-          </a>
-        </Show>
-      </dd>
+      <AddressValue url={entry.url} />
       <dt>Service</dt>
       <dd>
         {entryTypeLabel(entry)}
