@@ -920,7 +920,7 @@
       "note": "Firesheds and their treatment priority across the contiguous US — areas where prescribed burning and fuel reduction are planned or in progress."
     },
     {
-      "name": "USGovunits",
+      "name": "USGS — governmental unit boundaries",
       "type": "wms",
       "url": "https://carto.nationalmap.gov/arcgis/services/govunits/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
       "region": "United States",
