@@ -12,10 +12,8 @@ export function downloadBlob(blob: Blob, fileName: string): void {
 
 /** A file name for `name` with the extension, without the characters file systems refuse. */
 export function fileNameFor(name: string, extension: string): string {
-  const base = name
-    .replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-')
-    .trim()
-    .replace(new RegExp(`\\.${extension}$`, 'i'), '')
-    .replace(/^\.+/, '');
-  return `${base || 'layer'}.${extension}`;
+  const suffix = `.${extension}`;
+  let base = name.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-').trim();
+  if (base.toLowerCase().endsWith(suffix)) base = base.slice(0, -suffix.length);
+  return `${base.replace(/^\.+/, '') || 'layer'}${suffix}`;
 }

@@ -1,5 +1,5 @@
-import { createSignal, onCleanup, Show } from 'solid-js';
-import { dataLabel, sourceFacts } from '../library/entryInfo';
+import { createResource, createSignal, Show } from 'solid-js';
+import { dataLabel, layerFacts, zoomRange } from '../library/entryInfo';
 import { hasPlaceholders } from '../map/urls';
 import { SOURCE_KINDS, type Layer } from '../model/layer';
 import { htmlText } from '../services/xml';
@@ -10,20 +10,17 @@ import { splitOrigin } from './offers';
 /** An address, linked where it is one a browser can open, and a button that copies it and shows a tick for a moment. */
 export function AddressValue(props: { url: string }) {
   const [copied, setCopied] = createSignal(false);
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  onCleanup(() => clearTimeout(timer));
   const copy = () =>
-    navigator.clipboard?.writeText(props.url).then(
-      () => {
+    navigator.clipboard
+      ?.writeText(props.url)
+      .then(() => {
         setCopied(true);
-        clearTimeout(timer);
-        timer = setTimeout(() => setCopied(false), 1500);
-      },
-      () => {},
-    );
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {});
   return (
     <dd class="address-value">
-      <Show when={!hasPlaceholders(props.url)} fallback={<span>{props.url}</span>}>
+      <Show when={!hasPlaceholders(props.url)} fallback={props.url}>
         <a href={props.url} target="_blank" rel="noopener">
           {props.url}
         </a>
@@ -40,18 +37,16 @@ export function AddressValue(props: { url: string }) {
 /**
  * What a layer is, technically, as the add-layer list tells of a library entry: the
  * address it was added from, its place and name in the source (whatever it is called in
- * the list now), the kind of service, its data and format, and how it is fetched.
+ * the list now), the kind of service, its data and format, and how it is fetched. A
+ * style's facts come from the style, which the map has loaded already.
  */
 export function LayerInfo(props: { layer: Layer }) {
   const layer = props.layer;
   const origin = () => (layer.origin ? splitOrigin(layer.origin) : undefined);
   const address = () => origin()?.address ?? sourceUrl(layer);
-  const facts = () => sourceFacts(layer.source);
-  const zooms = () => {
-    const source = layer.source;
-    if (!('maxzoom' in source) || (source.minzoom === undefined && source.maxzoom === undefined)) return undefined;
-    return `${source.minzoom ?? 0}–${source.maxzoom ?? '…'}`;
-  };
+  const host = () => layerHost(layer);
+  const [facts] = createResource(() => layer.source, layerFacts);
+  const zooms = () => ('maxzoom' in layer.source ? zoomRange(layer.source.minzoom, layer.source.maxzoom) : undefined);
   return (
     <dl class="detail-rows layer-info">
       <Show when={address()}>
@@ -81,21 +76,27 @@ export function LayerInfo(props: { layer: Layer }) {
       <dt>Service</dt>
       <dd>
         {SOURCE_KINDS[layer.source.type].label}
-        {facts().version ? ` ${facts().version}` : ''}
+        {facts.state === 'ready' && facts().version ? ` ${facts().version}` : ''}
       </dd>
-      <Show when={facts().data.length > 0}>
-        <dt>Data</dt>
-        <dd>{dataLabel(facts().data)}</dd>
+      <Show when={facts.state === 'ready' && facts()}>
+        {(f) => (
+          <>
+            <Show when={f().data.length > 0}>
+              <dt>Data</dt>
+              <dd>{dataLabel(f().data)}</dd>
+            </Show>
+            <dt>Format</dt>
+            <dd>{f().format}</dd>
+          </>
+        )}
       </Show>
-      <dt>Format</dt>
-      <dd>{facts().format}</dd>
       <Show when={zooms()}>
         <dt>Tile zooms</dt>
         <dd>{zooms()}</dd>
       </Show>
-      <Show when={layerHost(layer)}>
+      <Show when={host()}>
         <dt>Access</dt>
-        <dd>{proxiesHost(layerHost(layer)) ? 'Through the CORS proxy' : 'Direct'}</dd>
+        <dd>{proxiesHost(host()) ? 'Through the CORS proxy' : 'Direct'}</dd>
       </Show>
       <Show when={layer.attribution}>
         {(attribution) => (

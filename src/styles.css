@@ -704,7 +704,7 @@ input.swatch {
   white-space: nowrap;
 }
 
-.detail-rows dt svg {
+.detail-rows :is(dt, .address-value) svg {
   width: 16px;
   height: 16px;
 }
@@ -722,24 +722,8 @@ input.swatch {
   gap: 4px;
 }
 
-.address-value > :first-child {
-  min-width: 0;
-}
-
 .address-value .icon {
-  flex: none;
   color: var(--muted);
-}
-
-.address-value .icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* A layer's technical details, under its source in its settings. */
-.layer-info {
-  margin: 0;
-  font-size: 12px;
 }
 
 /* Without the icon column of OpenStreetMap's details. */
@@ -902,11 +886,16 @@ input.swatch {
   color: var(--text);
 }
 
-.entries .entry-info {
+/* Technical details: a library entry's under it, a layer's under its source. */
+.entries .entry-info,
+.layer-info {
   margin: 0;
+  font-size: 12px;
+}
+
+.entries .entry-info {
   padding: 6px 8px 8px;
   border-bottom: 1px solid var(--border);
-  font-size: 12px;
 }
 
 /* Known to lie outside the focus area: still there, but out of the way of what lies inside. */

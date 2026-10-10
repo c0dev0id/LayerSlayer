@@ -310,13 +310,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
     changes no setting, so such an entry shows why it could not be read.
   - A layer's technical details are read from the layer, not the service. Its kind,
     version, data and format come from its source the way an entry's come from the layers
-    a service offers (`sourceFacts`), so opening them sends no request and works for a
-    service that is down. The address and the name in the service are the layer's origin,
-    which already held both for marking what the add-layer lists show as added. The titles
-    leading to it in the service's tree are kept beside it when the layer is added
-    (`originPath`), since the layer's own name is the user's to change and a service's
-    tree is only known by reading it again. Layers added before this have no path and show
-    none.
+    a service offers (`sourceFacts`), and a style's from the style the map has loaded
+    already (`layerFacts`), so opening them sends no request and works for a service that
+    is down. The address and the name in the service are the layer's origin, which already
+    held both for marking what the add-layer lists show as added. The titles leading to it
+    in the service's tree are recorded on each offer when the service is read
+    (`withPaths`), before a library entry gives a service's only layer its own name, and
+    kept with the layer when it is added (`originPath`), since the layer's own name is the
+    user's to change and a service's tree is only known by reading it again. Layers added
+    before this have no path and show none.
 - **Data a provider keeps to itself stays out.** Rumo's PMTiles archives and styles allow
   only Rumo's own site by their CORS rules, and the MapTiler key in them is limited to
   that domain; OsmAnd's off-road tiles answer other pages' requests with 502. A CORS proxy
