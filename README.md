@@ -161,6 +161,20 @@ mapping agency (BKG), which covers the rest of the world in less detail.
   removes it. While an area is set, Add layer greys out what is known to lie outside it:
   library entries by their region (or their own bounds), and the layers of a service by
   the bounds the service gives.
+  - **Precache** (the cloud beside the area) keeps the tiles of the area for later, so
+    that slow servers need not be waited for: choose the layer whose settings are open,
+    the visible layers or all, and the zooms, and the dialog counts the tiles of each zoom
+    at once and estimates their size from a few sampled tiles while you choose, beside
+    the space the browser grants and the least time it takes. *Start* fetches the tiles
+    one at a time with a pause of 100 ms after each, and keeps them until the tile cache
+    is cleared in Settings; the section shows how many are done, their size, the speed,
+    the time left and what failed, with *Pause* and *Cancel*. The page must stay open
+    meanwhile. Layers drawn from XYZ, WMTS, WMS and ArcGIS MapServer tiles and from
+    vector tiles are precached, if they keep their tiles; PMTiles archives, feature
+    layers and styles are not. Servers whose operators forbid downloading areas ahead
+    (the OpenStreetMap Foundation's, OpenRailwayMap's) are left out; those that ask for
+    restraint (OpenTopoMap, OpenStreetMap France, Waymarked Trails, Open Infrastructure
+    Map) are left out unless *Slow fetch* is chosen, which waits 500 ms after each tile.
 - **Routes**: *Draw route* starts a route and a toolbar over the map.
   - *Append* adds a point at the end with each tap on the map, *Insert* puts one into the
     line where it is tapped, *Waypoint* places a named pin (with an icon from the same
