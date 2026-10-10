@@ -352,19 +352,21 @@ It is a static single-page app on GitHub Pages; there is no server component.
   tiles that scroll out of view are dropped.
 - **Switches for testing override caching and the proxy for all layers.** Settings has a
   switch for the tile cache and a three-way choice for the CORS proxy: off, per layer (the
-  default) and all hosts, drawn as joined buttons over a radio group (a native control for
-  three states does not exist, and radios keep keyboard and screen reader use). With the
-  cache off the map is composed as if no layer kept tiles (the layers are handed over with
-  `cache: false`, so the composer stays as it is); with the proxy off it is set to none,
-  and for all hosts every request but those to the page's own host goes through it, POST
-  requests to Postpass and Overpass included; the layers' own choices are untouched and
-  apply again once switched on. The switches, like the proxy address, are this browser's:
-  they are left out of project files and kept when a project is opened
-  (`browserSettings`). The proxy address is shown as text rather than an open field and is
-  changed in place; an address without `{url}` is kept only once confirmed, as most
-  proxies read the target from a query parameter, where a target appended as it is loses
-  everything after its first `&`. The cache's tile count and size are on two lines, each
-  with its unit, since "935, 93.1 MB" on one line read as one number.
+  default) and all layers, drawn as joined buttons over a radio group (a native control
+  for three states does not exist, and radios keep keyboard and screen reader use). With
+  the cache off the map is composed as if no layer kept tiles (the layers are handed over
+  with `cache: false`, so the composer stays as it is); with the proxy off it gets no
+  hosts, and with all layers the hosts of all layers join those chosen for it, as if each
+  layer had it ticked (`proxiedHostsOf`). Every request was tried first and broke the
+  services the app asks itself: Postpass and Overpass are asked by POST, which proxies
+  often cannot pass, and they need no proxy, as they send CORS headers. The layers' own
+  choices are untouched and apply again once switched on. The switches, like the proxy
+  address, are this browser's: they are left out of project files and kept when a project
+  is opened (`browserSettings`). The proxy address is shown as text rather than an open
+  field and is changed in place; an address without `{url}` is kept only once confirmed,
+  as most proxies read the target from a query parameter, where a target appended as it
+  is loses everything after its first `&`. The cache's tile count and size are on two
+  lines, each with its unit, since "935, 93.1 MB" on one line read as one number.
 - **Flying to a layer.** The layer row offers a frame icon when the layer's bounds span at
   most half the Web Mercator world in width and in height; an area measure was tried first
   and failed for a week of earthquakes, which spans every longitude but leaves out the

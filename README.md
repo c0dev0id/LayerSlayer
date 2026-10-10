@@ -209,10 +209,10 @@ as text, changed with the pencil and saved with the button that takes its place 
 saves, Esc leaves it as it was; an address without `{url}` is saved only once confirmed).
 For testing, *Tile cache* has a switch that turns it off for every layer, so no layer
 reads or keeps tiles, and the CORS proxy can be *Off* (no request goes through it), *Per
-layer* (the hosts chosen for it, the default) or *All hosts* (every request but the page's
-own, OpenStreetMap queries and details included, which send data and need a proxy that
-passes it on). Each layer's own choice applies again once switched back. The switches stay
-in the browser, like the proxy address.
+layer* (the hosts chosen for it, the default) or *All layers* (as if every layer had it
+ticked). OpenStreetMap queries and details, place search and routing never use it. Each
+layer's own choice applies again once switched back. The switches stay in the browser,
+like the proxy address.
 
 ## How each source is drawn
 
