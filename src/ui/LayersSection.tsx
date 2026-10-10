@@ -2,7 +2,6 @@ import { createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'soli
 import { coversMostOfWorld } from '../geo/mercator';
 import { layerFeatures } from '../map/layerFeatures';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
-import { parsePmtilesUrl } from '../map/urls';
 import {
   canCache,
   fileResource,
@@ -10,12 +9,14 @@ import {
   isShown,
   isVector,
   keepsTiles,
+  layerHost,
   layerColor,
   LINE_WIDTH,
   MAX_ZOOM,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
   SOURCE_KINDS,
+  sourceUrl,
   type FileResource,
   type Layer,
   type LayerSource,
@@ -27,7 +28,6 @@ import {
 import { lineWidth } from '../model/line';
 import { propertyKeys } from '../services/featureProperties';
 import { importAccept } from '../services/importFile';
-import { hostOf } from '../state/net';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { timeValues } from '../services/wmsTime';
 import { moveLayer, proxiesHost, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, state, updateLayer } from '../state/store';
@@ -289,29 +289,6 @@ function dragToReorder(e: PointerEvent, layer: Layer, entry: HTMLLIElement, list
   handle.addEventListener('pointercancel', end);
 }
 
-/** The address a layer's data comes from, for showing and for the proxy setting. */
-function sourceUrl(layer: Layer): string | undefined {
-  const source = layer.source;
-  switch (source.type) {
-    case 'xyz':
-    case 'vector-tiles':
-      return parsePmtilesUrl(source.tiles[0]!)?.archive ?? source.tiles[0];
-    case 'wmts':
-      return source.template;
-    case 'geojson':
-    case 'image':
-      return 'url' in source.data ? source.data.url : undefined;
-    default:
-      return source.url;
-  }
-}
-
-/** The server a layer's data comes from, for the proxy setting. */
-function layerHost(layer: Layer): string | undefined {
-  const url = sourceUrl(layer);
-  return url ? hostOf(url) : undefined;
-}
-
 /** What an OSM query layer asked for and when; Update asks again, in the focus area as it is now. */
 function OsmQueryRows(props: { id: string; query: OsmQuery }) {
   const updated = createOutcome();
@@ -475,7 +452,7 @@ function TimeRow(props: { layer: Layer; time: WmsTime }) {
 function proxyNote(): string | undefined {
   if (!state.settings.proxy) return 'Set a CORS proxy in Settings first';
   if (state.settings.proxyMode === 'off') return 'The CORS proxy is switched off in Settings';
-  if (state.settings.proxyMode === 'all') return 'Every host goes through the CORS proxy (Settings)';
+  if (state.settings.proxyMode === 'all') return 'Every layer goes through the CORS proxy (Settings)';
   return undefined;
 }
 

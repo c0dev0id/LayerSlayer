@@ -1,3 +1,4 @@
+import { parsePmtilesUrl } from '../map/urls';
 import type { MapIcon } from './icon';
 
 /** West, south, east, north in degrees. */
@@ -367,4 +368,31 @@ export function createLayer(draft: LayerDraft, existing: readonly Layer[], id: s
     layer.color = VECTOR_COLORS[used % VECTOR_COLORS.length];
   }
   return layer;
+}
+
+/** The address a layer's data comes from, for showing and for the proxy setting. */
+export function sourceUrl(layer: Layer): string | undefined {
+  const source = layer.source;
+  switch (source.type) {
+    case 'xyz':
+    case 'vector-tiles':
+      return parsePmtilesUrl(source.tiles[0]!)?.archive ?? source.tiles[0];
+    case 'wmts':
+      return source.template;
+    case 'geojson':
+    case 'image':
+      return 'url' in source.data ? source.data.url : undefined;
+    default:
+      return source.url;
+  }
+}
+
+/** The server a layer's data comes from, which the CORS proxy is chosen for. */
+export function layerHost(layer: Layer): string | undefined {
+  const url = sourceUrl(layer);
+  try {
+    return url ? new URL(url).host : undefined;
+  } catch {
+    return undefined;
+  }
 }

@@ -1,7 +1,6 @@
 import { createResource, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { clearTileCache, TILE_MAX_AGE_HOURS, tileCacheStats } from '../map/tileCache';
-import type { ProxyMode } from '../state/net';
-import { setHostProxied, setProxyAddress, setProxyMode, setTileCacheOff, state } from '../state/store';
+import { setHostProxied, setProxyAddress, setProxyMode, setTileCacheOff, state, type ProxyMode } from '../state/store';
 import { askConfirmation } from './confirm';
 import { countText, sizeText } from './format';
 import { CloseIcon, PencilIcon, SaveIcon } from './icons';
@@ -9,13 +8,13 @@ import { CloseIcon, PencilIcon, SaveIcon } from './icons';
 const PROXY_MODES: { mode: ProxyMode; label: string; title: string }[] = [
   { mode: 'off', label: 'Off', title: 'No request goes through the proxy' },
   { mode: 'hosts', label: 'Per layer', title: 'Requests to the hosts below go through the proxy' },
-  { mode: 'all', label: 'All hosts', title: "Every request but the page's own goes through the proxy" },
+  { mode: 'all', label: 'All layers', title: 'Every layer goes through the proxy, as if each had it ticked' },
 ];
 
 /**
  * The tile cache and the CORS proxy. A switch turns the cache off for every layer, and the
- * proxy can be off, used for the hosts chosen for it, or used for all (for testing), without
- * touching the layers' own settings.
+ * proxy can be off, used for the hosts chosen for it, or used for every layer (for testing),
+ * without touching the layers' own settings.
  */
 export function SettingsSection() {
   const [opened, setOpened] = createSignal(false);
@@ -73,12 +72,12 @@ export function SettingsSection() {
         <ProxyAddress />
         <p class="muted hint">
           Servers that send no CORS headers cannot be read by a web page. A proxy you run fetches them instead: {'{url}'} in its address is
-          replaced by the encoded target. <em>Per layer</em>, the hosts below use it; <em>All hosts</em> sends every request through it,
-          those that send data (OpenStreetMap queries and details) included, which a proxy must pass on as they are.
+          replaced by the encoded target. <em>Per layer</em>, the hosts below use it; with <em>All layers</em>, every layer does.
+          OpenStreetMap queries and details never use it.
         </p>
         <Switch>
           <Match when={state.settings.proxyMode === 'all'}>
-            <p class="hosts-all">All hosts use the proxy.</p>
+            <p class="hosts-all">All layers use the proxy.</p>
           </Match>
           <Match when={state.settings.proxiedHosts.length === 0}>
             <p class="muted hint">No host uses the proxy.</p>

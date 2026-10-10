@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { storedFile } from '../model/layer';
+import { createLayer, storedFile } from '../model/layer';
 import { importFile } from '../services/importFile';
-import { addLayer, browserSettings, defaultState, moveItem, parseState, proxiesHost, replaceLayerFile, state, updateLayer } from './store';
+import { addLayer, browserSettings, defaultState, moveItem, parseState, proxiedHostsOf, proxiesHost, replaceLayerFile, state, updateLayer } from './store';
 
 // Stored files in memory, as IndexedDB is not at hand.
 const stored = vi.hoisted(() => new Map<string, Blob>());
@@ -111,5 +111,18 @@ describe('proxiesHost', () => {
     expect(proxiesHost('b.example', { ...settings, proxyMode: 'all' })).toBe(true);
     expect(proxiesHost('a.example', { ...settings, proxy: '' })).toBe(false);
     expect(proxiesHost(undefined, { ...settings, proxyMode: 'all' })).toBe(false);
+  });
+});
+
+describe('proxiedHostsOf', () => {
+  const settings = { proxy: 'https://p.example/?url={url}', proxiedHosts: ['chosen.example'] };
+  const wms = createLayer({ name: 'w', source: { type: 'wms', url: 'https://wms.example/ows?', version: '1.3.0', layers: 'a', styles: '', format: 'image/png', crs: 'EPSG:3857' } }, []);
+  const xyz = createLayer({ name: 'x', source: { type: 'xyz', tiles: ['https://tiles.example/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, []);
+  const file = createLayer({ name: 'f', source: { type: 'geojson', data: { file: 'k', name: 'f.geojson' } } }, []);
+  it('are the hosts chosen, those of every layer too with all layers, and none when off or without an address', () => {
+    expect(proxiedHostsOf(settings, [wms, xyz])).toEqual(['chosen.example']);
+    expect(proxiedHostsOf({ ...settings, proxyMode: 'all' }, [wms, xyz, file, wms])).toEqual(['chosen.example', 'wms.example', 'tiles.example']);
+    expect(proxiedHostsOf({ ...settings, proxyMode: 'off' }, [wms])).toEqual([]);
+    expect(proxiedHostsOf({ ...settings, proxy: '' }, [wms])).toEqual([]);
   });
 });

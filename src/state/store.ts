@@ -3,6 +3,7 @@ import { reconcile } from 'solid-js/store';
 import { cornersBounds } from '../geo/bounds';
 import {
   createLayer,
+  layerHost,
   MAX_ZOOM,
   MIN_ZOOM,
   SOURCE_KINDS,
@@ -16,7 +17,7 @@ import {
 import { isLngLat, type LngLat } from '../model/route';
 import { fileSourceType, importFile } from '../services/importFile';
 import { deleteFile } from './files';
-import { setProxy, type ProxyMode } from './net';
+import { setProxy } from './net';
 import { persistedStore } from './persist';
 
 export interface Settings {
@@ -31,18 +32,33 @@ export interface Settings {
   /** No layer keeps tiles, whatever its own setting says: a switch of this browser, for testing. */
   tileCacheOff?: boolean;
   /**
-   * Requests through the CORS proxy: none, or those to every host, whatever hosts use it; by
-   * default those to the hosts that use it. A switch of this browser, for testing.
+   * Which hosts the CORS proxy is used for: none, or those of all layers as if each had it
+   * ticked; by default the hosts chosen for it. A switch of this browser, for testing.
    */
   proxyMode?: 'off' | 'all';
 }
+
+/** Which hosts the CORS proxy is used for: none, those chosen for it, or those of all layers too. */
+export type ProxyMode = 'off' | 'hosts' | 'all';
 
 /** The settings that are this browser's own rather than a project's: the proxy and the switches. */
 export function browserSettings({ proxy, tileCacheOff, proxyMode }: Settings): Pick<Settings, 'proxy' | 'tileCacheOff' | 'proxyMode'> {
   return { proxy, ...(tileCacheOff && { tileCacheOff }), ...(proxyMode && { proxyMode }) };
 }
 
-/** Whether requests to the host go through the CORS proxy, as the settings say. */
+/**
+ * The hosts requests go through the CORS proxy for: none when it is off, the hosts chosen
+ * for it, and with all layers the host of every layer as well. Services the app asks itself
+ * (OpenStreetMap queries and details, place search, the sea at a spot) are no layer's.
+ */
+export function proxiedHostsOf(settings: Settings, layers: readonly Layer[]): string[] {
+  if (!settings.proxy || settings.proxyMode === 'off') return [];
+  if (settings.proxyMode !== 'all') return settings.proxiedHosts;
+  const hosts = layers.map(layerHost).filter((host): host is string => host !== undefined);
+  return [...new Set([...settings.proxiedHosts, ...hosts])];
+}
+
+/** Whether a layer's host goes through the CORS proxy, as the settings say. */
 export function proxiesHost(host: string | undefined, settings: Settings = state.settings): boolean {
   if (!settings.proxy || !host || settings.proxyMode === 'off') return false;
   return settings.proxyMode === 'all' || settings.proxiedHosts.includes(host);
@@ -156,7 +172,7 @@ const [state, setState] = persistedStore(STORAGE_KEY, 'layers', parseState, defa
 export { state };
 
 createRoot(() => {
-  createEffect(() => setProxy(state.settings.proxy, [...state.settings.proxiedHosts], state.settings.proxyMode ?? 'hosts'));
+  createEffect(() => setProxy(state.settings.proxy, proxiedHostsOf(state.settings, state.layers)));
   // A stored file goes with the last layer that uses it: removed, given other data, or
   // replaced by an opened project.
   let used = storedFiles(state.layers);

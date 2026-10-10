@@ -20,14 +20,6 @@ describe('requestUrl', () => {
     expect(requestUrl('https://a.example/x?y=1', 'https:')).toBe('https://p.example/https://a.example/x?y=1');
   });
 
-  it('sends no host through the proxy when off, and every host but the page\'s own when all', () => {
-    setProxy('https://p.example/?url={url}', ['a.example'], 'off');
-    expect(requestUrl('https://a.example/x', 'https:')).toBe('https://a.example/x');
-    setProxy('https://p.example/?url={url}', ['a.example'], 'all');
-    expect(requestUrl('https://b.example/x', 'https:')).toBe('https://p.example/?url=https%3A%2F%2Fb.example%2Fx');
-    expect(requestUrl(`${location.origin}/icon.png`, location.protocol)).toBe(`${location.origin}/icon.png`);
-  });
-
   it('ignores the host list while no proxy is set', () => {
     setProxy('', ['a.example']);
     expect(requestUrl('https://a.example/x', 'https:')).toBe('https://a.example/x');
