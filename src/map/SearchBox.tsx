@@ -5,6 +5,7 @@ import { NOMINATIM_ATTRIBUTION, NOMINATIM_MIN_INTERVAL_MS, parsePlaces, searchUr
 import { fetchResource } from '../state/net';
 import { errorMessage } from '../state/ui';
 import { CloseIcon, SearchIcon } from '../ui/icons';
+import { PIN_COLOR } from './markers';
 
 /** When the last search went out, to keep to Nominatim's one request per second. */
 let lastSearch = 0;
@@ -23,7 +24,7 @@ export function SearchBox(props: { map: maplibregl.Map }) {
   const [busy, setBusy] = createSignal(false);
   const [error, setError] = createSignal<string>();
   const [open, setOpen] = createSignal(false);
-  const pin = new maplibregl.Marker({ color: '#e03131' });
+  const pin = new maplibregl.Marker({ color: PIN_COLOR });
   let input!: HTMLInputElement;
 
   const show = (place: Place) => {

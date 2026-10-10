@@ -88,7 +88,8 @@ const BUSY: Partial<Record<number, string>> = {
   504: 'the service is overloaded or too slow to answer. Try again later.',
 };
 
-function answerReason(body: string): string | undefined {
+/** The reason an answer gives: an OGC exception, a JSON error or message, or short text. */
+export function answerReason(body: string): string | undefined {
   const text = body.trim();
   if (!text) return undefined;
   // OGC services report errors in XML; other markup is an HTML error page, of no use here.

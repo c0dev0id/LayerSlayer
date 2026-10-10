@@ -1,22 +1,25 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { createEffect, createRoot, createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { areaZoom, type Bounds, type Layer } from '../model/layer';
+import { AREA_ZOOM, areaZoom, type Bounds, type Layer } from '../model/layer';
 import { keepStored, readStored } from './persist';
 import { state } from './store';
 
 /** The map once it exists, for actions like zooming to a layer. */
 export const [map, setMap] = createSignal<MapLibreMap>();
 
-/** Moves the map to show the bounds, coming no closer than `maxZoom`. */
-export function showBounds(bounds: Bounds, maxZoom = 16): void {
-  map()?.fitBounds(bounds, { padding: 40, maxZoom });
+/** Room left around an area the map is moved to show, in pixels. */
+const AREA_PADDING = 40;
+
+/** Moves the map to show the bounds, coming no closer than the zoom areas are shown at. */
+export function showBounds(bounds: Bounds): void {
+  map()?.fitBounds(bounds, { padding: AREA_PADDING, maxZoom: AREA_ZOOM });
 }
 
 /** Moves the map to a layer's area, at a zoom the layer is drawn at. */
 export function showLayerArea(layer: Pick<Layer, 'bounds' | 'minzoom' | 'maxzoom'>): void {
   const m = map();
-  const camera = layer.bounds && m?.cameraForBounds(layer.bounds, { padding: 40 });
+  const camera = layer.bounds && m?.cameraForBounds(layer.bounds, { padding: AREA_PADDING });
   if (!m || !camera || camera.zoom === undefined) return;
   m.easeTo({ center: camera.center, zoom: areaZoom(camera.zoom, layer) });
 }

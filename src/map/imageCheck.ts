@@ -1,3 +1,5 @@
+import { answerReason } from '../state/net';
+
 /**
  * Whether a raster tile's answer is a whole image before the map decodes and keeps it. A
  * proxy or server can answer 200 with a page of text, nothing, or an image cut off on the
@@ -29,6 +31,8 @@ export function imageProblem(buffer: ArrayBuffer): string | undefined {
   // Text where an image should be: an error page or message. SVG is text and an image.
   const start = new TextDecoder().decode(data.subarray(0, 200)).trim();
   if (/^(<\?xml[^>]*>\s*)?<svg/i.test(start)) return undefined;
-  if (/^[<{[]/.test(start) || /^[\x20-\x7e\s]{16}/.test(start)) return `text instead of an image (“${start.slice(0, 80)}”)`;
-  return undefined;
+  if (!/^[<{[]/.test(start) && !/^[\x20-\x7e\s]{16}/.test(start)) return undefined;
+  // A service's error, such as a WMS exception sent as an image, says what went wrong.
+  const reason = data.length < 10_000 ? answerReason(new TextDecoder().decode(data)) : undefined;
+  return `text instead of an image (“${(reason ?? start).slice(0, 80)}”)`;
 }

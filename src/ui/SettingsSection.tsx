@@ -42,8 +42,14 @@ export function SettingsSection() {
           </button>
         </div>
         <div class="cache-stats">
-          <span>{cached() ? countText(cached()!.tiles, 'tile') : '…'}</span>
-          <span>{cached() ? sizeText(cached()!.bytes) : ''}</span>
+          <Show when={cached()} fallback={<span>…</span>}>
+            {(stats) => (
+              <>
+                <span>{countText(stats().tiles, 'tile')}</span>
+                <span>{sizeText(stats().bytes)}</span>
+              </>
+            )}
+          </Show>
         </div>
         <p class="muted hint">
           Layers that keep their tiles answer them from this browser for {TILE_MAX_AGE_HOURS} hours. Switched off, no layer reads or keeps
@@ -77,7 +83,7 @@ export function SettingsSection() {
         </p>
         <Switch>
           <Match when={state.settings.proxyMode === 'all'}>
-            <p class="hosts-all">All layers use the proxy.</p>
+            <p class="hosts">All layers use the proxy.</p>
           </Match>
           <Match when={state.settings.proxiedHosts.length === 0}>
             <p class="muted hint">No host uses the proxy.</p>

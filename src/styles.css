@@ -398,6 +398,7 @@ header.section > .row {
 }
 
 .name-input,
+.proxy-address input,
 .address input[type='url'],
 .service input[type='search'],
 .osm-query input {
@@ -532,16 +533,8 @@ input.swatch {
   outline-offset: -2px;
 }
 
-.hosts-all {
-  margin: 6px 0 0;
-}
-
 .proxy-address input {
-  box-sizing: border-box;
   min-width: 0;
-  padding: 3px 6px;
-  border: 1px solid var(--control-border);
-  border-radius: 4px;
 }
 
 .proxy-text {

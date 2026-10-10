@@ -25,6 +25,8 @@ describe('imageProblem', () => {
     expect(imageProblem(new ArrayBuffer(0))).toBe('nothing');
     expect(imageProblem(bytes('<html><body>Bad gateway</body></html>'))).toBe('text instead of an image (“<html><body>Bad gateway</body></html>”)');
     expect(imageProblem(bytes('Upstream fetch failed: timeout'))).toMatch(/^text instead of an image/);
+    const exception = '<?xml version="1.0"?><ServiceExceptionReport><ServiceException code="LayerNotDefined">Unknown layer x</ServiceException></ServiceExceptionReport>';
+    expect(imageProblem(bytes(exception))).toBe('text instead of an image (“Unknown layer x”)');
   });
 
   it('lets kinds of image it does not know through', () => {

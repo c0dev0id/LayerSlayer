@@ -13,6 +13,7 @@ import { FEATURE_PROTOCOL } from './featureTiles';
 import { detailsOverlay } from './detailsOverlay';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { keepLoadedGeoJson } from './geojsonDiff';
+import { PIN_COLOR } from './markers';
 import { withOverlays } from './overlays';
 import { latLonText, readSpotLink, type SpotView } from './placeLinks';
 import { drawDisc, drawGlyph, parsePoiImageId, POI_DISC } from './poiIcons';
@@ -152,7 +153,7 @@ export function MapView() {
       }
     });
     // The spot a link opened the map at, until the pin is clicked or another link opens.
-    const linkPin = new maplibregl.Marker({ color: '#e03131' });
+    const linkPin = new maplibregl.Marker({ color: PIN_COLOR });
     linkPin.getElement().addEventListener('click', () => linkPin.remove());
     const pinSpot = (view: SpotView) => {
       linkPin.setLngLat(view.center).addTo(map);

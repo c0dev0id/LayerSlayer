@@ -4,6 +4,9 @@ import { setMenu, type MenuItem } from '../state/drawing';
 import { onLongPress } from './longPress';
 
 /** True if a DOM event originated from a marker (the map's click fires after the marker's). */
+/** The colour of the pins that mark a place: one found by search, one a link opens. */
+export const PIN_COLOR = '#e03131';
+
 export function fromMarker(event: Event | undefined): boolean {
   return event?.target instanceof Element && event.target.closest('.maplibregl-marker') !== null;
 }

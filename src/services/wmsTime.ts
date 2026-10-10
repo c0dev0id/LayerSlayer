@@ -23,7 +23,7 @@ export function timeValues(extent: string): string[] | undefined {
     const range = part.split('/');
     if (range.length === 1) values.push(part);
     else if (range.length === 3) {
-      const steps = stepRange(range[0]!, range[1]!, range[2]!, MAX_TIMES - values.length);
+      const steps = stepRange(range[0]!, range[1]!, range[2]!);
       if (!steps) return undefined;
       values.push(...steps);
     } else return undefined;
@@ -38,8 +38,8 @@ export function lastTime(extent: string): string {
   return range[1] ?? range[0]!;
 }
 
-/** The dates from start to end by the period, written as precisely as the start; undefined beyond `room` dates. */
-function stepRange(start: string, end: string, period: string, room: number): string[] | undefined {
+/** The dates from start to end by the period, written as precisely as the start; undefined beyond the most times offered. */
+function stepRange(start: string, end: string, period: string): string[] | undefined {
   const from = DATE.exec(start);
   const to = DATE.exec(end);
   const step = PERIOD.exec(period);
@@ -54,7 +54,7 @@ function stepRange(start: string, end: string, period: string, room: number): st
   const date = new Date(Date.UTC(Number(from[1]), Number(from[2] ?? 1) - 1, Number(from[3] ?? 1)));
   const dates: string[] = [];
   while (date.getTime() <= last) {
-    if (dates.length === room) return undefined;
+    if (dates.length === MAX_TIMES) return undefined;
     dates.push(date.toISOString().slice(0, [4, 7, 10][precision - 1]));
     if (unit === 'Y') date.setUTCFullYear(date.getUTCFullYear() + n);
     else if (unit === 'M') date.setUTCMonth(date.getUTCMonth() + n);

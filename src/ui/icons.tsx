@@ -394,7 +394,6 @@ export const WorldIcon = () => (
   </Icon>
 );
 
-/** Opening hours (Tabler's clock). */
 /** A date (Tabler's calendar-event). */
 export const CalendarIcon = () => (
   <Icon>
@@ -423,6 +422,7 @@ export const QuoteIcon = () => (
   </Icon>
 );
 
+/** Opening hours (Tabler's clock). */
 export const ClockIcon = () => (
   <Icon>
     <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />

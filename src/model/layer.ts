@@ -256,8 +256,8 @@ export const LINE_WIDTH = 2.5;
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
 
-/** Closest zoom flying to a layer's area comes to, unless the layer is drawn only closer. */
-const AREA_ZOOM = 16;
+/** Closest zoom flying to an area comes to, unless a layer there is drawn only closer. */
+export const AREA_ZOOM = 16;
 
 /**
  * The zoom to show a layer's area at, given the zoom its area fits the map at: no further

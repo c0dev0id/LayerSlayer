@@ -72,13 +72,13 @@ export function searchesOf(filters: readonly string[]): Search[] {
       searches.push({ conditions });
       continue;
     }
-    const search = textSearches.get(only.key);
-    if (search) search.texts.push(only.value);
-    else {
-      const created = { key: only.key, texts: [only.value] };
-      textSearches.set(only.key, created);
-      searches.push(created);
+    let search = textSearches.get(only.key);
+    if (!search) {
+      search = { key: only.key, texts: [] };
+      textSearches.set(only.key, search);
+      searches.push(search);
     }
+    search.texts.push(only.value);
   }
   return searches;
 }

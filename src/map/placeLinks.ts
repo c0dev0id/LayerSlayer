@@ -1,3 +1,5 @@
+import { MAX_LATITUDE } from '../geo/mercator';
+import { MAX_ZOOM } from '../model/layer';
 import type { LngLat } from '../model/route';
 
 /**
@@ -44,6 +46,6 @@ export function readSpotLink(hash: string): SpotView | undefined {
   const match = MAP_HASH.exec(hash);
   if (!match) return undefined;
   const [zoom, lat, lng] = match.slice(1).map(Number) as [number, number, number];
-  if (zoom > 24 || Math.abs(lat) > 85.0511 || Math.abs(lng) > 180) return undefined;
+  if (zoom > MAX_ZOOM || Math.abs(lat) > MAX_LATITUDE || Math.abs(lng) > 180) return undefined;
   return { center: [lng, lat], zoom };
 }
