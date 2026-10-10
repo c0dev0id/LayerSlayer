@@ -1,5 +1,6 @@
 import { getParam, withParams } from '../map/urls';
 import { tileAt } from '../geo/mercator';
+import { tileUrl } from '../map/tileGrid';
 import type { LngLat } from '../model/route';
 import { fetchResource } from '../state/net';
 import { parseFeatureService, parseMapServer, serviceUrl, type FeatureLayer, type LayerDetails } from './arcgis';
@@ -82,13 +83,9 @@ async function readVectorTiles(url: string, near: LngLat): Promise<ServiceInfo> 
   const templates = tileTemplates(url);
   if (!['{z}', '{x}', '{y}'].every((token) => templates.tiles[0]!.includes(token)))
     throw new Error('A vector tile address needs {z}, {x} and {y}.');
-  const tileUrl = (z: number, x: number, y: number) =>
-    templates.tiles[0]!.replace('{z}', String(z))
-      .replace('{x}', String(x))
-      .replace('{y}', String(templates.scheme === 'tms' ? 2 ** z - 1 - y : y));
   const here = tileAt(near[0], near[1], TEMPLATE_MAXZOOM);
   const tile = (z: number, x: number, y: number) =>
-    fetchResource(tileUrl(z, x, y))
+    fetchResource(tileUrl(templates.tiles, { z, x, y }, templates.scheme))
       .then((r) => r.arrayBuffer())
       .catch(() => undefined);
   const [{ tileLayerNames }, world, local] = await Promise.all([import('./mvt'), tile(0, 0, 0), tile(TEMPLATE_MAXZOOM, here.x, here.y)]);
