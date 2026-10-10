@@ -9,3 +9,13 @@ export function downloadBlob(blob: Blob, fileName: string): void {
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
+
+/** A file name for `name` with the extension, without the characters file systems refuse. */
+export function fileNameFor(name: string, extension: string): string {
+  const base = name
+    .replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-')
+    .trim()
+    .replace(new RegExp(`\\.${extension}$`, 'i'), '')
+    .replace(/^\.+/, '');
+  return `${base || 'layer'}.${extension}`;
+}

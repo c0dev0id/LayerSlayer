@@ -26,6 +26,7 @@ import {
 import { lineWidth } from '../model/line';
 import { propertyKeys } from '../services/featureProperties';
 import { importAccept } from '../services/importFile';
+import { loadFile } from '../state/files';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { timeValues } from '../services/wmsTime';
 import { layerHost, moveLayer, proxiesHost, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, sourceUrl, state, updateLayer } from '../state/store';
@@ -34,9 +35,10 @@ import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
 import { LineWidthSlider } from './LineWidthSlider';
+import { downloadBlob, fileNameFor } from './download';
 import { createOutcome, OutcomeNote } from './outcome';
 import { LayerInfo } from './LayerInfo';
-import { AlertIcon, AreaIcon, CloseIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge, InfoIcon } from './icons';
+import { AlertIcon, AreaIcon, CloseIcon, DownloadIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge, InfoIcon } from './icons';
 import { reorderTarget } from './reorder';
 
 export function LayersSection(props: { onAdd: () => void }) {
@@ -286,6 +288,11 @@ function dragToReorder(e: PointerEvent, layer: Layer, entry: HTMLLIElement, list
   handle.addEventListener('pointermove', move);
   handle.addEventListener('pointerup', end);
   handle.addEventListener('pointercancel', end);
+}
+
+/** Saves the features a layer keeps in the browser as a GeoJSON file, to archive, add again later or open elsewhere. */
+async function saveGeoJson(layer: Layer, file: FileResource): Promise<void> {
+  downloadBlob(await loadFile(file.file), fileNameFor(layer.name, 'geojson'));
 }
 
 /** What an OSM query layer asked for and when; Update asks again, in the focus area as it is now. */
@@ -564,6 +571,18 @@ function ActiveLayer(props: { layer: Layer }) {
         <span class="grow name" title={sourceUrl(layer) ?? fileName()}>
           {SOURCE_KINDS[layer.source.type].label} · {host() ?? fileName() ?? ''}
         </span>
+        <Show when={layer.source.type === 'geojson' && fileResource(layer.source)}>
+          {(file) => (
+            <button
+              class="icon"
+              title="Save the features as a GeoJSON file, to keep, add again later or open in another application"
+              aria-label={`Save ${layer.name} as GeoJSON`}
+              onClick={() => void saveGeoJson(layer, file())}
+            >
+              <DownloadIcon />
+            </button>
+          )}
+        </Show>
         <button class="icon" title="Technical details" aria-label={`Technical details of ${layer.name}`} aria-expanded={info()} onClick={() => setInfo(!info())}>
           <InfoIcon />
         </button>
