@@ -350,6 +350,17 @@ It is a static single-page app on GitHub Pages; there is no server component.
   traffic) should have it switched off. Styles are left out: their tiles come from
   addresses inside the style. At most four feature queries run at once per server; queued
   tiles that scroll out of view are dropped.
+- **Switches for testing turn caching and the proxy off for all layers.** Settings has a
+  switch each for the tile cache and the CORS proxy. Off, the map is composed as if no
+  layer kept tiles (the layers are handed over with `cache: false`, so the composer stays
+  as it is), and the proxy is set to none; the layers' own choices are untouched and
+  apply again once switched on. The switches, like the proxy address, are this browser's:
+  they are left out of project files and kept when a project is opened
+  (`browserSettings`). The proxy address is shown as text rather than an open field and is
+  changed in place; an address without `{url}` is kept only once confirmed, as most proxies
+  read the target from a query parameter, where a target appended as it is loses
+  everything after its first `&`. The cache's tile count and size are on two lines, each
+  with its unit, since "935, 93.1 MB" on one line read as one number.
 - **Flying to a layer.** The layer row offers a frame icon when the layer's bounds span at
   most half the Web Mercator world in width and in height; an area measure was tried first
   and failed for a week of earthquakes, which spans every longitude but leaves out the

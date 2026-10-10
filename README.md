@@ -203,6 +203,15 @@ after clearing this one. *Open* also takes the `.webmap` files saved before the 
 renamed from webmap. The CORS proxy address stays in the browser, since it may carry
 an account key; which servers go through it is saved.
 
+**Settings** (bottom of the panel) shows how many tiles the tile cache holds and their
+size, each on a line of its own, with *Clear* to empty it, and the CORS proxy's address
+as text, changed with the pencil and saved with the button that takes its place (Enter
+saves, Esc leaves it as it was; an address without `{url}` is saved only once confirmed).
+A switch beside each turns it off for every layer, for testing: with *Tile cache* off no
+layer reads or keeps tiles, with *CORS proxy* off no request goes through the proxy, and
+each layer's own choice applies again once switched back on. Both switches stay in the
+browser, like the proxy address.
+
 ## How each source is drawn
 
 | Source | Read from | Drawn as |
