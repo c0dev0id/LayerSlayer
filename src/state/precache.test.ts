@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLayer, type LayerDraft } from '../model/layer';
-import { chosenLayers, estimatedBytes, planPrecache, precacheRun, sampleTiles, startPrecache, tileSource, tileZooms, type TileSource } from './precache';
+import { chosenLayers, estimatedBytes, planPrecache, precacheRun, sampleTiles, startPrecache, tileSource, tileZooms, type PlannedLayer, type TileSource } from './precache';
 
+type Tiled = Extract<PlannedLayer, { source: TileSource }>;
 const layer = (draft: LayerDraft, id: string) => createLayer(draft, [], id);
 const xyz = (url: string, extra: object = {}) => layer({ name: url, source: { type: 'xyz', tiles: [url], scheme: 'xyz', tileSize: 256, ...extra } }, url);
 const wms = layer({ name: 'w', source: { type: 'wms', url: 'https://w.example/ows?', version: '1.3.0', layers: 'a', styles: '', format: 'image/png', crs: 'EPSG:3857' } }, 'w');
@@ -61,8 +62,9 @@ describe('chosenLayers and planPrecache', () => {
 
   it('counts the tiles of each zoom and names the policy of the server', () => {
     const [planned, forbidden] = planPrecache([wms, osm], area, 12, 13);
-    expect(planned!.zooms.map((z) => z.z)).toEqual([12, 13]);
-    expect(planned!.zooms.every((z) => z.count >= 1)).toBe(true);
+    const { zooms } = planned as Tiled;
+    expect(zooms.map((z) => z.z)).toEqual([12, 13]);
+    expect(zooms.every((z) => z.count >= 1)).toBe(true);
     expect(forbidden!.policy?.level).toBe('forbidden');
   });
 });
@@ -85,8 +87,8 @@ describe('startPrecache', () => {
     });
     await startPrecache(
       [
-        { source, z: 8, count: 1, pause: 1 },
-        { source, z: 9, count: 1, pause: 1 },
+        { source, mapZoom: 7, z: 8, count: 1, pause: 1 },
+        { source, mapZoom: 8, z: 9, count: 1, pause: 1 },
       ],
       area,
     );
@@ -103,7 +105,7 @@ describe('startPrecache', () => {
       [8.0, 50.0],
       [7.0, 50.0],
     ];
-    await startPrecache([{ source, z: 12, count: 100, pause: 0 }], big);
+    await startPrecache([{ source, mapZoom: 11, z: 12, count: 100, pause: 0 }], big);
     expect(precacheRun()).toMatchObject({ status: 'stopped', failed: 20 });
     expect(precacheRun()?.lastError).toContain('503');
   });
@@ -111,7 +113,7 @@ describe('startPrecache', () => {
 
 describe('sampleTiles', () => {
   afterEach(() => vi.unstubAllGlobals());
-  it('estimates sizes from sampled tiles, and samples no layer left out', async () => {
+  it('estimates sizes from sampled tiles, sampling each zoom once', async () => {
     const png = (n: number) => {
       const data = new Uint8Array(n);
       data.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -127,14 +129,15 @@ describe('sampleTiles', () => {
       [7.6, 49.15],
     ];
     const sampledLayer = xyz('https://s.example/{z}/{x}/{y}.png');
-    const leftOut = xyz('https://l.example/{z}/{x}/{y}.png');
-    const plan = planPrecache([sampledLayer, leftOut], big, 13, 13);
-    let updates = 0;
-    await sampleTiles(plan, big, (p) => (p.layer === leftOut ? undefined : 1), () => updates++, new AbortController().signal);
-    const { source, zooms } = plan[0]!;
+    const [planned] = planPrecache([sampledLayer], big, 13, 13);
+    const { source, zooms } = planned as Tiled;
+    const jobs = zooms.map((zoom) => ({ source, ...zoom, pause: 1 }));
+    expect(estimatedBytes(source, 14, zooms[0]!.count)).toBeUndefined();
+    await sampleTiles(jobs, big, new AbortController().signal);
     expect(asked).toHaveLength(3);
     expect(asked.every((u) => u.startsWith('https://s.example/14/'))).toBe(true);
-    expect(estimatedBytes(source!, 14, zooms[0]!.count)).toBe(zooms[0]!.count * 1000);
-    expect(updates).toBe(1);
+    expect(estimatedBytes(source, 14, zooms[0]!.count)).toBe(zooms[0]!.count * 1000);
+    await sampleTiles(jobs, big, new AbortController().signal);
+    expect(asked).toHaveLength(3);
   });
 });

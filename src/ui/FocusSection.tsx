@@ -1,6 +1,6 @@
 import { Match, Show, Switch } from 'solid-js';
 import { focusDraft, startFocusDrawing } from '../state/drawing';
-import { cancelPrecache, dismissPrecache, pausePrecache, precacheRun, resumePrecache, type PrecacheRun } from '../state/precache';
+import { cancelPrecache, dismissPrecache, pausePrecache, precacheActive, precacheRun, resumePrecache, type PrecacheRun } from '../state/precache';
 import { clearFocus, focusBounds, state } from '../state/store';
 import { showBounds } from '../state/ui';
 import { countText, durationText, sizeText } from './format';
@@ -24,7 +24,7 @@ export function FocusSection() {
             class="icon"
             title="Precache the focus area: keep tiles of its layers for later"
             aria-label="Precache the focus area"
-            disabled={precacheRun()?.status === 'running' || precacheRun()?.status === 'paused'}
+            disabled={precacheActive()}
             onClick={openPrecacheDialog}
           >
             <DownloadAreaIcon />
@@ -60,7 +60,6 @@ const STATUS: Record<PrecacheRun['status'], string> = {
 /** How precaching goes: tiles done of all, size, speed, time left, and what failed. */
 function PrecacheProgress(props: { run: PrecacheRun }) {
   const run = () => props.run;
-  const active = () => run().status === 'running' || run().status === 'paused';
   const left = () => (run().tilesPerSecond > 0 ? (run().total - run().done) / run().tilesPerSecond : undefined);
   return (
     <div class="precache-progress">
@@ -75,7 +74,7 @@ function PrecacheProgress(props: { run: PrecacheRun }) {
           </Match>
         </Switch>
         <Show
-          when={active()}
+          when={precacheActive()}
           fallback={
             <button class="icon" title="Forget these numbers" aria-label="Forget the precache numbers" onClick={dismissPrecache}>
               <CloseIcon />
@@ -88,7 +87,7 @@ function PrecacheProgress(props: { run: PrecacheRun }) {
       <progress max={run().total} value={run().done} />
       <div class="precache-stats">
         <span>
-          {countText(run().done, 'tile')} of {run().total.toLocaleString('en-US')}
+          {run().done.toLocaleString('en-US')} of {countText(run().total, 'tile')}
         </span>
         <span>{sizeText(run().bytes)} fetched</span>
         <Show when={run().status === 'running' && run().tilesPerSecond > 0}>
@@ -100,7 +99,7 @@ function PrecacheProgress(props: { run: PrecacheRun }) {
       </div>
       <Show when={run().kept || run().missing || run().failed}>
         <p class="muted hint">
-          {[run().kept && `${run().kept.toLocaleString('en-US')} kept already`, run().missing && `${run().missing.toLocaleString('en-US')} missing on the server`, run().failed && `${run().failed.toLocaleString('en-US')} failed`]
+          {[run().kept && `${countText(run().kept, 'tile')} kept already`, run().missing && `${countText(run().missing, 'tile')} missing on the server`, run().failed && `${countText(run().failed, 'tile')} failed`]
             .filter(Boolean)
             .join(', ')}
           .

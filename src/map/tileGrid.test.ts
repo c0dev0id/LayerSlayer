@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countTiles, coveringTiles, tileUrl, tileZoom } from './tileGrid';
+import { countTiles, coveringTiles, sourceTileZoom, spreadTiles, tileUrl } from './tileGrid';
 
 describe('tileUrl', () => {
   it("writes the bounding box exactly as MapLibre did for a WMS tile it asked for", () => {
@@ -24,10 +24,10 @@ describe('tileUrl', () => {
   });
 });
 
-describe('tileZoom', () => {
+describe('sourceTileZoom', () => {
   it('is the map zoom for 512 px tiles and one deeper for 256 px tiles', () => {
-    expect(tileZoom(14, 512)).toBe(14);
-    expect(tileZoom(14, 256)).toBe(15);
+    expect(sourceTileZoom(14, 512)).toBe(14);
+    expect(sourceTileZoom(14, 256)).toBe(15);
   });
 });
 
@@ -61,6 +61,57 @@ describe('coveringTiles', () => {
     const at = (z: number) => countTiles(triangle, z);
     expect(at(15) / at(14)).toBeGreaterThan(3);
     expect(at(15) / at(14)).toBeLessThan(5);
+  });
+
+  it('finds the same tiles as testing each square of the bounding box', () => {
+    // Every tile of the bounding box tested on its own: an edge through its square, or its centre inside.
+    const reference = (z: number) => {
+      const n = 2 ** z;
+      const fraction = ([lng, lat]: [number, number]): [number, number] => {
+        const s = Math.sin((lat * Math.PI) / 180);
+        return [(lng + 180) / 360, 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)];
+      };
+      const ring = triangle.map(fraction);
+      const inside = ([px, py]: [number, number]) => {
+        let within = false;
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const [xi, yi] = ring[i]!;
+          const [xj, yj] = ring[j]!;
+          if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) within = !within;
+        }
+        return within;
+      };
+      const meets = ([ax, ay]: [number, number], [bx, by]: [number, number], [x0, y0, x1, y1]: number[]) => {
+        let [t0, t1] = [0, 1];
+        for (const [p, q] of [[ax - bx, ax - x0!], [bx - ax, x1! - ax], [ay - by, ay - y0!], [by - ay, y1! - ay]] as const) {
+          if (p === 0) { if (q < 0) return false; continue; }
+          const t = q / p;
+          if (p < 0) t0 = Math.max(t0, t); else t1 = Math.min(t1, t);
+          if (t0 > t1) return false;
+        }
+        return true;
+      };
+      const xs = ring.map((p) => Math.floor(p[0] * n));
+      const ys = ring.map((p) => Math.floor(p[1] * n));
+      const found: string[] = [];
+      for (let y = Math.min(...ys); y <= Math.max(...ys); y++) {
+        for (let x = Math.min(...xs); x <= Math.max(...xs); x++) {
+          const box = [x / n, y / n, (x + 1) / n, (y + 1) / n];
+          if (ring.some((p, i) => meets(p, ring[(i + 1) % ring.length]!, box)) || inside([(x + 0.5) / n, (y + 0.5) / n])) found.push(`${x}/${y}`);
+        }
+      }
+      return found;
+    };
+    for (const z of [12, 14, 16]) expect([...coveringTiles(triangle, z)].map((t) => `${t.x}/${t.y}`)).toEqual(reference(z));
+  });
+
+  it('spreads samples over the tiles without walking them', () => {
+    const tiles = [...coveringTiles(triangle, 15)].map((t) => `${t.x}/${t.y}`);
+    const picked = spreadTiles(triangle, 15, undefined, 3).map((t) => `${t.x}/${t.y}`);
+    expect(picked).toHaveLength(3);
+    expect(picked.every((t) => tiles.includes(t))).toBe(true);
+    expect(new Set(picked).size).toBe(3);
+    expect(spreadTiles(triangle, 15, [0, 0, 1, 1], 3)).toEqual([]);
   });
 
   it('keeps to the bounds where given, and refuses areas far too large to walk', () => {

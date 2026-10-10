@@ -38,12 +38,18 @@ export function lngLatToMercator(lng: number, lat: number): [number, number] {
   return [x, y];
 }
 
+/** A position as a fraction of the Web Mercator world, 0 to 1 from its top left. */
+export function worldFraction(lng: number, lat: number): [number, number] {
+  const [mx, my] = lngLatToMercator(lng, Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, lat)));
+  return [(mx + HALF_WORLD) / WORLD, (HALF_WORLD - my) / WORLD];
+}
+
 /** The XYZ tile at zoom `z` that holds a position, rows counted from the north. */
 export function tileAt(lng: number, lat: number, z: number): { x: number; y: number } {
-  const [mx, my] = lngLatToMercator(lng, Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, lat)));
+  const [fx, fy] = worldFraction(lng, lat);
   const n = 2 ** z;
   const clamp = (v: number) => Math.max(0, Math.min(n - 1, Math.floor(v)));
-  return { x: clamp(((mx + HALF_WORLD) / WORLD) * n), y: clamp(((HALF_WORLD - my) / WORLD) * n) };
+  return { x: clamp(fx * n), y: clamp(fy * n) };
 }
 
 export function mercatorToLngLat(x: number, y: number): [number, number] {

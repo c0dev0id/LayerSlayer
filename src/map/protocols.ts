@@ -5,7 +5,7 @@ import { CACHE_PREFIX, resolveWmtsTile, WMTS_PROTOCOL } from './compose';
 import { encodeFeatures, FEATURE_PROTOCOL, featureQueryUrl, featureSourceName, parseFeatureTileUrl, readFeatureAnswer } from './featureTiles';
 import { imageProblem } from './imageCheck';
 import { createLimiter } from './limit';
-import { cachedTile, storeTile } from './tileCache';
+import { keptTile, storeTile } from './tileCache';
 import { PMTILES_PROTOCOL } from './urls';
 
 /**
@@ -78,7 +78,7 @@ export function cacheKey(url: string): string {
  * A tile the map asks for, as `type` says: an image tile must be a whole image, or the map
  * would only say that it could not be decoded.
  */
-export async function loadTileData(url: string, type: string | undefined, signal: AbortSignal): Promise<ArrayBuffer> {
+async function loadTileData(url: string, type: string | undefined, signal: AbortSignal): Promise<ArrayBuffer> {
   const data = await tile(url, signal);
   const problem = type === 'image' ? imageProblem(data) : undefined;
   if (problem) {
@@ -95,18 +95,34 @@ export const loadTile: AddProtocolAction = async (params, abort) => ({ data: awa
 export const loadPmtiles: AddProtocolAction = async (params, abort) =>
   params.type === 'json' ? { data: await (await pmtiles()).pmtilesTileJson(params.url) } : loadTile(params, abort);
 
+/** A tile through the tile cache: whether it was fetched, its size, and its data. */
+export interface CachedTile {
+  fetched: boolean;
+  bytes: number;
+  data: () => Promise<ArrayBuffer>;
+}
+
 /**
- * Tiles of layers that keep them: answered from the tile cache while fresh, otherwise
- * fetched and kept. Errors are not kept, an image that is not whole among them, so a
- * missing tile is asked for again next time.
+ * A tile answered from the tile cache while fresh, otherwise fetched and kept. With
+ * `always`, as precaching asks, it is kept until the cache is cleared, a tile kept for a
+ * day included, and stored before this returns. Errors are not kept, an image that is not
+ * whole among them, so a missing tile is asked for again next time.
  */
-export const loadCachedTile: AddProtocolAction = async (params, abort) => {
-  const url = params.url.slice(CACHE_PREFIX.length);
+export async function tileThroughCache(url: string, type: string | undefined, signal: AbortSignal, always = false): Promise<CachedTile> {
   const key = cacheKey(url);
-  const hit = await cachedTile(key).catch(() => undefined);
-  if (hit) return { data: hit };
-  const data = await loadTileData(url, params.type, abort.signal);
+  const kept = await keptTile(key).catch(() => undefined);
+  if (kept) {
+    if (always && !kept.always) await storeTile(key, await kept.data(), { always });
+    return { fetched: false, bytes: kept.bytes, data: kept.data };
+  }
+  const data = await loadTileData(url, type, signal);
   // A copy, since the map may hand the returned buffer to its worker and detach it.
-  void storeTile(key, data.slice(0)).catch(() => {});
-  return { data };
-};
+  const stored = storeTile(key, data.slice(0), { always }).catch(() => {});
+  if (always) await stored;
+  return { fetched: true, bytes: data.byteLength, data: async () => data };
+}
+
+/** Tiles of layers that keep them, through the tile cache. */
+export const loadCachedTile: AddProtocolAction = async (params, abort) => ({
+  data: await (await tileThroughCache(params.url.slice(CACHE_PREFIX.length), params.type, abort.signal)).data(),
+});

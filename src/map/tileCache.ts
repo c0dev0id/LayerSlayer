@@ -26,14 +26,7 @@ function fresh(response: Response, now: number): boolean {
   return expires === 'never' || now < Number(expires ?? 0);
 }
 
-/** The tile stored under `key` (its query address), if it is younger than the maximum age. */
-export async function cachedTile(key: string, caches = storage(), now = Date.now()): Promise<ArrayBuffer | undefined> {
-  if (!caches) return undefined;
-  const response = await (await caches.open(CACHE_NAME)).match(key);
-  return response && fresh(response, now) ? response.arrayBuffer() : undefined;
-}
-
-/** A tile in the cache: its size, whether it is kept until the cache is cleared, and its data when asked for. */
+/** A tile in the cache: its size, whether it is kept until the cache is cleared, and its data when asked for (read once). */
 export interface KeptTile {
   bytes: number;
   always: boolean;
@@ -45,7 +38,8 @@ export async function keptTile(key: string, caches = storage(), now = Date.now()
   if (!caches) return undefined;
   const response = await (await caches.open(CACHE_NAME)).match(key);
   if (!response || !fresh(response, now)) return undefined;
-  return { bytes: Number(response.headers.get('content-length')) || 0, always: response.headers.get(EXPIRES) === 'never', data: () => response.arrayBuffer() };
+  let data: Promise<ArrayBuffer> | undefined;
+  return { bytes: Number(response.headers.get('content-length')) || 0, always: response.headers.get(EXPIRES) === 'never', data: () => (data ??= response.arrayBuffer()) };
 }
 
 interface StoreOptions {

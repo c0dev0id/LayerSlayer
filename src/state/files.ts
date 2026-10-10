@@ -33,7 +33,7 @@ export async function collectFiles(referenced: ReadonlySet<string>): Promise<voi
   }
 }
 
-/** Asks the browser not to evict stored files under storage pressure. */
-function requestPersistentStorage(): void {
+/** Asks the browser not to evict the site's storage (files, kept tiles) under storage pressure. */
+export function requestPersistentStorage(): void {
   void navigator.storage?.persist?.().catch(() => {});
 }

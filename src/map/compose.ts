@@ -214,6 +214,11 @@ export function styleFont(style: StyleSpecification): string[] | undefined {
   return fonts.find((f) => /regular/i.test(f[0]!)) ?? fonts[0];
 }
 
+/** The source a layer is drawn from, as the map is given it but without the tile cache: what precaching fetches. */
+export function layerSource(layer: Layer): SourceSpecification | undefined {
+  return fragment(layer, undefined, [], false)?.sources[layer.id];
+}
+
 /**
  * One user layer as MapLibre sources and layers; `labelFont` is what the labels of a vector
  * layer are written in, and `keep` whether its tiles go through the tile cache.
