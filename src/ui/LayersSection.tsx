@@ -30,7 +30,7 @@ import { importAccept } from '../services/importFile';
 import { hostOf } from '../state/net';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { timeValues } from '../services/wmsTime';
-import { moveLayer, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, state, updateLayer } from '../state/store';
+import { moveLayer, proxiesHost, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, state, updateLayer } from '../state/store';
 import { layerErrors, map, onlyLayerId, showLayerArea, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
@@ -163,10 +163,7 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
 function LayerSummary(props: { layer: Layer }) {
   const layer = props.layer;
   // From the settings rather than net.ts, so the tag follows the proxy checkbox.
-  const proxied = () => {
-    const host = layerHost(layer);
-    return !!state.settings.proxy && !state.settings.proxyOff && host !== undefined && state.settings.proxiedHosts.includes(host);
-  };
+  const proxied = () => proxiesHost(layerHost(layer));
   return (
     <div class="layer-summary">
       <span>{Math.round(layer.opacity * 100)}%</span>
@@ -474,6 +471,14 @@ function TimeRow(props: { layer: Layer; time: WmsTime }) {
   );
 }
 
+/** Why a layer's proxy checkbox is as it is, where Settings decides it. */
+function proxyNote(): string | undefined {
+  if (!state.settings.proxy) return 'Set a CORS proxy in Settings first';
+  if (state.settings.proxyMode === 'off') return 'The CORS proxy is switched off in Settings';
+  if (state.settings.proxyMode === 'all') return 'Every host goes through the CORS proxy (Settings)';
+  return undefined;
+}
+
 /** Opacity, zoom range, colour and source of the active layer. */
 function ActiveLayer(props: { layer: Layer }) {
   const layer = props.layer;
@@ -585,14 +590,11 @@ function ActiveLayer(props: { layer: Layer }) {
       </div>
       <Show when={host()}>
         {(h) => (
-          <label
-            class="row"
-            title={!state.settings.proxy ? 'Set a CORS proxy in Settings first' : state.settings.proxyOff ? 'The CORS proxy is switched off in Settings' : undefined}
-          >
+          <label class="row" title={proxyNote()}>
             <input
               type="checkbox"
-              disabled={!state.settings.proxy}
-              checked={state.settings.proxiedHosts.includes(h())}
+              disabled={!state.settings.proxy || state.settings.proxyMode === 'all'}
+              checked={state.settings.proxyMode === 'all' ? !!state.settings.proxy : state.settings.proxiedHosts.includes(h())}
               onChange={(e) => setHostProxied(h(), e.currentTarget.checked)}
             />
             <span>Fetch {h()} through the CORS proxy</span>

@@ -38,11 +38,11 @@ describe('project file', () => {
   });
 
   it("leaves the proxy address and this browser's switches out of the file", async () => {
-    const switched = { ...project, state: { ...project.state, settings: { ...project.state.settings, tileCacheOff: true, proxyOff: true } } };
+    const switched = { ...project, state: { ...project.state, settings: { ...project.state.settings, tileCacheOff: true, proxyMode: 'all' as const } } };
     const json = strFromU8(unzipSync(await encodeProjectFile(switched))['project.json']!);
     expect(json).not.toContain('secret');
     expect(json).not.toContain('tileCacheOff');
-    expect(json).not.toContain('proxyOff');
+    expect(json).not.toContain('proxyMode');
   });
 
   it('turns away what is not a project file', () => {

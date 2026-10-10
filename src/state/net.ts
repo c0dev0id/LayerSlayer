@@ -7,14 +7,22 @@ import { exceptionText } from '../services/xml';
 
 let proxyTemplate = '';
 let proxiedHosts = new Set<string>();
+let proxyAll = false;
+
+/**
+ * Which requests go through the CORS proxy: none, those to the hosts chosen for it, or
+ * those to every host but the page's own.
+ */
+export type ProxyMode = 'off' | 'hosts' | 'all';
 
 /**
  * Sets the CORS proxy and the hosts that need it. `template` holds {url} where the address
  * goes, percent-encoded; without {url} the address is appended as it is.
  */
-export function setProxy(template: string, hosts: readonly string[]): void {
-  proxyTemplate = template.trim();
+export function setProxy(template: string, hosts: readonly string[], mode: ProxyMode = 'hosts'): void {
+  proxyTemplate = mode === 'off' ? '' : template.trim();
   proxiedHosts = new Set(hosts);
+  proxyAll = mode === 'all';
 }
 
 export function hostOf(url: string): string | undefined {
@@ -28,7 +36,8 @@ export function hostOf(url: string): string | undefined {
 /** Whether requests to this URL's host go through the proxy. */
 export function isProxied(url: string): boolean {
   const host = hostOf(url);
-  return proxyTemplate !== '' && host !== undefined && proxiedHosts.has(host);
+  if (proxyTemplate === '' || host === undefined) return false;
+  return proxiedHosts.has(host) || (proxyAll && host !== globalThis.location?.host);
 }
 
 /**

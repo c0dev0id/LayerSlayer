@@ -1,13 +1,21 @@
-import { createResource, createSignal, For, Show } from 'solid-js';
+import { createResource, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { clearTileCache, TILE_MAX_AGE_HOURS, tileCacheStats } from '../map/tileCache';
-import { setHostProxied, setProxyAddress, setProxyOff, setTileCacheOff, state } from '../state/store';
+import type { ProxyMode } from '../state/net';
+import { setHostProxied, setProxyAddress, setProxyMode, setTileCacheOff, state } from '../state/store';
 import { askConfirmation } from './confirm';
 import { countText, sizeText } from './format';
 import { CloseIcon, PencilIcon, SaveIcon } from './icons';
 
+const PROXY_MODES: { mode: ProxyMode; label: string; title: string }[] = [
+  { mode: 'off', label: 'Off', title: 'No request goes through the proxy' },
+  { mode: 'hosts', label: 'Per layer', title: 'Requests to the hosts below go through the proxy' },
+  { mode: 'all', label: 'All hosts', title: "Every request but the page's own goes through the proxy" },
+];
+
 /**
- * The tile cache and the CORS proxy, each with a switch that turns it off for every layer
- * (for testing) without touching the layers' own settings.
+ * The tile cache and the CORS proxy. A switch turns the cache off for every layer, and the
+ * proxy can be off, used for the hosts chosen for it, or used for all (for testing), without
+ * touching the layers' own settings.
  */
 export function SettingsSection() {
   const [opened, setOpened] = createSignal(false);
@@ -44,29 +52,52 @@ export function SettingsSection() {
         </p>
       </div>
       <div class="setting">
-        <label class="row">
-          <input type="checkbox" checked={!state.settings.proxyOff} onChange={(e) => setProxyOff(!e.currentTarget.checked)} />
-          <strong>CORS proxy</strong>
-        </label>
+        <div class="row">
+          <strong class="grow">CORS proxy</strong>
+          <div class="segmented" role="radiogroup" aria-label="Requests through the CORS proxy">
+            <For each={PROXY_MODES}>
+              {({ mode, label, title }) => (
+                <label title={title}>
+                  <input
+                    type="radio"
+                    name="proxy-mode"
+                    checked={(state.settings.proxyMode ?? 'hosts') === mode}
+                    onChange={() => setProxyMode(mode)}
+                  />
+                  <span>{label}</span>
+                </label>
+              )}
+            </For>
+          </div>
+        </div>
         <ProxyAddress />
         <p class="muted hint">
           Servers that send no CORS headers cannot be read by a web page. A proxy you run fetches them instead: {'{url}'} in its address is
-          replaced by the encoded target. Only the hosts below use it; switched off, none does.
+          replaced by the encoded target. <em>Per layer</em>, the hosts below use it; <em>All hosts</em> sends every request through it,
+          those that send data (OpenStreetMap queries and details) included, which a proxy must pass on as they are.
         </p>
-        <Show when={state.settings.proxiedHosts.length > 0} fallback={<p class="muted hint">No host uses the proxy.</p>}>
-          <ul class="hosts">
-            <For each={state.settings.proxiedHosts}>
-              {(host) => (
-                <li class="row">
-                  <span class="grow name">{host}</span>
-                  <button class="icon" aria-label={`Stop using the proxy for ${host}`} onClick={() => setHostProxied(host, false)}>
-                    <CloseIcon />
-                  </button>
-                </li>
-              )}
-            </For>
-          </ul>
-        </Show>
+        <Switch>
+          <Match when={state.settings.proxyMode === 'all'}>
+            <p class="hosts-all">All hosts use the proxy.</p>
+          </Match>
+          <Match when={state.settings.proxiedHosts.length === 0}>
+            <p class="muted hint">No host uses the proxy.</p>
+          </Match>
+          <Match when={true}>
+            <ul class="hosts">
+              <For each={state.settings.proxiedHosts}>
+                {(host) => (
+                  <li class="row">
+                    <span class="grow name">{host}</span>
+                    <button class="icon" aria-label={`Stop using the proxy for ${host}`} onClick={() => setHostProxied(host, false)}>
+                      <CloseIcon />
+                    </button>
+                  </li>
+                )}
+              </For>
+            </ul>
+          </Match>
+        </Switch>
       </div>
     </details>
   );

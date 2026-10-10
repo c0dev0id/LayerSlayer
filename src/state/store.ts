@@ -16,7 +16,7 @@ import {
 import { isLngLat, type LngLat } from '../model/route';
 import { fileSourceType, importFile } from '../services/importFile';
 import { deleteFile } from './files';
-import { setProxy } from './net';
+import { setProxy, type ProxyMode } from './net';
 import { persistedStore } from './persist';
 
 export interface Settings {
@@ -30,13 +30,22 @@ export interface Settings {
   terrain?: boolean;
   /** No layer keeps tiles, whatever its own setting says: a switch of this browser, for testing. */
   tileCacheOff?: boolean;
-  /** No request goes through the CORS proxy, whatever hosts use it: a switch of this browser, for testing. */
-  proxyOff?: boolean;
+  /**
+   * Requests through the CORS proxy: none, or those to every host, whatever hosts use it; by
+   * default those to the hosts that use it. A switch of this browser, for testing.
+   */
+  proxyMode?: 'off' | 'all';
 }
 
 /** The settings that are this browser's own rather than a project's: the proxy and the switches. */
-export function browserSettings({ proxy, tileCacheOff, proxyOff }: Settings): Pick<Settings, 'proxy' | 'tileCacheOff' | 'proxyOff'> {
-  return { proxy, ...(tileCacheOff && { tileCacheOff }), ...(proxyOff && { proxyOff }) };
+export function browserSettings({ proxy, tileCacheOff, proxyMode }: Settings): Pick<Settings, 'proxy' | 'tileCacheOff' | 'proxyMode'> {
+  return { proxy, ...(tileCacheOff && { tileCacheOff }), ...(proxyMode && { proxyMode }) };
+}
+
+/** Whether requests to the host go through the CORS proxy, as the settings say. */
+export function proxiesHost(host: string | undefined, settings: Settings = state.settings): boolean {
+  if (!settings.proxy || !host || settings.proxyMode === 'off') return false;
+  return settings.proxyMode === 'all' || settings.proxiedHosts.includes(host);
 }
 
 export interface View {
@@ -133,7 +142,7 @@ export function parseState(json: string): AppState {
       ...(typeof settings?.background === 'string' && /^#[0-9a-f]{6}$/i.test(settings.background) && { background: settings.background }),
       ...(settings?.terrain === true && { terrain: true }),
       ...(settings?.tileCacheOff === true && { tileCacheOff: true }),
-      ...(settings?.proxyOff === true && { proxyOff: true }),
+      ...((settings?.proxyMode === 'off' || settings?.proxyMode === 'all') && { proxyMode: settings.proxyMode }),
     },
     view:
       view && Array.isArray(view.center) && typeof view.zoom === 'number'
@@ -147,7 +156,7 @@ const [state, setState] = persistedStore(STORAGE_KEY, 'layers', parseState, defa
 export { state };
 
 createRoot(() => {
-  createEffect(() => setProxy(state.settings.proxyOff ? '' : state.settings.proxy, [...state.settings.proxiedHosts]));
+  createEffect(() => setProxy(state.settings.proxy, [...state.settings.proxiedHosts], state.settings.proxyMode ?? 'hosts'));
   // A stored file goes with the last layer that uses it: removed, given other data, or
   // replaced by an opened project.
   let used = storedFiles(state.layers);
@@ -160,7 +169,7 @@ createRoot(() => {
 
 /** Replaces everything with a project's state, as when it is opened; the proxy and the switches stay this browser's. */
 export function replaceState(next: AppState): void {
-  const { tileCacheOff: _, proxyOff: __, ...settings } = next.settings;
+  const { tileCacheOff: _, proxyMode: __, ...settings } = next.settings;
   setState(reconcile({ ...next, settings: { ...settings, ...browserSettings(state.settings) } }, { key: 'id', merge: false }));
 }
 
@@ -253,9 +262,9 @@ export function setTileCacheOff(off: boolean): void {
   setState('settings', 'tileCacheOff', off || undefined);
 }
 
-/** Switches the CORS proxy off for every host, or back on for the hosts that use it. */
-export function setProxyOff(off: boolean): void {
-  setState('settings', 'proxyOff', off || undefined);
+/** Sends no request, every request, or those to the hosts that use it through the CORS proxy. */
+export function setProxyMode(mode: ProxyMode): void {
+  setState('settings', 'proxyMode', mode === 'hosts' ? undefined : mode);
 }
 
 /** Sets the colour the map is drawn on, or with none goes back to white. */
