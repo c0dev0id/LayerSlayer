@@ -1125,6 +1125,174 @@
       "note": "Near-surface smoke from wildfires, from NOAA air quality forecast guidance that runs about two days ahead. The map shows the hour the service shows by default."
     },
     {
+      "name": "USGS — imagery with topographic labels",
+      "type": "arcgis-mapserver",
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer",
+      "region": "United States",
+      "category": "Aerial",
+      "note": "Aerial imagery under The National Map's roads, boundaries and names, cached tiles."
+    },
+    {
+      "name": "USGS — place names (GNIS)",
+      "type": "arcgis-mapserver",
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/geonames/MapServer",
+      "region": "United States",
+      "category": "POI",
+      "note": "Official names of places, landforms, streams and cultural features from the Geographic Names Information System, including historical names."
+    },
+    {
+      "name": "USGS — transportation",
+      "type": "arcgis-mapserver",
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/transportation/MapServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Roads, railroads, trails and airports of The National Map, from Census TIGER/Line and Forest Service data, drawn by scale."
+    },
+    {
+      "name": "USGS — structures",
+      "type": "arcgis-mapserver",
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/structures/MapServer",
+      "region": "United States",
+      "category": "POI",
+      "note": "Public buildings: schools, hospitals, fire and police stations, post offices, cemeteries, campgrounds, trailheads, cabins and shelters."
+    },
+    {
+      "name": "USGS — trails",
+      "type": "arcgis-mapserver",
+      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/USGSTrails/MapServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Trails compiled from the National Transportation Dataset, Census and Forest Service data."
+    },
+    {
+      "name": "USGS — NHDPlus High Resolution",
+      "type": "arcgis-mapserver",
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer",
+      "region": "United States",
+      "category": "Waterways",
+      "note": "Flowlines, water bodies, gages, sinks and catchments of the high-resolution hydrography network; drawn only when zoomed in."
+    },
+    {
+      "name": "USGS — watershed boundaries",
+      "type": "arcgis-mapserver",
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer",
+      "region": "United States",
+      "category": "Waterways",
+      "note": "Hydrologic units from 2-digit regions down to 16-digit units, with their codes."
+    },
+    {
+      "name": "USGS — 3D hydrography (3DHP)",
+      "type": "arcgis-mapserver",
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/3DHP_all/MapServer",
+      "region": "United States",
+      "category": "Waterways",
+      "note": "The successor to NHD, derived from lidar elevation: flowlines, water bodies, catchments, springs and confluences where mapped so far."
+    },
+    {
+      "name": "USGS — 3D hydrography features (3DHP)",
+      "type": "arcgis-features",
+      "url": "https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer",
+      "region": "United States",
+      "category": "Waterways",
+      "note": "The 3DHP flowlines, water bodies and points as vector features queried by view."
+    },
+    {
+      "name": "USGS — NAIP aerial imagery",
+      "type": "wms",
+      "url": "https://imagery.nationalmap.gov/arcgis/services/USGSNAIPImagery/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "United States",
+      "category": "Aerial",
+      "note": "Summer imagery of the National Agriculture Imagery Program, the latest for each state: natural colour, colour infrared or a vegetation index (NDVI)."
+    },
+    {
+      "name": "USGS — NAIP imagery coverage",
+      "type": "arcgis-mapserver",
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/USGSNAIPImageryIndex/MapServer",
+      "region": "United States",
+      "category": "Reference",
+      "note": "Footprints of the NAIP imagery and the year each was flown."
+    },
+    {
+      "name": "USGS — 3DEP elevation coverage",
+      "type": "arcgis-mapserver",
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/3DEPElevationIndex/MapServer",
+      "region": "United States",
+      "category": "Reference",
+      "note": "Where 3DEP elevation models (1 m to 2 arc-seconds), lidar point clouds, ifsar and topobathymetric data exist."
+    },
+    {
+      "name": "USGS — 3DEP lidar acquisition grid",
+      "type": "arcgis-mapserver",
+      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/3DEPDataAcquisition_1KMGrid/MapServer",
+      "region": "United States",
+      "category": "Reference",
+      "note": "The 1 km grid lidar is collected in, with state and county outlines."
+    },
+    {
+      "name": "USGS — US Topo availability",
+      "type": "arcgis-mapserver",
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/USTopoAvailability/MapServer",
+      "region": "United States",
+      "category": "Reference",
+      "note": "7.5-minute quadrangles tinted by the year their current US Topo map was published."
+    },
+    {
+      "name": "USGS — map sheet indices",
+      "type": "arcgis-mapserver",
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/map_indices/MapServer",
+      "region": "United States",
+      "category": "Reference",
+      "note": "The 1×1 degree, 30×60-minute, 15-minute, 7.5-minute and 3.75-minute map sheet grids with their names."
+    },
+    {
+      "name": "BLM — Public Land Survey System",
+      "type": "arcgis-mapserver",
+      "url": "https://gis.blm.gov/arcgis/rest/services/Cadastral/BLM_Natl_PLSS_CadNSDI/MapServer",
+      "region": "United States",
+      "category": "Reference",
+      "note": "Townships and sections of the land survey grid most legal land descriptions refer to."
+    },
+    {
+      "name": "NGA — US National Grid",
+      "type": "arcgis-features",
+      "url": "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/US_National_Grid_HFL_V/FeatureServer",
+      "region": "United States",
+      "category": "Reference",
+      "note": "The USNG/MGRS grid used in search and rescue, from its 6×8 degree zones down to 100 m squares."
+    },
+    {
+      "name": "USGS — scanned topographic maps",
+      "type": "arcgis-mapserver",
+      "url": "https://services.arcgisonline.com/arcgis/rest/services/USA_Topo_Maps/MapServer",
+      "region": "United States",
+      "category": "History",
+      "note": "Seamless scans of the USGS paper topographic maps that US Topo replaced, 1:24 000 and 1:100 000 (1:63 360 and 1:250 000 in Alaska), from National Geographic TOPO!; cached tiles to zoom 15."
+    },
+    {
+      "name": "FEMA — flood hazard zones (NFHL)",
+      "type": "arcgis-mapserver",
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer",
+      "region": "United States",
+      "category": "Hazards",
+      "note": "The National Flood Hazard Layer: flood zones, base flood elevations, levees and map panels; drawn only when zoomed in closely."
+    },
+    {
+      "name": "USFWS — wetlands, topographic symbols",
+      "type": "arcgis-mapserver",
+      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/WetlandsTopo/Wetlands_Topo_Service/MapServer",
+      "region": "United States",
+      "category": "Waterways",
+      "note": "National Wetlands Inventory drawn with the marsh and swamp symbols of topographic maps; drawn only when zoomed in."
+    },
+    {
+      "name": "NPS — park boundaries",
+      "type": "arcgis-features",
+      "url": "https://services1.arcgis.com/fBc8EJBxQRMcHlei/arcgis/rest/services/NPS_Land_Resources_Division_Boundary_and_Tract_Data_Service/FeatureServer",
+      "region": "United States",
+      "category": "POI",
+      "note": "Boundaries and land tracts of national parks, monuments and other park units."
+    },
+    {
       "name": "Baden-Württemberg — MobiData BW (WFS)",
       "type": "wfs",
       "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
