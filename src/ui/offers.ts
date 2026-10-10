@@ -1,5 +1,4 @@
-import type { LayerDraft } from '../model/layer';
-import type { Offer } from '../services/types';
+import type { Offer, ServiceInfo } from '../services/types';
 
 /**
  * The origin a layer added from `offer` of the source at `sourceUrl` carries: the address,
@@ -18,25 +17,19 @@ export function splitOrigin(origin: string): { address: string; name?: string } 
 }
 
 /**
- * The titles leading to an offer in its source's layer tree: the headings it is nested
- * under, outermost first, then its own.
+ * The service's offers with each layer's path in its tree as `originPath`: the titles of
+ * the headings it is nested under, outermost first, then its own, as the service gives them.
  */
-export function offerPath(offers: readonly Offer[], offer: Offer): string[] {
-  const path = [offer.title];
-  let depth = offer.depth;
-  for (let i = offers.indexOf(offer) - 1; i >= 0 && depth > 0; i--) {
-    const above = offers[i]!;
-    if (above.depth < depth) {
-      path.unshift(above.title);
-      depth = above.depth;
-    }
-  }
-  return path;
-}
-
-/** The layer an offer of the source at `sourceUrl` adds, with where it came from; undefined for a heading. */
-export function offerLayer(sourceUrl: string, offers: readonly Offer[], offer: Offer): LayerDraft | undefined {
-  return offer.draft && { ...offer.draft, origin: originOf(sourceUrl, offer), originPath: offerPath(offers, offer) };
+export function withPaths(info: ServiceInfo): ServiceInfo {
+  const above: Offer[] = [];
+  return {
+    ...info,
+    offers: info.offers.map((offer) => {
+      while (above.length > 0 && above[above.length - 1]!.depth >= offer.depth) above.pop();
+      above.push(offer);
+      return offer.draft ? { ...offer, draft: { ...offer.draft, originPath: above.map((o) => o.title) } } : offer;
+    }),
+  };
 }
 
 /** Whether a layer's origin is one of the source's layers. */

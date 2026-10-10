@@ -115,6 +115,16 @@ export async function entryFacts(entry: LibraryEntry, read: (entry: ServiceEntry
   return serviceFacts(await read(entry));
 }
 
+/** A layer's facts: a style's from its sources, which the map has loaded already, other sources' from the source itself. */
+export async function layerFacts(source: LayerSource): Promise<SourceFacts> {
+  return source.type === 'style' ? styleFacts(await loadStyle(source.url)) : sourceFacts(source);
+}
+
+/** Tile zooms as "3–17", open-ended where only one end is known; undefined where neither is. */
+export function zoomRange(min: number | undefined, max: number | undefined): string | undefined {
+  return min === undefined && max === undefined ? undefined : `${min ?? 0}–${max ?? '…'}`;
+}
+
 /** "Raster", "Vector" or "Raster and vector". */
 export function dataLabel(data: readonly DataKind[]): string {
   const text = data.join(' and ');
