@@ -67,9 +67,9 @@ export const CACHE_PREFIX = 'cache+';
 /** The schemes a cached tile address can have. */
 export const CACHED_SCHEMES = ['https', 'http', WMTS_PROTOCOL, FEATURE_PROTOCOL, PMTILES_PROTOCOL].map((s) => CACHE_PREFIX + s);
 
-/** The layer's tile addresses, through the tile cache where the layer keeps its tiles. */
-function cached(layer: Layer, tiles: string[]): string[] {
-  return keepsTiles(layer) ? tiles.map((t) => CACHE_PREFIX + t) : tiles;
+/** Tile addresses, through the tile cache where the layer keeps its tiles. */
+function cached(keep: boolean, tiles: string[]): string[] {
+  return keep ? tiles.map((t) => CACHE_PREFIX + t) : tiles;
 }
 
 /** What is drawn around the layers. */
@@ -89,6 +89,8 @@ export interface MapOptions {
   terrain?: boolean;
   /** The id of the one layer shown, with the bottom layer under it; see `isShown`. */
   only?: string;
+  /** Whether layers keep tiles as each says; false, none does (a switch for testing). */
+  tileCache?: boolean;
 }
 
 export const TERRAIN_SOURCE = 'terrain';
@@ -137,7 +139,7 @@ interface Fragment {
  *
  * See MapOptions for what is drawn around the layers.
  */
-export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain, only }: MapOptions = {}): StyleSpecification {
+export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain, only, tileCache = true }: MapOptions = {}): StyleSpecification {
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
   if (background) style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
   const sprites: { id: string; url: string }[] = [];
@@ -163,7 +165,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   for (const [index, layer] of layers.entries()) {
     if (!drawn(layer, index)) continue;
     const within = withinOf(index);
-    const part = fragment(layer, assets.get(layer.id), labelFont);
+    const part = fragment(layer, assets.get(layer.id), labelFont, tileCache && keepsTiles(layer));
     if (!part) continue;
     let partLayers = part.layers;
     const sprite = part.sprite;
@@ -212,8 +214,11 @@ export function styleFont(style: StyleSpecification): string[] | undefined {
   return fonts.find((f) => /regular/i.test(f[0]!)) ?? fonts[0];
 }
 
-/** One user layer as MapLibre sources and layers; `labelFont` is what the labels of a vector layer are written in. */
-function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[]): Fragment | undefined {
+/**
+ * One user layer as MapLibre sources and layers; `labelFont` is what the labels of a vector
+ * layer are written in, and `keep` whether its tiles go through the tile cache.
+ */
+function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[], keep: boolean): Fragment | undefined {
   const src = layer.source;
   switch (src.type) {
     case 'xyz':
@@ -222,7 +227,7 @@ function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[])
     case 'arcgis-map':
       return raster(layer, {
         type: 'raster',
-        tiles: cached(layer, rasterTiles(src)),
+        tiles: cached(keep, rasterTiles(src)),
         tileSize: src.type === 'xyz' || src.type === 'wmts' ? src.tileSize : DYNAMIC_TILE_SIZE,
         ...(src.type === 'xyz' && src.scheme === 'tms' && { scheme: 'tms' }),
         ...tileZooms(src),
@@ -244,7 +249,7 @@ function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[])
         labelFont,
         {
           type: 'vector',
-          tiles: cached(layer, src.tiles),
+          tiles: cached(keep, src.tiles),
           ...(src.scheme && { scheme: src.scheme }),
           ...tileZooms(src),
           ...common(layer),
@@ -263,7 +268,7 @@ function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[])
       // was added, and live data moves.
       const source: SourceSpecification = {
         type: 'vector',
-        tiles: cached(layer, [featureTileUrl(src)]),
+        tiles: cached(keep, [featureTileUrl(src)]),
         maxzoom: FEATURE_TILE_MAXZOOM,
         ...(layer.attribution && { attribution: layer.attribution }),
       };

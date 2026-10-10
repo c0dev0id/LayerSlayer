@@ -9,14 +9,12 @@ import {
   isShown,
   isVector,
   keepsTiles,
-  layerHost,
   layerColor,
   LINE_WIDTH,
   MAX_ZOOM,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
   SOURCE_KINDS,
-  sourceUrl,
   type FileResource,
   type Layer,
   type LayerSource,
@@ -30,7 +28,7 @@ import { propertyKeys } from '../services/featureProperties';
 import { importAccept } from '../services/importFile';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { timeValues } from '../services/wmsTime';
-import { moveLayer, proxiesHost, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, state, updateLayer } from '../state/store';
+import { layerHost, moveLayer, proxiesHost, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, sourceUrl, state, updateLayer } from '../state/store';
 import { layerErrors, map, onlyLayerId, showLayerArea, zoom } from '../state/ui';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';

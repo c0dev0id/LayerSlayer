@@ -275,6 +275,12 @@ describe('composeStyle', () => {
     expect((style.sources.N as { tiles: string[] }).tiles).toEqual(['https://n/{z}/{x}/{y}.png']);
   });
 
+  it('sends no tiles through the tile cache while it is switched off', () => {
+    const keeping = layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } }, {}, 'X');
+    const style = compose([keeping], {}, { tileCache: false });
+    expect((style.sources.X as { tiles: string[] }).tiles).toEqual(['https://t/{z}/{x}/{y}.png']);
+  });
+
   it('draws one layer of a vector tile set in the layer colour', () => {
     const style = compose([
       layer(

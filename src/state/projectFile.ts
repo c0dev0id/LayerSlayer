@@ -2,7 +2,7 @@ import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
 import { storedFile } from '../model/layer';
 import type { RouteData } from '../model/route';
 import { parseRouteData } from './routes';
-import { parseState, type AppState } from './store';
+import { parseState, projectSettings, type AppState } from './store';
 
 /**
  * A project file (.lslay) is a ZIP archive: `project.json` with the layers, the view, the
@@ -33,8 +33,7 @@ export async function encodeProjectFile({ state, routes, files }: Project): Prom
     // Images are compressed already; GeoJSON shrinks to a fraction.
     zip[`files/${key}`] = [new Uint8Array(await blob.arrayBuffer()), { level: blob.type.startsWith('image/') ? 0 : 6 }];
   }
-  const { proxy: _, tileCacheOff: __, proxyMode: ___, ...settings } = state.settings;
-  const project = { app: APP, ...state, settings, ...routes, files: types };
+  const project = { app: APP, ...state, settings: projectSettings(state.settings), ...routes, files: types };
   zip['project.json'] = [strToU8(JSON.stringify(project, null, 2)), { level: 6 }];
   return zipSync(zip);
 }

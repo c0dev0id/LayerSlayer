@@ -130,12 +130,12 @@ export function MapView() {
       const layers = createMemo(() =>
         JSON.parse(
           JSON.stringify(
-            // With tile caching switched off, no layer keeps tiles, whatever its own setting.
-            composeStyle(state.settings.tileCacheOff ? state.layers.map((l) => ({ ...l, cache: false })) : state.layers, assets(), {
+            composeStyle(state.layers, assets(), {
               focus: focusBounds(),
               background: state.settings.background,
               terrain: state.settings.terrain,
               only: onlyLayerId(),
+              tileCache: !state.settings.tileCacheOff,
             }),
           ),
         ),

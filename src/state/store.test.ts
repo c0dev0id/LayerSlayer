@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createLayer, storedFile } from '../model/layer';
 import { importFile } from '../services/importFile';
-import { addLayer, browserSettings, defaultState, moveItem, parseState, proxiedHostsOf, proxiesHost, replaceLayerFile, state, updateLayer } from './store';
+import { addLayer, browserSettings, defaultState, moveItem, parseState, proxiedHostsOf, projectSettings, replaceLayerFile, state, updateLayer } from './store';
 
 // Stored files in memory, as IndexedDB is not at hand.
 const stored = vi.hoisted(() => new Map<string, Blob>());
@@ -95,22 +95,13 @@ describe('replaceLayerFile', () => {
   });
 });
 
-describe('browserSettings', () => {
-  it('are the proxy address and the switches that are on', () => {
-    expect(browserSettings({ proxy: 'p', proxiedHosts: ['h'], terrain: true, proxyMode: 'all' })).toEqual({ proxy: 'p', proxyMode: 'all' });
-    expect(browserSettings({ proxy: '', proxiedHosts: [], tileCacheOff: false })).toEqual({ proxy: '' });
-  });
-});
-
-describe('proxiesHost', () => {
-  const settings = { proxy: 'https://p.example/?url={url}', proxiedHosts: ['a.example'] };
-  it('follows the hosts chosen, none when off, every host when all, and none without an address', () => {
-    expect(proxiesHost('a.example', settings)).toBe(true);
-    expect(proxiesHost('b.example', settings)).toBe(false);
-    expect(proxiesHost('a.example', { ...settings, proxyMode: 'off' })).toBe(false);
-    expect(proxiesHost('b.example', { ...settings, proxyMode: 'all' })).toBe(true);
-    expect(proxiesHost('a.example', { ...settings, proxy: '' })).toBe(false);
-    expect(proxiesHost(undefined, { ...settings, proxyMode: 'all' })).toBe(false);
+describe('browserSettings and projectSettings', () => {
+  it('split the settings into this browser\'s own and the project\'s', () => {
+    const settings = { proxy: 'p', proxiedHosts: ['h'], terrain: true, tileCacheOff: true, proxyMode: 'off' as const };
+    expect(projectSettings(settings)).toEqual({ proxiedHosts: ['h'], terrain: true });
+    expect({ ...projectSettings(settings), ...browserSettings(settings) }).toEqual(settings);
+    // Every key of this browser's own, so that a project's cannot outlast them.
+    expect(Object.keys(browserSettings({ proxy: '', proxiedHosts: [] }))).toEqual(['proxy', 'tileCacheOff', 'proxyMode']);
   });
 });
 

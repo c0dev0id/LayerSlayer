@@ -1,9 +1,9 @@
 import { createEffect, createMemo, createRoot } from 'solid-js';
 import { reconcile } from 'solid-js/store';
 import { cornersBounds } from '../geo/bounds';
+import { MAX_LATITUDE } from '../geo/mercator';
 import {
   createLayer,
-  layerHost,
   MAX_ZOOM,
   MIN_ZOOM,
   SOURCE_KINDS,
@@ -17,7 +17,8 @@ import {
 import { isLngLat, type LngLat } from '../model/route';
 import { fileSourceType, importFile } from '../services/importFile';
 import { deleteFile } from './files';
-import { setProxy } from './net';
+import { parsePmtilesUrl } from '../map/urls';
+import { hostOf, setProxy } from './net';
 import { persistedStore } from './persist';
 
 export interface Settings {
@@ -35,15 +36,46 @@ export interface Settings {
    * Which hosts the CORS proxy is used for: none, or those of all layers as if each had it
    * ticked; by default the hosts chosen for it. A switch of this browser, for testing.
    */
-  proxyMode?: 'off' | 'all';
+  proxyMode?: Exclude<ProxyMode, 'hosts'>;
 }
 
 /** Which hosts the CORS proxy is used for: none, those chosen for it, or those of all layers too. */
 export type ProxyMode = 'off' | 'hosts' | 'all';
 
-/** The settings that are this browser's own rather than a project's: the proxy and the switches. */
-export function browserSettings({ proxy, tileCacheOff, proxyMode }: Settings): Pick<Settings, 'proxy' | 'tileCacheOff' | 'proxyMode'> {
-  return { proxy, ...(tileCacheOff && { tileCacheOff }), ...(proxyMode && { proxyMode }) };
+/** The settings that are this browser's own rather than a project's: the proxy address and the switches. */
+type BrowserSettings = Pick<Settings, 'proxy' | 'tileCacheOff' | 'proxyMode'>;
+
+/** This browser's own settings, every one of them, so that they replace those of a project. */
+export function browserSettings({ proxy, tileCacheOff, proxyMode }: Settings): BrowserSettings {
+  return { proxy, tileCacheOff, proxyMode };
+}
+
+/** The settings a project file keeps: all but this browser's own. */
+export function projectSettings({ proxy: _, tileCacheOff: __, proxyMode: ___, ...settings }: Settings): Omit<Settings, keyof BrowserSettings> {
+  return settings;
+}
+
+/** The address a layer's data comes from, for showing and for the proxy setting. */
+export function sourceUrl(layer: Layer): string | undefined {
+  const source = layer.source;
+  switch (source.type) {
+    case 'xyz':
+    case 'vector-tiles':
+      return parsePmtilesUrl(source.tiles[0]!)?.archive ?? source.tiles[0];
+    case 'wmts':
+      return source.template;
+    case 'geojson':
+    case 'image':
+      return 'url' in source.data ? source.data.url : undefined;
+    default:
+      return source.url;
+  }
+}
+
+/** The server a layer's data comes from, which the CORS proxy is chosen for. */
+export function layerHost(layer: Layer): string | undefined {
+  const url = sourceUrl(layer);
+  return url ? hostOf(url) : undefined;
 }
 
 /**
@@ -58,11 +90,6 @@ export function proxiedHostsOf(settings: Settings, layers: readonly Layer[]): st
   return [...new Set([...settings.proxiedHosts, ...hosts])];
 }
 
-/** Whether a layer's host goes through the CORS proxy, as the settings say. */
-export function proxiesHost(host: string | undefined, settings: Settings = state.settings): boolean {
-  if (!settings.proxy || !host || settings.proxyMode === 'off') return false;
-  return settings.proxyMode === 'all' || settings.proxiedHosts.includes(host);
-}
 
 export interface View {
   center: [number, number];
@@ -99,7 +126,7 @@ const FIRST_LAYER: LayerDraft = {
     matrices: Object.fromEntries(Array.from({ length: 19 }, (_, z) => [z, String(z).padStart(2, '0')])),
     tileSize: 256,
   },
-  bounds: [-180, -85.0511287798, 180, 85.0511287798],
+  bounds: [-180, -MAX_LATITUDE, 180, MAX_LATITUDE],
   attribution: '© <a href="https://www.bkg.bund.de">BKG</a> dl-de/by-2-0, <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_topplusopen.html">data sources</a>',
   // As if added from its library entry, which then shows it as on the map.
   origin: `${TOPPLUS}/1.0.0/WMTSCapabilities.xml web`,
@@ -171,8 +198,16 @@ export function parseState(json: string): AppState {
 const [state, setState] = persistedStore(STORAGE_KEY, 'layers', parseState, defaultState);
 export { state };
 
+/** The hosts requests go through the CORS proxy for now. */
+const proxiedHosts = createRoot(() => createMemo(() => proxiedHostsOf(state.settings, state.layers)));
+
+/** Whether requests to a layer's host go through the CORS proxy now. */
+export function proxiesHost(host: string | undefined): boolean {
+  return host !== undefined && proxiedHosts().includes(host);
+}
+
 createRoot(() => {
-  createEffect(() => setProxy(state.settings.proxy, proxiedHostsOf(state.settings, state.layers)));
+  createEffect(() => setProxy(state.settings.proxy, proxiedHosts()));
   // A stored file goes with the last layer that uses it: removed, given other data, or
   // replaced by an opened project.
   let used = storedFiles(state.layers);
@@ -185,8 +220,7 @@ createRoot(() => {
 
 /** Replaces everything with a project's state, as when it is opened; the proxy and the switches stay this browser's. */
 export function replaceState(next: AppState): void {
-  const { tileCacheOff: _, proxyMode: __, ...settings } = next.settings;
-  setState(reconcile({ ...next, settings: { ...settings, ...browserSettings(state.settings) } }, { key: 'id', merge: false }));
+  setState(reconcile({ ...next, settings: { ...next.settings, ...browserSettings(state.settings) } }, { key: 'id', merge: false }));
 }
 
 /** Adds a layer on top of the others and makes it the active one. */
