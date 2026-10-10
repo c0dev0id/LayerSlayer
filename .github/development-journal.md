@@ -470,31 +470,36 @@ It is a static single-page app on GitHub Pages; there is no server component.
     win, and Global entries are never marked. A test requires boxes for every region in
     the library. State services sit under their country, so they are only marked when
     the area lies outside it; inside a service, layers are marked by their own bounds.
-- **Precaching fetches what the map would ask for, politely.** A precached tile is only
-  of use if its address is the one the map asks for, so the templates are read from the
-  style the map is given (the layer composed alone, as shown and without the cache
-  prefix) and filled in by `tileUrl`, a copy of maplibre-gl 6's `CanonicalTileID.url`
-  (template by `(x + y) % n`, quadkey, `{ratio}`, the 256 px grid behind
-  `{bbox-epsg-3857}`); a test holds its bounding box to one MapLibre wrote. Tile zooms
-  follow MapLibre's covering zoom: the map zoom plus log2(512 / tile size), no deeper than
-  the source's deepest zoom, whose tiles the map enlarges beyond it. The tiles of each
-  zoom are those whose square meets the focus polygon (an edge clipped against the square,
-  or its centre inside), not the whole bounding box, and areas whose box holds more than
-  two million tiles are refused rather than walked. Counts are exact and instant; sizes
-  are estimated from three tiles spread over each zoom, read from the cache or fetched
-  and kept like any tile, and averaged. Precached tiles are kept until the cache is
-  cleared: each tile now carries when it expires (`never` for these) instead of when it
-  was stored, so the start-up sweep leaves them, and the cache name moved to v2. Tiles
-  already kept for a day are kept for good without being fetched again. A run asks one
-  tile at a time with 100 ms after each, 500 ms where *Slow fetch* is chosen, and stops
-  after 20 failures in a row, as the server is then down or refusing; missing tiles (404)
-  are counted, not failures. The OpenStreetMap Foundation's tile policy names "save area
-  for later" features as prohibited and OpenRailwayMap forbids bulk requests, so their
-  layers are left out without a choice; volunteer servers that ask for restraint are left
-  out or fetched slowly (`bulkPolicies.ts`). Feature layers (queries, as fresh as their
-  last run), PMTiles archives (better downloaded whole) and styles (tiles from addresses
-  inside the style) are not precached. There is no service worker, so a run lasts as long
-  as the page; the browser is asked to keep the site's storage (`storage.persist`).
+- **Precaching fetches what the map would ask for, politely.** A precached tile is only of
+  use if its address is the one the map asks for, so the templates are the source the
+  composer gives the map for that layer (without the cache prefix) and filled in by
+  `tileUrl`, a copy of maplibre-gl 6's `CanonicalTileID.url` (template by `(x + y) % n`,
+  quadkey, `{ratio}`, the 256 px grid behind `{bbox-epsg-3857}`); a test holds its
+  bounding box to one MapLibre wrote. Tile zooms follow MapLibre's covering zoom: the map
+  zoom plus log2(512 / tile size), no deeper than the source's deepest zoom, whose tiles
+  the map enlarges beyond it. The tiles of each zoom are those whose square meets the
+  focus polygon (an edge passes through the square, or its centre is inside), not the
+  whole bounding box. They are found row by row: a row takes the columns its stretch of
+  each edge passes through, and the spans between the edges' crossings of its middle line.
+  Testing every square took seconds at deep zooms; the row scan takes milliseconds, and a
+  test holds it to the square-by-square answer. Areas whose box holds more than two
+  million tiles are refused rather than walked. Sizes are estimated from three tiles
+  spread over each zoom, picked by counting along the rows, and averaged. Samples, runs
+  and the map all load tiles through one function that answers from the cache where it can
+  and keeps what it fetches. Precached tiles are kept until the cache is cleared: each
+  tile carries when it expires (`never` for these) instead of when it was stored, so the
+  start-up sweep leaves them, and the cache name moved to v2. Tiles already kept for a day
+  are kept for good without being fetched again. A run asks one tile at a time with 100 ms
+  after each tile fetched, 500 ms where *Slow fetch* is chosen, and stops after 20
+  failures in a row, as the server is then down or refusing; missing tiles (404) are
+  counted, not failures. It counts as it goes and updates the panel about five times a
+  second. The OpenStreetMap Foundation's tile policy names "save area for later" features
+  as prohibited and OpenRailwayMap forbids bulk requests, so their layers are left out
+  without a choice; volunteer servers that ask for restraint are left out or fetched
+  slowly (`bulkPolicies.ts`). Feature layers (queries, as fresh as their last run),
+  PMTiles archives (better downloaded whole) and styles (tiles from addresses inside the
+  style) are not precached. There is no service worker, so a run lasts as long as the
+  page; the browser is asked to keep the site's storage (`storage.persist`).
 - **UI after mappic.** Top-first layer list with an active layer whose settings open in
   its card, in place of its summary line: below the whole list they were a scroll away
   from the layer once the list grew, and editing several layers meant scrolling between
