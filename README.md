@@ -108,7 +108,13 @@ mapping agency (BKG), which covers the rest of the world in less detail.
   now and replaces the layer's data. Other file layers show when their file was changed
   and *Replace*, which takes a newer version of the file and keeps the layer's settings;
   one added from a library file entry or a GeoPDF address also has the arrow that
-  downloads the newest file, so refreshing it is a download and a Replace.
+  downloads the newest file, so refreshing it is a download and a Replace. The ⓘ beside
+  the layer's *Source* shows the same technical details as a library entry's, read from
+  the layer itself: the address it was added from (with a button that copies it), its
+  place in the service's layer tree and its name there, as the service gave them when it
+  was added and however the layer has been renamed since, the kind of service and its
+  version, raster or vector, the format, tile zooms, whether it is fetched directly or
+  through the CORS proxy, and its attribution.
 - **Show alone** (the stack button under *3D*) draws only the layer whose settings are
   open, over the bottom layer (usually the base map, shown as its eye says). The open
   layer is drawn even when its eye is off. No layer's eye changes, so a second press shows
