@@ -207,10 +207,12 @@ an account key; which servers go through it is saved.
 size, each on a line of its own, with *Clear* to empty it, and the CORS proxy's address
 as text, changed with the pencil and saved with the button that takes its place (Enter
 saves, Esc leaves it as it was; an address without `{url}` is saved only once confirmed).
-A switch beside each turns it off for every layer, for testing: with *Tile cache* off no
-layer reads or keeps tiles, with *CORS proxy* off no request goes through the proxy, and
-each layer's own choice applies again once switched back on. Both switches stay in the
-browser, like the proxy address.
+For testing, *Tile cache* has a switch that turns it off for every layer, so no layer
+reads or keeps tiles, and the CORS proxy can be *Off* (no request goes through it), *Per
+layer* (the hosts chosen for it, the default) or *All hosts* (every request but the page's
+own, OpenStreetMap queries and details included, which send data and need a proxy that
+passes it on). Each layer's own choice applies again once switched back. The switches stay
+in the browser, like the proxy address.
 
 ## How each source is drawn
 
