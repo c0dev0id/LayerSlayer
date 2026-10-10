@@ -327,24 +327,29 @@ It is a static single-page app on GitHub Pages; there is no server component.
 - **Tile caching is on by default, per layer.** Slow servers often forbid HTTP caching too
   (ArcGIS Online sends `max-age=300`), so the browser cache does not help. A tiled layer
   (XYZ, WMS, WMTS, ArcGIS export, feature sources, vector tiles, PMTiles) whose `cache` is
-  not false has its tile addresses
-  prefixed with `cache+` (`cache+https://…`, `cache+wmts-matrix://…`,
-  `cache+features://…`, `cache+pmtiles://…`); MapLibre hands
+  not false has its tile addresses prefixed with `cache+` (`cache+https://…`,
+  `cache+wmts-matrix://…`, `cache+features://…`, `cache+pmtiles://…`); MapLibre hands
   every scheme it does not know to the protocol registered for it, and one protocol
   answers them all from Cache Storage or fetches the tile and keeps it for 24 hours.
-  Caching is thereby a wrapper around fetching rather than part of each source kind.
-  Tiles are kept under the address that answers them (the tile URL, a WMTS tile's resolved
-  URL, a feature tile's query); empty feature tiles are kept too, errors are not, so a
-  missing tile is asked for again. Expired tiles are swept at start-up, and the cache name
-  carries a version so a change in what is kept never reads old entries back. Each tile is
-  stored with its length in `content-length`, so Settings sums the cache's size from the
-  headers (`matchAll`) without reading tile bodies. Cache Storage was chosen over IndexedDB
-  because it holds HTTP responses by URL as it is, and the browser accounts for it in the
-  site's storage. It is on unless switched off because most tiled services are static and
-  slow enough for kept tiles to pay off; it serves tiles up to a day old, so layers with
-  live data (radar, traffic) should have it switched off. Styles
-  are left out: their tiles come from addresses inside the style. At most four feature
-  queries run at once per server; queued tiles that scroll out of view are dropped.
+  Caching is thereby a wrapper around fetching rather than part of each source kind. Tiles
+  are kept under the address that answers them (the tile URL, a WMTS tile's resolved URL,
+  a feature tile's query); empty feature tiles are kept too, errors are not, so a missing
+  tile is asked for again. An image tile must be a whole image to count: nothing, text, or
+  a PNG, JPEG, GIF or WebP without its end (the PNG's IEND chunk, the JPEG's end marker,
+  the WebP's RIFF length) is an error naming the server (`imageCheck.ts`). A proxy that
+  re-sends a tile chunked hides a cut-off answer from the browser, which then only reports
+  that the image could not be decoded, and the cache would keep the broken tile for a day.
+  Raster tiles of layers that keep none go through MapLibre's own loader and are not
+  checked. Expired tiles are swept at start-up, and the cache name carries a version so a
+  change in what is kept never reads old entries back. Each tile is stored with its length
+  in `content-length`, so Settings sums the cache's size from the headers (`matchAll`)
+  without reading tile bodies. Cache Storage was chosen over IndexedDB because it holds
+  HTTP responses by URL as it is, and the browser accounts for it in the site's storage.
+  It is on unless switched off because most tiled services are static and slow enough for
+  kept tiles to pay off; it serves tiles up to a day old, so layers with live data (radar,
+  traffic) should have it switched off. Styles are left out: their tiles come from
+  addresses inside the style. At most four feature queries run at once per server; queued
+  tiles that scroll out of view are dropped.
 - **Flying to a layer.** The layer row offers a frame icon when the layer's bounds span at
   most half the Web Mercator world in width and in height; an area measure was tried first
   and failed for a week of earthquakes, which spans every longitude but leaves out the
