@@ -27,7 +27,7 @@ import { askConfirmation } from './confirm';
 import { CloseIcon, DownloadLink, InfoIcon } from './icons';
 import { showModalWhile } from './modal';
 import { OsmQueryTab } from './OsmQueryTab';
-import { groupMembers, isFromSource, originOf, selection, type Selection } from './offers';
+import { groupMembers, isFromSource, offerLayer, originOf, selection, type Selection } from './offers';
 
 type Tab = 'library' | 'address' | 'file' | 'osm';
 
@@ -85,14 +85,15 @@ function outsideFocus(areas: readonly Bounds[]): boolean {
 const offerAreas = (offer: Offer): Bounds[] => (offer.draft?.bounds ? [offer.draft.bounds] : []);
 
 /** Adds the offer's layer, or removes it when it is on the map already. */
-function toggle(url: string, offer: Offer): void {
+function toggle(url: string, offers: readonly Offer[], offer: Offer): void {
   const origin = originOf(url, offer);
-  if (origins().has(origin)) removeLayersWhere((l) => l.origin === origin);
-  else if (offer.draft) addLayer({ ...offer.draft, origin });
+  if (origins().has(origin)) return removeLayersWhere((l) => l.origin === origin);
+  const layer = offerLayer(url, offers, offer);
+  if (layer) addLayer(layer);
 }
 
 /** Adds what of a group is not on the map yet, or removes the group when all of it is. */
-async function toggleGroup(url: string, members: readonly Offer[]): Promise<void> {
+async function toggleGroup(url: string, offers: readonly Offer[], members: readonly Offer[]): Promise<void> {
   if (selection(members, (o) => isAdded(url, o)) === 'all') {
     const remove = new Set(members.map((o) => originOf(url, o)));
     removeLayersWhere((l) => l.origin !== undefined && remove.has(l.origin));
@@ -101,7 +102,7 @@ async function toggleGroup(url: string, members: readonly Offer[]): Promise<void
   const missing = members.filter((o) => !isAdded(url, o));
   const message = `Add ${missing.length} layers? Each is fetched and drawn on its own.`;
   if (missing.length > CONFIRM_ABOVE && !(await askConfirmation(message, 'Add layers'))) return;
-  for (const offer of missing) addLayer({ ...offer.draft!, origin: originOf(url, offer) });
+  for (const offer of missing) addLayer(offerLayer(url, offers, offer)!);
 }
 
 /**
@@ -141,7 +142,7 @@ export function AddLayerDialog(props: { open: boolean; onClose: () => void }) {
       const info = await read(source);
       setSizes(new Map(sizes()).set(source.url, info.offers.filter((o) => o.draft).length));
       const only = info.offers.length === 1 && info.offers[0]!.draft ? info.offers[0]! : undefined;
-      if (only && source.entry) toggle(source.url, only);
+      if (only && source.entry) toggle(source.url, info.offers, only);
       else setOpened({ source, info });
     } catch (error) {
       setFailure({ message: `${source.entry?.name ?? hostOf(source.url) ?? source.url}: ${errorMessage(error)}`, source });
@@ -609,7 +610,7 @@ function OfferRow(props: { url: string; offers: readonly Offer[]; offer: Offer; 
         style={{ 'padding-left': `${8 + props.offer.depth * 14}px` }}
         disabled={selected() === undefined}
         aria-pressed={selected() === 'some' ? 'mixed' : selected() === 'all'}
-        onClick={() => (props.offer.draft ? toggle(props.url, props.offer) : void toggleGroup(props.url, members()))}
+        onClick={() => (props.offer.draft ? toggle(props.url, props.offers, props.offer) : void toggleGroup(props.url, props.offers, members()))}
       >
         <span class="mark" aria-hidden="true" />
         <span class="grow">

@@ -219,6 +219,11 @@ export interface Layer {
    * file was downloaded from, if any: a link there fetches a newer version.
    */
   origin?: string;
+  /**
+   * The titles leading to the layer in its source's layer tree, as the source gave them when
+   * the layer was added: the groups it is nested in, outermost first, then its own title.
+   */
+  originPath?: string[];
 }
 
 /**
@@ -242,7 +247,7 @@ export const NO_ADJUSTMENTS: RasterAdjustments = { hue: 0, saturation: 0, contra
 
 /** What a service offers to add: a layer before it gets an id and the user's settings. */
 export type LayerDraft = Pick<Layer, 'name' | 'source'> &
-  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin' | 'icon' | 'ownStyle'>>;
+  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin' | 'originPath' | 'icon' | 'ownStyle'>>;
 
 /** New layers are half transparent, so what lies below them shows; layers with an icon start opaque, as icons read best that way. */
 const DEFAULT_OPACITY = 0.5;

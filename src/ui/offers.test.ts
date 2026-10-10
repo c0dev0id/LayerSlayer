@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Offer } from '../services/types';
-import { groupMembers, isFromSource, originOf, selection } from './offers';
+import { groupMembers, isFromSource, offerLayer, offerPath, originOf, selection, splitOrigin } from './offers';
 
 const draft = { name: 'x', source: { type: 'geojson', data: { url: 'https://x' } } } as const;
 const offers: Offer[] = [
@@ -43,5 +43,25 @@ describe('origins', () => {
     const origin = originOf('https://a/MapServer', { title: 'A (all layers)', depth: 0, draft });
     expect(origin).toBe('https://a/MapServer');
     expect(isFromSource(origin, 'https://a/MapServer')).toBe(true);
+  });
+});
+
+describe('offerPath and offerLayer', () => {
+  it('lists the headings above an offer, outermost first, then its title', () => {
+    expect(offerPath(offers, offers[3]!)).toEqual(['Root', 'Roads', 'Paths']);
+    expect(offerPath(offers, offers[4]!)).toEqual(['Root', 'Rail']);
+    expect(offerPath(offers, offers[6]!)).toEqual(['Other root']);
+  });
+
+  it('adds the origin and path to the draft, and nothing for a heading', () => {
+    expect(offerLayer('https://s', offers, offers[2]!)).toMatchObject({ origin: 'https://s motorways', originPath: ['Root', 'Roads', 'Motorways'] });
+    expect(offerLayer('https://s', offers, offers[1]!)).toBeUndefined();
+  });
+});
+
+describe('splitOrigin', () => {
+  it('takes the address and the name in the source apart', () => {
+    expect(splitOrigin('https://s/wms? rp hk 25')).toEqual({ address: 'https://s/wms?', name: 'rp hk 25' });
+    expect(splitOrigin('https://s/{z}/{x}/{y}.png')).toEqual({ address: 'https://s/{z}/{x}/{y}.png' });
   });
 });
