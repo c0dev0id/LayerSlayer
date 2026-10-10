@@ -453,6 +453,12 @@ It is a static single-page app on GitHub Pages; there is no server component.
     by a box, network links fetch other files, and KML styles would override the colour
     that tells overlapping files apart, so all three are left out. Both libraries are
     loaded when such a file is imported.
+  - Saving a layer as GeoJSON hands out the file the layer keeps in the browser,
+    unchanged. File layers and OSM query layers keep their features as GeoJSON whatever
+    they came from, so there is nothing to convert: the saved file adds back with the same
+    features (an OSM query's tags and *Update* stay with the layer, not the file), and
+    other applications read GeoJSON more widely than the formats it came from. A GeoPDF
+    keeps only the picture of its map, so it is not offered.
   - Requests to the routing server go out directly, not through the CORS proxy; it sends
     `Access-Control-Allow-Origin: *`.
 - **The focus area limits requests through source bounds.** The area is a polygon kept
