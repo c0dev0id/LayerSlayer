@@ -51,37 +51,9 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
 Web Mercator only: a service that offers no Web Mercator is listed with the reason, never
 reprojected.
 
-## Getting started
-
-Just visit <https://shagen.me/LayerSlayer/>, or run it locally:
-
-1. `npm ci`
-2. `npm run dev`
-3. Open the URL it prints.
-
-A first visit starts on TopPlusOpen, the BKG's topographic base map of Germany, which
-covers the rest of the world in less detail. **Add layer** opens the library, an address
-field, a file picker and OSM Query.
-
 ## The CORS proxy
 
 A WebGL map can only draw images from servers that send CORS headers. Most public services
 do; some do not, and work only in viewers that draw tiles as plain `<img>` (Leaflet,
 OpenLayers). For those, Settings takes the address of a CORS proxy you run, with `{url}`
 where the target goes. Only the hosts you choose go through it. No proxy is built in.
-
-## Development
-
-```sh
-npm ci
-npm run dev            # development server
-npm test               # unit tests (Vitest)
-npm run typecheck      # TypeScript
-npm run build          # production build in dist/
-npm run check-library  # check the library against the live services (run by hand)
-```
-
-The Build workflow type-checks, tests and builds every push. On `main` it also deploys
-`dist/` to GitHub Pages; the repository's Pages source must be set to *GitHub Actions*.
-
-See `.github/development-journal.md` for the reasoning behind the design decisions.
