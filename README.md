@@ -4,7 +4,7 @@ A static, server-less map viewer that stacks base maps and overlays from many ki
 map service and draws routes over them. For anyone who needs to combine layers no single
 viewer handles: a WMS next to a PMTiles archive next to a live OpenStreetMap query.
 
-It runs at <https://shagen.me/LayerSlayer/>, built with SolidJS and MapLibre GL JS.
+It runs at <https://shagen.me/LayerSlayer>, built with SolidJS and MapLibre GL JS.
 Nothing runs on a server; layers, routes, settings and imported files stay in the browser.
 
 ## Features
