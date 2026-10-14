@@ -63,6 +63,25 @@
       "maxzoom": 20
     },
     {
+      "name": "OpenSeaMap — seamarks",
+      "type": "xyz",
+      "url": "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
+      "region": "Global",
+      "category": "Waterways",
+      "note": "Buoys, beacons, lights, harbours and anchorages from OpenStreetMap, as a transparent overlay for any base map.",
+      "attribution": "Seamarks: © <a href=\"https://www.openseamap.org\">OpenSeaMap</a> contributors · Map data: © <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
+    },
+    {
+      "name": "Safecast — radiation measurements",
+      "type": "xyz",
+      "url": "https://s3.amazonaws.com/te512.safecast.org/{z}/{x}/{y}.png",
+      "region": "Global",
+      "category": "Hazards",
+      "note": "Background radiation readings uploaded by Safecast volunteers, coloured by dose rate; densest in Japan around Fukushima. The tiles were last rendered in May 2023.",
+      "attribution": "<a href=\"https://safecast.org\">Safecast</a> (CC0)",
+      "maxzoom": 16
+    },
+    {
       "name": "USGS — earthquakes of the past week",
       "type": "geojson",
       "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson",
@@ -78,6 +97,14 @@
       "region": "Global",
       "category": "Aerial",
       "note": "Satellite and aerial imagery of the whole world, down to about 30 cm per pixel in many places, from Esri and its partners."
+    },
+    {
+      "name": "Esri National Geographic World Map",
+      "type": "arcgis-mapserver",
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer",
+      "region": "Global",
+      "category": "Basemap",
+      "note": "Reference map in National Geographic's style: boundaries, places, protected areas, roads and water over shaded relief. Street detail only in the United States; elsewhere closer than city scale it shows \"Map data not yet available\"."
     },
     {
       "name": "NASA GIBS — satellite imagery",
@@ -934,6 +961,14 @@
       "region": "United States",
       "category": "POI",
       "note": "State, county, city and tribal-land boundaries with their names, from the Census Bureau, alongside the statistical areas it draws for its own counts."
+    },
+    {
+      "name": "US Census — physical features (TIGERweb)",
+      "type": "wms",
+      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_PhysicalFeatures/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "United States",
+      "category": "Infrastructure",
+      "note": "Rivers, lakes and glaciers, roads and railroads, and military installations, colleges, prisons and National Park Service areas, each with a separate labels layer."
     },
     {
       "name": "USGS — 3DEP elevation",
