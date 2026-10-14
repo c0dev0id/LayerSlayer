@@ -337,9 +337,9 @@
       "name": "TopPlusOpen",
       "type": "wmts",
       "url": "https://sgx.geodatenzentrum.de/wmts_topplus_open/1.0.0/WMTSCapabilities.xml",
-      "region": "Germany",
+      "region": "Global",
       "category": "Basemap",
-      "note": "National topographic basemap, colour and grey.",
+      "note": "Topographic base map of Germany's federal mapping agency, detailed for Germany and in less detail for the rest of the world; colour, grey and light variants.",
       "attribution": "© <a href=\"https://www.bkg.bund.de\">BKG</a> dl-de/by-2-0, <a href=\"https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_topplusopen.html\">data sources</a>"
     },
     {
