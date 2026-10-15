@@ -21,6 +21,11 @@ export function AddressValue(props: { url: string }) {
   );
 }
 
+/** The address a layer was added from, or where none is known, the address its data comes from. */
+export function layerAddress(layer: Layer): string | undefined {
+  return layer.origin ? splitOrigin(layer.origin).address : sourceUrl(layer);
+}
+
 /**
  * What a layer is, technically, as the add-layer list tells of a library entry: the
  * address it was added from, its place and name in the source (whatever it is called in
@@ -30,7 +35,7 @@ export function AddressValue(props: { url: string }) {
 export function LayerInfo(props: { layer: Layer }) {
   const layer = props.layer;
   const origin = () => (layer.origin ? splitOrigin(layer.origin) : undefined);
-  const address = () => origin()?.address ?? sourceUrl(layer);
+  const address = () => layerAddress(layer);
   const host = () => layerHost(layer);
   const [facts] = createResource(() => layer.source, layerFacts);
   const zooms = () => ('maxzoom' in layer.source ? zoomRange(layer.source.minzoom, layer.source.maxzoom) : undefined);

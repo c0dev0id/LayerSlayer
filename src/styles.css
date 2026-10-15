@@ -740,12 +740,34 @@ input.swatch {
   color: var(--muted);
 }
 
-/* A layer's plain tile address in its settings, selected whole with one click. */
-.plain-tiles .url {
+/* Text that copies an address when clicked: plain text on one line, cut short. */
+:where(.panel) button.copy-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: copy;
+}
+
+:where(.panel) button.copy-text:hover:not(:disabled) {
+  background: none;
+  color: var(--accent-text);
+}
+
+.copy-text svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.plain-tiles .copy-text {
   font-size: 12px;
-  overflow-wrap: anywhere;
-  user-select: all;
 }
 
 /* Without the icon column of OpenStreetMap's details. */

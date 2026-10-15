@@ -30,16 +30,16 @@ import { importAccept } from '../services/importFile';
 import { loadFile } from '../state/files';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { timeValues } from '../services/wmsTime';
-import { layerHost, moveLayer, proxiesHost, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, sourceUrl, state, updateLayer } from '../state/store';
+import { layerHost, moveLayer, proxiesHost, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, state, updateLayer } from '../state/store';
 import { layerErrors, map, onlyLayerId, showLayerArea, zoom } from '../state/ui';
-import { CopyButton } from './CopyButton';
+import { CopyText } from './CopyButton';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
 import { LineWidthSlider } from './LineWidthSlider';
 import { downloadBlob, fileNameFor } from './download';
 import { createOutcome, OutcomeNote } from './outcome';
-import { LayerInfo } from './LayerInfo';
+import { LayerInfo, layerAddress } from './LayerInfo';
 import { AlertIcon, AreaIcon, CloseIcon, DownloadIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge, InfoIcon } from './icons';
 import { reorderTarget } from './reorder';
 
@@ -576,9 +576,20 @@ function ActiveLayer(props: { layer: Layer; plainTiles: string | undefined }) {
       </Switch>
       <div class="row">
         <span class="muted label">Source</span>
-        <span class="grow name" title={sourceUrl(layer) ?? fileName()}>
-          {SOURCE_KINDS[layer.source.type].label} · {host() ?? fileName() ?? ''}
-        </span>
+        <Show
+          when={layerAddress(layer)}
+          fallback={
+            <span class="grow name" title={fileName()}>
+              {SOURCE_KINDS[layer.source.type].label} · {fileName() ?? ''}
+            </span>
+          }
+        >
+          {(url) => (
+            <CopyText text={url()} label="Copy the address it was added from">
+              {SOURCE_KINDS[layer.source.type].label} · {host() ?? fileName() ?? url()}
+            </CopyText>
+          )}
+        </Show>
         <Show when={layer.source.type === 'geojson' && fileResource(layer.source)}>
           {(file) => (
             <button
@@ -600,10 +611,13 @@ function ActiveLayer(props: { layer: Layer; plainTiles: string | undefined }) {
       </Show>
       <Show when={props.plainTiles}>
         {(url) => (
-          <div class="row plain-tiles" title="The tiles' plain z/x/y address, for DMD2 and other apps that take an online map as a URL template">
-            <span class="muted label">DMD</span>
-            <span class="grow url">{url()}</span>
-            <CopyButton text={url()} label="Copy the tile address" />
+          <div class="row plain-tiles">
+            <span class="muted label" title="The tiles' plain z/x/y address, for DMD2 and other apps that take an online map as a URL template">
+              DMD
+            </span>
+            <CopyText text={url()} label="Copy the tile address">
+              {url()}
+            </CopyText>
           </div>
         )}
       </Show>
