@@ -14,8 +14,9 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
 - **Service library** — about 150 ready-made services and files, by region and category,
   with search.
 - **Layer control** — order, visibility, opacity, zoom range, colour, line style, labels,
-  raster colour adjustments, and icons from about 7,900 symbols; layers with a plain z/x/y
-  tile address show it for apps such as DMD2.
+  raster colour adjustments, and icons from about 7,900 symbols; raster layers whose tiles
+  have an https address another app can fill in ({z}/{x}/{y}, or {bbox} for a WMS) show it
+  for apps such as DMD2.
 - **OSM queries** — build a layer of OpenStreetMap features in an area, from a preset list
   or typed tags.
 - **Routing** — draw routes along roads (OSRM) or straight, with waypoints, undo/redo and
