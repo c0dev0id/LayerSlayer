@@ -319,20 +319,20 @@ It is a static single-page app on GitHub Pages; there is no server component.
     kept with the layer when it is added (`originPath`), since the layer's own name is the
     user's to change and a service's tree is only known by reading it again. Layers added
     before this have no path and show none.
-  - A layer's plain tile address (the *DMD* tag) is read from its source, with no request:
-    an XYZ template counted from the top (cached ArcGIS map services are read as one), or
-    a WMTS whose tile matrices are named by their zoom, with or without a prefix or
-    leading zeros. Leading zeros are taken as the zoom without asking the server: the
-    conditions are the address pattern and y counted from the top, and TopPlusOpen, named
-    00 to 18, answers the bare zoom with the same tiles. Templates with subdomains give
-    their first one, as such apps fill in no list. WMS layers get none: a cache may sit
-    behind a WMS (GeoWebCache, MapProxy, an ArcGIS tile cache), but finding it means
-    guessing addresses per server software, and the cache holds the whole map rather than
-    the layer chosen. The tag is a pill after the layer's name, so it shows in the list
-    whether the settings are open or not. In the settings, the address and the source line
-    are one line each, cut short, and copy themselves when clicked: the source line copies
-    the address the layer was added from (a capabilities document, not a tile template
-    with matrix placeholders), the same one its details show.
+  - A layer's plain tile address (the *DMD* tag) is read from its source, with no request,
+    and only an https one counts: an XYZ template counted from the top (cached ArcGIS map
+    services are read as one), or a WMTS whose tile matrices are named by their zoom, with
+    or without a prefix or leading zeros. Leading zeros are taken as the zoom without
+    asking the server: the conditions are the address pattern and y counted from the top,
+    and TopPlusOpen, named 00 to 18, answers the bare zoom with the same tiles. Templates
+    with subdomains give their first one, as such apps fill in no list. WMS layers get
+    none: a cache may sit behind a WMS (GeoWebCache, MapProxy, an ArcGIS tile cache), but
+    finding it means guessing addresses per server software, and the cache holds the whole
+    map rather than the layer chosen. The tag is a pill after the layer's name, so it
+    shows in the list whether the settings are open or not. In the settings, the address
+    and the source line are one line each, cut short, and copy themselves when clicked:
+    the source line copies the address the layer was added from (a capabilities document,
+    not a tile template with matrix placeholders), the same one its details show.
 - **Data a provider keeps to itself stays out.** Rumo's PMTiles archives and styles allow
   only Rumo's own site by their CORS rules, and the MapTiler key in them is limited to
   that domain; OsmAnd's off-road tiles answer other pages' requests with 502. A CORS proxy

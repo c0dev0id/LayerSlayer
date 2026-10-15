@@ -5,9 +5,10 @@ import { isPlainTileUrl, plainTileUrl } from './plainTiles';
 const wmts = (matrices: Record<string, string>, template = 'https://w.example/tile/{TileMatrix}/{TileRow}/{TileCol}.png'): WmtsSource => ({ type: 'wmts', template, matrices, tileSize: 256 });
 
 describe('isPlainTileUrl', () => {
-  it('takes http(s) addresses with only {z}, {x} and {y}', () => {
+  it('takes https addresses with only {z}, {x} and {y}', () => {
     expect(isPlainTileUrl('https://t.example/{z}/{x}/{y}.png?key=1')).toBe(true);
     expect(isPlainTileUrl('https://t.example/tile/{z}/{y}/{x}')).toBe(true);
+    expect(isPlainTileUrl('http://t.example/{z}/{x}/{y}.png')).toBe(false);
     expect(isPlainTileUrl('https://t.example/{z}/{x}/{y}{ratio}.png')).toBe(false);
     expect(isPlainTileUrl('https://t.example/{quadkey}.png')).toBe(false);
     expect(isPlainTileUrl('pmtiles://https://t.example/a.pmtiles/{z}/{x}/{y}')).toBe(false);
