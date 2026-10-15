@@ -27,6 +27,8 @@
   --info-text: light-dark(#1864ab, #a5d8ff);
   --warn-bg: light-dark(#fff3bf, #3d3200);
   --warn-text: light-dark(#8f5f00, #ffe066);
+  --tag-bg: light-dark(#d6e0ea, #34404c);
+  --tag-text: light-dark(#4a6580, #a3b8cc);
   color-scheme: light dark;
 }
 
@@ -998,9 +1000,9 @@ input.swatch {
   font-size: 12px;
 }
 
-.badge.accent {
-  background: var(--accent);
-  color: #fff;
+.badge.quiet {
+  background: var(--tag-bg);
+  color: var(--tag-text);
 }
 
 .offer .grow {

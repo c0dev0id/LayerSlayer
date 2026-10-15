@@ -134,7 +134,7 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
           >
             <span class="name">{layer.name}</span>
             <Show when={externalTiles()}>
-              <span class="badge accent" title="Its tiles have an address DMD2 and similar apps take for a custom map, shown in its settings">
+              <span class="badge quiet" title="Its tiles have an address DMD2 and similar apps take for a custom map, shown in its settings">
                 DMD
               </span>
             </Show>
