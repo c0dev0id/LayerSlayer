@@ -133,6 +133,11 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
             onClick={() => setActiveLayer(isActive() ? undefined : layer.id)}
           >
             <span class="name">{layer.name}</span>
+            <Show when={plainTiles()}>
+              <span class="pill" title="Its tiles have a plain z/x/y address, shown in its settings, as DMD2 and similar apps take for an online map">
+                DMD
+              </span>
+            </Show>
           </button>
         </EditableName>
         <Show when={layer.bounds && !coversMostOfWorld(layer.bounds)}>
@@ -156,7 +161,7 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
           <CloseIcon />
         </button>
       </div>
-      <Show when={isActive()} fallback={<LayerSummary layer={layer} plainTiles={plainTiles()} />}>
+      <Show when={isActive()} fallback={<LayerSummary layer={layer} />}>
         <ActiveLayer layer={layer} plainTiles={plainTiles()} />
       </Show>
     </li>
@@ -164,7 +169,7 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
 }
 
 /** The layer's settings at a glance: opacity, colour, zoom range and the options that are on. Edited where they open, in its place. */
-function LayerSummary(props: { layer: Layer; plainTiles: string | undefined }) {
+function LayerSummary(props: { layer: Layer }) {
   const layer = props.layer;
   // From the settings rather than net.ts, so the tag follows the proxy checkbox.
   const proxied = () => proxiesHost(layerHost(layer));
@@ -192,9 +197,6 @@ function LayerSummary(props: { layer: Layer; plainTiles: string | undefined }) {
       </Show>
       <Show when={proxied()}>
         <span title="Fetched through the CORS proxy">proxy</span>
-      </Show>
-      <Show when={props.plainTiles}>
-        <span title="Its tiles have a plain z/x/y address, shown in its settings, as DMD2 and similar apps take for an online map">DMD</span>
       </Show>
     </div>
   );
