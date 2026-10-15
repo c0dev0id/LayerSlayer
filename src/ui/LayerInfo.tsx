@@ -1,23 +1,14 @@
-import { createResource, createSignal, Show } from 'solid-js';
+import { createResource, Show } from 'solid-js';
 import { dataLabel, layerFacts, zoomRange } from '../library/entryInfo';
 import { hasPlaceholders } from '../map/urls';
 import { SOURCE_KINDS, type Layer } from '../model/layer';
 import { htmlText } from '../services/xml';
 import { layerHost, proxiesHost, sourceUrl } from '../state/store';
-import { CheckIcon, CopyIcon } from './icons';
+import { CopyButton } from './CopyButton';
 import { splitOrigin } from './offers';
 
-/** An address, linked where it is one a browser can open, and a button that copies it and shows a tick for a moment. */
+/** An address, linked where it is one a browser can open, with a button that copies it. */
 export function AddressValue(props: { url: string }) {
-  const [copied, setCopied] = createSignal(false);
-  const copy = () =>
-    navigator.clipboard
-      ?.writeText(props.url)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      })
-      .catch(() => {});
   return (
     <dd class="address-value">
       <Show when={!hasPlaceholders(props.url)} fallback={props.url}>
@@ -25,11 +16,7 @@ export function AddressValue(props: { url: string }) {
           {props.url}
         </a>
       </Show>
-      <button class="icon" title={copied() ? 'Copied' : 'Copy the address'} aria-label="Copy the address" onClick={() => void copy()}>
-        <Show when={copied()} fallback={<CopyIcon />}>
-          <CheckIcon />
-        </Show>
-      </button>
+      <CopyButton text={props.url} label="Copy the address" />
     </dd>
   );
 }
