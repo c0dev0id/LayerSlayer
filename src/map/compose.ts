@@ -331,27 +331,30 @@ export function rasterAdjustments(adjust: RasterAdjustments | undefined): Record
   return Object.fromEntries(paint.filter(([, value, none]) => value !== none).map(([name, value]) => [name, value]));
 }
 
+/** A WMS GetMap address for square tiles of `size` pixels, with `bbox` standing for each tile's extent. */
+export function wmsGetMapUrl(src: WmsSource, bbox: string, size: number): string {
+  return withParams(src.url, {
+    SERVICE: 'WMS',
+    VERSION: src.version,
+    REQUEST: 'GetMap',
+    LAYERS: src.layers,
+    STYLES: src.styles,
+    FORMAT: src.format,
+    TRANSPARENT: 'TRUE',
+    [src.version === '1.3.0' ? 'CRS' : 'SRS']: src.crs,
+    BBOX: bbox,
+    WIDTH: size,
+    HEIGHT: size,
+    ...(src.time && { TIME: src.time.value }),
+  });
+}
+
 export function rasterTiles(src: XyzSource | WmsSource | WmtsSource | ArcGisMapSource): string[] {
   switch (src.type) {
     case 'xyz':
       return src.tiles;
     case 'wms':
-      return [
-        withParams(src.url, {
-          SERVICE: 'WMS',
-          VERSION: src.version,
-          REQUEST: 'GetMap',
-          LAYERS: src.layers,
-          STYLES: src.styles,
-          FORMAT: src.format,
-          TRANSPARENT: 'TRUE',
-          [src.version === '1.3.0' ? 'CRS' : 'SRS']: src.crs,
-          BBOX: '{bbox-epsg-3857}',
-          WIDTH: DYNAMIC_TILE_SIZE,
-          HEIGHT: DYNAMIC_TILE_SIZE,
-          ...(src.time && { TIME: src.time.value }),
-        }),
-      ];
+      return [wmsGetMapUrl(src, '{bbox-epsg-3857}', DYNAMIC_TILE_SIZE)];
     case 'wmts':
       return [wmtsTileUrl(src)];
     case 'arcgis-map':
