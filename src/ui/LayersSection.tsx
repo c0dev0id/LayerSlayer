@@ -1,7 +1,7 @@
 import { createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { layerFeatures } from '../map/layerFeatures';
-import { plainTileUrl } from '../map/plainTiles';
+import { externalTileUrl } from '../map/externalTiles';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import {
   canCache,
@@ -92,7 +92,7 @@ function outOfRange(layer: Layer): boolean {
 function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
   const layer = props.layer;
   const isActive = () => state.activeLayerId === layer.id;
-  const plainTiles = createMemo(() => plainTileUrl(layer.source));
+  const externalTiles = createMemo(() => externalTileUrl(layer.source));
   let entry!: HTMLLIElement;
 
   return (
@@ -133,8 +133,8 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
             onClick={() => setActiveLayer(isActive() ? undefined : layer.id)}
           >
             <span class="name">{layer.name}</span>
-            <Show when={plainTiles()}>
-              <span class="badge accent" title="Its tiles have a plain z/x/y address, shown in its settings, as DMD2 and similar apps take for an online map">
+            <Show when={externalTiles()}>
+              <span class="badge accent" title="Its tiles have an address DMD2 and similar apps take for a custom map, shown in its settings">
                 DMD
               </span>
             </Show>
@@ -162,7 +162,7 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
         </button>
       </div>
       <Show when={isActive()} fallback={<LayerSummary layer={layer} />}>
-        <ActiveLayer layer={layer} plainTiles={plainTiles()} />
+        <ActiveLayer layer={layer} externalTiles={externalTiles()} />
       </Show>
     </li>
   );
@@ -471,7 +471,7 @@ function proxyNote(): string | undefined {
 }
 
 /** Opacity, zoom range, colour and source of the active layer. */
-function ActiveLayer(props: { layer: Layer; plainTiles: string | undefined }) {
+function ActiveLayer(props: { layer: Layer; externalTiles: string | undefined }) {
   const layer = props.layer;
   const host = () => layerHost(layer);
   const fileName = () => fileResource(layer.source)?.name;
@@ -610,10 +610,10 @@ function ActiveLayer(props: { layer: Layer; plainTiles: string | undefined }) {
       <Show when={info()}>
         <LayerInfo layer={layer} />
       </Show>
-      <Show when={props.plainTiles}>
+      <Show when={props.externalTiles}>
         {(url) => (
-          <div class="row plain-tiles">
-            <span class="muted label" title="The tiles' plain z/x/y address, for DMD2 and other apps that take an online map as a URL template">
+          <div class="row external-tiles">
+            <span class="muted label" title="The tiles' address for DMD2 and other apps that take a custom map as an address to fill in: {z}/{x}/{y}, or {bbox} for a WMS">
               DMD
             </span>
             <CopyText text={url()} label="Copy the tile address">
