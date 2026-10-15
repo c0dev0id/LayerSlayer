@@ -27,7 +27,6 @@ describe('externalTileUrl', () => {
     expect(externalTileUrl({ ...wms, url: 'http://w.example/wms' })).toBeUndefined();
   });
 
-
   it('gives raster XYZ templates counted from the top and WMTS named by zoom, not vector tiles', () => {
     expect(externalTileUrl({ type: 'xyz', tiles: ['https://a.t.example/{z}/{x}/{y}.png', 'https://b.t.example/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 })).toBe('https://a.t.example/{z}/{x}/{y}.png');
     expect(externalTileUrl({ type: 'xyz', tiles: ['https://t.example/{z}/{x}/{y}.png'], scheme: 'tms', tileSize: 256 })).toBeUndefined();

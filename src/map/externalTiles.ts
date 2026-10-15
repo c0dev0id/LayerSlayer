@@ -1,19 +1,19 @@
 import type { LayerSource, WmtsSource } from '../model/layer';
 import { wmsGetMapUrl, wmtsTileUrl } from './compose';
-import { hasPlaceholders } from './urls';
 
 /**
  * A layer's tiles as an address other apps fill in themselves, such as DMD2's custom
  * raster maps: https, and either only {z}, {x} and {y} with y counted from the top, or a
- * WMS GetMap with only {bbox}, the tile's extent in Web Mercator metres. Subdomain lists,
- * {-y}, tile matrix names and raster archives are not taken.
+ * WMS GetMap with only {bbox}, the tile's extent in Web Mercator metres. An XYZ template
+ * counted from the top (cached ArcGIS map services among them), a WMTS whose tile
+ * matrices are named by their zoom, and a WMS have one; subdomain lists, {-y}, other
+ * tile matrix names and raster archives do not.
  */
 
 /** Whether an address is one other apps fill in themselves. */
 export function isExternalTileUrl(template: string): boolean {
-  if (!/^https:\/\//i.test(template)) return false;
-  const filled = ['{z}', '{x}', '{y}'].every((p) => template.includes(p)) ? template.replace(/\{[xyz]\}/g, '') : template.replace('{bbox}', '');
-  return filled !== template && !hasPlaceholders(filled);
+  const names = [...new Set(template.match(/\{[^{}]+\}/g))].sort().join('');
+  return /^https:\/\//i.test(template) && (names === '{x}{y}{z}' || names === '{bbox}');
 }
 
 /** Pixels across a WMS tile in the address given out, as tile apps draw 256-pixel tiles. */
@@ -29,19 +29,22 @@ function wmtsZoomUrl(source: WmtsSource): string {
   return wmtsTileUrl({ ...source, matrices });
 }
 
-/**
- * The address of a raster source's tiles that other apps fill in themselves, where it has
- * one: an XYZ template counted from the top (cached ArcGIS map services among them), a
- * WMTS whose tile matrices are named by their zoom, or a WMS GetMap.
- */
+/** The source's tile address with placeholders, as it would be given out. */
+function template(source: LayerSource): string | undefined {
+  switch (source.type) {
+    case 'xyz':
+      return source.scheme === 'xyz' ? source.tiles[0] : undefined;
+    case 'wmts':
+      return wmtsZoomUrl(source);
+    case 'wms':
+      return wmsGetMapUrl(source, '{bbox}', WMS_TILE_SIZE);
+    default:
+      return undefined;
+  }
+}
+
+/** The source's tile address in the form other apps fill in, where it has one. */
 export function externalTileUrl(source: LayerSource): string | undefined {
-  const template =
-    source.type === 'xyz' && source.scheme === 'xyz'
-      ? source.tiles[0]
-      : source.type === 'wmts'
-        ? wmtsZoomUrl(source)
-        : source.type === 'wms'
-          ? wmsGetMapUrl(source, '{bbox}', WMS_TILE_SIZE)
-          : undefined;
-  return template && isExternalTileUrl(template) ? template : undefined;
+  const url = template(source);
+  return url && isExternalTileUrl(url) ? url : undefined;
 }
