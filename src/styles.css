@@ -704,7 +704,8 @@ input.swatch {
   white-space: nowrap;
 }
 
-.detail-rows :is(dt, .address-value) svg {
+.detail-rows dt svg,
+.icon.copy svg {
   width: 16px;
   height: 16px;
 }
@@ -722,8 +723,16 @@ input.swatch {
   gap: 4px;
 }
 
-.address-value .icon {
+.icon.copy {
   color: var(--muted);
+}
+
+/* A layer's plain tile address in its settings, selected whole with one click. */
+.plain-tiles .url {
+  min-width: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  user-select: all;
 }
 
 /* Without the icon column of OpenStreetMap's details. */

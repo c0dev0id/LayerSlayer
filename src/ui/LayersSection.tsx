@@ -1,6 +1,7 @@
-import { createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
 import { layerFeatures } from '../map/layerFeatures';
+import { plainTileUrl } from '../map/plainTiles';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
 import {
   canCache,
@@ -31,6 +32,7 @@ import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
 import { timeValues } from '../services/wmsTime';
 import { layerHost, moveLayer, proxiesHost, removeLayer, replaceLayerFile, setActiveLayer, setBackground, setHostProxied, setLayerTime, sourceUrl, state, updateLayer } from '../state/store';
 import { layerErrors, map, onlyLayerId, showLayerArea, zoom } from '../state/ui';
+import { CopyButton } from './CopyButton';
 import { EditableName } from './EditableName';
 import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
@@ -90,6 +92,7 @@ function outOfRange(layer: Layer): boolean {
 function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
   const layer = props.layer;
   const isActive = () => state.activeLayerId === layer.id;
+  const plainTiles = createMemo(() => plainTileUrl(layer.source));
   let entry!: HTMLLIElement;
 
   return (
@@ -153,15 +156,15 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
           <CloseIcon />
         </button>
       </div>
-      <Show when={isActive()} fallback={<LayerSummary layer={layer} />}>
-        <ActiveLayer layer={layer} />
+      <Show when={isActive()} fallback={<LayerSummary layer={layer} plainTiles={plainTiles()} />}>
+        <ActiveLayer layer={layer} plainTiles={plainTiles()} />
       </Show>
     </li>
   );
 }
 
 /** The layer's settings at a glance: opacity, colour, zoom range and the options that are on. Edited where they open, in its place. */
-function LayerSummary(props: { layer: Layer }) {
+function LayerSummary(props: { layer: Layer; plainTiles: string | undefined }) {
   const layer = props.layer;
   // From the settings rather than net.ts, so the tag follows the proxy checkbox.
   const proxied = () => proxiesHost(layerHost(layer));
@@ -189,6 +192,9 @@ function LayerSummary(props: { layer: Layer }) {
       </Show>
       <Show when={proxied()}>
         <span title="Fetched through the CORS proxy">proxy</span>
+      </Show>
+      <Show when={props.plainTiles}>
+        <span title="Its tiles have a plain z/x/y address, shown in its settings, as DMD2 and similar apps take for an online map">DMD</span>
       </Show>
     </div>
   );
@@ -463,7 +469,7 @@ function proxyNote(): string | undefined {
 }
 
 /** Opacity, zoom range, colour and source of the active layer. */
-function ActiveLayer(props: { layer: Layer }) {
+function ActiveLayer(props: { layer: Layer; plainTiles: string | undefined }) {
   const layer = props.layer;
   const host = () => layerHost(layer);
   const fileName = () => fileResource(layer.source)?.name;
@@ -589,6 +595,15 @@ function ActiveLayer(props: { layer: Layer }) {
       </div>
       <Show when={info()}>
         <LayerInfo layer={layer} />
+      </Show>
+      <Show when={props.plainTiles}>
+        {(url) => (
+          <div class="row plain-tiles" title="The tiles' plain z/x/y address, for DMD2 and other apps that take an online map as a URL template">
+            <span class="muted label">DMD</span>
+            <span class="grow url">{url()}</span>
+            <CopyButton text={url()} label="Copy the tile address" />
+          </div>
+        )}
       </Show>
       <Show when={host()}>
         {(h) => (
