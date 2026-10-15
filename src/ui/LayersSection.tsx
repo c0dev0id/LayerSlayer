@@ -134,7 +134,7 @@ function LayerEntry(props: { layer: Layer; list: () => HTMLUListElement }) {
           >
             <span class="name">{layer.name}</span>
             <Show when={plainTiles()}>
-              <span class="pill" title="Its tiles have a plain z/x/y address, shown in its settings, as DMD2 and similar apps take for an online map">
+              <span class="badge accent" title="Its tiles have a plain z/x/y address, shown in its settings, as DMD2 and similar apps take for an online map">
                 DMD
               </span>
             </Show>
@@ -475,6 +475,7 @@ function ActiveLayer(props: { layer: Layer; plainTiles: string | undefined }) {
   const layer = props.layer;
   const host = () => layerHost(layer);
   const fileName = () => fileResource(layer.source)?.name;
+  const sourceLine = () => `${SOURCE_KINDS[layer.source.type].label} · ${host() ?? fileName() ?? ''}`;
   const [info, setInfo] = createSignal(false);
   const zoomInput = (key: 'minzoom' | 'maxzoom', label: string) => (
     <input
@@ -580,13 +581,13 @@ function ActiveLayer(props: { layer: Layer; plainTiles: string | undefined }) {
           when={layerAddress(layer)}
           fallback={
             <span class="grow name" title={fileName()}>
-              {SOURCE_KINDS[layer.source.type].label} · {fileName() ?? ''}
+              {sourceLine()}
             </span>
           }
         >
           {(url) => (
             <CopyText text={url()} label="Copy the address it was added from">
-              {SOURCE_KINDS[layer.source.type].label} · {host() ?? fileName() ?? url()}
+              {sourceLine()}
             </CopyText>
           )}
         </Show>

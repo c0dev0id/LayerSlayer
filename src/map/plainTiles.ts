@@ -1,5 +1,6 @@
 import type { LayerSource, WmtsSource } from '../model/layer';
 import { wmtsTileUrl } from './compose';
+import { hasPlaceholders } from './urls';
 
 /**
  * Plain tile addresses: https with only {z}, {x} and {y} to fill in, y counted from the
@@ -9,17 +10,17 @@ import { wmtsTileUrl } from './compose';
 
 /** Whether a tile address is plain. */
 export function isPlainTileUrl(template: string): boolean {
-  return /^https:\/\//i.test(template) && ['{z}', '{x}', '{y}'].every((p) => template.includes(p)) && !/[{}]/.test(template.replace(/\{[xyz]\}/g, ''));
+  return /^https:\/\//i.test(template) && ['{z}', '{x}', '{y}'].every((p) => template.includes(p)) && !hasPlaceholders(template.replace(/\{[xyz]\}/g, ''));
 }
 
 /**
- * A WMTS address with the zoom for the tile matrix, where the matrices are named by their
- * zoom (with or without a prefix the app already reads, or with leading zeros).
+ * A WMTS address as the map would build it if the tile matrices had no leading zeros
+ * (05 read as 5): the zoom where they are named by it, with or without a prefix. The
+ * map itself asks for the names as listed, as servers may take nothing else.
  */
 function wmtsZoomUrl(source: WmtsSource): string {
-  const ids = Object.entries(source.matrices);
-  const numbered = ids.length > 0 && ids.every(([z, id]) => /^\d+$/.test(id) && Number(id) === Number(z));
-  return numbered ? source.template.replace('{TileMatrix}', '{z}').replace('{TileRow}', '{y}').replace('{TileCol}', '{x}') : wmtsTileUrl(source);
+  const matrices = Object.fromEntries(Object.entries(source.matrices).map(([z, id]) => [z, /^\d+$/.test(id) ? String(Number(id)) : id]));
+  return wmtsTileUrl({ ...source, matrices });
 }
 
 /**

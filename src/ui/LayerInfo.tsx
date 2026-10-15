@@ -35,13 +35,12 @@ export function layerAddress(layer: Layer): string | undefined {
 export function LayerInfo(props: { layer: Layer }) {
   const layer = props.layer;
   const origin = () => (layer.origin ? splitOrigin(layer.origin) : undefined);
-  const address = () => layerAddress(layer);
   const host = () => layerHost(layer);
   const [facts] = createResource(() => layer.source, layerFacts);
   const zooms = () => ('maxzoom' in layer.source ? zoomRange(layer.source.minzoom, layer.source.maxzoom) : undefined);
   return (
     <dl class="detail-rows layer-info">
-      <Show when={address()}>
+      <Show when={layerAddress(layer)}>
         {(url) => (
           <>
             <dt>Address</dt>

@@ -243,14 +243,10 @@ header.section > .row {
   gap: 2px;
 }
 
-/* A tag after a layer's name: white on the accent colour. */
-.layer-main .pill {
+/* A tag after a layer's name, smaller than in lists. */
+.layer-main .badge {
   flex: none;
   margin-left: 6px;
-  padding: 0 5px;
-  border-radius: 7px;
-  background: var(--accent);
-  color: #fff;
   font-size: 10px;
   font-weight: 600;
   line-height: 14px;
@@ -324,18 +320,22 @@ header.section > .row {
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
-:where(.panel) button.layer-select {
+/* Buttons that read as text: a layer's name, an address copied when clicked. */
+:where(.panel) button:is(.layer-select, .copy-text) {
   display: flex;
   align-items: center;
   min-width: 0;
-  padding: 2px 4px;
   border: none;
   background: none;
   text-align: left;
 }
 
-:where(.panel) button.layer-select:hover:not(:disabled) {
+:where(.panel) button:is(.layer-select, .copy-text):hover:not(:disabled) {
   background: none;
+}
+
+:where(.panel) button.layer-select {
+  padding: 2px 4px;
 }
 
 .layer.hidden .layer-select,
@@ -742,21 +742,13 @@ input.swatch {
 
 /* Text that copies an address when clicked: plain text on one line, cut short. */
 :where(.panel) button.copy-text {
-  display: flex;
-  align-items: center;
   gap: 4px;
-  min-width: 0;
   padding: 0;
-  border: none;
-  background: none;
   color: inherit;
-  font: inherit;
-  text-align: left;
   cursor: copy;
 }
 
 :where(.panel) button.copy-text:hover:not(:disabled) {
-  background: none;
   color: var(--accent-text);
 }
 
@@ -1004,6 +996,11 @@ input.swatch {
   background: var(--warn-bg);
   color: var(--warn-text);
   font-size: 12px;
+}
+
+.badge.accent {
+  background: var(--accent);
+  color: #fff;
 }
 
 .offer .grow {
