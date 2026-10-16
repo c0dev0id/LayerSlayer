@@ -4,7 +4,7 @@
   templates, vector tiles, PMTiles archives, MapLibre styles, Cloud Optimized GeoTIFF,
   GeoJSON (URL or file), GPX tracks and KML or KMZ placemarks (file) and GeoPDF (file or
   URL).
-- A library of about 150 services and files by region and category, with search.
+- A library of about 180 services and files by region and category, with search.
 - An add-layer dialog that stays open: layers and groups toggle with a tap, what is on
   the map is highlighted, and the library and a service's layers can be switched between
   freely. Every layer a service offers is listed, with reasons for those it cannot show
@@ -34,8 +34,9 @@
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
   a disc of the layer's colour, picked by search; OSM presets come with theirs.
 - OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about
-  140 led by what off-road riders look for (tracks, trails, surfaces, barriers, access)
-  or typed as tags, queried with Overpass once and updated on demand.
+  160 led by what off-road riders look for (tracks, trails, surfaces, barriers, access)
+  or typed as tags, queried once (Postpass, Overpass where Postpass fails) and updated
+  on demand.
 - Optional CORS proxy, used per host.
 - Light and dark interface, following the browser unless switched.
 - A focus area: a polygon outside whose bounds no layer but the bottom one requests
