@@ -21,6 +21,7 @@ export const REGION_BOUNDS: Readonly<Record<string, readonly Bounds[]>> = {
     [44.9, -13.1, 45.4, -12.5],
   ],
   Germany: [[5.8, 47.2, 15.1, 55.1]],
+  Luxembourg: [[5.7, 49.4, 6.6, 50.2]],
   Netherlands: [[3.3, 50.7, 7.3, 53.6]],
   Norway: [
     [4.4, 57.9, 31.2, 71.3],

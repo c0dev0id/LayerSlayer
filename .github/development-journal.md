@@ -274,7 +274,15 @@ It is a static single-page app on GitHub Pages; there is no server component.
   HTTP. Later additions came from the public sources outdoor apps (onX, Gaia GPS) draw
   on: BLM land managers, wilderness and study areas, NPS park roads and trails, USGS mines
   (MRDS), NOAA's smoke forecast and EPA AirNow's air quality layers. HIFLD's transmission
-  lines stay, noted as archived by their publisher.
+  lines stay, noted as archived by their publisher. The national mapping services Topo GPS
+  (uk.rdzl.topo.gps) bundles were reviewed for ones usable here: only those whose own
+  licence is open (the licence Topo GPS records per map, not its app terms), that need no
+  key, that are not already listed, and that serve Web Mercator were added. Most were
+  ruled out for serving only a national projection (Lithuania EPSG:3346, Czech ČÚZK
+  EPSG:5514) or for being reachable only through Topo GPS's authenticated tile servers;
+  the ones added are Luxembourg's geoportail.lu (CC BY 4.0), Flanders' aerial imagery
+  (Digitaal Vlaanderen open data) and Poland's orthophoto mosaic (GUGiK open data), each
+  a public WMTS.
   - German history: the History category holds what was found open, with CORS and in Web
     Mercator: Berlin's course of the Wall of 1989 (WMS with the aerial photo it was traced
     from, and WFS), the BKG's GDR map 1:200 000 in its restricted state edition and its

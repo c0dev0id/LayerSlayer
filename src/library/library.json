@@ -319,6 +319,14 @@
       "note": "National topographic map."
     },
     {
+      "name": "Flanders — aerial imagery",
+      "type": "wmts",
+      "url": "https://geo.api.vlaanderen.be/omwrgbmrvl/wmts?SERVICE=WMTS&REQUEST=GetCapabilities",
+      "region": "Belgium",
+      "category": "Aerial",
+      "note": "Most recent aerial orthophotos of Flanders, from the regional open data service (Digitaal Vlaanderen)."
+    },
+    {
       "name": "TerraBrasilis",
       "type": "wms",
       "url": "https://terrabrasilis.dpi.inpe.br/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
@@ -643,6 +651,14 @@
       "cors": false
     },
     {
+      "name": "geoportail.lu",
+      "type": "wmts",
+      "url": "https://wmts.geoportail.lu/opendata/wmts/1.0.0/WMTSCapabilities.xml",
+      "region": "Luxembourg",
+      "category": "Basemap",
+      "note": "National basemap, road map and aerial orthophotos back to 1967, from the open data service of the Luxembourg cadastre (ACT)."
+    },
+    {
       "name": "PDOK — topographic basemap",
       "type": "wmts",
       "url": "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?SERVICE=WMTS&REQUEST=GetCapabilities",
@@ -681,6 +697,14 @@
       "region": "Poland",
       "category": "POI",
       "note": "Forest compartment lines and numbers, and the forest-district boundaries, as posted on the marker stones in State Forests."
+    },
+    {
+      "name": "Poland — aerial imagery",
+      "type": "wmts",
+      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution?SERVICE=WMTS&REQUEST=GetCapabilities",
+      "region": "Poland",
+      "category": "Aerial",
+      "note": "National orthophoto mosaic from the head office of geodesy and cartography (GUGiK)."
     },
     {
       "name": "DGT — aerial imagery 2018",
