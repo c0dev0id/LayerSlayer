@@ -11,7 +11,7 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
 
 - **Many source kinds** — each read the way it describes itself, then drawn with the
   MapLibre source that fits, rather than flattened to raster tiles by a proxy.
-- **Service library** — about 150 ready-made services and files, by region and category,
+- **Service library** — about 180 ready-made services and files, by region and category,
   with search.
 - **Layer control** — order, visibility, opacity, zoom range, colour, line style, labels,
   raster colour adjustments, and icons from about 7,900 symbols; raster layers whose tiles
