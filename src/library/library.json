@@ -1328,6 +1328,38 @@
       "note": "Boundaries and land tracts of national parks, monuments and other park units."
     },
     {
+      "name": "FAA — VFR sectional charts",
+      "type": "arcgis-mapserver",
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "The aeronautical charts for visual flight: airports, airspace, navigation aids, obstacles and terrain, revised every 56 days. Cached for zooms 8 to 12, enlarged beyond."
+    },
+    {
+      "name": "FAA — VFR terminal area charts",
+      "type": "arcgis-mapserver",
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Terminal/MapServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Larger-scale charts of the airspace around busy airports, with more detail than the sectionals. Cached for zooms 10 to 12, enlarged beyond."
+    },
+    {
+      "name": "FAA — IFR low altitude enroute charts",
+      "type": "arcgis-mapserver",
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_AreaLow/MapServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Charts for instrument flight below 18,000 ft: airways, navigation aids, fixes and minimum altitudes, with the area charts of busy regions. Cached for zooms 7 to 12."
+    },
+    {
+      "name": "FAA — IFR high altitude enroute charts",
+      "type": "arcgis-mapserver",
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_High/MapServer",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "Charts for instrument flight at 18,000 ft and above: jet routes, RNAV Q-routes, navigation aids and reporting points. Cached for zooms 5 to 9, for a zoomed-out view."
+    },
+    {
       "name": "Baden-Württemberg — MobiData BW (WFS)",
       "type": "wfs",
       "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
