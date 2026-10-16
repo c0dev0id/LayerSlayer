@@ -8,10 +8,11 @@ stacks layers from many map service kinds (WMS, WMTS, WFS, OGC API – Features,
 XYZ, MVT, PMTiles, MapLibre styles, COG, GeoJSON, GPX, KML, GeoPDF) and draws OSRM-routed
 routes over them.
 
-`README.md` describes behaviour from the user's side; `.github/development-journal.md`
-holds the reasoning behind nearly every design choice (its *Key decisions* section). Read
-the relevant journal entry before changing how a source kind, the cache, the proxy, the
-focus area or persistence works.
+`README.md` describes behaviour from the user's side. `.github/` holds the development
+documents: `overview.md` (the problem and the approach), `stackinfo.md` (the stack),
+`features.md` (core features) and `decisions.md`, the reasoning behind nearly every design
+choice. Read the relevant `decisions.md` entry before changing how a source kind, the
+cache, the proxy, the focus area or persistence works.
 
 ## Commands
 
@@ -117,5 +118,6 @@ through the config's imports, and `tools/check-library.test.ts` is not typecheck
 - Colours in `styles.css` are tokens on `:root` with a light and a dark value
   (`light-dark()`); use or add a token rather than a literal colour, except for the map's
   own content and white on accent fills.
-- README and journal are prose wrapped at 90 columns, describing behaviour in plain words
-  rather than code terms. Update both when behaviour or a design decision changes.
+- README and the `.github/` documents are prose wrapped at 90 columns, describing
+  behaviour in plain words rather than code terms. Update them when behaviour or a design
+  decision changes.
