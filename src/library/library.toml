@@ -1115,28 +1115,28 @@ id = "united-states-faa-vfr-sectional-charts"
 name = "FAA — VFR sectional charts"
 region = "United States"
 category = "Traffic"
-description = "The aeronautical charts for visual flight: airports, airspace, navigation aids, obstacles and terrain, revised every 56 days. Cached for zooms 8 to 12, enlarged beyond."
+description = "The aeronautical charts for visual flight: airports, airspace, navigation aids, obstacles and terrain, revised every 56 days. Cached tiles for zooms 8 to 12."
 
 [[entries]]
 id = "united-states-faa-vfr-terminal-area-charts"
 name = "FAA — VFR terminal area charts"
 region = "United States"
 category = "Traffic"
-description = "Larger-scale charts of the airspace around busy airports, with more detail than the sectionals. Cached for zooms 10 to 12, enlarged beyond."
+description = "Charts of the airspace around busy airports at a larger scale than the sectionals. Cached tiles for zooms 10 to 12."
 
 [[entries]]
 id = "united-states-faa-ifr-low-altitude-enroute-charts"
 name = "FAA — IFR low altitude enroute charts"
 region = "United States"
 category = "Traffic"
-description = "Charts for instrument flight below 18,000 ft: airways, navigation aids, fixes and minimum altitudes, with the area charts of busy regions. Cached for zooms 7 to 12."
+description = "Charts for instrument flight below 18,000 ft: airways, navigation aids, fixes and minimum altitudes, with the area charts of busy regions. Cached tiles for zooms 7 to 12."
 
 [[entries]]
 id = "united-states-faa-ifr-high-altitude-enroute-charts"
 name = "FAA — IFR high altitude enroute charts"
 region = "United States"
 category = "Traffic"
-description = "Charts for instrument flight at 18,000 ft and above: jet routes, RNAV Q-routes, navigation aids and reporting points. Cached for zooms 5 to 9, for a zoomed-out view."
+description = "Charts for instrument flight at 18,000 ft and above: jet routes, RNAV Q-routes, navigation aids and reporting points. Cached tiles for zooms 5 to 9."
 
 [[entries]]
 id = "united-states-nrl-faa-and-noaa-charts"
@@ -1150,7 +1150,7 @@ id = "united-states-faa-temporary-flight-restrictions"
 name = "FAA — temporary flight restrictions"
 region = "United States"
 category = "Hazards"
-description = "The temporary flight restrictions in force or announced, as the FAA's TFR site shows them, with airports, navigation aids and the boundaries of air route traffic control centers. Its chart layers answer with errors; the FAA chart entries have them."
+description = "The temporary flight restrictions in force or announced, as the FAA's TFR site shows them, with airports, navigation aids and the boundaries of air route traffic control centers. Its chart layers fail; use the FAA chart entries for charts."
 
 [[entries]]
 id = "germany-baden-wu-rttemberg-mobidata-bw-wfs"
