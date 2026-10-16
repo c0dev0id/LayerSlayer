@@ -9,7 +9,8 @@ XYZ, MVT, PMTiles, MapLibre styles, COG, GeoJSON, GPX, KML, GeoPDF) and draws OS
 routes over them.
 
 `README.md` describes behaviour from the user's side. `.github/` holds the development
-documents: `overview.md` (the problem and the approach), `stackinfo.md` (the stack),
+documents: `overview.md` (the problem and the approach), `architecture.md` (component,
+layer and persisted-data diagrams), `stackinfo.md` (the stack and its targets),
 `features.md` (core features) and `decisions.md`, the reasoning behind nearly every design
 choice. Read the relevant `decisions.md` entry before changing how a source kind, the
 cache, the proxy, the focus area or persistence works.
