@@ -26,3 +26,13 @@
   style on the map brings fonts.
 - Elevation for 3D terrain from Mapterhorn (tiles.mapterhorn.com).
 - Deployment: GitHub Actions to GitHub Pages.
+
+## Targets
+
+- Desktop and phone browsers with WebGL 2, which MapLibre GL JS 6 requires; the build
+  targets ES2022.
+- Screens down to 360 px wide. At 720 px and less the panel lies below the map; touch
+  screens get larger controls.
+- A secure context (HTTPS, or localhost in development): kept tiles use Cache Storage,
+  which browsers offer only there.
+- Node.js LTS for building and testing, as CI uses.
