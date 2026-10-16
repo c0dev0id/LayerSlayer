@@ -1360,6 +1360,24 @@
       "note": "Charts for instrument flight at 18,000 ft and above: jet routes, RNAV Q-routes, navigation aids and reporting points. Cached for zooms 5 to 9, for a zoomed-out view."
     },
     {
+      "name": "NRL — FAA and NOAA charts",
+      "type": "wmts",
+      "url": "https://geoint.nrlssc.navy.mil/nrltileserver/wmts?SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0",
+      "region": "United States",
+      "category": "Traffic",
+      "note": "The US Naval Research Laboratory's tile server: FAA flyway and helicopter route charts, besides sectional and terminal charts, as of September 2024; NOAA raster nautical charts as of 2018; and elevation and imagery layers.",
+      "cors": false
+    },
+    {
+      "name": "FAA — temporary flight restrictions",
+      "type": "wms",
+      "url": "https://tfr.faa.gov/geoserver/TFR/ows?SERVICE=WMS&REQUEST=GetCapabilities",
+      "region": "United States",
+      "category": "Hazards",
+      "note": "The temporary flight restrictions in force or announced, as the FAA's TFR site shows them, with airports, navigation aids and the boundaries of air route traffic control centers. Its chart layers answer with errors; the FAA chart entries have them.",
+      "cors": false
+    },
+    {
       "name": "Baden-Württemberg — MobiData BW (WFS)",
       "type": "wfs",
       "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
