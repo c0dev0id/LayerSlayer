@@ -41,8 +41,8 @@ export interface FileEntry extends EntryBase {
 export type LibraryEntry = ServiceEntry | FileEntry;
 
 export async function loadLibrary(): Promise<LibraryEntry[]> {
-  const { default: library } = await import('./library.json');
-  return library.entries as LibraryEntry[];
+  const { default: library } = await import('virtual:library');
+  return library.entries;
 }
 
 /** What kind of service an entry is, or that it is a file to download. */

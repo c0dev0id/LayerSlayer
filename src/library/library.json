@@ -1,174 +1,114 @@
 {
   "entries": [
     {
-      "name": "OpenFreeMap Liberty",
+      "id": "global-openfreemap-liberty",
       "type": "style",
-      "url": "https://tiles.openfreemap.org/styles/liberty",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "Vector base map from OpenStreetMap; labels stay sharp at any zoom. No key, no usage limits."
+      "url": "https://tiles.openfreemap.org/styles/liberty"
     },
     {
-      "name": "OpenFreeMap Bright",
+      "id": "global-openfreemap-bright",
       "type": "style",
-      "url": "https://tiles.openfreemap.org/styles/bright",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "Vector base map in the OSM Bright style."
+      "url": "https://tiles.openfreemap.org/styles/bright"
     },
     {
-      "name": "OpenFreeMap Positron",
+      "id": "global-openfreemap-positron",
       "type": "style",
-      "url": "https://tiles.openfreemap.org/styles/positron",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "Light grey vector base map; coloured overlays stand out against it."
+      "url": "https://tiles.openfreemap.org/styles/positron"
     },
     {
-      "name": "VersaTiles Colorful",
+      "id": "global-versatiles-colorful",
       "type": "style",
-      "url": "https://tiles.versatiles.org/assets/styles/colorful/style.json",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "Colourful vector base map from OpenStreetMap."
+      "url": "https://tiles.versatiles.org/assets/styles/colorful/style.json"
     },
     {
-      "name": "OpenStreetMap Standard",
+      "id": "global-openstreetmap-standard",
       "type": "xyz",
       "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "The standard OpenStreetMap raster tiles.",
       "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
       "maxzoom": 19
     },
     {
-      "name": "OpenTopoMap",
+      "id": "global-opentopomap",
       "type": "xyz",
       "url": "https://tile.opentopomap.org/{z}/{x}/{y}.png",
-      "region": "Global",
-      "category": "Terrain",
-      "note": "Topographic map with contour lines and hill shading, large labels.",
       "attribution": "Map data: © <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, SRTM · Map style: © <a href=\"https://opentopomap.org\">OpenTopoMap</a> (CC-BY-SA)",
       "maxzoom": 17
     },
     {
-      "name": "CyclOSM",
+      "id": "global-cyclosm",
       "type": "xyz",
       "url": "https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
-      "region": "Global",
-      "category": "Traffic",
-      "note": "Tracks and trails with their surface and difficulty, cycling infrastructure.",
       "attribution": "Map style: <a href=\"https://www.cyclosm.org\">CyclOSM</a>, hosted by OpenStreetMap France · Map data: © <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
       "maxzoom": 20
     },
     {
-      "name": "OpenSeaMap — seamarks",
+      "id": "global-openseamap-seamarks",
       "type": "xyz",
       "url": "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
-      "region": "Global",
-      "category": "Waterways",
-      "note": "Buoys, beacons, lights, harbours and anchorages from OpenStreetMap, as a transparent overlay for any base map.",
       "attribution": "Seamarks: © <a href=\"https://www.openseamap.org\">OpenSeaMap</a> contributors · Map data: © <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
     },
     {
-      "name": "Safecast — radiation measurements",
+      "id": "global-safecast-radiation-measurements",
       "type": "xyz",
       "url": "https://s3.amazonaws.com/te512.safecast.org/{z}/{x}/{y}.png",
-      "region": "Global",
-      "category": "Hazards",
-      "note": "Background radiation readings uploaded by Safecast volunteers, coloured by dose rate; densest in Japan around Fukushima. The tiles were last rendered in May 2023.",
       "attribution": "<a href=\"https://safecast.org\">Safecast</a> (CC0)",
       "maxzoom": 16
     },
     {
-      "name": "USGS — earthquakes of the past week",
+      "id": "global-usgs-earthquakes-of-the-past-week",
       "type": "geojson",
       "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson",
-      "region": "Global",
-      "category": "Hazards",
-      "note": "Live feed of every earthquake recorded in the last seven days, as points.",
       "attribution": "USGS"
     },
     {
-      "name": "Esri World Imagery",
+      "id": "global-esri-world-imagery",
       "type": "arcgis-mapserver",
-      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
-      "region": "Global",
-      "category": "Aerial",
-      "note": "Satellite and aerial imagery of the whole world, down to about 30 cm per pixel in many places, from Esri and its partners."
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
     },
     {
-      "name": "Esri National Geographic World Map",
+      "id": "global-esri-national-geographic-world-map",
       "type": "arcgis-mapserver",
-      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "Reference map in National Geographic's style: boundaries, places, protected areas, roads and water over shaded relief. Street detail only in the United States; elsewhere closer than city scale it shows \"Map data not yet available\"."
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer"
     },
     {
-      "name": "NASA GIBS — satellite imagery",
+      "id": "global-nasa-gibs-satellite-imagery",
       "type": "wmts",
-      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/1.0.0/WMTSCapabilities.xml",
-      "region": "Global",
-      "category": "Aerial",
-      "note": "Daily satellite imagery and science layers."
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/1.0.0/WMTSCapabilities.xml"
     },
     {
-      "name": "EOX Maps",
+      "id": "global-eox-maps",
       "type": "wmts",
-      "url": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml",
-      "region": "Global",
-      "category": "Aerial",
-      "note": "Sentinel-2 cloudless imagery, terrain and overlays."
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml"
     },
     {
-      "name": "OpenStreetMap — terrestris",
+      "id": "global-openstreetmap-terrestris",
       "type": "wms",
-      "url": "https://ows.terrestris.de/osm/service?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "OpenStreetMap rendered as a basemap, with and without labels."
+      "url": "https://ows.terrestris.de/osm/service?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "OpenStreetMap — mundialis",
+      "id": "global-openstreetmap-mundialis",
       "type": "wms",
-      "url": "https://ows.mundialis.de/services/service?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "OpenStreetMap, plus a topographic style."
+      "url": "https://ows.mundialis.de/services/service?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Waymarked Trails — hiking routes",
+      "id": "global-waymarked-trails-hiking-routes",
       "type": "xyz",
-      "url": "https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png",
-      "region": "Global",
-      "category": "Traffic",
-      "note": "Signed hiking routes from OpenStreetMap, drawn as coloured lines over your own map; the colour tells the route's rank, from international down to local, and the waymark symbols appear at close zoom."
+      "url": "https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png"
     },
     {
-      "name": "GEBCO — bathymetry",
+      "id": "global-gebco-bathymetry",
       "type": "wms",
-      "url": "https://wms.gebco.net/mapserv?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Global",
-      "category": "Terrain",
-      "note": "Sea floor depth, shaded relief."
+      "url": "https://wms.gebco.net/mapserv?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "OpenRailwayMap — railways",
+      "id": "global-openrailwaymap-railways",
       "type": "xyz",
-      "url": "https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
-      "region": "Global",
-      "category": "Traffic",
-      "note": "Every railway line from OpenStreetMap, with stations and track details at close zoom. An overlay: transparent between the lines."
+      "url": "https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
     },
     {
-      "name": "Open Infrastructure Map — power",
+      "id": "global-open-infrastructure-map-power",
       "type": "vector-tiles",
       "url": "https://openinframap.org/map/power/{z}/{x}/{y}.pbf",
-      "region": "Global",
-      "category": "Infrastructure",
-      "note": "Power lines, towers, substations, power plants and generators from OpenStreetMap.",
       "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
       "maxzoom": 17,
       "layers": [
@@ -187,12 +127,9 @@
       ]
     },
     {
-      "name": "Open Infrastructure Map — telecoms",
+      "id": "global-open-infrastructure-map-telecoms",
       "type": "vector-tiles",
       "url": "https://openinframap.org/map/telecoms/{z}/{x}/{y}.pbf",
-      "region": "Global",
-      "category": "Infrastructure",
-      "note": "Communication lines, masts, antennas, data centres and street cabinets from OpenStreetMap.",
       "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
       "maxzoom": 17,
       "layers": [
@@ -205,12 +142,9 @@
       ]
     },
     {
-      "name": "Open Infrastructure Map — oil and gas",
+      "id": "global-open-infrastructure-map-oil-and-gas",
       "type": "vector-tiles",
       "url": "https://openinframap.org/map/petroleum/{z}/{x}/{y}.pbf",
-      "region": "Global",
-      "category": "Infrastructure",
-      "note": "Oil and gas pipelines, wells and sites from OpenStreetMap.",
       "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
       "minzoom": 2,
       "maxzoom": 17,
@@ -221,12 +155,9 @@
       ]
     },
     {
-      "name": "Open Infrastructure Map — other pipelines",
+      "id": "global-open-infrastructure-map-other-pipelines",
       "type": "vector-tiles",
       "url": "https://openinframap.org/map/other_pipeline/{z}/{x}/{y}.pbf",
-      "region": "Global",
-      "category": "Infrastructure",
-      "note": "Pipelines for other substances, such as heat, chemicals or slurry, from OpenStreetMap.",
       "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
       "minzoom": 2,
       "maxzoom": 17,
@@ -235,12 +166,9 @@
       ]
     },
     {
-      "name": "Open Infrastructure Map — water",
+      "id": "global-open-infrastructure-map-water",
       "type": "vector-tiles",
       "url": "https://openinframap.org/map/water/{z}/{x}/{y}.pbf",
-      "region": "Global",
-      "category": "Infrastructure",
-      "note": "Water and wastewater pipelines, treatment plants, reservoirs, towers, wells and pumping stations from OpenStreetMap.",
       "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"https://openinframap.org/copyright\">Open Infrastructure Map</a>",
       "minzoom": 3,
       "maxzoom": 17,
@@ -261,491 +189,311 @@
       ]
     },
     {
-      "name": "NASA Black Marble 2024 — Earth at night",
+      "id": "global-nasa-black-marble-2024-earth-at-night",
       "type": "xyz",
       "url": "https://openinframap.org/black-marble-2024/{z}/{x}/{y}.webp",
-      "region": "Global",
-      "category": "Aerial",
-      "note": "City and industry lights seen from space, a 2024 composite of the VIIRS night-time imagery, as served by Open Infrastructure Map.",
       "attribution": "<a href=\"https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/VNP46A4/\">NASA Black Marble 2024</a>",
       "maxzoom": 8
     },
     {
-      "name": "EMODnet — bathymetry",
+      "id": "europe-emodnet-bathymetry",
       "type": "wmts",
-      "url": "https://tiles.emodnet-bathymetry.eu/wmts/1.0.0/WMTSCapabilities.xml",
-      "region": "Europe",
-      "category": "Terrain",
-      "note": "European sea floor depth and coastline."
+      "url": "https://tiles.emodnet-bathymetry.eu/wmts/1.0.0/WMTSCapabilities.xml"
     },
     {
-      "name": "Corine Land Cover 2018",
+      "id": "europe-corine-land-cover-2018",
       "type": "wms",
-      "url": "https://image.discomap.eea.europa.eu/arcgis/services/Corine/CLC2018_WM/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Europe",
-      "category": "Basemap",
-      "note": "How the land is used across Europe — forest, farmland, built-up, water."
+      "url": "https://image.discomap.eea.europa.eu/arcgis/services/Corine/CLC2018_WM/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Geoscience Australia — topographic",
+      "id": "australia-geoscience-australia-topographic",
       "type": "wms",
-      "url": "https://services.ga.gov.au/gis/services/Topographic_Base_Map/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Australia",
-      "category": "Basemap",
-      "note": "National topographic basemap."
+      "url": "https://services.ga.gov.au/gis/services/Topographic_Base_Map/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Digital Earth Australia",
+      "id": "australia-digital-earth-australia",
       "type": "wms",
-      "url": "https://ows.dea.ga.gov.au/?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Australia",
-      "category": "Aerial",
-      "note": "Satellite imagery and maps derived from it."
+      "url": "https://ows.dea.ga.gov.au/?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "basemap.at",
+      "id": "austria-basemap-at",
       "type": "wmts",
-      "url": "https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml",
-      "region": "Austria",
-      "category": "Basemap",
-      "note": "National basemap, grey and high-contrast variants."
+      "url": "https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml"
     },
     {
-      "name": "NGI CartoWeb",
+      "id": "belgium-ngi-cartoweb",
       "type": "wms",
-      "url": "https://cartoweb.wms.ngi.be/service?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Belgium",
-      "category": "Basemap",
-      "note": "National topographic map."
+      "url": "https://cartoweb.wms.ngi.be/service?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Flanders — aerial imagery",
+      "id": "belgium-flanders-aerial-imagery",
       "type": "wmts",
-      "url": "https://geo.api.vlaanderen.be/omwrgbmrvl/wmts?SERVICE=WMTS&REQUEST=GetCapabilities",
-      "region": "Belgium",
-      "category": "Aerial",
-      "note": "Most recent aerial orthophotos of Flanders, from the regional open data service (Digitaal Vlaanderen)."
+      "url": "https://geo.api.vlaanderen.be/omwrgbmrvl/wmts?SERVICE=WMTS&REQUEST=GetCapabilities"
     },
     {
-      "name": "TerraBrasilis",
+      "id": "brazil-terrabrasilis",
       "type": "wms",
-      "url": "https://terrabrasilis.dpi.inpe.br/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Brazil",
-      "category": "Basemap",
-      "note": "Deforestation monitoring and basemaps."
+      "url": "https://terrabrasilis.dpi.inpe.br/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Canada Base Map",
+      "id": "canada-canada-base-map",
       "type": "wms",
       "url": "https://maps.geogratis.gc.ca/wms/CBMT?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Canada",
-      "category": "Basemap",
-      "note": "National transportation basemap.",
       "cors": false
     },
     {
-      "name": "Géoplateforme (IGN)",
+      "id": "france-ge-oplateforme-ign",
       "type": "wmts",
-      "url": "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetCapabilities",
-      "region": "France",
-      "category": "Basemap",
-      "note": "National topographic maps and aerial imagery."
+      "url": "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetCapabilities"
     },
     {
-      "name": "BRGM — natural hazards",
+      "id": "france-brgm-natural-hazards",
       "type": "wms",
       "url": "https://geoservices.brgm.fr/risques?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "France",
-      "category": "Hazards",
-      "note": "Flood, landslide and seismic risk.",
       "cors": false
     },
     {
-      "name": "Sandre — water",
+      "id": "france-sandre-water",
       "type": "wms",
-      "url": "https://services.sandre.eaufrance.fr/geo/sandre?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "France",
-      "category": "Waterways",
-      "note": "Rivers, lakes and catchments."
+      "url": "https://services.sandre.eaufrance.fr/geo/sandre?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "TopPlusOpen",
+      "id": "global-topplusopen",
       "type": "wmts",
       "url": "https://sgx.geodatenzentrum.de/wmts_topplus_open/1.0.0/WMTSCapabilities.xml",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "Topographic base map of Germany's federal mapping agency, detailed for Germany and in less detail for the rest of the world; colour, grey and light variants.",
       "attribution": "© <a href=\"https://www.bkg.bund.de\">BKG</a> dl-de/by-2-0, <a href=\"https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_topplusopen.html\">data sources</a>"
     },
     {
-      "name": "DWD — weather",
+      "id": "germany-dwd-weather",
       "type": "wms",
-      "url": "https://maps.dwd.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Weather",
-      "note": "Radar, warnings and forecast layers."
+      "url": "https://maps.dwd.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "basemap.de",
+      "id": "germany-basemap-de",
       "type": "wmts",
-      "url": "https://sgx.geodatenzentrum.de/wmts_basemapde/1.0.0/WMTSCapabilities.xml",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "The German national basemap, colour and grey, as ready-made tiles."
+      "url": "https://sgx.geodatenzentrum.de/wmts_basemapde/1.0.0/WMTSCapabilities.xml"
     },
     {
-      "name": "BKG — overview map 1:250 000",
+      "id": "germany-bkg-overview-map-1-250-000",
       "type": "wms",
-      "url": "https://sgx.geodatenzentrum.de/wms_dtk250?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "Small-scale topographic map for route overview."
+      "url": "https://sgx.geodatenzentrum.de/wms_dtk250?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Federal waterways",
+      "id": "germany-federal-waterways",
       "type": "wms",
-      "url": "https://via.bund.de/wsv/bwastr/wms?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Waterways",
-      "note": "Navigable rivers and canals, locks and kilometre marks."
+      "url": "https://via.bund.de/wsv/bwastr/wms?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Bavaria — topographic 1:25 000",
+      "id": "germany-bavaria-topographic-1-25-000",
       "type": "wms",
-      "url": "https://geoservices.bayern.de/od/wms/dtk/v1/dtk25?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "State topographic map."
+      "url": "https://geoservices.bayern.de/od/wms/dtk/v1/dtk25?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Bavaria — aerial imagery",
+      "id": "germany-bavaria-aerial-imagery",
       "type": "wms",
-      "url": "https://geoservices.bayern.de/od/wms/dop/v1/dop40?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Aerial",
-      "note": "40 cm aerial photography of the state."
+      "url": "https://geoservices.bayern.de/od/wms/dop/v1/dop40?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — MobiData",
+      "id": "germany-baden-wu-rttemberg-mobidata",
       "type": "wms",
-      "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Roadworks, charging points, parking and the cycle network."
+      "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "North Rhine-Westphalia — topographic",
+      "id": "germany-north-rhine-westphalia-topographic",
       "type": "wms",
-      "url": "https://www.wms.nrw.de/geobasis/wms_nw_dtk?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "State topographic maps at several scales."
+      "url": "https://www.wms.nrw.de/geobasis/wms_nw_dtk?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "North Rhine-Westphalia — aerial imagery",
+      "id": "germany-north-rhine-westphalia-aerial-imagery",
       "type": "wms",
-      "url": "https://www.wms.nrw.de/geobasis/wms_nw_dop?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Aerial",
-      "note": "Aerial photography of the state, colour and infrared."
+      "url": "https://www.wms.nrw.de/geobasis/wms_nw_dop?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Rhineland-Palatinate — topographic 1:25 000",
+      "id": "germany-rhineland-palatinate-topographic-1-25-000",
       "type": "wms",
-      "url": "https://geo4.service24.rlp.de/wms/rp_dtk25.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "State topographic map."
+      "url": "https://geo4.service24.rlp.de/wms/rp_dtk25.fcgi?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Rhineland-Palatinate — roadworks",
+      "id": "germany-rhineland-palatinate-roadworks",
       "type": "wms",
-      "url": "https://maps.mobilitaetsatlas.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Construction sites, closures and diversions in Rhineland-Palatinate."
+      "url": "https://maps.mobilitaetsatlas.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Mecklenburg-Vorpommern — topographic",
+      "id": "germany-mecklenburg-vorpommern-topographic",
       "type": "wms",
-      "url": "https://www.geodaten-mv.de/dienste/gdimv_dtk?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "State topographic maps at several scales."
+      "url": "https://www.geodaten-mv.de/dienste/gdimv_dtk?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Mecklenburg-Vorpommern — aerial imagery",
+      "id": "germany-mecklenburg-vorpommern-aerial-imagery",
       "type": "wms",
-      "url": "https://www.geodaten-mv.de/dienste/adv_dop?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Aerial",
-      "note": "Aerial photography of the state."
+      "url": "https://www.geodaten-mv.de/dienste/adv_dop?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Mecklenburg-Vorpommern — roadworks",
+      "id": "germany-mecklenburg-vorpommern-roadworks",
       "type": "wms",
-      "url": "https://www.geodaten-mv.de/dienste/baustellen_lsbv_wms?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Construction sites that restrict traffic on federal and state roads in Mecklenburg-Vorpommern."
+      "url": "https://www.geodaten-mv.de/dienste/baustellen_lsbv_wms?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Saxony — aerial imagery",
+      "id": "germany-saxony-aerial-imagery",
       "type": "wms",
-      "url": "https://geodienste.sachsen.de/wms_geosn_dop-rgb/guest?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Aerial",
-      "note": "Aerial photography of the state."
+      "url": "https://geodienste.sachsen.de/wms_geosn_dop-rgb/guest?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Saxony — closures and diversions",
+      "id": "germany-saxony-closures-and-diversions",
       "type": "wms",
-      "url": "https://geodienste.sachsen.de/wms_list_baustellen/guest?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Today's closures and the official diversion routes on Saxony's roads, plus closures already announced."
+      "url": "https://geodienste.sachsen.de/wms_list_baustellen/guest?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Schleswig-Holstein — roadworks and diversions",
+      "id": "germany-schleswig-holstein-roadworks-and-diversions",
       "type": "wms",
-      "url": "https://dienste.gdi-sh.de/WMS_SH_Baustelleninformationen?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Construction sites, closures and signed diversion routes on Schleswig-Holstein's roads and motorways, plus current traffic disruptions. Also carries the roadworks of Hamburg, Lower Saxony and Mecklenburg-Vorpommern."
+      "url": "https://dienste.gdi-sh.de/WMS_SH_Baustelleninformationen?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Hamburg — roadworks",
+      "id": "germany-hamburg-roadworks",
       "type": "wms",
-      "url": "https://geodienste.hamburg.de/hh_wms_baustellen?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Construction sites on Hamburg's roads."
+      "url": "https://geodienste.hamburg.de/hh_wms_baustellen?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Hamburg — motorway diversions",
+      "id": "germany-hamburg-motorway-diversions",
       "type": "wms",
-      "url": "https://geodienste.hamburg.de/HH_WMS_Bedarfsumleitungen?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "The signed diversion routes that take over when a motorway or expressway around Hamburg is closed."
+      "url": "https://geodienste.hamburg.de/HH_WMS_Bedarfsumleitungen?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Hamburg — live traffic",
+      "id": "germany-hamburg-live-traffic",
       "type": "wms",
-      "url": "https://geodienste.hamburg.de/wms_hh_verkehrslage?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Current traffic flow on Hamburg's main roads."
+      "url": "https://geodienste.hamburg.de/wms_hh_verkehrslage?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Hamburg — police traffic reports",
+      "id": "germany-hamburg-police-traffic-reports",
       "type": "wms",
-      "url": "https://geodienste.hamburg.de/wms_verkehrsinformation?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "The police's current traffic reports for Hamburg: accidents, closures and hazards."
+      "url": "https://geodienste.hamburg.de/wms_verkehrsinformation?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Brandenburg — roadworks",
+      "id": "germany-brandenburg-roadworks",
       "type": "wms",
-      "url": "https://isk.geobasis-bb.de/ows/baustelleninfo_wms?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Current and upcoming roadworks and closures on federal, state and district roads in Brandenburg."
+      "url": "https://isk.geobasis-bb.de/ows/baustelleninfo_wms?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "BKG — topographic 1:100 000",
+      "id": "germany-bkg-topographic-1-100-000",
       "type": "wms",
-      "url": "https://sgx.geodatenzentrum.de/wms_dtk100?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "Topographic map of the whole country at 1:100 000."
+      "url": "https://sgx.geodatenzentrum.de/wms_dtk100?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — topographic 1:25 000",
+      "id": "germany-baden-wu-rttemberg-topographic-1-25-000",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DTK_25_K_A?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "The state's 1:25 000 sheet. Enough detail for small roads and tracks."
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DTK_25_K_A?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — road map 1:200 000",
+      "id": "germany-baden-wu-rttemberg-road-map-1-200-000",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ASK_200_K?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Basemap",
-      "note": "The official road map of the state, for reading a route at low zoom."
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ASK_200_K?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — aerial imagery",
+      "id": "germany-baden-wu-rttemberg-aerial-imagery",
       "type": "wmts",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMTS_LGL-BW_ATKIS_DOP_20_C?SERVICE=WMTS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Aerial",
-      "note": "20 cm colour aerial photography of the whole state."
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMTS_LGL-BW_ATKIS_DOP_20_C?SERVICE=WMTS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — hillshade",
+      "id": "germany-baden-wu-rttemberg-hillshade",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DGM_025_Schummerung?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Terrain",
-      "note": "Terrain shading from the laser-scan height model, for reading relief under another layer."
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DGM_025_Schummerung?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — protected areas",
+      "id": "germany-baden-wu-rttemberg-protected-areas",
       "type": "wms",
-      "url": "https://rips-gdi.lubw.baden-wuerttemberg.de/arcgis/services/GDI/INSPIRE_Schutzgebiete/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Hazards",
-      "note": "Nature reserves, national park and biosphere zones, where access is often restricted."
+      "url": "https://rips-gdi.lubw.baden-wuerttemberg.de/arcgis/services/GDI/INSPIRE_Schutzgebiete/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — world heritage sites",
+      "id": "germany-baden-wu-rttemberg-world-heritage-sites",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_UNESCO_Welterbestaetten_BW?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "POI",
-      "note": "UNESCO sites in the state, including the Roman Limes, Reichenau and the ice-age caves."
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_UNESCO_Welterbestaetten_BW?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — archaeological sites",
+      "id": "germany-baden-wu-rttemberg-archaeological-sites",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_Archaeologische_Kulturdenkmale_BW?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "Recorded archaeological monuments — forts, burial grounds, earthworks."
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_Archaeologische_Kulturdenkmale_BW?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — geotopes and landmarks",
+      "id": "germany-baden-wu-rttemberg-geotopes-and-landmarks",
       "type": "wms",
-      "url": "https://services.lgrb-bw.de/ms/lgrb_geotope?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "POI",
-      "note": "Caves, waterfalls, gorges, rock formations and viewpoints, as places worth stopping at."
+      "url": "https://services.lgrb-bw.de/ms/lgrb_geotope?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — geological hazards",
+      "id": "germany-baden-wu-rttemberg-geological-hazards",
       "type": "wms",
-      "url": "https://services.lgrb-bw.de/ms/lgrb_geola_ing?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Hazards",
-      "note": "Where rockfall, landslide and sinkholes are known to occur."
+      "url": "https://services.lgrb-bw.de/ms/lgrb_geola_ing?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Baden-Württemberg — flood zones",
+      "id": "germany-baden-wu-rttemberg-flood-zones",
       "type": "wms",
-      "url": "https://rips-gdi.lubw.baden-wuerttemberg.de/arcgis/services/wms/UIS_0100000003900001/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Hazards",
-      "note": "Designated flood areas along the state's rivers."
+      "url": "https://rips-gdi.lubw.baden-wuerttemberg.de/arcgis/services/wms/UIS_0100000003900001/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Karlsruhe region — traffic and roadworks",
+      "id": "germany-karlsruhe-region-traffic-and-roadworks",
       "type": "wms",
       "url": "https://mobil.trk.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Current and planned roadworks, one-way streets, ferries, low-emission zones, winter gritting and motorcycle parking. Karlsruhe region only.",
       "cors": false
     },
     {
-      "name": "geoportail.lu",
+      "id": "luxembourg-geoportail-lu",
       "type": "wmts",
-      "url": "https://wmts.geoportail.lu/opendata/wmts/1.0.0/WMTSCapabilities.xml",
-      "region": "Luxembourg",
-      "category": "Basemap",
-      "note": "National basemap, road map and aerial orthophotos back to 1967, from the open data service of the Luxembourg cadastre (ACT)."
+      "url": "https://wmts.geoportail.lu/opendata/wmts/1.0.0/WMTSCapabilities.xml"
     },
     {
-      "name": "PDOK — topographic basemap",
+      "id": "netherlands-pdok-topographic-basemap",
       "type": "wmts",
-      "url": "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?SERVICE=WMTS&REQUEST=GetCapabilities",
-      "region": "Netherlands",
-      "category": "Basemap",
-      "note": "National basemap, several styles."
+      "url": "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?SERVICE=WMTS&REQUEST=GetCapabilities"
     },
     {
-      "name": "PDOK — aerial imagery",
+      "id": "netherlands-pdok-aerial-imagery",
       "type": "wms",
-      "url": "https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Netherlands",
-      "category": "Aerial",
-      "note": "Recent aerial photography."
+      "url": "https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Kartverket",
+      "id": "norway-kartverket",
       "type": "wmts",
-      "url": "https://cache.kartverket.no/v1/wmts/1.0.0/WMTSCapabilities.xml",
-      "region": "Norway",
-      "category": "Basemap",
-      "note": "Topographic and nautical raster maps."
+      "url": "https://cache.kartverket.no/v1/wmts/1.0.0/WMTSCapabilities.xml"
     },
     {
-      "name": "Poland — forest ownership",
+      "id": "poland-poland-forest-ownership",
       "type": "arcgis-mapserver",
-      "url": "https://mapserver.bdl.lasy.gov.pl/arcgis/rest/services/WMTS_BDL_kat_wlasnosci/MapServer?f=json",
-      "region": "Poland",
-      "category": "POI",
-      "note": "Who owns each forest: State Forests, national parks, communal or private, from the national Forest Data Bank."
+      "url": "https://mapserver.bdl.lasy.gov.pl/arcgis/rest/services/WMTS_BDL_kat_wlasnosci/MapServer?f=json"
     },
     {
-      "name": "Poland — forest compartments",
+      "id": "poland-poland-forest-compartments",
       "type": "wms",
-      "url": "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL/mapserver/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Poland",
-      "category": "POI",
-      "note": "Forest compartment lines and numbers, and the forest-district boundaries, as posted on the marker stones in State Forests."
+      "url": "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL/mapserver/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Poland — aerial imagery",
+      "id": "poland-poland-aerial-imagery",
       "type": "wmts",
-      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution?SERVICE=WMTS&REQUEST=GetCapabilities",
-      "region": "Poland",
-      "category": "Aerial",
-      "note": "National orthophoto mosaic from the head office of geodesy and cartography (GUGiK)."
+      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution?SERVICE=WMTS&REQUEST=GetCapabilities"
     },
     {
-      "name": "DGT — aerial imagery 2018",
+      "id": "portugal-dgt-aerial-imagery-2018",
       "type": "wms",
       "url": "https://cartografia.dgterritorio.gov.pt/ortos2018/service?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Portugal",
-      "category": "Aerial",
-      "note": "Aerial photography of Portugal, flown in 2018.",
       "cors": false
     },
     {
-      "name": "IGN — PNOA aerial imagery",
+      "id": "spain-ign-pnoa-aerial-imagery",
       "type": "wms",
-      "url": "https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Spain",
-      "category": "Aerial",
-      "note": "National aerial photography."
+      "url": "https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "IGN — raster map",
+      "id": "spain-ign-raster-map",
       "type": "wms",
-      "url": "https://www.ign.es/wms-inspire/mapa-raster?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Spain",
-      "category": "Basemap",
-      "note": "Scanned topographic maps of Spain."
+      "url": "https://www.ign.es/wms-inspire/mapa-raster?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "swisstopo",
+      "id": "switzerland-swisstopo",
       "type": "wms",
-      "url": "https://wms.geo.admin.ch/?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Switzerland",
-      "category": "Basemap",
-      "note": "National maps, imagery and thematic layers."
+      "url": "https://wms.geo.admin.ch/?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "swisstopo — National Map tiles",
+      "id": "switzerland-swisstopo-national-map-tiles",
       "type": "xyz",
       "url": "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
-      "region": "Switzerland",
-      "category": "Basemap",
-      "note": "The national topographic map as Web Mercator tiles.",
       "attribution": "© <a href=\"https://www.swisstopo.admin.ch\">swisstopo</a>",
       "bounds": [
         5.9,
@@ -755,676 +503,427 @@
       ]
     },
     {
-      "name": "Environment Agency — LiDAR terrain",
+      "id": "united-kingdom-environment-agency-lidar-terrain",
       "type": "wms",
-      "url": "https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wms?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United Kingdom",
-      "category": "Terrain",
-      "note": "Ground height at 1 m detail, from laser scanning."
+      "url": "https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wms?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "USFS — Motor Vehicle Use Map",
+      "id": "united-states-usfs-motor-vehicle-use-map",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MVUM_02/MapServer?f=json",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Which roads and trails in US National Forests are open to motor vehicles."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MVUM_02/MapServer?f=json"
     },
     {
-      "name": "USFS — forest roads",
+      "id": "united-states-usfs-forest-roads",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RoadBasic_01/MapServer?f=json",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "The Forest Service road network in every National Forest, appearing from zoom 11."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RoadBasic_01/MapServer?f=json"
     },
     {
-      "name": "USFS — forest trails",
+      "id": "united-states-usfs-forest-trails",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_TrailNFSPublish_01/MapServer?f=json",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Forest Service trails in every National Forest, appearing from zoom 11."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_TrailNFSPublish_01/MapServer?f=json"
     },
     {
-      "name": "USFS — campgrounds and trailheads",
+      "id": "united-states-usfs-campgrounds-and-trailheads",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecreationOpportunities_01/MapServer?f=json",
-      "region": "United States",
-      "category": "POI",
-      "note": "Campgrounds, trailheads, picnic sites and other Forest Service recreation sites, appearing from zoom 11."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecreationOpportunities_01/MapServer?f=json"
     },
     {
-      "name": "USFS — wilderness areas",
+      "id": "united-states-usfs-wilderness-areas",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_Wilderness_01/MapServer?f=json",
-      "region": "United States",
-      "category": "POI",
-      "note": "Designated wilderness areas, where no motor vehicle may go, at every zoom."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_Wilderness_01/MapServer?f=json"
     },
     {
-      "name": "BLM — roads and trails",
+      "id": "united-states-blm-roads-and-trails",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/transportation/BLM_Natl_GTLF_Public_Display/MapServer?f=json",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Roads and trails on Bureau of Land Management land, split by whether motor vehicles are allowed on them."
+      "url": "https://gis.blm.gov/arcgis/rest/services/transportation/BLM_Natl_GTLF_Public_Display/MapServer?f=json"
     },
     {
-      "name": "BLM — campgrounds and recreation sites",
+      "id": "united-states-blm-campgrounds-and-recreation-sites",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/recreation/BLM_Natl_Recreation_Sites_Facilities/MapServer?f=json",
-      "region": "United States",
-      "category": "POI",
-      "note": "Campgrounds, boat ramps, day-use areas and other recreation sites on Bureau of Land Management land."
+      "url": "https://gis.blm.gov/arcgis/rest/services/recreation/BLM_Natl_Recreation_Sites_Facilities/MapServer?f=json"
     },
     {
-      "name": "BLM — land managers",
+      "id": "united-states-blm-land-managers",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_SMA_Cached_without_PriUnk/MapServer?f=json",
-      "region": "United States",
-      "category": "POI",
-      "note": "Public land coloured by the agency that manages its surface: Bureau of Land Management, Forest Service, Park Service, Fish and Wildlife Service, Reclamation, Indian Affairs, military, state and local. Private land is left blank. Served as cached tiles, so it appears quickly."
+      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_SMA_Cached_without_PriUnk/MapServer?f=json"
     },
     {
-      "name": "BLM — wilderness and wilderness study areas",
+      "id": "united-states-blm-wilderness-and-wilderness-study-areas",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_NLCS_WLD_WSA/MapServer?f=json",
-      "region": "United States",
-      "category": "POI",
-      "note": "Wilderness and wilderness study areas on Bureau of Land Management land. Wilderness is closed to motor vehicles; in study areas they are limited to the routes the BLM allows."
+      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_NLCS_WLD_WSA/MapServer?f=json"
     },
     {
-      "name": "NPS — park roads",
+      "id": "united-states-nps-park-roads",
       "type": "arcgis-mapserver",
-      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Roads/MapServer?f=json",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Public roads in national parks and other National Park Service units."
+      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Roads/MapServer?f=json"
     },
     {
-      "name": "NPS — park trails",
+      "id": "united-states-nps-park-trails",
       "type": "arcgis-mapserver",
-      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Trails/MapServer?f=json",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Public trails in national parks and other National Park Service units; trails closed to the public are left out."
+      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Trails/MapServer?f=json"
     },
     {
-      "name": "USGS — mines and mineral resources",
+      "id": "united-states-usgs-mines-and-mineral-resources",
       "type": "wms",
-      "url": "https://mrdata.usgs.gov/services/mrds?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "POI",
-      "note": "Mines, prospects and mineral occurrences from the USGS Mineral Resource Data System, which the USGS no longer updates."
+      "url": "https://mrdata.usgs.gov/services/mrds?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "USGS — aerial imagery",
+      "id": "united-states-usgs-aerial-imagery",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer?f=json",
-      "region": "United States",
-      "category": "Aerial",
-      "note": "National aerial imagery."
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer?f=json"
     },
     {
-      "name": "USGS — shaded relief",
+      "id": "united-states-usgs-shaded-relief",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer?f=json",
-      "region": "United States",
-      "category": "Terrain",
-      "note": "Terrain shading."
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer?f=json"
     },
     {
-      "name": "USGS — hydrography",
+      "id": "united-states-usgs-hydrography",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer?f=json",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "Rivers, lakes and coastline."
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer?f=json"
     },
     {
-      "name": "USGS — protected areas by manager (PAD-US 4.1)",
+      "id": "united-states-usgs-protected-areas-by-manager-pad-us-4-1",
       "type": "arcgis-mapserver",
-      "url": "https://edits.nationalmap.gov/arcgis/rest/services/PAD-US/PAD_US_4_1/MapServer?f=json",
-      "region": "United States",
-      "category": "POI",
-      "note": "Who manages each protected area, from the current edition of the database — Forest Service, Bureau of Land Management, National Park Service, state, local, tribal or private. Drawn fresh for each view, so it takes a moment longer to appear."
+      "url": "https://edits.nationalmap.gov/arcgis/rest/services/PAD-US/PAD_US_4_1/MapServer?f=json"
     },
     {
-      "name": "USGS — contours",
+      "id": "united-states-usgs-contours",
       "type": "wms",
-      "url": "https://carto.nationalmap.gov/arcgis/services/contours/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Terrain",
-      "note": "Topographic contour lines for the United States at multiple scales."
+      "url": "https://carto.nationalmap.gov/arcgis/services/contours/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "USGS — NHD hydrography (detailed)",
+      "id": "united-states-usgs-nhd-hydrography-detailed",
       "type": "wms",
-      "url": "https://hydro.nationalmap.gov/arcgis/services/nhd/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "Individual stream reaches, named water bodies, canals, drainage basins and other features from the National Hydrography Dataset. More detail than the cached hydrography basemap."
+      "url": "https://hydro.nationalmap.gov/arcgis/services/nhd/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "NLCD — land cover",
+      "id": "united-states-nlcd-land-cover",
       "type": "wms",
-      "url": "https://www.mrlc.gov/geoserver/mrlc_display/wms?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Terrain",
-      "note": "What the land is covered with across the contiguous US and Alaska: forest, shrub, grassland, wetland, cultivated and urban, at 30 m resolution. Multiple editions of the National Land Cover Database."
+      "url": "https://www.mrlc.gov/geoserver/mrlc_display/wms?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "USFWS — National Wetlands Inventory",
+      "id": "united-states-usfws-national-wetlands-inventory",
       "type": "wms",
-      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/services/Wetlands/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "Wetlands mapped by the US Fish & Wildlife Service: marshes, swamps, bogs, ponds and coastal waters. Useful for assessing trafficability in soft or seasonally flooded terrain."
+      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/services/Wetlands/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "EPA — ecoregions",
+      "id": "united-states-epa-ecoregions",
       "type": "wms",
-      "url": "https://geodata.epa.gov/arcgis/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Terrain",
-      "note": "Level III and IV ecoregions — areas where ecosystems, vegetation, soils and land use are broadly similar. Useful as context when interpreting terrain and vegetation layers."
+      "url": "https://geodata.epa.gov/arcgis/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "NOAA — snow analysis",
+      "id": "united-states-noaa-snow-analysis",
       "type": "arcgis-mapserver",
-      "url": "https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer?f=json",
-      "region": "United States",
-      "category": "Weather",
-      "note": "Daily snow water equivalent and snow depth from the NOAA National Operational Hydrologic Remote Sensing Center. Useful for planning winter access."
+      "url": "https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer?f=json"
     },
     {
-      "name": "USFS — fire history",
+      "id": "united-states-usfs-fire-history",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceAndPerimeter_01/MapServer?f=json",
-      "region": "United States",
-      "category": "Hazards",
-      "note": "Wildfire occurrence points and perimeters in US National Forests since the 1970s. Useful for understanding which areas have burned and assessing post-fire terrain."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceAndPerimeter_01/MapServer?f=json"
     },
     {
-      "name": "USFS — fire, current edition",
+      "id": "united-states-usfs-fire-current-edition",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer?f=json",
-      "region": "United States",
-      "category": "Hazards",
-      "note": "The most recently published compilation of wildfire occurrences in National Forests. More current than the historical archive but otherwise covers the same data."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer?f=json"
     },
     {
-      "name": "USFS — fire severity (MTBS)",
+      "id": "united-states-usfs-fire-severity-mtbs",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MTBS_01/MapServer?f=json",
-      "region": "United States",
-      "category": "Hazards",
-      "note": "How intensely each large wildfire burned, derived from satellite imagery, since 1984. From the Monitoring Trends in Burn Severity program. Useful for assessing vegetation recovery and post-fire trafficability."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MTBS_01/MapServer?f=json"
     },
     {
-      "name": "USFS — fireshed registry",
+      "id": "united-states-usfs-fireshed-registry",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireshedRegistry_01/MapServer?f=json",
-      "region": "United States",
-      "category": "Hazards",
-      "note": "Firesheds and their treatment priority across the contiguous US — areas where prescribed burning and fuel reduction are planned or in progress."
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireshedRegistry_01/MapServer?f=json"
     },
     {
-      "name": "USGS — governmental unit boundaries",
+      "id": "united-states-usgs-governmental-unit-boundaries",
       "type": "wms",
-      "url": "https://carto.nationalmap.gov/arcgis/services/govunits/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "POI",
-      "note": "Outlines and names of national forests, wilderness areas, parks, monuments, Bureau of Land Management and tribal lands, and state, county and town limits. Names are separate layers: pick a boundary and its label together."
+      "url": "https://carto.nationalmap.gov/arcgis/services/govunits/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "US Census — boundaries (TIGERweb)",
+      "id": "united-states-us-census-boundaries-tigerweb",
       "type": "wms",
-      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_Current/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "POI",
-      "note": "State, county, city and tribal-land boundaries with their names, from the Census Bureau, alongside the statistical areas it draws for its own counts."
+      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_Current/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "US Census — physical features (TIGERweb)",
+      "id": "united-states-us-census-physical-features-tigerweb",
       "type": "wms",
-      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_PhysicalFeatures/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Infrastructure",
-      "note": "Rivers, lakes and glaciers, roads and railroads, and military installations, colleges, prisons and National Park Service areas, each with a separate labels layer."
+      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_PhysicalFeatures/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "USGS — 3DEP elevation",
+      "id": "united-states-usgs-3dep-elevation",
       "type": "wms",
-      "url": "https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Terrain",
-      "note": "Elevation, slope and hillshade."
+      "url": "https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "NOAA nowCOAST",
+      "id": "united-states-noaa-nowcoast",
       "type": "wms",
-      "url": "https://nowcoast.noaa.gov/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Weather",
-      "note": "Weather, radar and marine observations."
+      "url": "https://nowcoast.noaa.gov/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "NOAA — nautical charts",
+      "id": "united-states-noaa-nautical-charts",
       "type": "wms",
-      "url": "https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/ENCOnline/MapServer/exts/MaritimeChartService/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "Electronic navigational charts."
+      "url": "https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/ENCOnline/MapServer/exts/MaritimeChartService/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "NEXRAD radar",
+      "id": "united-states-nexrad-radar",
       "type": "wms",
-      "url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Weather",
-      "note": "Live and archived precipitation radar."
+      "url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "LANDFIRE — vegetation and fuels",
+      "id": "united-states-landfire-vegetation-and-fuels",
       "type": "wms",
-      "url": "https://edcintl.cr.usgs.gov/geoserver/landfire/conus_2025/wms?request=GetCapabilities&service=WMS",
-      "region": "United States",
-      "category": "Terrain",
-      "note": "Vegetation type, height and cover across the contiguous US."
+      "url": "https://edcintl.cr.usgs.gov/geoserver/landfire/conus_2025/wms?request=GetCapabilities&service=WMS"
     },
     {
-      "name": "WFIGS — current wildfire perimeters",
+      "id": "united-states-wfigs-current-wildfire-perimeters",
       "type": "arcgis-features",
-      "url": "https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Interagency_Perimeters_Current/FeatureServer",
-      "region": "United States",
-      "category": "Hazards",
-      "note": "Perimeters of active wildfires, as vector features queried by view."
+      "url": "https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Interagency_Perimeters_Current/FeatureServer"
     },
     {
-      "name": "USGS — topographic map",
+      "id": "united-states-usgs-topographic-map",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer",
-      "region": "United States",
-      "category": "Basemap",
-      "note": "The National Map's topographic base map, cached tiles."
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer"
     },
     {
-      "name": "USGS — protected areas by fee manager (PAD-US 4.1)",
+      "id": "united-states-usgs-protected-areas-by-fee-manager-pad-us-4-1",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/v01gqwM5QqNysAAi/arcgis/rest/services/Fee_Managers_PADUS/FeatureServer",
-      "region": "United States",
-      "category": "POI",
-      "note": "Who owns or manages each protected area, as polygons drawn in the browser; the same data as the PAD-US map service."
+      "url": "https://services.arcgis.com/v01gqwM5QqNysAAi/arcgis/rest/services/Fee_Managers_PADUS/FeatureServer"
     },
     {
-      "name": "BTS — North American rail network lines",
+      "id": "united-states-bts-north-american-rail-network-lines",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Lines/FeatureServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Every rail line in the United States, Canada and Mexico, with owner, track rights and use (NTAD)."
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Lines/FeatureServer"
     },
     {
-      "name": "BTS — North American rail network nodes",
+      "id": "united-states-bts-north-american-rail-network-nodes",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Nodes/FeatureServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Junctions and ends of the rail network lines (NTAD)."
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Nodes/FeatureServer"
     },
     {
-      "name": "BTS — passenger rail lines",
+      "id": "united-states-bts-passenger-rail-lines",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Lines_Passenger_Rail/FeatureServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "The rail network lines that carry passenger trains (NTAD)."
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_North_American_Rail_Network_Lines_Passenger_Rail/FeatureServer"
     },
     {
-      "name": "BTS — Amtrak routes",
+      "id": "united-states-bts-amtrak-routes",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Amtrak_Routes/FeatureServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Amtrak's passenger routes as lines."
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Amtrak_Routes/FeatureServer"
     },
     {
-      "name": "BTS — Amtrak stations",
+      "id": "united-states-bts-amtrak-stations",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Amtrak_Stations/FeatureServer",
-      "region": "United States",
-      "category": "POI",
-      "note": "Amtrak stations and stops."
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Amtrak_Stations/FeatureServer"
     },
     {
-      "name": "BTS — railroad grade crossings",
+      "id": "united-states-bts-railroad-grade-crossings",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Railroad_Grade_Crossings/FeatureServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Every place a road or path crosses a railway, from the FRA crossing inventory."
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Railroad_Grade_Crossings/FeatureServer"
     },
     {
-      "name": "BTS — railroad bridges",
+      "id": "united-states-bts-railroad-bridges",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Railroad_Bridges/FeatureServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Railroad bridges, as points."
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Railroad_Bridges/FeatureServer"
     },
     {
-      "name": "BTS — rail yards",
+      "id": "united-states-bts-rail-yards",
       "type": "arcgis-features",
-      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Rail_Yards/FeatureServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "The tracks of rail yards, as lines."
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Rail_Yards/FeatureServer"
     },
     {
-      "name": "HIFLD — electric power transmission lines",
+      "id": "united-states-hifld-electric-power-transmission-lines",
       "type": "arcgis-features",
-      "url": "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/US_Electric_Power_Transmission_Lines/FeatureServer",
-      "region": "United States",
-      "category": "Infrastructure",
-      "note": "High-voltage transmission lines with their voltage and owner. HIFLD has archived the layer: it is no longer updated."
+      "url": "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/US_Electric_Power_Transmission_Lines/FeatureServer"
     },
     {
-      "name": "EPA AirNow — air quality index",
+      "id": "united-states-epa-airnow-air-quality-index",
       "type": "arcgis-features",
       "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursCombined/FeatureServer",
-      "region": "United States",
-      "category": "Weather",
-      "note": "Contours of the latest air quality index, ozone and fine particles combined, in the AQI colours from green (good) to maroon (hazardous).",
       "ownStyle": true
     },
     {
-      "name": "EPA AirNow — fine particles (PM2.5)",
+      "id": "united-states-epa-airnow-fine-particles-pm2-5",
       "type": "arcgis-features",
       "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursPM25/FeatureServer",
-      "region": "United States",
-      "category": "Weather",
-      "note": "Contours of the latest air quality index for fine particles (PM2.5), the pollutant wildfire smoke raises, in the AQI colours.",
       "ownStyle": true
     },
     {
-      "name": "EPA AirNow — ozone",
+      "id": "united-states-epa-airnow-ozone",
       "type": "arcgis-features",
       "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursOzone/FeatureServer",
-      "region": "United States",
-      "category": "Weather",
-      "note": "Contours of the latest air quality index for ozone, in the AQI colours.",
       "ownStyle": true
     },
     {
-      "name": "EPA AirNow — monitoring stations",
+      "id": "united-states-epa-airnow-monitoring-stations",
       "type": "arcgis-features",
       "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/Air_Now_Current_Monitors_Ozone_and_PM/FeatureServer",
-      "region": "United States",
-      "category": "Weather",
-      "note": "The latest readings of the stations measuring ozone and particles, each dot in the colour of its air quality index.",
       "ownStyle": true
     },
     {
-      "name": "EPA AirNow — air quality forecast",
+      "id": "united-states-epa-airnow-air-quality-forecast",
       "type": "arcgis-features",
       "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNow_National_Air_Quality_Index_(AQI)_Forecast/FeatureServer",
-      "region": "United States",
-      "category": "Weather",
-      "note": "Today's and tomorrow's air quality forecast for each reporting area, in the AQI colours.",
       "ownStyle": true
     },
     {
-      "name": "NOAA — wildfire smoke forecast",
+      "id": "united-states-noaa-wildfire-smoke-forecast",
       "type": "wms",
-      "url": "https://mapservices.weather.noaa.gov/raster/services/air_quality/ndgd_smoke_sfc_1hr_avg_time/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Weather",
-      "note": "Near-surface smoke from wildfires, from NOAA air quality forecast guidance that runs about two days ahead. The map shows the hour the service shows by default."
+      "url": "https://mapservices.weather.noaa.gov/raster/services/air_quality/ndgd_smoke_sfc_1hr_avg_time/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "USGS — imagery with topographic labels",
+      "id": "united-states-usgs-imagery-with-topographic-labels",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer",
-      "region": "United States",
-      "category": "Aerial",
-      "note": "Aerial imagery under The National Map's roads, boundaries and names, cached tiles."
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer"
     },
     {
-      "name": "USGS — place names (GNIS)",
+      "id": "united-states-usgs-place-names-gnis",
       "type": "arcgis-mapserver",
-      "url": "https://carto.nationalmap.gov/arcgis/rest/services/geonames/MapServer",
-      "region": "United States",
-      "category": "POI",
-      "note": "Official names of places, landforms, streams and cultural features from the Geographic Names Information System, including historical names."
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/geonames/MapServer"
     },
     {
-      "name": "USGS — transportation",
+      "id": "united-states-usgs-transportation",
       "type": "arcgis-mapserver",
-      "url": "https://carto.nationalmap.gov/arcgis/rest/services/transportation/MapServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Roads, railroads, trails and airports of The National Map, from Census TIGER/Line and Forest Service data, drawn by scale."
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/transportation/MapServer"
     },
     {
-      "name": "USGS — structures",
+      "id": "united-states-usgs-structures",
       "type": "arcgis-mapserver",
-      "url": "https://carto.nationalmap.gov/arcgis/rest/services/structures/MapServer",
-      "region": "United States",
-      "category": "POI",
-      "note": "Public buildings: schools, hospitals, fire and police stations, post offices, cemeteries, campgrounds, trailheads, cabins and shelters."
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/structures/MapServer"
     },
     {
-      "name": "USGS — trails",
+      "id": "united-states-usgs-trails",
       "type": "arcgis-mapserver",
-      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/USGSTrails/MapServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Trails compiled from the National Transportation Dataset, Census and Forest Service data."
+      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/USGSTrails/MapServer"
     },
     {
-      "name": "USGS — NHDPlus High Resolution",
+      "id": "united-states-usgs-nhdplus-high-resolution",
       "type": "arcgis-mapserver",
-      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "Flowlines, water bodies, gages, sinks and catchments of the high-resolution hydrography network; drawn only when zoomed in."
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer"
     },
     {
-      "name": "USGS — watershed boundaries",
+      "id": "united-states-usgs-watershed-boundaries",
       "type": "arcgis-mapserver",
-      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "Hydrologic units from 2-digit regions down to 16-digit units, with their codes."
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer"
     },
     {
-      "name": "USGS — 3D hydrography (3DHP)",
+      "id": "united-states-usgs-3d-hydrography-3dhp",
       "type": "arcgis-mapserver",
-      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/3DHP_all/MapServer",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "The successor to NHD, derived from lidar elevation: flowlines, water bodies, catchments, springs and confluences where mapped so far."
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/3DHP_all/MapServer"
     },
     {
-      "name": "USGS — 3D hydrography features (3DHP)",
+      "id": "united-states-usgs-3d-hydrography-features-3dhp",
       "type": "arcgis-features",
-      "url": "https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "The 3DHP flowlines, water bodies and points as vector features queried by view."
+      "url": "https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer"
     },
     {
-      "name": "USGS — NAIP aerial imagery",
+      "id": "united-states-usgs-naip-aerial-imagery",
       "type": "wms",
-      "url": "https://imagery.nationalmap.gov/arcgis/services/USGSNAIPImagery/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Aerial",
-      "note": "Summer imagery of the National Agriculture Imagery Program, the latest for each state: natural colour, colour infrared or a vegetation index (NDVI)."
+      "url": "https://imagery.nationalmap.gov/arcgis/services/USGSNAIPImagery/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "USGS — NAIP imagery coverage",
+      "id": "united-states-usgs-naip-imagery-coverage",
       "type": "arcgis-mapserver",
-      "url": "https://index.nationalmap.gov/arcgis/rest/services/USGSNAIPImageryIndex/MapServer",
-      "region": "United States",
-      "category": "Reference",
-      "note": "Footprints of the NAIP imagery and the year each was flown."
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/USGSNAIPImageryIndex/MapServer"
     },
     {
-      "name": "USGS — 3DEP elevation coverage",
+      "id": "united-states-usgs-3dep-elevation-coverage",
       "type": "arcgis-mapserver",
-      "url": "https://index.nationalmap.gov/arcgis/rest/services/3DEPElevationIndex/MapServer",
-      "region": "United States",
-      "category": "Reference",
-      "note": "Where 3DEP elevation models (1 m to 2 arc-seconds), lidar point clouds, ifsar and topobathymetric data exist."
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/3DEPElevationIndex/MapServer"
     },
     {
-      "name": "USGS — 3DEP lidar acquisition grid",
+      "id": "united-states-usgs-3dep-lidar-acquisition-grid",
       "type": "arcgis-mapserver",
-      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/3DEPDataAcquisition_1KMGrid/MapServer",
-      "region": "United States",
-      "category": "Reference",
-      "note": "The 1 km grid lidar is collected in, with state and county outlines."
+      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/3DEPDataAcquisition_1KMGrid/MapServer"
     },
     {
-      "name": "USGS — US Topo availability",
+      "id": "united-states-usgs-us-topo-availability",
       "type": "arcgis-mapserver",
-      "url": "https://index.nationalmap.gov/arcgis/rest/services/USTopoAvailability/MapServer",
-      "region": "United States",
-      "category": "Reference",
-      "note": "7.5-minute quadrangles tinted by the year their current US Topo map was published."
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/USTopoAvailability/MapServer"
     },
     {
-      "name": "USGS — map sheet indices",
+      "id": "united-states-usgs-map-sheet-indices",
       "type": "arcgis-mapserver",
-      "url": "https://carto.nationalmap.gov/arcgis/rest/services/map_indices/MapServer",
-      "region": "United States",
-      "category": "Reference",
-      "note": "The 1×1 degree, 30×60-minute, 15-minute, 7.5-minute and 3.75-minute map sheet grids with their names."
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/map_indices/MapServer"
     },
     {
-      "name": "BLM — Public Land Survey System",
+      "id": "united-states-blm-public-land-survey-system",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/Cadastral/BLM_Natl_PLSS_CadNSDI/MapServer",
-      "region": "United States",
-      "category": "Reference",
-      "note": "Townships and sections of the land survey grid most legal land descriptions refer to."
+      "url": "https://gis.blm.gov/arcgis/rest/services/Cadastral/BLM_Natl_PLSS_CadNSDI/MapServer"
     },
     {
-      "name": "NGA — US National Grid",
+      "id": "united-states-nga-us-national-grid",
       "type": "arcgis-features",
-      "url": "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/US_National_Grid_HFL_V/FeatureServer",
-      "region": "United States",
-      "category": "Reference",
-      "note": "The USNG/MGRS grid used in search and rescue, from its 6×8 degree zones down to 100 m squares."
+      "url": "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/US_National_Grid_HFL_V/FeatureServer"
     },
     {
-      "name": "USGS — scanned topographic maps",
+      "id": "united-states-usgs-scanned-topographic-maps",
       "type": "arcgis-mapserver",
-      "url": "https://services.arcgisonline.com/arcgis/rest/services/USA_Topo_Maps/MapServer",
-      "region": "United States",
-      "category": "History",
-      "note": "Seamless scans of the USGS paper topographic maps that US Topo replaced, 1:24 000 and 1:100 000 (1:63 360 and 1:250 000 in Alaska), from National Geographic TOPO!; cached tiles to zoom 15."
+      "url": "https://services.arcgisonline.com/arcgis/rest/services/USA_Topo_Maps/MapServer"
     },
     {
-      "name": "FEMA — flood hazard zones (NFHL)",
+      "id": "united-states-fema-flood-hazard-zones-nfhl",
       "type": "arcgis-mapserver",
-      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer",
-      "region": "United States",
-      "category": "Hazards",
-      "note": "The National Flood Hazard Layer: flood zones, base flood elevations, levees and map panels; drawn only when zoomed in closely."
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer"
     },
     {
-      "name": "USFWS — wetlands, topographic symbols",
+      "id": "united-states-usfws-wetlands-topographic-symbols",
       "type": "arcgis-mapserver",
-      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/WetlandsTopo/Wetlands_Topo_Service/MapServer",
-      "region": "United States",
-      "category": "Waterways",
-      "note": "National Wetlands Inventory drawn with the marsh and swamp symbols of topographic maps; drawn only when zoomed in."
+      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/WetlandsTopo/Wetlands_Topo_Service/MapServer"
     },
     {
-      "name": "NPS — park boundaries",
+      "id": "united-states-nps-park-boundaries",
       "type": "arcgis-features",
-      "url": "https://services1.arcgis.com/fBc8EJBxQRMcHlei/arcgis/rest/services/NPS_Land_Resources_Division_Boundary_and_Tract_Data_Service/FeatureServer",
-      "region": "United States",
-      "category": "POI",
-      "note": "Boundaries and land tracts of national parks, monuments and other park units."
+      "url": "https://services1.arcgis.com/fBc8EJBxQRMcHlei/arcgis/rest/services/NPS_Land_Resources_Division_Boundary_and_Tract_Data_Service/FeatureServer"
     },
     {
-      "name": "FAA — VFR sectional charts",
+      "id": "united-states-faa-vfr-sectional-charts",
       "type": "arcgis-mapserver",
-      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "The aeronautical charts for visual flight: airports, airspace, navigation aids, obstacles and terrain, revised every 56 days. Cached for zooms 8 to 12, enlarged beyond."
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer"
     },
     {
-      "name": "FAA — VFR terminal area charts",
+      "id": "united-states-faa-vfr-terminal-area-charts",
       "type": "arcgis-mapserver",
-      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Terminal/MapServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Larger-scale charts of the airspace around busy airports, with more detail than the sectionals. Cached for zooms 10 to 12, enlarged beyond."
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Terminal/MapServer"
     },
     {
-      "name": "FAA — IFR low altitude enroute charts",
+      "id": "united-states-faa-ifr-low-altitude-enroute-charts",
       "type": "arcgis-mapserver",
-      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_AreaLow/MapServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Charts for instrument flight below 18,000 ft: airways, navigation aids, fixes and minimum altitudes, with the area charts of busy regions. Cached for zooms 7 to 12."
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_AreaLow/MapServer"
     },
     {
-      "name": "FAA — IFR high altitude enroute charts",
+      "id": "united-states-faa-ifr-high-altitude-enroute-charts",
       "type": "arcgis-mapserver",
-      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_High/MapServer",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "Charts for instrument flight at 18,000 ft and above: jet routes, RNAV Q-routes, navigation aids and reporting points. Cached for zooms 5 to 9, for a zoomed-out view."
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_High/MapServer"
     },
     {
-      "name": "NRL — FAA and NOAA charts",
+      "id": "united-states-nrl-faa-and-noaa-charts",
       "type": "wmts",
       "url": "https://geoint.nrlssc.navy.mil/nrltileserver/wmts?SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0",
-      "region": "United States",
-      "category": "Traffic",
-      "note": "The US Naval Research Laboratory's tile server: FAA flyway and helicopter route charts, besides sectional and terminal charts, as of September 2024; NOAA raster nautical charts as of 2018; and elevation and imagery layers.",
       "cors": false
     },
     {
-      "name": "FAA — temporary flight restrictions",
+      "id": "united-states-faa-temporary-flight-restrictions",
       "type": "wms",
       "url": "https://tfr.faa.gov/geoserver/TFR/ows?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "United States",
-      "category": "Hazards",
-      "note": "The temporary flight restrictions in force or announced, as the FAA's TFR site shows them, with airports, navigation aids and the boundaries of air route traffic control centers. Its chart layers answer with errors; the FAA chart entries have them.",
       "cors": false
     },
     {
-      "name": "Baden-Württemberg — MobiData BW (WFS)",
+      "id": "germany-baden-wu-rttemberg-mobidata-bw-wfs",
       "type": "wfs",
-      "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "Roadworks, charging points, bike parking, sharing vehicles, stops and stations as features, from zoom 9."
+      "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Karlsruhe region — traffic and roadworks (WFS)",
+      "id": "germany-karlsruhe-region-traffic-and-roadworks-wfs",
       "type": "wfs",
       "url": "https://mobil.trk.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Traffic",
-      "note": "The roadworks and traffic layers of the Karlsruhe WMS as features, from zoom 9.",
       "cors": false
     },
     {
-      "name": "Motorcycle road closures",
+      "id": "europe-motorcycle-road-closures",
       "type": "file",
       "url": "https://www.mintelonline.de/streckensperrungen/Streckensperrungen_Motorrad.kmz",
-      "region": "Europe",
-      "category": "Traffic",
-      "note": "Roads closed to motorcycles on certain days or hours in Germany, Austria, Switzerland, the Netherlands and Belgium, collected by mintelonline.de. Its server does not let web pages read the file: download it with the arrow, then choose it here. Updated every few weeks; Replace in the layer's settings takes a newer download.",
       "attribution": "<a href=\"https://www.mintelonline.de/streckensperrungen/\">mintelonline.de</a>",
       "bounds": [
         4.2,
@@ -1434,127 +933,82 @@
       ]
     },
     {
-      "name": "DWD — weather observations and warnings (WFS)",
+      "id": "germany-dwd-weather-observations-and-warnings-wfs",
       "type": "wfs",
-      "url": "https://maps.dwd.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "Weather",
-      "note": "Station observations and warning areas of the Deutscher Wetterdienst as features."
+      "url": "https://maps.dwd.de/geoserver/ows?SERVICE=WFS&REQUEST=GetCapabilities"
     },
     {
-      "name": "France — Sandre water reference data (WFS)",
+      "id": "france-france-sandre-water-reference-data-wfs",
       "type": "wfs",
-      "url": "https://services.sandre.eaufrance.fr/geo/sandre?SERVICE=WFS&REQUEST=GetCapabilities",
-      "region": "France",
-      "category": "Waterways",
-      "note": "Rivers, catchments, monitoring stations and water bodies; several hundred feature types."
+      "url": "https://services.sandre.eaufrance.fr/geo/sandre?SERVICE=WFS&REQUEST=GetCapabilities"
     },
     {
-      "name": "North Rhine-Westphalia — hospitals (OGC API)",
+      "id": "germany-north-rhine-westphalia-hospitals-ogc-api",
       "type": "ogc-features",
-      "url": "https://ogc-api.nrw.de/inspire-us-krankenhaus/v1/collections",
-      "region": "Germany",
-      "category": "POI",
-      "note": "Hospitals of North Rhine-Westphalia from an OGC API – Features service."
+      "url": "https://ogc-api.nrw.de/inspire-us-krankenhaus/v1/collections"
     },
     {
-      "name": "Berlin — the Berlin Wall, 1989",
+      "id": "germany-berlin-the-berlin-wall-1989",
       "type": "wms",
-      "url": "https://gdi.berlin.de/services/wms/berlinermauer?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "The GDR border installations as traced from an aerial photo of 25 April 1989: border wall, rear wall or fence, border strip, with the photo itself."
+      "url": "https://gdi.berlin.de/services/wms/berlinermauer?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Berlin — the Berlin Wall, 1989 (WFS)",
+      "id": "germany-berlin-the-berlin-wall-1989-wfs",
       "type": "wfs",
-      "url": "https://gdi.berlin.de/services/wfs/berlinermauer?SERVICE=WFS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "The walls, the border strip and the political border as features, to colour and tap."
+      "url": "https://gdi.berlin.de/services/wfs/berlinermauer?SERVICE=WFS&REQUEST=GetCapabilities"
     },
     {
-      "name": "BKG — GDR topographic map 1:200 000",
+      "id": "germany-bkg-gdr-topographic-map-1-200-000",
       "type": "wms",
-      "url": "https://sgx.geodatenzentrum.de/wms_tk200_ddr?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "Last editions of the GDR map, 1974–1989: the restricted edition for state and army (Ausgabe Staat) and the public one (Ausgabe für die Volkswirtschaft)."
+      "url": "https://sgx.geodatenzentrum.de/wms_tk200_ddr?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Brandenburg — Reich topographic map 1:25 000",
+      "id": "germany-brandenburg-reich-topographic-map-1-25-000",
       "type": "wms",
-      "url": "https://isk.geobasis-bb.de/mapproxy/dr25/service/wms?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "Messtischblätter of Brandenburg and Berlin, first surveyed from 1875; many sheets were updated in the 1930s and 1940s."
+      "url": "https://isk.geobasis-bb.de/mapproxy/dr25/service/wms?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "North Rhine-Westphalia — topographic 1:25 000, 1936–1945",
+      "id": "germany-north-rhine-westphalia-topographic-1-25-000-1936-194",
       "type": "wms",
-      "url": "https://www.wms.nrw.de/geobasis/wms_nw_tk25_1936-1945?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "The state's map sheets as updated from 1936 to 1945; drawn only when zoomed in closely."
+      "url": "https://www.wms.nrw.de/geobasis/wms_nw_tk25_1936-1945?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Rhineland-Palatinate — topographic 1:25 000, 1887–2024",
+      "id": "germany-rhineland-palatinate-topographic-1-25-000-1887-2024",
       "type": "wms",
       "url": "https://geo4.service24.rlp.de/wms/hktk25.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "Every edition of the state's map sheets; choose the year in the layer's settings, which starts at 2024. Which years a sheet has varies: around Dahn the first is 1937.",
       "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
     },
     {
-      "name": "Rhineland-Palatinate — Palatinate survey, 1836–1841",
+      "id": "germany-rhineland-palatinate-palatinate-survey-1836-1841",
       "type": "wms",
       "url": "https://geo4.service24.rlp.de/wms/hkpb.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "The original 1:25 000 survey sheets of the Palatinate, then part of the Kingdom of Bavaria.",
       "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
     },
     {
-      "name": "Rhineland-Palatinate — aerial photos since 1994",
+      "id": "germany-rhineland-palatinate-aerial-photos-since-1994",
       "type": "wms",
       "url": "https://geo4.service24.rlp.de/wms/rp_hkdop20.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "One layer per year from 1994; each year shows the part of the state flown that year, so a place appears every two to three years.",
       "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
     },
     {
-      "name": "Saxony — historical maps 1:25 000",
+      "id": "germany-saxony-historical-maps-1-25-000",
       "type": "wms",
-      "url": "https://geodienste.sachsen.de/wms_geosn_hist/guest?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "Messtischblatt before 1945, the GDR's restricted state edition of 1976–1989, and the map from 1990."
+      "url": "https://geodienste.sachsen.de/wms_geosn_hist/guest?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Bavaria — monuments",
+      "id": "germany-bavaria-monuments",
       "type": "wms",
-      "url": "https://geoservices.bayern.de/od/wms/gdi/v1/denkmal?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "Listed buildings, archaeological sites and ensembles of the Bavarian monument list, updated daily."
+      "url": "https://geoservices.bayern.de/od/wms/gdi/v1/denkmal?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "Saxony — cultural monuments and protected areas",
+      "id": "germany-saxony-cultural-monuments-and-protected-areas",
       "type": "wms",
-      "url": "https://geodienste.sachsen.de/iwms_gsz_schutzgebiete/guest?SERVICE=WMS&REQUEST=GetCapabilities",
-      "region": "Germany",
-      "category": "History",
-      "note": "Cultural monuments as points, lines and areas, beside the state's nature reserves and protected landscapes."
+      "url": "https://geodienste.sachsen.de/iwms_gsz_schutzgebiete/guest?SERVICE=WMS&REQUEST=GetCapabilities"
     },
     {
-      "name": "VersaTiles — vector tile layers",
+      "id": "global-versatiles-vector-tile-layers",
       "type": "vector-tiles",
-      "url": "https://tiles.versatiles.org/tiles/osm/tiles.json",
-      "region": "Global",
-      "category": "Basemap",
-      "note": "OpenStreetMap in the Shortbread schema, each tile layer a layer of its own in one colour."
+      "url": "https://tiles.versatiles.org/tiles/osm/tiles.json"
     }
   ]
 }

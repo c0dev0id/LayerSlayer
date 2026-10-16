@@ -72,10 +72,15 @@ parsers as local storage.
 by OSRM or straight, edits are pure functions in `routeEdit.ts`, and a pull-based pump
 requests one missing leg at a time (`routing/osrm.ts`, about one per second).
 
-**Library.** `src/library/library.json` lists the services offered in Add layer. A unit
-test requires `detectServiceType` to agree with every entry's type and `REGION_BOUNDS`
+**Library.** The services offered in Add layer come from two files merged at build time by
+`tools/libraryData.ts` into the `virtual:library` module. `src/library/library.json` holds
+each entry's technical definition (type, address, zooms, bounds, CORS) keyed by an `id`;
+`src/library/library.toml` holds its name, region, category and description, keyed by the
+same `id`, so text and taxonomy can be reworded without touching the technical side. Every
+id must appear in both files; the merge fails otherwise. A unit test requires
+`detectServiceType` to agree with every entry's type and `REGION_BOUNDS`
 (`library/regions.ts`) to cover every region used. `tools/check-library.test.ts` (the
-`check-library` script) rewrites `cors: false` marks in that file.
+`check-library` script) rewrites `cors: false` marks in `library.json` only.
 
 **Build-time icons.** `tools/iconSets.ts` is a Vite plugin that reads Maki, Temaki and
 Material Design Icons from their dev-dependency packages into virtual modules, each a

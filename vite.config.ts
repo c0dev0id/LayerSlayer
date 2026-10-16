@@ -1,11 +1,12 @@
 import { defineConfig } from 'vitest/config';
 import solid from 'vite-plugin-solid';
 import { iconSets } from './tools/iconSets.ts';
+import { libraryData } from './tools/libraryData.ts';
 
 export default defineConfig({
   // Relative base so the build works under any GitHub Pages path.
   base: './',
-  plugins: [solid(), iconSets()],
+  plugins: [solid(), iconSets(), libraryData()],
   build: {
     target: 'es2022',
     // MapLibre alone is about 1 MB minified; the PDF libraries are split off and load on import,

@@ -283,6 +283,17 @@ It is a static single-page app on GitHub Pages; there is no server component.
   the ones added are Luxembourg's geoportail.lu (CC BY 4.0), Flanders' aerial imagery
   (Digitaal Vlaanderen open data) and Poland's orthophoto mosaic (GUGiK open data), each
   a public WMTS.
+  - Two files, merged at build. The library is split in two so each half can be
+    edited on its own terms. `library.json` is the technical definition of every
+    service — type, address, zooms, bounds, CORS — the part a unit test guards and
+    `check-library` writes to. `library.toml` is the name, region, category and
+    description, the part a maintainer rewords or re-sorts, kept free of JSON
+    punctuation and readable as one overview. An `id` on each entry joins the two;
+    `tools/libraryData.ts` merges them into `virtual:library` at build time and
+    fails if an id is unmatched or names a region `regions.ts` lacks. The overlay
+    cannot add, remove or retype a service: those change the technical file, where
+    the tests are. TOML over JSON5 or YAML for the overlay because it carries no
+    nesting here and needs the least punctuation to maintain.
   - German history: the History category holds what was found open, with CORS and in Web
     Mercator: Berlin's course of the Wall of 1989 (WMS with the aerial photo it was traced
     from, and WFS), the BKG's GDR map 1:200 000 in its restricted state edition and its

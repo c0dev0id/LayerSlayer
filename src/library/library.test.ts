@@ -7,7 +7,7 @@ import { parseWmts } from '../services/wmts';
 import { parseXyz } from '../services/xyz';
 import { originOf } from '../ui/offers';
 import { defaultState } from '../state/store';
-import library from './library.json';
+import library from 'virtual:library';
 import { validBounds } from '../geo/mercator';
 import { downloadedLayer, entryAreas, entryService, filterLibrary, withEntry, type FileEntry, type LibraryEntry, type ServiceEntry } from './library';
 import { REGION_BOUNDS } from './regions';

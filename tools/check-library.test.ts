@@ -6,6 +6,7 @@
  * Run by hand: npm run check-library
  */
 import { readFileSync, writeFileSync } from 'node:fs';
+import { parse } from 'smol-toml';
 import { it } from 'vitest';
 import { entryService, type ServiceEntry } from '../src/library/library';
 import { getParam, withParams } from '../src/map/urls';
@@ -20,11 +21,13 @@ import { parseWfs } from '../src/services/wfs';
 import { parseXyz } from '../src/services/xyz';
 
 const LIBRARY = 'src/library/library.json';
+const OVERLAY = 'src/library/library.toml';
 /** The origin the app is served from (https://shagen.me/LayerSlayer/). */
 const ORIGIN = 'https://shagen.me';
 
 interface Entry {
-  name: string;
+  id: string;
+  name?: string;
   type: string;
   url: string;
   cors?: boolean;
@@ -112,6 +115,10 @@ async function check(entry: Entry): Promise<string> {
 
 it('checks the library', { timeout: 600_000 }, async () => {
   const library = JSON.parse(readFileSync(LIBRARY, 'utf8')) as { entries: Entry[] };
+  // The name lives in the overlay; borrow it for the report and the tile-template titles.
+  const { entries: overlay } = parse(readFileSync(OVERLAY, 'utf8')) as unknown as { entries: { id: string; name: string }[] };
+  const nameById = new Map(overlay.map((o) => [o.id, o.name]));
+  for (const entry of library.entries) entry.name = nameById.get(entry.id) ?? entry.id;
   const results = new Map<Entry, string>();
   const queue = [...library.entries];
   await Promise.all(
@@ -123,6 +130,7 @@ it('checks the library', { timeout: 600_000 }, async () => {
     const mark = entry.type === 'file' ? 'file   ' : entry.cors ? 'cors   ' : 'NO CORS';
     console.log(`${mark}  ${entry.name}: ${results.get(entry)}`);
     if (entry.cors) delete entry.cors;
+    delete entry.name;
   }
   writeFileSync(LIBRARY, `${JSON.stringify(library, null, 2)}\n`);
 });

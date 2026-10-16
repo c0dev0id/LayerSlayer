@@ -1,0 +1,1280 @@
+# Library overview: the name, taxonomy and description of every service.
+# Edit here to rename a source, reword its description, or move it to another
+# existing region or category. The id ties each entry to src/library/library.json,
+# which holds the technical definition (type, url, zooms, bounds). Entries cannot be
+# added, removed or retyped here; do that in library.json.
+
+[[entries]]
+id = "global-openfreemap-liberty"
+name = "OpenFreeMap Liberty"
+region = "Global"
+category = "Basemap"
+description = "Vector base map from OpenStreetMap; labels stay sharp at any zoom. No key, no usage limits."
+
+[[entries]]
+id = "global-openfreemap-bright"
+name = "OpenFreeMap Bright"
+region = "Global"
+category = "Basemap"
+description = "Vector base map in the OSM Bright style."
+
+[[entries]]
+id = "global-openfreemap-positron"
+name = "OpenFreeMap Positron"
+region = "Global"
+category = "Basemap"
+description = "Light grey vector base map; coloured overlays stand out against it."
+
+[[entries]]
+id = "global-versatiles-colorful"
+name = "VersaTiles Colorful"
+region = "Global"
+category = "Basemap"
+description = "Colourful vector base map from OpenStreetMap."
+
+[[entries]]
+id = "global-openstreetmap-standard"
+name = "OpenStreetMap Standard"
+region = "Global"
+category = "Basemap"
+description = "The standard OpenStreetMap raster tiles."
+
+[[entries]]
+id = "global-opentopomap"
+name = "OpenTopoMap"
+region = "Global"
+category = "Terrain"
+description = "Topographic map with contour lines and hill shading, large labels."
+
+[[entries]]
+id = "global-cyclosm"
+name = "CyclOSM"
+region = "Global"
+category = "Traffic"
+description = "Tracks and trails with their surface and difficulty, cycling infrastructure."
+
+[[entries]]
+id = "global-openseamap-seamarks"
+name = "OpenSeaMap — seamarks"
+region = "Global"
+category = "Waterways"
+description = "Buoys, beacons, lights, harbours and anchorages from OpenStreetMap, as a transparent overlay for any base map."
+
+[[entries]]
+id = "global-safecast-radiation-measurements"
+name = "Safecast — radiation measurements"
+region = "Global"
+category = "Hazards"
+description = "Background radiation readings uploaded by Safecast volunteers, coloured by dose rate; densest in Japan around Fukushima. The tiles were last rendered in May 2023."
+
+[[entries]]
+id = "global-usgs-earthquakes-of-the-past-week"
+name = "USGS — earthquakes of the past week"
+region = "Global"
+category = "Hazards"
+description = "Live feed of every earthquake recorded in the last seven days, as points."
+
+[[entries]]
+id = "global-esri-world-imagery"
+name = "Esri World Imagery"
+region = "Global"
+category = "Aerial"
+description = "Satellite and aerial imagery of the whole world, down to about 30 cm per pixel in many places, from Esri and its partners."
+
+[[entries]]
+id = "global-esri-national-geographic-world-map"
+name = "Esri National Geographic World Map"
+region = "Global"
+category = "Basemap"
+description = "Reference map in National Geographic's style: boundaries, places, protected areas, roads and water over shaded relief. Street detail only in the United States; elsewhere closer than city scale it shows \"Map data not yet available\"."
+
+[[entries]]
+id = "global-nasa-gibs-satellite-imagery"
+name = "NASA GIBS — satellite imagery"
+region = "Global"
+category = "Aerial"
+description = "Daily satellite imagery and science layers."
+
+[[entries]]
+id = "global-eox-maps"
+name = "EOX Maps"
+region = "Global"
+category = "Aerial"
+description = "Sentinel-2 cloudless imagery, terrain and overlays."
+
+[[entries]]
+id = "global-openstreetmap-terrestris"
+name = "OpenStreetMap — terrestris"
+region = "Global"
+category = "Basemap"
+description = "OpenStreetMap rendered as a basemap, with and without labels."
+
+[[entries]]
+id = "global-openstreetmap-mundialis"
+name = "OpenStreetMap — mundialis"
+region = "Global"
+category = "Basemap"
+description = "OpenStreetMap, plus a topographic style."
+
+[[entries]]
+id = "global-waymarked-trails-hiking-routes"
+name = "Waymarked Trails — hiking routes"
+region = "Global"
+category = "Traffic"
+description = "Signed hiking routes from OpenStreetMap, drawn as coloured lines over your own map; the colour tells the route's rank, from international down to local, and the waymark symbols appear at close zoom."
+
+[[entries]]
+id = "global-gebco-bathymetry"
+name = "GEBCO — bathymetry"
+region = "Global"
+category = "Terrain"
+description = "Sea floor depth, shaded relief."
+
+[[entries]]
+id = "global-openrailwaymap-railways"
+name = "OpenRailwayMap — railways"
+region = "Global"
+category = "Traffic"
+description = "Every railway line from OpenStreetMap, with stations and track details at close zoom. An overlay: transparent between the lines."
+
+[[entries]]
+id = "global-open-infrastructure-map-power"
+name = "Open Infrastructure Map — power"
+region = "Global"
+category = "Infrastructure"
+description = "Power lines, towers, substations, power plants and generators from OpenStreetMap."
+
+[[entries]]
+id = "global-open-infrastructure-map-telecoms"
+name = "Open Infrastructure Map — telecoms"
+region = "Global"
+category = "Infrastructure"
+description = "Communication lines, masts, antennas, data centres and street cabinets from OpenStreetMap."
+
+[[entries]]
+id = "global-open-infrastructure-map-oil-and-gas"
+name = "Open Infrastructure Map — oil and gas"
+region = "Global"
+category = "Infrastructure"
+description = "Oil and gas pipelines, wells and sites from OpenStreetMap."
+
+[[entries]]
+id = "global-open-infrastructure-map-other-pipelines"
+name = "Open Infrastructure Map — other pipelines"
+region = "Global"
+category = "Infrastructure"
+description = "Pipelines for other substances, such as heat, chemicals or slurry, from OpenStreetMap."
+
+[[entries]]
+id = "global-open-infrastructure-map-water"
+name = "Open Infrastructure Map — water"
+region = "Global"
+category = "Infrastructure"
+description = "Water and wastewater pipelines, treatment plants, reservoirs, towers, wells and pumping stations from OpenStreetMap."
+
+[[entries]]
+id = "global-nasa-black-marble-2024-earth-at-night"
+name = "NASA Black Marble 2024 — Earth at night"
+region = "Global"
+category = "Aerial"
+description = "City and industry lights seen from space, a 2024 composite of the VIIRS night-time imagery, as served by Open Infrastructure Map."
+
+[[entries]]
+id = "europe-emodnet-bathymetry"
+name = "EMODnet — bathymetry"
+region = "Europe"
+category = "Terrain"
+description = "European sea floor depth and coastline."
+
+[[entries]]
+id = "europe-corine-land-cover-2018"
+name = "Corine Land Cover 2018"
+region = "Europe"
+category = "Basemap"
+description = "How the land is used across Europe — forest, farmland, built-up, water."
+
+[[entries]]
+id = "australia-geoscience-australia-topographic"
+name = "Geoscience Australia — topographic"
+region = "Australia"
+category = "Basemap"
+description = "National topographic basemap."
+
+[[entries]]
+id = "australia-digital-earth-australia"
+name = "Digital Earth Australia"
+region = "Australia"
+category = "Aerial"
+description = "Satellite imagery and maps derived from it."
+
+[[entries]]
+id = "austria-basemap-at"
+name = "basemap.at"
+region = "Austria"
+category = "Basemap"
+description = "National basemap, grey and high-contrast variants."
+
+[[entries]]
+id = "belgium-ngi-cartoweb"
+name = "NGI CartoWeb"
+region = "Belgium"
+category = "Basemap"
+description = "National topographic map."
+
+[[entries]]
+id = "belgium-flanders-aerial-imagery"
+name = "Flanders — aerial imagery"
+region = "Belgium"
+category = "Aerial"
+description = "Most recent aerial orthophotos of Flanders, from the regional open data service (Digitaal Vlaanderen)."
+
+[[entries]]
+id = "brazil-terrabrasilis"
+name = "TerraBrasilis"
+region = "Brazil"
+category = "Basemap"
+description = "Deforestation monitoring and basemaps."
+
+[[entries]]
+id = "canada-canada-base-map"
+name = "Canada Base Map"
+region = "Canada"
+category = "Basemap"
+description = "National transportation basemap."
+
+[[entries]]
+id = "france-ge-oplateforme-ign"
+name = "Géoplateforme (IGN)"
+region = "France"
+category = "Basemap"
+description = "National topographic maps and aerial imagery."
+
+[[entries]]
+id = "france-brgm-natural-hazards"
+name = "BRGM — natural hazards"
+region = "France"
+category = "Hazards"
+description = "Flood, landslide and seismic risk."
+
+[[entries]]
+id = "france-sandre-water"
+name = "Sandre — water"
+region = "France"
+category = "Waterways"
+description = "Rivers, lakes and catchments."
+
+[[entries]]
+id = "global-topplusopen"
+name = "TopPlusOpen"
+region = "Global"
+category = "Basemap"
+description = "Topographic base map of Germany's federal mapping agency, detailed for Germany and in less detail for the rest of the world; colour, grey and light variants."
+
+[[entries]]
+id = "germany-dwd-weather"
+name = "DWD — weather"
+region = "Germany"
+category = "Weather"
+description = "Radar, warnings and forecast layers."
+
+[[entries]]
+id = "germany-basemap-de"
+name = "basemap.de"
+region = "Germany"
+category = "Basemap"
+description = "The German national basemap, colour and grey, as ready-made tiles."
+
+[[entries]]
+id = "germany-bkg-overview-map-1-250-000"
+name = "BKG — overview map 1:250 000"
+region = "Germany"
+category = "Basemap"
+description = "Small-scale topographic map for route overview."
+
+[[entries]]
+id = "germany-federal-waterways"
+name = "Federal waterways"
+region = "Germany"
+category = "Waterways"
+description = "Navigable rivers and canals, locks and kilometre marks."
+
+[[entries]]
+id = "germany-bavaria-topographic-1-25-000"
+name = "Bavaria — topographic 1:25 000"
+region = "Germany"
+category = "Basemap"
+description = "State topographic map."
+
+[[entries]]
+id = "germany-bavaria-aerial-imagery"
+name = "Bavaria — aerial imagery"
+region = "Germany"
+category = "Aerial"
+description = "40 cm aerial photography of the state."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-mobidata"
+name = "Baden-Württemberg — MobiData"
+region = "Germany"
+category = "Traffic"
+description = "Roadworks, charging points, parking and the cycle network."
+
+[[entries]]
+id = "germany-north-rhine-westphalia-topographic"
+name = "North Rhine-Westphalia — topographic"
+region = "Germany"
+category = "Basemap"
+description = "State topographic maps at several scales."
+
+[[entries]]
+id = "germany-north-rhine-westphalia-aerial-imagery"
+name = "North Rhine-Westphalia — aerial imagery"
+region = "Germany"
+category = "Aerial"
+description = "Aerial photography of the state, colour and infrared."
+
+[[entries]]
+id = "germany-rhineland-palatinate-topographic-1-25-000"
+name = "Rhineland-Palatinate — topographic 1:25 000"
+region = "Germany"
+category = "Basemap"
+description = "State topographic map."
+
+[[entries]]
+id = "germany-rhineland-palatinate-roadworks"
+name = "Rhineland-Palatinate — roadworks"
+region = "Germany"
+category = "Traffic"
+description = "Construction sites, closures and diversions in Rhineland-Palatinate."
+
+[[entries]]
+id = "germany-mecklenburg-vorpommern-topographic"
+name = "Mecklenburg-Vorpommern — topographic"
+region = "Germany"
+category = "Basemap"
+description = "State topographic maps at several scales."
+
+[[entries]]
+id = "germany-mecklenburg-vorpommern-aerial-imagery"
+name = "Mecklenburg-Vorpommern — aerial imagery"
+region = "Germany"
+category = "Aerial"
+description = "Aerial photography of the state."
+
+[[entries]]
+id = "germany-mecklenburg-vorpommern-roadworks"
+name = "Mecklenburg-Vorpommern — roadworks"
+region = "Germany"
+category = "Traffic"
+description = "Construction sites that restrict traffic on federal and state roads in Mecklenburg-Vorpommern."
+
+[[entries]]
+id = "germany-saxony-aerial-imagery"
+name = "Saxony — aerial imagery"
+region = "Germany"
+category = "Aerial"
+description = "Aerial photography of the state."
+
+[[entries]]
+id = "germany-saxony-closures-and-diversions"
+name = "Saxony — closures and diversions"
+region = "Germany"
+category = "Traffic"
+description = "Today's closures and the official diversion routes on Saxony's roads, plus closures already announced."
+
+[[entries]]
+id = "germany-schleswig-holstein-roadworks-and-diversions"
+name = "Schleswig-Holstein — roadworks and diversions"
+region = "Germany"
+category = "Traffic"
+description = "Construction sites, closures and signed diversion routes on Schleswig-Holstein's roads and motorways, plus current traffic disruptions. Also carries the roadworks of Hamburg, Lower Saxony and Mecklenburg-Vorpommern."
+
+[[entries]]
+id = "germany-hamburg-roadworks"
+name = "Hamburg — roadworks"
+region = "Germany"
+category = "Traffic"
+description = "Construction sites on Hamburg's roads."
+
+[[entries]]
+id = "germany-hamburg-motorway-diversions"
+name = "Hamburg — motorway diversions"
+region = "Germany"
+category = "Traffic"
+description = "The signed diversion routes that take over when a motorway or expressway around Hamburg is closed."
+
+[[entries]]
+id = "germany-hamburg-live-traffic"
+name = "Hamburg — live traffic"
+region = "Germany"
+category = "Traffic"
+description = "Current traffic flow on Hamburg's main roads."
+
+[[entries]]
+id = "germany-hamburg-police-traffic-reports"
+name = "Hamburg — police traffic reports"
+region = "Germany"
+category = "Traffic"
+description = "The police's current traffic reports for Hamburg: accidents, closures and hazards."
+
+[[entries]]
+id = "germany-brandenburg-roadworks"
+name = "Brandenburg — roadworks"
+region = "Germany"
+category = "Traffic"
+description = "Current and upcoming roadworks and closures on federal, state and district roads in Brandenburg."
+
+[[entries]]
+id = "germany-bkg-topographic-1-100-000"
+name = "BKG — topographic 1:100 000"
+region = "Germany"
+category = "Basemap"
+description = "Topographic map of the whole country at 1:100 000."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-topographic-1-25-000"
+name = "Baden-Württemberg — topographic 1:25 000"
+region = "Germany"
+category = "Basemap"
+description = "The state's 1:25 000 sheet. Enough detail for small roads and tracks."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-road-map-1-200-000"
+name = "Baden-Württemberg — road map 1:200 000"
+region = "Germany"
+category = "Basemap"
+description = "The official road map of the state, for reading a route at low zoom."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-aerial-imagery"
+name = "Baden-Württemberg — aerial imagery"
+region = "Germany"
+category = "Aerial"
+description = "20 cm colour aerial photography of the whole state."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-hillshade"
+name = "Baden-Württemberg — hillshade"
+region = "Germany"
+category = "Terrain"
+description = "Terrain shading from the laser-scan height model, for reading relief under another layer."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-protected-areas"
+name = "Baden-Württemberg — protected areas"
+region = "Germany"
+category = "Hazards"
+description = "Nature reserves, national park and biosphere zones, where access is often restricted."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-world-heritage-sites"
+name = "Baden-Württemberg — world heritage sites"
+region = "Germany"
+category = "POI"
+description = "UNESCO sites in the state, including the Roman Limes, Reichenau and the ice-age caves."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-archaeological-sites"
+name = "Baden-Württemberg — archaeological sites"
+region = "Germany"
+category = "History"
+description = "Recorded archaeological monuments — forts, burial grounds, earthworks."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-geotopes-and-landmarks"
+name = "Baden-Württemberg — geotopes and landmarks"
+region = "Germany"
+category = "POI"
+description = "Caves, waterfalls, gorges, rock formations and viewpoints, as places worth stopping at."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-geological-hazards"
+name = "Baden-Württemberg — geological hazards"
+region = "Germany"
+category = "Hazards"
+description = "Where rockfall, landslide and sinkholes are known to occur."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-flood-zones"
+name = "Baden-Württemberg — flood zones"
+region = "Germany"
+category = "Hazards"
+description = "Designated flood areas along the state's rivers."
+
+[[entries]]
+id = "germany-karlsruhe-region-traffic-and-roadworks"
+name = "Karlsruhe region — traffic and roadworks"
+region = "Germany"
+category = "Traffic"
+description = "Current and planned roadworks, one-way streets, ferries, low-emission zones, winter gritting and motorcycle parking. Karlsruhe region only."
+
+[[entries]]
+id = "luxembourg-geoportail-lu"
+name = "geoportail.lu"
+region = "Luxembourg"
+category = "Basemap"
+description = "National basemap, road map and aerial orthophotos back to 1967, from the open data service of the Luxembourg cadastre (ACT)."
+
+[[entries]]
+id = "netherlands-pdok-topographic-basemap"
+name = "PDOK — topographic basemap"
+region = "Netherlands"
+category = "Basemap"
+description = "National basemap, several styles."
+
+[[entries]]
+id = "netherlands-pdok-aerial-imagery"
+name = "PDOK — aerial imagery"
+region = "Netherlands"
+category = "Aerial"
+description = "Recent aerial photography."
+
+[[entries]]
+id = "norway-kartverket"
+name = "Kartverket"
+region = "Norway"
+category = "Basemap"
+description = "Topographic and nautical raster maps."
+
+[[entries]]
+id = "poland-poland-forest-ownership"
+name = "Poland — forest ownership"
+region = "Poland"
+category = "POI"
+description = "Who owns each forest: State Forests, national parks, communal or private, from the national Forest Data Bank."
+
+[[entries]]
+id = "poland-poland-forest-compartments"
+name = "Poland — forest compartments"
+region = "Poland"
+category = "POI"
+description = "Forest compartment lines and numbers, and the forest-district boundaries, as posted on the marker stones in State Forests."
+
+[[entries]]
+id = "poland-poland-aerial-imagery"
+name = "Poland — aerial imagery"
+region = "Poland"
+category = "Aerial"
+description = "National orthophoto mosaic from the head office of geodesy and cartography (GUGiK)."
+
+[[entries]]
+id = "portugal-dgt-aerial-imagery-2018"
+name = "DGT — aerial imagery 2018"
+region = "Portugal"
+category = "Aerial"
+description = "Aerial photography of Portugal, flown in 2018."
+
+[[entries]]
+id = "spain-ign-pnoa-aerial-imagery"
+name = "IGN — PNOA aerial imagery"
+region = "Spain"
+category = "Aerial"
+description = "National aerial photography."
+
+[[entries]]
+id = "spain-ign-raster-map"
+name = "IGN — raster map"
+region = "Spain"
+category = "Basemap"
+description = "Scanned topographic maps of Spain."
+
+[[entries]]
+id = "switzerland-swisstopo"
+name = "swisstopo"
+region = "Switzerland"
+category = "Basemap"
+description = "National maps, imagery and thematic layers."
+
+[[entries]]
+id = "switzerland-swisstopo-national-map-tiles"
+name = "swisstopo — National Map tiles"
+region = "Switzerland"
+category = "Basemap"
+description = "The national topographic map as Web Mercator tiles."
+
+[[entries]]
+id = "united-kingdom-environment-agency-lidar-terrain"
+name = "Environment Agency — LiDAR terrain"
+region = "United Kingdom"
+category = "Terrain"
+description = "Ground height at 1 m detail, from laser scanning."
+
+[[entries]]
+id = "united-states-usfs-motor-vehicle-use-map"
+name = "USFS — Motor Vehicle Use Map"
+region = "United States"
+category = "Traffic"
+description = "Which roads and trails in US National Forests are open to motor vehicles."
+
+[[entries]]
+id = "united-states-usfs-forest-roads"
+name = "USFS — forest roads"
+region = "United States"
+category = "Traffic"
+description = "The Forest Service road network in every National Forest, appearing from zoom 11."
+
+[[entries]]
+id = "united-states-usfs-forest-trails"
+name = "USFS — forest trails"
+region = "United States"
+category = "Traffic"
+description = "Forest Service trails in every National Forest, appearing from zoom 11."
+
+[[entries]]
+id = "united-states-usfs-campgrounds-and-trailheads"
+name = "USFS — campgrounds and trailheads"
+region = "United States"
+category = "POI"
+description = "Campgrounds, trailheads, picnic sites and other Forest Service recreation sites, appearing from zoom 11."
+
+[[entries]]
+id = "united-states-usfs-wilderness-areas"
+name = "USFS — wilderness areas"
+region = "United States"
+category = "POI"
+description = "Designated wilderness areas, where no motor vehicle may go, at every zoom."
+
+[[entries]]
+id = "united-states-blm-roads-and-trails"
+name = "BLM — roads and trails"
+region = "United States"
+category = "Traffic"
+description = "Roads and trails on Bureau of Land Management land, split by whether motor vehicles are allowed on them."
+
+[[entries]]
+id = "united-states-blm-campgrounds-and-recreation-sites"
+name = "BLM — campgrounds and recreation sites"
+region = "United States"
+category = "POI"
+description = "Campgrounds, boat ramps, day-use areas and other recreation sites on Bureau of Land Management land."
+
+[[entries]]
+id = "united-states-blm-land-managers"
+name = "BLM — land managers"
+region = "United States"
+category = "POI"
+description = "Public land coloured by the agency that manages its surface: Bureau of Land Management, Forest Service, Park Service, Fish and Wildlife Service, Reclamation, Indian Affairs, military, state and local. Private land is left blank. Served as cached tiles, so it appears quickly."
+
+[[entries]]
+id = "united-states-blm-wilderness-and-wilderness-study-areas"
+name = "BLM — wilderness and wilderness study areas"
+region = "United States"
+category = "POI"
+description = "Wilderness and wilderness study areas on Bureau of Land Management land. Wilderness is closed to motor vehicles; in study areas they are limited to the routes the BLM allows."
+
+[[entries]]
+id = "united-states-nps-park-roads"
+name = "NPS — park roads"
+region = "United States"
+category = "Traffic"
+description = "Public roads in national parks and other National Park Service units."
+
+[[entries]]
+id = "united-states-nps-park-trails"
+name = "NPS — park trails"
+region = "United States"
+category = "Traffic"
+description = "Public trails in national parks and other National Park Service units; trails closed to the public are left out."
+
+[[entries]]
+id = "united-states-usgs-mines-and-mineral-resources"
+name = "USGS — mines and mineral resources"
+region = "United States"
+category = "POI"
+description = "Mines, prospects and mineral occurrences from the USGS Mineral Resource Data System, which the USGS no longer updates."
+
+[[entries]]
+id = "united-states-usgs-aerial-imagery"
+name = "USGS — aerial imagery"
+region = "United States"
+category = "Aerial"
+description = "National aerial imagery."
+
+[[entries]]
+id = "united-states-usgs-shaded-relief"
+name = "USGS — shaded relief"
+region = "United States"
+category = "Terrain"
+description = "Terrain shading."
+
+[[entries]]
+id = "united-states-usgs-hydrography"
+name = "USGS — hydrography"
+region = "United States"
+category = "Waterways"
+description = "Rivers, lakes and coastline."
+
+[[entries]]
+id = "united-states-usgs-protected-areas-by-manager-pad-us-4-1"
+name = "USGS — protected areas by manager (PAD-US 4.1)"
+region = "United States"
+category = "POI"
+description = "Who manages each protected area, from the current edition of the database — Forest Service, Bureau of Land Management, National Park Service, state, local, tribal or private. Drawn fresh for each view, so it takes a moment longer to appear."
+
+[[entries]]
+id = "united-states-usgs-contours"
+name = "USGS — contours"
+region = "United States"
+category = "Terrain"
+description = "Topographic contour lines for the United States at multiple scales."
+
+[[entries]]
+id = "united-states-usgs-nhd-hydrography-detailed"
+name = "USGS — NHD hydrography (detailed)"
+region = "United States"
+category = "Waterways"
+description = "Individual stream reaches, named water bodies, canals, drainage basins and other features from the National Hydrography Dataset. More detail than the cached hydrography basemap."
+
+[[entries]]
+id = "united-states-nlcd-land-cover"
+name = "NLCD — land cover"
+region = "United States"
+category = "Terrain"
+description = "What the land is covered with across the contiguous US and Alaska: forest, shrub, grassland, wetland, cultivated and urban, at 30 m resolution. Multiple editions of the National Land Cover Database."
+
+[[entries]]
+id = "united-states-usfws-national-wetlands-inventory"
+name = "USFWS — National Wetlands Inventory"
+region = "United States"
+category = "Waterways"
+description = "Wetlands mapped by the US Fish & Wildlife Service: marshes, swamps, bogs, ponds and coastal waters. Useful for assessing trafficability in soft or seasonally flooded terrain."
+
+[[entries]]
+id = "united-states-epa-ecoregions"
+name = "EPA — ecoregions"
+region = "United States"
+category = "Terrain"
+description = "Level III and IV ecoregions — areas where ecosystems, vegetation, soils and land use are broadly similar. Useful as context when interpreting terrain and vegetation layers."
+
+[[entries]]
+id = "united-states-noaa-snow-analysis"
+name = "NOAA — snow analysis"
+region = "United States"
+category = "Weather"
+description = "Daily snow water equivalent and snow depth from the NOAA National Operational Hydrologic Remote Sensing Center. Useful for planning winter access."
+
+[[entries]]
+id = "united-states-usfs-fire-history"
+name = "USFS — fire history"
+region = "United States"
+category = "Hazards"
+description = "Wildfire occurrence points and perimeters in US National Forests since the 1970s. Useful for understanding which areas have burned and assessing post-fire terrain."
+
+[[entries]]
+id = "united-states-usfs-fire-current-edition"
+name = "USFS — fire, current edition"
+region = "United States"
+category = "Hazards"
+description = "The most recently published compilation of wildfire occurrences in National Forests. More current than the historical archive but otherwise covers the same data."
+
+[[entries]]
+id = "united-states-usfs-fire-severity-mtbs"
+name = "USFS — fire severity (MTBS)"
+region = "United States"
+category = "Hazards"
+description = "How intensely each large wildfire burned, derived from satellite imagery, since 1984. From the Monitoring Trends in Burn Severity program. Useful for assessing vegetation recovery and post-fire trafficability."
+
+[[entries]]
+id = "united-states-usfs-fireshed-registry"
+name = "USFS — fireshed registry"
+region = "United States"
+category = "Hazards"
+description = "Firesheds and their treatment priority across the contiguous US — areas where prescribed burning and fuel reduction are planned or in progress."
+
+[[entries]]
+id = "united-states-usgs-governmental-unit-boundaries"
+name = "USGS — governmental unit boundaries"
+region = "United States"
+category = "POI"
+description = "Outlines and names of national forests, wilderness areas, parks, monuments, Bureau of Land Management and tribal lands, and state, county and town limits. Names are separate layers: pick a boundary and its label together."
+
+[[entries]]
+id = "united-states-us-census-boundaries-tigerweb"
+name = "US Census — boundaries (TIGERweb)"
+region = "United States"
+category = "POI"
+description = "State, county, city and tribal-land boundaries with their names, from the Census Bureau, alongside the statistical areas it draws for its own counts."
+
+[[entries]]
+id = "united-states-us-census-physical-features-tigerweb"
+name = "US Census — physical features (TIGERweb)"
+region = "United States"
+category = "Infrastructure"
+description = "Rivers, lakes and glaciers, roads and railroads, and military installations, colleges, prisons and National Park Service areas, each with a separate labels layer."
+
+[[entries]]
+id = "united-states-usgs-3dep-elevation"
+name = "USGS — 3DEP elevation"
+region = "United States"
+category = "Terrain"
+description = "Elevation, slope and hillshade."
+
+[[entries]]
+id = "united-states-noaa-nowcoast"
+name = "NOAA nowCOAST"
+region = "United States"
+category = "Weather"
+description = "Weather, radar and marine observations."
+
+[[entries]]
+id = "united-states-noaa-nautical-charts"
+name = "NOAA — nautical charts"
+region = "United States"
+category = "Waterways"
+description = "Electronic navigational charts."
+
+[[entries]]
+id = "united-states-nexrad-radar"
+name = "NEXRAD radar"
+region = "United States"
+category = "Weather"
+description = "Live and archived precipitation radar."
+
+[[entries]]
+id = "united-states-landfire-vegetation-and-fuels"
+name = "LANDFIRE — vegetation and fuels"
+region = "United States"
+category = "Terrain"
+description = "Vegetation type, height and cover across the contiguous US."
+
+[[entries]]
+id = "united-states-wfigs-current-wildfire-perimeters"
+name = "WFIGS — current wildfire perimeters"
+region = "United States"
+category = "Hazards"
+description = "Perimeters of active wildfires, as vector features queried by view."
+
+[[entries]]
+id = "united-states-usgs-topographic-map"
+name = "USGS — topographic map"
+region = "United States"
+category = "Basemap"
+description = "The National Map's topographic base map, cached tiles."
+
+[[entries]]
+id = "united-states-usgs-protected-areas-by-fee-manager-pad-us-4-1"
+name = "USGS — protected areas by fee manager (PAD-US 4.1)"
+region = "United States"
+category = "POI"
+description = "Who owns or manages each protected area, as polygons drawn in the browser; the same data as the PAD-US map service."
+
+[[entries]]
+id = "united-states-bts-north-american-rail-network-lines"
+name = "BTS — North American rail network lines"
+region = "United States"
+category = "Traffic"
+description = "Every rail line in the United States, Canada and Mexico, with owner, track rights and use (NTAD)."
+
+[[entries]]
+id = "united-states-bts-north-american-rail-network-nodes"
+name = "BTS — North American rail network nodes"
+region = "United States"
+category = "Traffic"
+description = "Junctions and ends of the rail network lines (NTAD)."
+
+[[entries]]
+id = "united-states-bts-passenger-rail-lines"
+name = "BTS — passenger rail lines"
+region = "United States"
+category = "Traffic"
+description = "The rail network lines that carry passenger trains (NTAD)."
+
+[[entries]]
+id = "united-states-bts-amtrak-routes"
+name = "BTS — Amtrak routes"
+region = "United States"
+category = "Traffic"
+description = "Amtrak's passenger routes as lines."
+
+[[entries]]
+id = "united-states-bts-amtrak-stations"
+name = "BTS — Amtrak stations"
+region = "United States"
+category = "POI"
+description = "Amtrak stations and stops."
+
+[[entries]]
+id = "united-states-bts-railroad-grade-crossings"
+name = "BTS — railroad grade crossings"
+region = "United States"
+category = "Traffic"
+description = "Every place a road or path crosses a railway, from the FRA crossing inventory."
+
+[[entries]]
+id = "united-states-bts-railroad-bridges"
+name = "BTS — railroad bridges"
+region = "United States"
+category = "Traffic"
+description = "Railroad bridges, as points."
+
+[[entries]]
+id = "united-states-bts-rail-yards"
+name = "BTS — rail yards"
+region = "United States"
+category = "Traffic"
+description = "The tracks of rail yards, as lines."
+
+[[entries]]
+id = "united-states-hifld-electric-power-transmission-lines"
+name = "HIFLD — electric power transmission lines"
+region = "United States"
+category = "Infrastructure"
+description = "High-voltage transmission lines with their voltage and owner. HIFLD has archived the layer: it is no longer updated."
+
+[[entries]]
+id = "united-states-epa-airnow-air-quality-index"
+name = "EPA AirNow — air quality index"
+region = "United States"
+category = "Weather"
+description = "Contours of the latest air quality index, ozone and fine particles combined, in the AQI colours from green (good) to maroon (hazardous)."
+
+[[entries]]
+id = "united-states-epa-airnow-fine-particles-pm2-5"
+name = "EPA AirNow — fine particles (PM2.5)"
+region = "United States"
+category = "Weather"
+description = "Contours of the latest air quality index for fine particles (PM2.5), the pollutant wildfire smoke raises, in the AQI colours."
+
+[[entries]]
+id = "united-states-epa-airnow-ozone"
+name = "EPA AirNow — ozone"
+region = "United States"
+category = "Weather"
+description = "Contours of the latest air quality index for ozone, in the AQI colours."
+
+[[entries]]
+id = "united-states-epa-airnow-monitoring-stations"
+name = "EPA AirNow — monitoring stations"
+region = "United States"
+category = "Weather"
+description = "The latest readings of the stations measuring ozone and particles, each dot in the colour of its air quality index."
+
+[[entries]]
+id = "united-states-epa-airnow-air-quality-forecast"
+name = "EPA AirNow — air quality forecast"
+region = "United States"
+category = "Weather"
+description = "Today's and tomorrow's air quality forecast for each reporting area, in the AQI colours."
+
+[[entries]]
+id = "united-states-noaa-wildfire-smoke-forecast"
+name = "NOAA — wildfire smoke forecast"
+region = "United States"
+category = "Weather"
+description = "Near-surface smoke from wildfires, from NOAA air quality forecast guidance that runs about two days ahead. The map shows the hour the service shows by default."
+
+[[entries]]
+id = "united-states-usgs-imagery-with-topographic-labels"
+name = "USGS — imagery with topographic labels"
+region = "United States"
+category = "Aerial"
+description = "Aerial imagery under The National Map's roads, boundaries and names, cached tiles."
+
+[[entries]]
+id = "united-states-usgs-place-names-gnis"
+name = "USGS — place names (GNIS)"
+region = "United States"
+category = "POI"
+description = "Official names of places, landforms, streams and cultural features from the Geographic Names Information System, including historical names."
+
+[[entries]]
+id = "united-states-usgs-transportation"
+name = "USGS — transportation"
+region = "United States"
+category = "Traffic"
+description = "Roads, railroads, trails and airports of The National Map, from Census TIGER/Line and Forest Service data, drawn by scale."
+
+[[entries]]
+id = "united-states-usgs-structures"
+name = "USGS — structures"
+region = "United States"
+category = "POI"
+description = "Public buildings: schools, hospitals, fire and police stations, post offices, cemeteries, campgrounds, trailheads, cabins and shelters."
+
+[[entries]]
+id = "united-states-usgs-trails"
+name = "USGS — trails"
+region = "United States"
+category = "Traffic"
+description = "Trails compiled from the National Transportation Dataset, Census and Forest Service data."
+
+[[entries]]
+id = "united-states-usgs-nhdplus-high-resolution"
+name = "USGS — NHDPlus High Resolution"
+region = "United States"
+category = "Waterways"
+description = "Flowlines, water bodies, gages, sinks and catchments of the high-resolution hydrography network; drawn only when zoomed in."
+
+[[entries]]
+id = "united-states-usgs-watershed-boundaries"
+name = "USGS — watershed boundaries"
+region = "United States"
+category = "Waterways"
+description = "Hydrologic units from 2-digit regions down to 16-digit units, with their codes."
+
+[[entries]]
+id = "united-states-usgs-3d-hydrography-3dhp"
+name = "USGS — 3D hydrography (3DHP)"
+region = "United States"
+category = "Waterways"
+description = "The successor to NHD, derived from lidar elevation: flowlines, water bodies, catchments, springs and confluences where mapped so far."
+
+[[entries]]
+id = "united-states-usgs-3d-hydrography-features-3dhp"
+name = "USGS — 3D hydrography features (3DHP)"
+region = "United States"
+category = "Waterways"
+description = "The 3DHP flowlines, water bodies and points as vector features queried by view."
+
+[[entries]]
+id = "united-states-usgs-naip-aerial-imagery"
+name = "USGS — NAIP aerial imagery"
+region = "United States"
+category = "Aerial"
+description = "Summer imagery of the National Agriculture Imagery Program, the latest for each state: natural colour, colour infrared or a vegetation index (NDVI)."
+
+[[entries]]
+id = "united-states-usgs-naip-imagery-coverage"
+name = "USGS — NAIP imagery coverage"
+region = "United States"
+category = "Reference"
+description = "Footprints of the NAIP imagery and the year each was flown."
+
+[[entries]]
+id = "united-states-usgs-3dep-elevation-coverage"
+name = "USGS — 3DEP elevation coverage"
+region = "United States"
+category = "Reference"
+description = "Where 3DEP elevation models (1 m to 2 arc-seconds), lidar point clouds, ifsar and topobathymetric data exist."
+
+[[entries]]
+id = "united-states-usgs-3dep-lidar-acquisition-grid"
+name = "USGS — 3DEP lidar acquisition grid"
+region = "United States"
+category = "Reference"
+description = "The 1 km grid lidar is collected in, with state and county outlines."
+
+[[entries]]
+id = "united-states-usgs-us-topo-availability"
+name = "USGS — US Topo availability"
+region = "United States"
+category = "Reference"
+description = "7.5-minute quadrangles tinted by the year their current US Topo map was published."
+
+[[entries]]
+id = "united-states-usgs-map-sheet-indices"
+name = "USGS — map sheet indices"
+region = "United States"
+category = "Reference"
+description = "The 1×1 degree, 30×60-minute, 15-minute, 7.5-minute and 3.75-minute map sheet grids with their names."
+
+[[entries]]
+id = "united-states-blm-public-land-survey-system"
+name = "BLM — Public Land Survey System"
+region = "United States"
+category = "Reference"
+description = "Townships and sections of the land survey grid most legal land descriptions refer to."
+
+[[entries]]
+id = "united-states-nga-us-national-grid"
+name = "NGA — US National Grid"
+region = "United States"
+category = "Reference"
+description = "The USNG/MGRS grid used in search and rescue, from its 6×8 degree zones down to 100 m squares."
+
+[[entries]]
+id = "united-states-usgs-scanned-topographic-maps"
+name = "USGS — scanned topographic maps"
+region = "United States"
+category = "History"
+description = "Seamless scans of the USGS paper topographic maps that US Topo replaced, 1:24 000 and 1:100 000 (1:63 360 and 1:250 000 in Alaska), from National Geographic TOPO!; cached tiles to zoom 15."
+
+[[entries]]
+id = "united-states-fema-flood-hazard-zones-nfhl"
+name = "FEMA — flood hazard zones (NFHL)"
+region = "United States"
+category = "Hazards"
+description = "The National Flood Hazard Layer: flood zones, base flood elevations, levees and map panels; drawn only when zoomed in closely."
+
+[[entries]]
+id = "united-states-usfws-wetlands-topographic-symbols"
+name = "USFWS — wetlands, topographic symbols"
+region = "United States"
+category = "Waterways"
+description = "National Wetlands Inventory drawn with the marsh and swamp symbols of topographic maps; drawn only when zoomed in."
+
+[[entries]]
+id = "united-states-nps-park-boundaries"
+name = "NPS — park boundaries"
+region = "United States"
+category = "POI"
+description = "Boundaries and land tracts of national parks, monuments and other park units."
+
+[[entries]]
+id = "united-states-faa-vfr-sectional-charts"
+name = "FAA — VFR sectional charts"
+region = "United States"
+category = "Traffic"
+description = "The aeronautical charts for visual flight: airports, airspace, navigation aids, obstacles and terrain, revised every 56 days. Cached for zooms 8 to 12, enlarged beyond."
+
+[[entries]]
+id = "united-states-faa-vfr-terminal-area-charts"
+name = "FAA — VFR terminal area charts"
+region = "United States"
+category = "Traffic"
+description = "Larger-scale charts of the airspace around busy airports, with more detail than the sectionals. Cached for zooms 10 to 12, enlarged beyond."
+
+[[entries]]
+id = "united-states-faa-ifr-low-altitude-enroute-charts"
+name = "FAA — IFR low altitude enroute charts"
+region = "United States"
+category = "Traffic"
+description = "Charts for instrument flight below 18,000 ft: airways, navigation aids, fixes and minimum altitudes, with the area charts of busy regions. Cached for zooms 7 to 12."
+
+[[entries]]
+id = "united-states-faa-ifr-high-altitude-enroute-charts"
+name = "FAA — IFR high altitude enroute charts"
+region = "United States"
+category = "Traffic"
+description = "Charts for instrument flight at 18,000 ft and above: jet routes, RNAV Q-routes, navigation aids and reporting points. Cached for zooms 5 to 9, for a zoomed-out view."
+
+[[entries]]
+id = "united-states-nrl-faa-and-noaa-charts"
+name = "NRL — FAA and NOAA charts"
+region = "United States"
+category = "Traffic"
+description = "The US Naval Research Laboratory's tile server: FAA flyway and helicopter route charts, besides sectional and terminal charts, as of September 2024; NOAA raster nautical charts as of 2018; and elevation and imagery layers."
+
+[[entries]]
+id = "united-states-faa-temporary-flight-restrictions"
+name = "FAA — temporary flight restrictions"
+region = "United States"
+category = "Hazards"
+description = "The temporary flight restrictions in force or announced, as the FAA's TFR site shows them, with airports, navigation aids and the boundaries of air route traffic control centers. Its chart layers answer with errors; the FAA chart entries have them."
+
+[[entries]]
+id = "germany-baden-wu-rttemberg-mobidata-bw-wfs"
+name = "Baden-Württemberg — MobiData BW (WFS)"
+region = "Germany"
+category = "Traffic"
+description = "Roadworks, charging points, bike parking, sharing vehicles, stops and stations as features, from zoom 9."
+
+[[entries]]
+id = "germany-karlsruhe-region-traffic-and-roadworks-wfs"
+name = "Karlsruhe region — traffic and roadworks (WFS)"
+region = "Germany"
+category = "Traffic"
+description = "The roadworks and traffic layers of the Karlsruhe WMS as features, from zoom 9."
+
+[[entries]]
+id = "europe-motorcycle-road-closures"
+name = "Motorcycle road closures"
+region = "Europe"
+category = "Traffic"
+description = "Roads closed to motorcycles on certain days or hours in Germany, Austria, Switzerland, the Netherlands and Belgium, collected by mintelonline.de. Its server does not let web pages read the file: download it with the arrow, then choose it here. Updated every few weeks; Replace in the layer's settings takes a newer download."
+
+[[entries]]
+id = "germany-dwd-weather-observations-and-warnings-wfs"
+name = "DWD — weather observations and warnings (WFS)"
+region = "Germany"
+category = "Weather"
+description = "Station observations and warning areas of the Deutscher Wetterdienst as features."
+
+[[entries]]
+id = "france-france-sandre-water-reference-data-wfs"
+name = "France — Sandre water reference data (WFS)"
+region = "France"
+category = "Waterways"
+description = "Rivers, catchments, monitoring stations and water bodies; several hundred feature types."
+
+[[entries]]
+id = "germany-north-rhine-westphalia-hospitals-ogc-api"
+name = "North Rhine-Westphalia — hospitals (OGC API)"
+region = "Germany"
+category = "POI"
+description = "Hospitals of North Rhine-Westphalia from an OGC API – Features service."
+
+[[entries]]
+id = "germany-berlin-the-berlin-wall-1989"
+name = "Berlin — the Berlin Wall, 1989"
+region = "Germany"
+category = "History"
+description = "The GDR border installations as traced from an aerial photo of 25 April 1989: border wall, rear wall or fence, border strip, with the photo itself."
+
+[[entries]]
+id = "germany-berlin-the-berlin-wall-1989-wfs"
+name = "Berlin — the Berlin Wall, 1989 (WFS)"
+region = "Germany"
+category = "History"
+description = "The walls, the border strip and the political border as features, to colour and tap."
+
+[[entries]]
+id = "germany-bkg-gdr-topographic-map-1-200-000"
+name = "BKG — GDR topographic map 1:200 000"
+region = "Germany"
+category = "History"
+description = "Last editions of the GDR map, 1974–1989: the restricted edition for state and army (Ausgabe Staat) and the public one (Ausgabe für die Volkswirtschaft)."
+
+[[entries]]
+id = "germany-brandenburg-reich-topographic-map-1-25-000"
+name = "Brandenburg — Reich topographic map 1:25 000"
+region = "Germany"
+category = "History"
+description = "Messtischblätter of Brandenburg and Berlin, first surveyed from 1875; many sheets were updated in the 1930s and 1940s."
+
+[[entries]]
+id = "germany-north-rhine-westphalia-topographic-1-25-000-1936-194"
+name = "North Rhine-Westphalia — topographic 1:25 000, 1936–1945"
+region = "Germany"
+category = "History"
+description = "The state's map sheets as updated from 1936 to 1945; drawn only when zoomed in closely."
+
+[[entries]]
+id = "germany-rhineland-palatinate-topographic-1-25-000-1887-2024"
+name = "Rhineland-Palatinate — topographic 1:25 000, 1887–2024"
+region = "Germany"
+category = "History"
+description = "Every edition of the state's map sheets; choose the year in the layer's settings, which starts at 2024. Which years a sheet has varies: around Dahn the first is 1937."
+
+[[entries]]
+id = "germany-rhineland-palatinate-palatinate-survey-1836-1841"
+name = "Rhineland-Palatinate — Palatinate survey, 1836–1841"
+region = "Germany"
+category = "History"
+description = "The original 1:25 000 survey sheets of the Palatinate, then part of the Kingdom of Bavaria."
+
+[[entries]]
+id = "germany-rhineland-palatinate-aerial-photos-since-1994"
+name = "Rhineland-Palatinate — aerial photos since 1994"
+region = "Germany"
+category = "History"
+description = "One layer per year from 1994; each year shows the part of the state flown that year, so a place appears every two to three years."
+
+[[entries]]
+id = "germany-saxony-historical-maps-1-25-000"
+name = "Saxony — historical maps 1:25 000"
+region = "Germany"
+category = "History"
+description = "Messtischblatt before 1945, the GDR's restricted state edition of 1976–1989, and the map from 1990."
+
+[[entries]]
+id = "germany-bavaria-monuments"
+name = "Bavaria — monuments"
+region = "Germany"
+category = "History"
+description = "Listed buildings, archaeological sites and ensembles of the Bavarian monument list, updated daily."
+
+[[entries]]
+id = "germany-saxony-cultural-monuments-and-protected-areas"
+name = "Saxony — cultural monuments and protected areas"
+region = "Germany"
+category = "History"
+description = "Cultural monuments as points, lines and areas, beside the state's nature reserves and protected landscapes."
+
+[[entries]]
+id = "global-versatiles-vector-tile-layers"
+name = "VersaTiles — vector tile layers"
+region = "Global"
+category = "Basemap"
+description = "OpenStreetMap in the Shortbread schema, each tile layer a layer of its own in one colour."
+
