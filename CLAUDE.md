@@ -47,7 +47,9 @@ layers (route lines, focus mask, details highlight) are `Overlay`s (`map/overlay
 appended to the style; their data changes go through `setData` only. Source and layer ids
 are the user layer's id or `<id>/…`, which is how map errors are traced back to layers.
 The style is round-tripped through JSON before `setStyle`: Solid store proxies cannot be
-posted to MapLibre's workers.
+posted to MapLibre's workers. `setStyle` also gets a `transformStyle` from
+`map/geojsonDiff.ts` (`keepLoadedGeoJson`); without it every diff refetches each GeoJSON
+source loaded from an address.
 
 **Custom protocols** (registered in `MapView.tsx`, handlers in `map/protocols.ts`):
 `features://` (ArcGIS FeatureServer, WFS and OGC API queried per tile, turned into vector
@@ -64,7 +66,8 @@ fetches must use them, or the proxy and readable error messages are bypassed. Ro
 local storage by `persistedStore` (`state/persist.ts`) under the key `layerslayer`.
 Routes and waypoints are a separate store (`state/routes.ts`, key `layerslayer-routes`)
 with its own undo/redo history (`state/history.ts`); layer changes are never undo steps.
-Imported files are Blobs in IndexedDB (`state/files.ts`), referenced by key.
+The theme choice is a third key, `layerslayer-theme` (`state/theme.ts`). Imported files
+are Blobs in IndexedDB (`state/files.ts`), referenced by key.
 `state/projectFile.ts` reads and writes `.lslay` ZIP project files through the same
 parsers as local storage.
 
@@ -76,15 +79,22 @@ requests one missing leg at a time (`routing/osrm.ts`, about one per second).
 `tools/libraryData.ts` into the `virtual:library` module. `src/library/library.json` holds
 each entry's technical definition (type, address, zooms, bounds, CORS) keyed by an `id`;
 `src/library/library.toml` holds its name, region, category and description, keyed by the
-same `id`, so text and taxonomy can be reworded without touching the technical side. Every
-id must appear in both files; the merge fails otherwise. A unit test requires
-`detectServiceType` to agree with every entry's type and `REGION_BOUNDS`
-(`library/regions.ts`) to cover every region used. `tools/check-library.test.ts` (the
-`check-library` script) rewrites `cors: false` marks in `library.json` only.
+same `id`, so text and taxonomy can be reworded without touching the technical side. The
+merge fails the build when an id is missing from either file or a region is not in
+`REGION_BOUNDS` (`library/regions.ts`). A unit test requires `detectServiceType` to agree
+with every entry's type. `tools/check-library.test.ts` (the `check-library` script)
+rewrites `cors: false` marks in `library.json` only.
 
 **Build-time icons.** `tools/iconSets.ts` is a Vite plugin that reads Maki, Temaki and
-Material Design Icons from their dev-dependency packages into virtual modules, each a
-chunk loaded with the icon picker. UI icons are Tabler SVG paths in `src/ui/icons.tsx`.
+Material Design Icons from their dev-dependency packages into virtual modules
+(`virtual:icons/<set>`, `virtual:osm-feature-icons`), each a chunk loaded with the icon
+picker; `src/icons/iconSets.ts` is the runtime side. UI icons are Tabler SVG paths in
+`src/ui/icons.tsx`.
+
+**Virtual modules and `tools/`.** A new virtual module needs its `declare module` in a
+`virtual.d.ts` beside its consumer (`src/library/`, `src/icons/`). `tsconfig.json`
+includes only `src` and `vite.config.ts`, so the plugins in `tools/` are typechecked
+through the config's imports, and `tools/check-library.test.ts` is not typechecked at all.
 
 ## Conventions
 
@@ -93,6 +103,12 @@ chunk loaded with the icon picker. UI icons are Tabler SVG paths in `src/ui/icon
   `minzoom`/`maxzoom` stay in the source's own tile zooms.
 - Heavy libraries (pdf.js, pdf-lib, geotiff, pmtiles, togeojson, fflate, osmtogeojson,
   the style spec) are loaded with dynamic `import()` on first use; keep them that way.
+  Some are imported statically by a wrapper module (`services/pmtiles.ts`, `cog.ts`,
+  `kml.ts`, `state/projectFile.ts`) that is itself reached only through `import()`; a
+  static import of such a wrapper from the main graph pulls the library into the main
+  chunk.
+- No `confirm()`, `alert()` or `prompt()`: questions go through `askConfirmation` in
+  `ui/confirm.ts` and the app's own `ConfirmDialog`.
 - Below 1.0 there is no migration code: stored layers that no longer parse are dropped.
   The one exception: `decodeProjectFile` accepts `.webmap` files (`"app": "webmap"`) from
   before the rename. Everything else uses the name `layerslayer`.
