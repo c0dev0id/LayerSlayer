@@ -16,7 +16,7 @@ describe('parseMapServer', () => {
         tiles: ['https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}'],
         tileSize: 256,
         minzoom: 0,
-        maxzoom: 23,
+        maxzoom: 16,
       },
     });
   });

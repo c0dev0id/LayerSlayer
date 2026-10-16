@@ -38,11 +38,13 @@ interface MapServer {
     cols: number;
     origin: { x: number; y: number };
     spatialReference: SpatialReference;
-    lods: { level: number; resolution: number }[];
+    lods: { level: number; resolution: number; scale: number }[];
   };
   /** The levels the tile cache holds, where it holds fewer than `tileInfo` lists (ArcGIS Online tile layers). */
   minLOD?: number;
   maxLOD?: number;
+  /** The largest scale shown; for a cache, the scale of its deepest level (0 means none). */
+  maxScale?: number;
   fullExtent?: Extent;
   supportedImageFormatTypes?: string;
   maxRecordCount?: number;
@@ -143,7 +145,11 @@ function cachedTiles(json: MapServer): { tileSize: number; zooms: { minzoom: num
   if (!isWebMercatorCode(wkid)) return undefined;
   if (Math.abs(tiles.origin.x + HALF_WORLD) > 1 || Math.abs(tiles.origin.y - HALF_WORLD) > 1) return undefined;
   if (tiles.lods.some((lod) => tileZoom(lod.resolution, tiles.rows) !== lod.level)) return undefined;
-  const levels = tiles.lods.map((lod) => lod.level).filter((level) => level >= (json.minLOD ?? 0) && level <= (json.maxLOD ?? Infinity));
+  const { minLOD = 0, maxLOD = Infinity, maxScale = 0 } = json;
+  // Scales a level apart differ twofold; the margin absorbs rounding in the published numbers.
+  const levels = tiles.lods
+    .filter((lod) => lod.level >= minLOD && lod.level <= maxLOD && lod.scale * 1.01 >= maxScale)
+    .map((lod) => lod.level);
   if (levels.length === 0) return undefined;
   return { tileSize: tiles.rows, zooms: { minzoom: Math.min(...levels), maxzoom: Math.max(...levels) } };
 }
