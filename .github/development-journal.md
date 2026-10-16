@@ -121,8 +121,11 @@ It is a static single-page app on GitHub Pages; there is no server component.
     prefix (`EPSG:3857:12`), become `{z}`; any other naming (TopPlusOpen's `00`–`18`) goes
     through the `wmts-matrix://` protocol, which looks the identifier up per tile.
   - ArcGIS MapServer: a cached Web Mercator service whose levels are numbered by zoom is
-    XYZ (`/tile/{z}/{y}/{x}`); anything else is drawn by `export` per tile, the whole map or
-    one layer (`show:id`).
+    XYZ (`/tile/{z}/{y}/{x}`); anything else is drawn by `export` per tile, the whole map
+    or one layer (`show:id`). Its zooms are the levels the cache holds: ArcGIS Online tile
+    layers list all 24 levels of the scheme and name the cached ones in `minLOD` and
+    `maxLOD` (the FAA's charts hold 8 to 12), and asking beyond them gets nothing instead
+    of the enlarged deepest level.
   - Feature sources (ArcGIS FeatureServer, WFS, OGC API – Features) share one tile
     protocol, `features://`, whose tile address carries the source as JSON;
     `featureTiles.ts` builds each kind's query, reads the GeoJSON answer (and the messages

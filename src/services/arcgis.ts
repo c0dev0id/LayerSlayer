@@ -40,6 +40,9 @@ interface MapServer {
     spatialReference: SpatialReference;
     lods: { level: number; resolution: number }[];
   };
+  /** The levels the tile cache holds, where it holds fewer than `tileInfo` lists (ArcGIS Online tile layers). */
+  minLOD?: number;
+  maxLOD?: number;
   fullExtent?: Extent;
   supportedImageFormatTypes?: string;
   maxRecordCount?: number;
@@ -139,8 +142,9 @@ function cachedTiles(json: MapServer): { tileSize: number; zooms: { minzoom: num
   const wkid = tiles.spatialReference.latestWkid ?? tiles.spatialReference.wkid;
   if (!isWebMercatorCode(wkid)) return undefined;
   if (Math.abs(tiles.origin.x + HALF_WORLD) > 1 || Math.abs(tiles.origin.y - HALF_WORLD) > 1) return undefined;
-  const levels = tiles.lods.map((lod) => lod.level);
-  if (levels.length === 0 || tiles.lods.some((lod) => tileZoom(lod.resolution, tiles.rows) !== lod.level)) return undefined;
+  if (tiles.lods.some((lod) => tileZoom(lod.resolution, tiles.rows) !== lod.level)) return undefined;
+  const levels = tiles.lods.map((lod) => lod.level).filter((level) => level >= (json.minLOD ?? 0) && level <= (json.maxLOD ?? Infinity));
+  if (levels.length === 0) return undefined;
   return { tileSize: tiles.rows, zooms: { minzoom: Math.min(...levels), maxzoom: Math.max(...levels) } };
 }
 

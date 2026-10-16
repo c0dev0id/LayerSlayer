@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseFeatureService, parseMapServer } from './arcgis';
 import dynamic from './fixtures/arcgis-mapserver-dynamic.json';
 import tiled from './fixtures/arcgis-mapserver-tiled.json';
+import hostedTiles from './fixtures/arcgis-mapserver-hosted-tiles.json';
 import featureServer from './fixtures/arcgis-featureserver.json';
 import featureLayer from './fixtures/arcgis-featurelayer.json';
 
@@ -18,6 +19,11 @@ describe('parseMapServer', () => {
         maxzoom: 23,
       },
     });
+  });
+
+  it('keeps a hosted tile layer to the levels its cache holds', () => {
+    const info = parseMapServer(hostedTiles as never, 'https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer');
+    expect(info.offers[0]!.draft!.source).toMatchObject({ type: 'xyz', minzoom: 8, maxzoom: 12 });
   });
 
   it('offers a dynamic service as a whole and by layer', () => {
