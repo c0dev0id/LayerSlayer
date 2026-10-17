@@ -304,14 +304,16 @@
     draw, so labels keep their size. XYZ addresses work in DMD2, and WMS ones did for the
     GeoServer layers tried (MobiData BW, Mobilitätsatlas). ArcGIS map services without a
     tile cache get none, as DMD2 takes no export address. The tag is a pill after the
-    layer's name, so it shows in the list whether the settings are open or not. The layers
-    a service offers in Add layer carry the same pill, read from the source each would be
-    added with. A library entry carries it where every layer of its service does, as
-    `check-library` records it; a unit test holds the marks of tile templates to their
-    address. In the settings, the address and the source line are one line each, cut
-    short, and copy themselves when clicked: the source line copies the address the layer
-    was added from (a capabilities document, not a tile template with matrix
-    placeholders), the same one its details show.
+    layer's name, so it shows in the list whether the settings are open or not. A library
+    entry carries it where every layer of its service does, as `check-library` records it;
+    a unit test holds the marks of tile templates to their address. A service's layers in
+    Add layer carry none, and neither does an entry whose layers differ: a pill on every
+    row of a service repeated the entry's, and the library stays quieter for the few
+    services that lose out (NASA GIBS has an address for 1306 of its 1330 layers). In the
+    settings, the address and the source line are one line each, cut short, and copy
+    themselves when clicked: the source line copies the address the layer was added from
+    (a capabilities document, not a tile template with matrix placeholders), the same one
+    its details show.
 - **Data a provider keeps to itself stays out.** Rumo's PMTiles archives and styles allow
   only Rumo's own site by their CORS rules, and the MapTiler key in them is limited to
   that domain; OsmAnd's off-road tiles answer other pages' requests with 502. A CORS proxy

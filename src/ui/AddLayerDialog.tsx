@@ -14,7 +14,6 @@ import {
 } from '../library/library';
 import { dataLabel, entryFacts, zoomRange } from '../library/entryInfo';
 import type { Bounds } from '../model/layer';
-import { externalTileUrl } from '../map/externalTiles';
 import { decodePlaceholders, parsePmtilesUrl } from '../map/urls';
 import { detectServiceType } from '../services/detect';
 import { IMPORT_ACCEPT, importFile, importGeoPdfUrl } from '../services/importFile';
@@ -633,11 +632,6 @@ function OfferRow(props: { url: string; offers: readonly Offer[]; offer: Offer; 
             <span class="muted reason">{props.offer.reason}</span>
           </Show>
         </span>
-        <Show when={props.offer.draft && externalTileUrl(props.offer.draft.source)}>
-          <span class="badge quiet" title="Its tiles have an address DMD2 and similar apps take for a custom map, shown in its settings once added">
-            DMD
-          </span>
-        </Show>
       </button>
     </li>
   );
