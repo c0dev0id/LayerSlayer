@@ -79,13 +79,14 @@ requests one missing leg at a time (`routing/osrm.ts`, about one per second).
 
 **Library.** The services offered in Add layer come from two files merged at build time by
 `tools/libraryData.ts` into the `virtual:library` module. `src/library/library.json` holds
-each entry's technical definition (type, address, zooms, bounds, CORS) keyed by an `id`;
-`src/library/library.toml` holds its name, region, category and description, keyed by the
-same `id`, so text and taxonomy can be reworded without touching the technical side. The
-merge fails the build when an id is missing from either file or a region is not in
-`REGION_BOUNDS` (`library/regions.ts`). A unit test requires `detectServiceType` to agree
-with every entry's type. `tools/check-library.test.ts` (the `check-library` script)
-rewrites `cors: false` marks in `library.json` only.
+each entry's technical definition (type, address, zooms, bounds, CORS, DMD) keyed by an
+`id`; `src/library/library.toml` holds its name, region, category and description, keyed
+by the same `id`, so text and taxonomy can be reworded without touching the technical
+side. The merge fails the build when an id is missing from either file or a region is not
+in `REGION_BOUNDS` (`library/regions.ts`). A unit test requires `detectServiceType` to
+agree with every entry's type, and the DMD marks of XYZ entries to agree with their
+template. `tools/check-library.test.ts` (the `check-library` script) rewrites the
+`cors: false` and `dmd: true` marks in `library.json` only.
 
 **Build-time icons.** `tools/iconSets.ts` is a Vite plugin that reads Maki, Temaki and
 Material Design Icons from their dev-dependency packages into virtual modules

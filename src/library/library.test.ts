@@ -9,6 +9,7 @@ import { originOf } from '../ui/offers';
 import { defaultState } from '../state/store';
 import library from 'virtual:library';
 import { validBounds } from '../geo/mercator';
+import { externalTileUrl } from '../map/externalTiles';
 import { downloadedLayer, entryAreas, entryService, filterLibrary, withEntry, type FileEntry, type LibraryEntry, type ServiceEntry } from './library';
 import { REGION_BOUNDS } from './regions';
 
@@ -41,6 +42,14 @@ describe('library', () => {
     const offer = withEntry(parseWmts(topplus, entry.url), entry).offers.find((o) => originOf(entry.url, o) === layer.origin);
     const { name, source, bounds, attribution } = offer!.draft!;
     expect({ name: layer.name, source: layer.source, bounds: layer.bounds, attribution: layer.attribution }).toEqual({ name, source, bounds, attribution });
+  });
+
+  it('marks an XYZ template for DMD exactly where its tiles have an address for other apps', () => {
+    for (const entry of entries) {
+      if (entry.type !== 'xyz') continue;
+      const source = parseXyz(entry.url).offers[0]!.draft!.source;
+      expect(entry.dmd === true, entry.name).toBe(externalTileUrl(source) !== undefined);
+    }
   });
 
   it('knows the area of every region but Global, in valid bounds', () => {

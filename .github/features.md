@@ -13,6 +13,9 @@
 - Layer list with drag and keyboard reordering, visibility, removal, flying to the layer's
   area, opacity, zoom range, colour and line style for vector layers, colour adjustments
   for raster layers, and per-layer error marks.
+- Tile addresses for apps that fill them in themselves, such as DMD2: a raster layer that
+  has one shows it in its settings, tagged DMD in the layer list, among a service's layers
+  and on library entries whose layers all have one.
 - Labels for vector layers from a feature property, and the properties of a tapped feature
   in words in the details sheet.
 - A map button that shows the open layer alone over the base map, leaving every layer's

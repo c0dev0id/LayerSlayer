@@ -16,7 +16,7 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
 - **Layer control** — order, visibility, opacity, zoom range, colour, line style, labels,
   raster colour adjustments, and icons from about 7,900 symbols; raster layers whose tiles
   have an https address another app can fill in ({z}/{x}/{y}, or {bbox} for a WMS) show it
-  for apps such as DMD2.
+  for apps such as DMD2, tagged DMD in the layer list and in Add layer.
 - **OSM queries** — build a layer of OpenStreetMap features in an area, from a preset list
   or typed tags.
 - **Routing** — draw routes along roads (OSRM) or straight, with waypoints, undo/redo and

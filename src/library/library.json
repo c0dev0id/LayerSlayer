@@ -25,34 +25,39 @@
       "type": "xyz",
       "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
-      "maxzoom": 19
+      "maxzoom": 19,
+      "dmd": true
     },
     {
       "id": "global-opentopomap",
       "type": "xyz",
       "url": "https://tile.opentopomap.org/{z}/{x}/{y}.png",
       "attribution": "Map data: © <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, SRTM · Map style: © <a href=\"https://opentopomap.org\">OpenTopoMap</a> (CC-BY-SA)",
-      "maxzoom": 17
+      "maxzoom": 17,
+      "dmd": true
     },
     {
       "id": "global-cyclosm",
       "type": "xyz",
       "url": "https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
       "attribution": "Map style: <a href=\"https://www.cyclosm.org\">CyclOSM</a>, hosted by OpenStreetMap France · Map data: © <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
-      "maxzoom": 20
+      "maxzoom": 20,
+      "dmd": true
     },
     {
       "id": "global-openseamap-seamarks",
       "type": "xyz",
       "url": "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
-      "attribution": "Seamarks: © <a href=\"https://www.openseamap.org\">OpenSeaMap</a> contributors · Map data: © <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
+      "attribution": "Seamarks: © <a href=\"https://www.openseamap.org\">OpenSeaMap</a> contributors · Map data: © <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
+      "dmd": true
     },
     {
       "id": "global-safecast-radiation-measurements",
       "type": "xyz",
       "url": "https://s3.amazonaws.com/te512.safecast.org/{z}/{x}/{y}.png",
       "attribution": "<a href=\"https://safecast.org\">Safecast</a> (CC0)",
-      "maxzoom": 16
+      "maxzoom": 16,
+      "dmd": true
     },
     {
       "id": "global-usgs-earthquakes-of-the-past-week",
@@ -63,12 +68,14 @@
     {
       "id": "global-esri-world-imagery",
       "type": "arcgis-mapserver",
-      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+      "dmd": true
     },
     {
       "id": "global-esri-national-geographic-world-map",
       "type": "arcgis-mapserver",
-      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer"
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer",
+      "dmd": true
     },
     {
       "id": "global-nasa-gibs-satellite-imagery",
@@ -83,27 +90,32 @@
     {
       "id": "global-openstreetmap-terrestris",
       "type": "wms",
-      "url": "https://ows.terrestris.de/osm/service?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://ows.terrestris.de/osm/service?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "global-openstreetmap-mundialis",
       "type": "wms",
-      "url": "https://ows.mundialis.de/services/service?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://ows.mundialis.de/services/service?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "global-waymarked-trails-hiking-routes",
       "type": "xyz",
-      "url": "https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png"
+      "url": "https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png",
+      "dmd": true
     },
     {
       "id": "global-gebco-bathymetry",
       "type": "wms",
-      "url": "https://wms.gebco.net/mapserv?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://wms.gebco.net/mapserv?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "global-openrailwaymap-railways",
       "type": "xyz",
-      "url": "https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
+      "url": "https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+      "dmd": true
     },
     {
       "id": "global-open-infrastructure-map-power",
@@ -193,58 +205,69 @@
       "type": "xyz",
       "url": "https://openinframap.org/black-marble-2024/{z}/{x}/{y}.webp",
       "attribution": "<a href=\"https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/VNP46A4/\">NASA Black Marble 2024</a>",
-      "maxzoom": 8
+      "maxzoom": 8,
+      "dmd": true
     },
     {
       "id": "europe-emodnet-bathymetry",
       "type": "wmts",
-      "url": "https://tiles.emodnet-bathymetry.eu/wmts/1.0.0/WMTSCapabilities.xml"
+      "url": "https://tiles.emodnet-bathymetry.eu/wmts/1.0.0/WMTSCapabilities.xml",
+      "dmd": true
     },
     {
       "id": "europe-corine-land-cover-2018",
       "type": "wms",
-      "url": "https://image.discomap.eea.europa.eu/arcgis/services/Corine/CLC2018_WM/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://image.discomap.eea.europa.eu/arcgis/services/Corine/CLC2018_WM/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "australia-geoscience-australia-topographic",
       "type": "wms",
-      "url": "https://services.ga.gov.au/gis/services/Topographic_Base_Map/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://services.ga.gov.au/gis/services/Topographic_Base_Map/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "australia-digital-earth-australia",
       "type": "wms",
-      "url": "https://ows.dea.ga.gov.au/?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://ows.dea.ga.gov.au/?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "austria-basemap-at",
       "type": "wmts",
-      "url": "https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml"
+      "url": "https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml",
+      "dmd": true
     },
     {
       "id": "belgium-ngi-cartoweb",
       "type": "wms",
-      "url": "https://cartoweb.wms.ngi.be/service?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://cartoweb.wms.ngi.be/service?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "belgium-flanders-aerial-imagery",
       "type": "wmts",
-      "url": "https://geo.api.vlaanderen.be/omwrgbmrvl/wmts?SERVICE=WMTS&REQUEST=GetCapabilities"
+      "url": "https://geo.api.vlaanderen.be/omwrgbmrvl/wmts?SERVICE=WMTS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "brazil-terrabrasilis",
       "type": "wms",
-      "url": "https://terrabrasilis.dpi.inpe.br/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://terrabrasilis.dpi.inpe.br/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "canada-canada-base-map",
       "type": "wms",
       "url": "https://maps.geogratis.gc.ca/wms/CBMT?SERVICE=WMS&REQUEST=GetCapabilities",
-      "cors": false
+      "cors": false,
+      "dmd": true
     },
     {
       "id": "france-ge-oplateforme-ign",
       "type": "wmts",
-      "url": "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetCapabilities"
+      "url": "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "france-brgm-natural-hazards",
@@ -255,18 +278,21 @@
     {
       "id": "france-sandre-water",
       "type": "wms",
-      "url": "https://services.sandre.eaufrance.fr/geo/sandre?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://services.sandre.eaufrance.fr/geo/sandre?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "global-topplusopen",
       "type": "wmts",
       "url": "https://sgx.geodatenzentrum.de/wmts_topplus_open/1.0.0/WMTSCapabilities.xml",
-      "attribution": "© <a href=\"https://www.bkg.bund.de\">BKG</a> dl-de/by-2-0, <a href=\"https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_topplusopen.html\">data sources</a>"
+      "attribution": "© <a href=\"https://www.bkg.bund.de\">BKG</a> dl-de/by-2-0, <a href=\"https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_topplusopen.html\">data sources</a>",
+      "dmd": true
     },
     {
       "id": "germany-dwd-weather",
       "type": "wms",
-      "url": "https://maps.dwd.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://maps.dwd.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-basemap-de",
@@ -276,142 +302,170 @@
     {
       "id": "germany-bkg-overview-map-1-250-000",
       "type": "wms",
-      "url": "https://sgx.geodatenzentrum.de/wms_dtk250?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://sgx.geodatenzentrum.de/wms_dtk250?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-federal-waterways",
       "type": "wms",
-      "url": "https://via.bund.de/wsv/bwastr/wms?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://via.bund.de/wsv/bwastr/wms?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-bavaria-topographic-1-25-000",
       "type": "wms",
-      "url": "https://geoservices.bayern.de/od/wms/dtk/v1/dtk25?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geoservices.bayern.de/od/wms/dtk/v1/dtk25?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-bavaria-aerial-imagery",
       "type": "wms",
-      "url": "https://geoservices.bayern.de/od/wms/dop/v1/dop40?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geoservices.bayern.de/od/wms/dop/v1/dop40?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-mobidata",
       "type": "wms",
-      "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://api.mobidata-bw.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-north-rhine-westphalia-topographic",
       "type": "wms",
-      "url": "https://www.wms.nrw.de/geobasis/wms_nw_dtk?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.wms.nrw.de/geobasis/wms_nw_dtk?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-north-rhine-westphalia-aerial-imagery",
       "type": "wms",
-      "url": "https://www.wms.nrw.de/geobasis/wms_nw_dop?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.wms.nrw.de/geobasis/wms_nw_dop?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-rhineland-palatinate-topographic-1-25-000",
       "type": "wms",
-      "url": "https://geo4.service24.rlp.de/wms/rp_dtk25.fcgi?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geo4.service24.rlp.de/wms/rp_dtk25.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-rhineland-palatinate-roadworks",
       "type": "wms",
-      "url": "https://maps.mobilitaetsatlas.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://maps.mobilitaetsatlas.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-mecklenburg-vorpommern-topographic",
       "type": "wms",
-      "url": "https://www.geodaten-mv.de/dienste/gdimv_dtk?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.geodaten-mv.de/dienste/gdimv_dtk?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-mecklenburg-vorpommern-aerial-imagery",
       "type": "wms",
-      "url": "https://www.geodaten-mv.de/dienste/adv_dop?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.geodaten-mv.de/dienste/adv_dop?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-mecklenburg-vorpommern-roadworks",
       "type": "wms",
-      "url": "https://www.geodaten-mv.de/dienste/baustellen_lsbv_wms?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.geodaten-mv.de/dienste/baustellen_lsbv_wms?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-saxony-aerial-imagery",
       "type": "wms",
-      "url": "https://geodienste.sachsen.de/wms_geosn_dop-rgb/guest?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodienste.sachsen.de/wms_geosn_dop-rgb/guest?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-saxony-closures-and-diversions",
       "type": "wms",
-      "url": "https://geodienste.sachsen.de/wms_list_baustellen/guest?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodienste.sachsen.de/wms_list_baustellen/guest?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-schleswig-holstein-roadworks-and-diversions",
       "type": "wms",
-      "url": "https://dienste.gdi-sh.de/WMS_SH_Baustelleninformationen?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://dienste.gdi-sh.de/WMS_SH_Baustelleninformationen?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-hamburg-roadworks",
       "type": "wms",
-      "url": "https://geodienste.hamburg.de/hh_wms_baustellen?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodienste.hamburg.de/hh_wms_baustellen?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-hamburg-motorway-diversions",
       "type": "wms",
-      "url": "https://geodienste.hamburg.de/HH_WMS_Bedarfsumleitungen?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodienste.hamburg.de/HH_WMS_Bedarfsumleitungen?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-hamburg-live-traffic",
       "type": "wms",
-      "url": "https://geodienste.hamburg.de/wms_hh_verkehrslage?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodienste.hamburg.de/wms_hh_verkehrslage?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-hamburg-police-traffic-reports",
       "type": "wms",
-      "url": "https://geodienste.hamburg.de/wms_verkehrsinformation?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodienste.hamburg.de/wms_verkehrsinformation?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-brandenburg-roadworks",
       "type": "wms",
-      "url": "https://isk.geobasis-bb.de/ows/baustelleninfo_wms?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://isk.geobasis-bb.de/ows/baustelleninfo_wms?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-bkg-topographic-1-100-000",
       "type": "wms",
-      "url": "https://sgx.geodatenzentrum.de/wms_dtk100?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://sgx.geodatenzentrum.de/wms_dtk100?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-topographic-1-25-000",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DTK_25_K_A?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DTK_25_K_A?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-road-map-1-200-000",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ASK_200_K?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ASK_200_K?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-aerial-imagery",
       "type": "wmts",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMTS_LGL-BW_ATKIS_DOP_20_C?SERVICE=WMTS&REQUEST=GetCapabilities"
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMTS_LGL-BW_ATKIS_DOP_20_C?SERVICE=WMTS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-hillshade",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DGM_025_Schummerung?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DGM_025_Schummerung?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-protected-areas",
       "type": "wms",
-      "url": "https://rips-gdi.lubw.baden-wuerttemberg.de/arcgis/services/GDI/INSPIRE_Schutzgebiete/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://rips-gdi.lubw.baden-wuerttemberg.de/arcgis/services/GDI/INSPIRE_Schutzgebiete/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-world-heritage-sites",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_UNESCO_Welterbestaetten_BW?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_UNESCO_Welterbestaetten_BW?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-archaeological-sites",
       "type": "wms",
-      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_Archaeologische_Kulturdenkmale_BW?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LAD_Archaeologische_Kulturdenkmale_BW?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-baden-wu-rttemberg-geotopes-and-landmarks",
@@ -426,69 +480,82 @@
     {
       "id": "germany-baden-wu-rttemberg-flood-zones",
       "type": "wms",
-      "url": "https://rips-gdi.lubw.baden-wuerttemberg.de/arcgis/services/wms/UIS_0100000003900001/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://rips-gdi.lubw.baden-wuerttemberg.de/arcgis/services/wms/UIS_0100000003900001/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-karlsruhe-region-traffic-and-roadworks",
       "type": "wms",
       "url": "https://mobil.trk.de/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
-      "cors": false
+      "cors": false,
+      "dmd": true
     },
     {
       "id": "luxembourg-geoportail-lu",
       "type": "wmts",
-      "url": "https://wmts.geoportail.lu/opendata/wmts/1.0.0/WMTSCapabilities.xml"
+      "url": "https://wmts.geoportail.lu/opendata/wmts/1.0.0/WMTSCapabilities.xml",
+      "dmd": true
     },
     {
       "id": "netherlands-pdok-topographic-basemap",
       "type": "wmts",
-      "url": "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?SERVICE=WMTS&REQUEST=GetCapabilities"
+      "url": "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?SERVICE=WMTS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "netherlands-pdok-aerial-imagery",
       "type": "wms",
-      "url": "https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "norway-kartverket",
       "type": "wmts",
-      "url": "https://cache.kartverket.no/v1/wmts/1.0.0/WMTSCapabilities.xml"
+      "url": "https://cache.kartverket.no/v1/wmts/1.0.0/WMTSCapabilities.xml",
+      "dmd": true
     },
     {
       "id": "poland-poland-forest-ownership",
       "type": "arcgis-mapserver",
-      "url": "https://mapserver.bdl.lasy.gov.pl/arcgis/rest/services/WMTS_BDL_kat_wlasnosci/MapServer?f=json"
+      "url": "https://mapserver.bdl.lasy.gov.pl/arcgis/rest/services/WMTS_BDL_kat_wlasnosci/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "poland-poland-forest-compartments",
       "type": "wms",
-      "url": "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL/mapserver/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL/mapserver/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "poland-poland-aerial-imagery",
       "type": "wmts",
-      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution?SERVICE=WMTS&REQUEST=GetCapabilities"
+      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution?SERVICE=WMTS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "portugal-dgt-aerial-imagery-2018",
       "type": "wms",
       "url": "https://cartografia.dgterritorio.gov.pt/ortos2018/service?SERVICE=WMS&REQUEST=GetCapabilities",
-      "cors": false
+      "cors": false,
+      "dmd": true
     },
     {
       "id": "spain-ign-pnoa-aerial-imagery",
       "type": "wms",
-      "url": "https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "spain-ign-raster-map",
       "type": "wms",
-      "url": "https://www.ign.es/wms-inspire/mapa-raster?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.ign.es/wms-inspire/mapa-raster?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "switzerland-swisstopo",
       "type": "wms",
-      "url": "https://wms.geo.admin.ch/?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://wms.geo.admin.ch/?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "switzerland-swisstopo-national-map-tiles",
@@ -500,12 +567,14 @@
         45.8,
         10.5,
         47.9
-      ]
+      ],
+      "dmd": true
     },
     {
       "id": "united-kingdom-environment-agency-lidar-terrain",
       "type": "wms",
-      "url": "https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wms?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wms?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-motor-vehicle-use-map",
@@ -545,7 +614,8 @@
     {
       "id": "united-states-blm-land-managers",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_SMA_Cached_without_PriUnk/MapServer?f=json"
+      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_SMA_Cached_without_PriUnk/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-blm-wilderness-and-wilderness-study-areas",
@@ -565,22 +635,26 @@
     {
       "id": "united-states-usgs-mines-and-mineral-resources",
       "type": "wms",
-      "url": "https://mrdata.usgs.gov/services/mrds?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://mrdata.usgs.gov/services/mrds?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-aerial-imagery",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer?f=json"
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-shaded-relief",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer?f=json"
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-hydrography",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer?f=json"
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-protected-areas-by-manager-pad-us-4-1",
@@ -590,27 +664,32 @@
     {
       "id": "united-states-usgs-contours",
       "type": "wms",
-      "url": "https://carto.nationalmap.gov/arcgis/services/contours/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://carto.nationalmap.gov/arcgis/services/contours/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-nhd-hydrography-detailed",
       "type": "wms",
-      "url": "https://hydro.nationalmap.gov/arcgis/services/nhd/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://hydro.nationalmap.gov/arcgis/services/nhd/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-nlcd-land-cover",
       "type": "wms",
-      "url": "https://www.mrlc.gov/geoserver/mrlc_display/wms?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.mrlc.gov/geoserver/mrlc_display/wms?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-usfws-national-wetlands-inventory",
       "type": "wms",
-      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/services/Wetlands/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/services/Wetlands/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-epa-ecoregions",
       "type": "wms",
-      "url": "https://geodata.epa.gov/arcgis/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodata.epa.gov/arcgis/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-noaa-snow-analysis",
@@ -640,42 +719,50 @@
     {
       "id": "united-states-usgs-governmental-unit-boundaries",
       "type": "wms",
-      "url": "https://carto.nationalmap.gov/arcgis/services/govunits/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://carto.nationalmap.gov/arcgis/services/govunits/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-us-census-boundaries-tigerweb",
       "type": "wms",
-      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_Current/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_Current/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-us-census-physical-features-tigerweb",
       "type": "wms",
-      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_PhysicalFeatures/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://tigerweb.geo.census.gov/arcgis/services/TIGERweb/tigerWMS_PhysicalFeatures/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-3dep-elevation",
       "type": "wms",
-      "url": "https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-noaa-nowcoast",
       "type": "wms",
-      "url": "https://nowcoast.noaa.gov/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://nowcoast.noaa.gov/geoserver/ows?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-noaa-nautical-charts",
       "type": "wms",
-      "url": "https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/ENCOnline/MapServer/exts/MaritimeChartService/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/ENCOnline/MapServer/exts/MaritimeChartService/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-nexrad-radar",
       "type": "wms",
-      "url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-landfire-vegetation-and-fuels",
       "type": "wms",
-      "url": "https://edcintl.cr.usgs.gov/geoserver/landfire/conus_2025/wms?request=GetCapabilities&service=WMS"
+      "url": "https://edcintl.cr.usgs.gov/geoserver/landfire/conus_2025/wms?request=GetCapabilities&service=WMS",
+      "dmd": true
     },
     {
       "id": "united-states-wfigs-current-wildfire-perimeters",
@@ -685,7 +772,8 @@
     {
       "id": "united-states-usgs-topographic-map",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer"
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-protected-areas-by-fee-manager-pad-us-4-1",
@@ -770,12 +858,14 @@
     {
       "id": "united-states-noaa-wildfire-smoke-forecast",
       "type": "wms",
-      "url": "https://mapservices.weather.noaa.gov/raster/services/air_quality/ndgd_smoke_sfc_1hr_avg_time/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://mapservices.weather.noaa.gov/raster/services/air_quality/ndgd_smoke_sfc_1hr_avg_time/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-imagery-with-topographic-labels",
       "type": "arcgis-mapserver",
-      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer"
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-place-names-gnis",
@@ -820,7 +910,8 @@
     {
       "id": "united-states-usgs-naip-aerial-imagery",
       "type": "wms",
-      "url": "https://imagery.nationalmap.gov/arcgis/services/USGSNAIPImagery/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://imagery.nationalmap.gov/arcgis/services/USGSNAIPImagery/ImageServer/WMSServer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-naip-imagery-coverage",
@@ -860,7 +951,8 @@
     {
       "id": "united-states-usgs-scanned-topographic-maps",
       "type": "arcgis-mapserver",
-      "url": "https://services.arcgisonline.com/arcgis/rest/services/USA_Topo_Maps/MapServer"
+      "url": "https://services.arcgisonline.com/arcgis/rest/services/USA_Topo_Maps/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-fema-flood-hazard-zones-nfhl",
@@ -880,28 +972,33 @@
     {
       "id": "united-states-faa-vfr-sectional-charts",
       "type": "arcgis-mapserver",
-      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer"
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-faa-vfr-terminal-area-charts",
       "type": "arcgis-mapserver",
-      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Terminal/MapServer"
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Terminal/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-faa-ifr-low-altitude-enroute-charts",
       "type": "arcgis-mapserver",
-      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_AreaLow/MapServer"
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_AreaLow/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-faa-ifr-high-altitude-enroute-charts",
       "type": "arcgis-mapserver",
-      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_High/MapServer"
+      "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_High/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-nrl-faa-and-noaa-charts",
       "type": "wmts",
       "url": "https://geoint.nrlssc.navy.mil/nrltileserver/wmts?SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0",
-      "cors": false
+      "cors": false,
+      "dmd": true
     },
     {
       "id": "united-states-faa-temporary-flight-restrictions",
@@ -950,7 +1047,8 @@
     {
       "id": "germany-berlin-the-berlin-wall-1989",
       "type": "wms",
-      "url": "https://gdi.berlin.de/services/wms/berlinermauer?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://gdi.berlin.de/services/wms/berlinermauer?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-berlin-the-berlin-wall-1989-wfs",
@@ -960,50 +1058,59 @@
     {
       "id": "germany-bkg-gdr-topographic-map-1-200-000",
       "type": "wms",
-      "url": "https://sgx.geodatenzentrum.de/wms_tk200_ddr?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://sgx.geodatenzentrum.de/wms_tk200_ddr?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-brandenburg-reich-topographic-map-1-25-000",
       "type": "wms",
-      "url": "https://isk.geobasis-bb.de/mapproxy/dr25/service/wms?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://isk.geobasis-bb.de/mapproxy/dr25/service/wms?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-north-rhine-westphalia-topographic-1-25-000-1936-194",
       "type": "wms",
-      "url": "https://www.wms.nrw.de/geobasis/wms_nw_tk25_1936-1945?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://www.wms.nrw.de/geobasis/wms_nw_tk25_1936-1945?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-rhineland-palatinate-topographic-1-25-000-1887-2024",
       "type": "wms",
       "url": "https://geo4.service24.rlp.de/wms/hktk25.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
-      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
+      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0",
+      "dmd": true
     },
     {
       "id": "germany-rhineland-palatinate-palatinate-survey-1836-1841",
       "type": "wms",
       "url": "https://geo4.service24.rlp.de/wms/hkpb.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
-      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
+      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0",
+      "dmd": true
     },
     {
       "id": "germany-rhineland-palatinate-aerial-photos-since-1994",
       "type": "wms",
       "url": "https://geo4.service24.rlp.de/wms/rp_hkdop20.fcgi?SERVICE=WMS&REQUEST=GetCapabilities",
-      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0"
+      "attribution": "© GeoBasis-DE / LVermGeoRP, dl-de/by-2-0",
+      "dmd": true
     },
     {
       "id": "germany-saxony-historical-maps-1-25-000",
       "type": "wms",
-      "url": "https://geodienste.sachsen.de/wms_geosn_hist/guest?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodienste.sachsen.de/wms_geosn_hist/guest?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-bavaria-monuments",
       "type": "wms",
-      "url": "https://geoservices.bayern.de/od/wms/gdi/v1/denkmal?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geoservices.bayern.de/od/wms/gdi/v1/denkmal?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "germany-saxony-cultural-monuments-and-protected-areas",
       "type": "wms",
-      "url": "https://geodienste.sachsen.de/iwms_gsz_schutzgebiete/guest?SERVICE=WMS&REQUEST=GetCapabilities"
+      "url": "https://geodienste.sachsen.de/iwms_gsz_schutzgebiete/guest?SERVICE=WMS&REQUEST=GetCapabilities",
+      "dmd": true
     },
     {
       "id": "global-versatiles-vector-tile-layers",

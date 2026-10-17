@@ -21,6 +21,8 @@ export interface ServiceEntry extends EntryBase {
   type: Exclude<ServiceType, 'geopdf'>;
   /** False where the server sends no valid CORS header, so a browser needs a proxy to use it. */
   cors?: false;
+  /** True where every layer of the service has a tile address other apps fill in themselves, such as DMD2. */
+  dmd?: true;
   /** The zooms the tile set has tiles for. */
   minzoom?: number;
   maxzoom?: number;

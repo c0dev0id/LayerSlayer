@@ -8,7 +8,7 @@ import { REGION_BOUNDS } from '../src/library/regions.ts';
 /**
  * The library the app offers in Add layer, merged at build time from two files so each can
  * be edited on its own terms: library.json holds the technical definition of every service
- * (type, address, zooms, bounds, CORS), library.toml the name, region, category and
+ * (type, address, zooms, bounds, CORS, DMD), library.toml the name, region, category and
  * description a maintainer rewords without touching the technical side. An `id` ties the two;
  * every entry in one must have its match in the other. Served as `virtual:library`.
  */

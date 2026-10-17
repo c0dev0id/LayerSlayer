@@ -1,7 +1,9 @@
 /**
  * Reads every library entry with the app's own parsers and records whether its server lets a
- * web page read it (CORS), which decides whether the layer works without a proxy. Writes the
- * result back into the library as `cors: false` on entries that need a proxy.
+ * web page read it (CORS), which decides whether the layer works without a proxy, and whether
+ * its layers have a tile address other apps fill in themselves, such as DMD2. Writes the
+ * results back into the library as `cors: false` on entries that need a proxy and `dmd: true`
+ * on entries whose layers all have such an address.
  *
  * Run by hand: npm run check-library
  */
@@ -9,6 +11,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { parse as parseToml } from 'smol-toml';
 import { it } from 'vitest';
 import { entryService, type ServiceEntry } from '../src/library/library';
+import { externalTileUrl } from '../src/map/externalTiles';
 import { getParam, withParams } from '../src/map/urls';
 import { parseFeatureService, parseMapServer, serviceUrl } from '../src/services/arcgis';
 import { collectionsAddress, parseCollections } from '../src/services/ogcFeatures';
@@ -31,6 +34,7 @@ interface Entry {
   type: string;
   url: string;
   cors?: boolean;
+  dmd?: true;
   [key: string]: unknown;
 }
 
@@ -105,9 +109,13 @@ async function check(entry: Entry): Promise<string> {
     const binary = entry.type === 'xyz' || entry.type === 'cog' || (entry.type === 'vector-tiles' && entry.url.includes('{z}'));
     const info = await parse(entry, binary ? '' : await response.text(), url);
     if (!info) return `ok${header}`;
-    const usable = info.offers.filter((o) => o.draft).length;
+    const usable = info.offers.flatMap((o) => (o.draft ? [o.draft] : []));
     const refused = info.offers.filter((o) => o.reason).length;
-    return `${usable} usable, ${refused} refused${header}`;
+    const dmd = usable.filter((draft) => externalTileUrl(draft.source)).length;
+    if (dmd > 0 && dmd === usable.length) entry.dmd = true;
+    else delete entry.dmd;
+    const tag = dmd === 0 ? '' : dmd === usable.length ? ', DMD' : `, DMD for ${dmd} of ${usable.length}`;
+    return `${usable.length} usable, ${refused} refused${tag}${header}`;
   } catch (error) {
     return `failed: ${(error as Error).message}`;
   }

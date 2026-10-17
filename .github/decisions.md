@@ -211,9 +211,12 @@
   agrees with every entry. `npm run check-library` reads every entry with the app's own
   parsers and records `cors: false` for servers without a valid CORS header; an error
   answer leaves the mark as it was, since servers rarely add CORS headers to errors. It
-  reads live services, so it is run by hand. Esri World Imagery (in mappic) was left out:
-  its keyless endpoint is only licensed with Esri software. The feature services WMSproxy
-  had to refuse for want of a renderer (its `docs/feature-servers.md`) are in the library,
+  also records `dmd: true` where every layer a service offers has an address other apps
+  fill in (the DMD tag), so the library shows the tag before a service is read; reading
+  every service whenever the library opens would ask all of its servers at once. It reads
+  live services, so it is run by hand. Esri World Imagery (in mappic) was left out: its
+  keyless endpoint is only licensed with Esri software. The feature services WMSproxy had
+  to refuse for want of a renderer (its `docs/feature-servers.md`) are in the library,
   with the distinct rail datasets of geodata.bts.gov; the per-railroad views of the rail
   network were left out as copies of the same lines. Amsterdam's travel time feed, also in
   that list, was left out: its server resets HTTPS connections and gives no answer over
@@ -303,7 +306,9 @@
     tile cache get none, as DMD2 takes no export address. The tag is a pill after the
     layer's name, so it shows in the list whether the settings are open or not. The layers
     a service offers in Add layer carry the same pill, read from the source each would be
-    added with. In the settings, the address and the source line are one line each, cut
+    added with. A library entry carries it where every layer of its service does, as
+    `check-library` records it; a unit test holds the marks of tile templates to their
+    address. In the settings, the address and the source line are one line each, cut
     short, and copy themselves when clicked: the source line copies the address the layer
     was added from (a capabilities document, not a tile template with matrix
     placeholders), the same one its details show.

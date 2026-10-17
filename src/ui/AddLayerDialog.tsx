@@ -323,6 +323,14 @@ function LibraryTab(props: {
                       <Show when={onMap() > 0}>
                         <span class="count">{onMap()} on the map</span>
                       </Show>
+                      <Show when={entry.type !== 'file' && entry.dmd}>
+                        <span
+                          class="badge quiet"
+                          title="Its layers' tiles have an address DMD2 and similar apps take for a custom map, shown in a layer's settings once added"
+                        >
+                          DMD
+                        </span>
+                      </Show>
                       <Show when={entry.type !== 'file' && entry.cors === false}>
                         <span
                           class="badge"
