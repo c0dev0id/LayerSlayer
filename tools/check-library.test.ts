@@ -6,7 +6,7 @@
  * Run by hand: npm run check-library
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { parse } from 'smol-toml';
+import { parse as parseToml } from 'smol-toml';
 import { it } from 'vitest';
 import { entryService, type ServiceEntry } from '../src/library/library';
 import { getParam, withParams } from '../src/map/urls';
@@ -116,7 +116,7 @@ async function check(entry: Entry): Promise<string> {
 it('checks the library', { timeout: 600_000 }, async () => {
   const library = JSON.parse(readFileSync(LIBRARY, 'utf8')) as { entries: Entry[] };
   // The name lives in the overlay; borrow it for the report and the tile-template titles.
-  const { entries: overlay } = parse(readFileSync(OVERLAY, 'utf8')) as unknown as { entries: { id: string; name: string }[] };
+  const { entries: overlay } = parseToml(readFileSync(OVERLAY, 'utf8')) as unknown as { entries: { id: string; name: string }[] };
   const nameById = new Map(overlay.map((o) => [o.id, o.name]));
   for (const entry of library.entries) entry.name = nameById.get(entry.id) ?? entry.id;
   const results = new Map<Entry, string>();
