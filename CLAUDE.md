@@ -93,10 +93,8 @@ Material Design Icons from their dev-dependency packages into virtual modules
 picker; `src/icons/iconSets.ts` is the runtime side. UI icons are Tabler SVG paths in
 `src/ui/icons.tsx`.
 
-**Virtual modules and `tools/`.** A new virtual module needs its `declare module` in a
-`virtual.d.ts` beside its consumer (`src/library/`, `src/icons/`). `tsconfig.json`
-includes only `src` and `vite.config.ts`, so the plugins in `tools/` are typechecked
-through the config's imports, and `tools/check-library.test.ts` is not typechecked at all.
+**Virtual modules.** A new virtual module needs its `declare module` in a `virtual.d.ts`
+beside its consumer (`src/library/`, `src/icons/`).
 
 ## Conventions
 

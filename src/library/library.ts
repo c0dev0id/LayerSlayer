@@ -67,7 +67,7 @@ export function filterLibrary(entries: readonly LibraryEntry[], query: string, r
 }
 
 /** What an entry offers without reading the service: a vector tile template whose tile layers it lists. */
-export function entryService(entry: ServiceEntry): ServiceInfo | undefined {
+export function entryService(entry: Pick<ServiceEntry, 'type' | 'url' | 'name' | 'layers'>): ServiceInfo | undefined {
   return entry.type === 'vector-tiles' && entry.layers ? parseTemplate(tileTemplates(entry.url), entry.layers, entry.name) : undefined;
 }
 

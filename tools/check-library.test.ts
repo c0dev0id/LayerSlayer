@@ -74,7 +74,7 @@ async function parse(entry: Entry, body: string, url: string): Promise<ServiceIn
       return address ? parseCollections(JSON.parse(body), address.collections, address.id) : undefined;
     }
     case 'vector-tiles':
-      return entryService(entry as ServiceEntry) ?? parseTileJson(JSON.parse(body), entry.url);
+      return entryService(entry as Pick<ServiceEntry, 'type' | 'url' | 'name' | 'layers'>) ?? parseTileJson(JSON.parse(body), entry.url);
     case 'xyz':
       return parseXyz(entry.url);
     default:
