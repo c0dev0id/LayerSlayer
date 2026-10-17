@@ -301,11 +301,12 @@
     draw, so labels keep their size. XYZ addresses work in DMD2, and WMS ones did for the
     GeoServer layers tried (MobiData BW, Mobilitätsatlas). ArcGIS map services without a
     tile cache get none, as DMD2 takes no export address. The tag is a pill after the
-    layer's name, so it shows in the list whether the settings are open or not. In the
-    settings, the address and the source line are one line each, cut short, and copy
-    themselves when clicked: the source line copies the address the layer was added from
-    (a capabilities document, not a tile template with matrix placeholders), the same one
-    its details show.
+    layer's name, so it shows in the list whether the settings are open or not. The layers
+    a service offers in Add layer carry the same pill, read from the source each would be
+    added with. In the settings, the address and the source line are one line each, cut
+    short, and copy themselves when clicked: the source line copies the address the layer
+    was added from (a capabilities document, not a tile template with matrix
+    placeholders), the same one its details show.
 - **Data a provider keeps to itself stays out.** Rumo's PMTiles archives and styles allow
   only Rumo's own site by their CORS rules, and the MapTiler key in them is limited to
   that domain; OsmAnd's off-road tiles answer other pages' requests with 502. A CORS proxy
