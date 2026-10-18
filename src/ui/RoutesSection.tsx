@@ -4,6 +4,7 @@ import { geojsonBounds } from '../geo/bounds';
 import { lineWidth } from '../model/line';
 import { PROFILES, ROUTE_LINE_WIDTH, routeOutline, waypointLook, type LngLat, type Profile, type Route } from '../model/route';
 import { ROUTE_COLORINGS, type RouteColoring } from '../model/routeColoring';
+import { retryColoring } from '../state/routeColoring';
 import { gpxToRouteData, routeTracks } from '../routing/gpx';
 import { routedLegs, routePoints } from '../routing/legs';
 import { ROUTING_MIN_INTERVAL_MS } from '../routing/osrm';
@@ -238,7 +239,10 @@ function RouteRow(props: { route: Route }) {
         <select
           aria-label={`Line colouring of ${route.name}`}
           value={route.coloring ?? ''}
-          onChange={(e) => setRouteColoring(route.id, (e.currentTarget.value || undefined) as RouteColoring | undefined)}
+          onChange={(e) => {
+            setRouteColoring(route.id, (e.currentTarget.value || undefined) as RouteColoring | undefined);
+            retryColoring(route);
+          }}
         >
           <option value="">Route colour</option>
           <For each={ROUTE_COLORINGS}>{(coloring) => <option value={coloring.id}>{coloring.name}</option>}</For>
