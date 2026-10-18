@@ -511,9 +511,11 @@
   are kept for good without being fetched again. A run asks one tile at a time with 100 ms
   after each tile fetched, 500 ms where *Slow fetch* is chosen, and stops after 20
   failures in a row, as the server is then down or refusing; missing tiles (404) are
-  counted, not failures. It counts as it goes and updates the panel about five times a
-  second. The OpenStreetMap Foundation's tile policy names "save area for later" features
-  as prohibited and OpenRailwayMap forbids bulk requests, so their layers are left out
+  counted, not failures. The app author's own server, codevoid.de, allows full speed: its
+  tiles are asked for four at a time without pauses, found by host like the servers that
+  ask for restraint. It counts as it goes and updates the panel about five times a second.
+  The OpenStreetMap Foundation's tile policy names "save area for later" features as
+  prohibited and OpenRailwayMap forbids bulk requests, so their layers are left out
   without a choice; volunteer servers that ask for restraint are left out or fetched
   slowly (`bulkPolicies.ts`). Feature layers (queries, as fresh as their last run),
   PMTiles archives (better downloaded whole) and styles (tiles from addresses inside the

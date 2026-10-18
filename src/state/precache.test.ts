@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLayer, type LayerDraft } from '../model/layer';
-import { chosenLayers, estimatedBytes, planPrecache, precacheRun, sampleTiles, startPrecache, tileSource, tileZooms, type PlannedLayer, type TileSource } from './precache';
+import { countTiles } from '../map/tileGrid';
+import { chosenLayers, estimatedBytes, pausePrecache, planPrecache, precacheRun, resumePrecache, sampleTiles, startPrecache, tileSource, tileZooms, type PlannedLayer, type TileSource } from './precache';
 
 type Tiled = Extract<PlannedLayer, { source: TileSource }>;
 const layer = (draft: LayerDraft, id: string) => createLayer(draft, [], id);
@@ -67,6 +68,12 @@ describe('chosenLayers and planPrecache', () => {
     expect(zooms.every((z) => z.count >= 1)).toBe(true);
     expect(forbidden!.policy?.level).toBe('forbidden');
   });
+
+  it('fetches the tiles of codevoid.de four at a time', () => {
+    const [own, other] = planPrecache([xyz('https://tiles.codevoid.de/{z}/{x}/{y}.png'), wms], area, 12, 12);
+    expect(own!.parallel).toBe(4);
+    expect(other!.parallel).toBeUndefined();
+  });
 });
 
 describe('startPrecache', () => {
@@ -95,6 +102,47 @@ describe('startPrecache', () => {
     expect(precacheRun()).toMatchObject({ status: 'done', total: 2, done: 2, fetched: 1, missing: 1, failed: 0, bytes: png.length });
     expect(calls).toBe(2);
     expect(most).toBe(1);
+  });
+
+  const wide: [number, number][] = [
+    [7.6, 49.0],
+    [7.8, 49.0],
+    [7.8, 49.15],
+    [7.6, 49.15],
+  ];
+  const slowFetch = (log: { calls: number; running: number; most: number }) => async () => {
+    log.calls++;
+    log.most = Math.max(log.most, ++log.running);
+    await new Promise((r) => setTimeout(r, 5));
+    log.running--;
+    return new Response(png, { headers: { 'content-type': 'image/png' } });
+  };
+
+  it('fetches as many tiles at once as the job allows, each tile once', async () => {
+    const log = { calls: 0, running: 0, most: 0 };
+    vi.stubGlobal('fetch', slowFetch(log));
+    const count = countTiles(wide, 13);
+    expect(count).toBeGreaterThan(8);
+    await startPrecache([{ source, mapZoom: 12, z: 13, count, pause: 0, parallel: 4 }], wide);
+    expect(precacheRun()).toMatchObject({ status: 'done', total: count, done: count, fetched: count });
+    expect(log.calls).toBe(count);
+    expect(log.most).toBe(4);
+  });
+
+  it('pauses and resumes every fetch of a job asked for several at a time', async () => {
+    const log = { calls: 0, running: 0, most: 0 };
+    vi.stubGlobal('fetch', slowFetch(log));
+    const count = countTiles(wide, 13);
+    const run = startPrecache([{ source, mapZoom: 12, z: 13, count, pause: 0, parallel: 4 }], wide);
+    pausePrecache();
+    await new Promise((r) => setTimeout(r, 30));
+    const whilePaused = log.calls;
+    await new Promise((r) => setTimeout(r, 30));
+    expect(log.calls).toBe(whilePaused);
+    expect(log.calls).toBeLessThan(count);
+    resumePrecache();
+    await run;
+    expect(precacheRun()).toMatchObject({ status: 'done', done: count });
   });
 
   it('stops when tile after tile fails, with the reason', async () => {

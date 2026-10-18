@@ -58,13 +58,13 @@ function PrecacheForm(props: { area: [number, number][] }) {
   const [restraint, setRestraint] = createStore<Record<string, Restraint>>({});
 
   const plan = createMemo(() => planPrecache(chosenLayers(choice(), state.layers, state.activeLayerId), props.area, from(), to()));
-  /** The zooms of each layer not left out, with the pause after each of its tiles. */
+  /** The zooms of each layer not left out, with the pause after each of its tiles and how many are asked for at once. */
   const jobs = createMemo(() =>
     plan().flatMap((planned): PrecacheJob[] => {
       if (!planned.source || planned.policy?.level === 'forbidden') return [];
       if (planned.policy?.level === 'warn' && restraint[planned.layer.id] !== 'slow') return [];
-      const pause = planned.policy ? SLOW_PAUSE_MS : PAUSE_MS;
-      return planned.zooms.map((zoom) => ({ source: planned.source, ...zoom, pause }));
+      const pause = planned.parallel ? 0 : planned.policy ? SLOW_PAUSE_MS : PAUSE_MS;
+      return planned.zooms.map((zoom) => ({ source: planned.source, ...zoom, pause, ...(planned.parallel && { parallel: planned.parallel }) }));
     }),
   );
 
