@@ -53,7 +53,7 @@ diff that changes anything also fires. Things the app draws over the layers (rou
 focus cover, details highlight) are `Overlay`s (`map/overlays.ts`) appended to the style;
 their data changes go through `setData` only, and map-wide values their fixed layers need
 (the background colour) come from the style's global `state`, set by `composeStyle`. The
-one exception is the focus area's shadow, bevel and outline, drawn on a 2D canvas over the
+one exception is the focus area's shadow, bevel and outline, drawn on 2D canvases over the
 map's (`map/focusShadow.ts`) because they are lit from a direction on screen.
 Source and layer ids are the user layer's id or `<id>/…`, which is how map errors are
 traced back to layers. The style is round-tripped through JSON before `setStyle`: Solid

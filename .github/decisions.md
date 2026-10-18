@@ -568,10 +568,14 @@
     the area. Each edge is drawn in steps projected onto the ground, so it follows the
     terrain in 3D. The canvas is drawn after each frame of the map that moves the area on
     screen; redrawn after every frame, its blur halved the frame rate while 3D tiles
-    loaded. In the style, the edges' lighting would have to come from the bearing in the
-    global state, and a feature property drawn with a value from the global state makes
-    MapLibre load the source again on every change, so on every frame of a turn; lines
-    offset from each edge also left notches at the corners.
+    loaded. The shadow, soft anyway, has a canvas of one pixel to the CSS pixel, and the
+    bevel and outline one at the screen's resolution, which spares the blur most of its
+    pixels on dense screens. The shadow takes the background colour from the map's
+    global state, as the cover does, so they always agree; before the first composed
+    style there is neither. In the style, the edges' lighting would have to come from the
+    bearing in the global state, and a feature property drawn with a value from the
+    global state makes MapLibre load the source again on every change, so on every frame
+    of a turn; lines offset from each edge also left notches at the corners.
   - The shadow is 28 px long and as wide blurred while the area fills the view, at the
     zoom that also puts the cover's world at zoom 4, and halves with every zoom level out,
     so that it keeps its shape as the area shrinks; a fixed length looked ever softer and

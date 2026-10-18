@@ -1,32 +1,33 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
+import { boxOf } from '../geo/bounds';
 import { lngLatToMercator, mercatorToLngLat } from '../geo/mercator';
 import type { LngLat } from '../model/route';
 import { state } from '../state/store';
-import { MAP_BACKGROUND } from './compose';
-import { fitZoom } from './focusOverlay';
+import { BACKGROUND_STATE } from './compose';
+import { COASTLINES, COVER_DIM, fitZoom } from './focusOverlay';
 
 /**
- * The focus area's edge, on a canvas over the map's: a shadow beyond it, a bevel just inside
+ * The focus area's edge, on canvases over the map's: a shadow beyond it, a bevel just inside
  * and an outline. The light comes from a fixed direction on screen, so the area looks raised
  * however the map is turned or tilted; a style could only light the edges from a direction
- * on the map. The canvas is drawn again after each frame of the map that moves the area.
+ * on the map. The canvases are drawn again after each frame of the map that moves the area.
  */
 
 /** How high the area seems raised: the length of its shadow in CSS pixels while it fills the view. */
 const ELEVATION = 28;
+/** How far the bevel reaches into the area, in CSS pixels. */
+const BEVEL = 3;
 /** Where the light comes from on screen, clockwise from up: north-north-west, as in MapLibre's hillshading. */
 const LIGHT = (335 * Math.PI) / 180;
 /** The steps each edge is drawn in, so that it follows the ground in 3D. */
 const EDGE_STEPS = 16;
-/** The outline, in the colour of the coastlines on the cover. */
-const OUTLINE = 'rgba(255, 255, 255, 0.55)';
 
 /**
- * The shadow on a cover of the given background colour, which the cover shows 40 % of the
- * way to black: dark, or a light glow where the cover is too dark for a shadow to show.
+ * The shadow on the cover of a map with the given background colour: dark, or a light glow
+ * where the cover is too dark for a shadow to show.
  */
 export function shadowColor(background: string): string {
-  const [r, g, b] = [1, 3, 5].map((i) => (parseInt(background.slice(i, i + 2), 16) / 255) * 0.6) as [number, number, number];
+  const [r, g, b] = [1, 3, 5].map((i) => (parseInt(background.slice(i, i + 2), 16) / 255) * (1 - COVER_DIM)) as [number, number, number];
   return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.2 ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.45)';
 }
 
@@ -48,80 +49,85 @@ export function edgePoints(corners: readonly LngLat[]): LngLat[] {
   });
 }
 
-/** Draws the focus area's edge over `map` after each of its frames, until the returned function is called. */
-export function drawFocusShadow(map: MapLibreMap): () => void {
-  const canvas = document.createElement('canvas');
-  canvas.className = 'focus-shadow';
-  map.getCanvas().after(canvas);
+/** Lets `context` cast shadows `length` CSS pixels away from the light, as far blurred, at `scale` canvas pixels to the CSS pixel. */
+function castShadow(context: CanvasRenderingContext2D, color: string, length: number, scale: number) {
+  // Canvas shadows are measured in canvas pixels, whatever the transform.
+  context.shadowColor = color;
+  context.shadowBlur = Math.abs(length) * scale;
+  context.shadowOffsetX = -Math.sin(LIGHT) * length * scale;
+  context.shadowOffsetY = Math.cos(LIGHT) * length * scale;
+}
+
+/** The shadow the area casts: the area filled with its shadow, then wiped out. Drawn one canvas pixel to the CSS pixel. */
+function paintShadow(context: CanvasRenderingContext2D, area: Path2D, color: string, length: number) {
+  context.save();
+  castShadow(context, color, length, 1);
+  context.fill(area);
+  context.restore();
+  context.globalCompositeOperation = 'destination-out';
+  context.fill(area);
+  context.globalCompositeOperation = 'source-over';
+}
+
+/**
+ * The bevel and the outline of the area, whose screen box is `box`. For the bevel, the
+ * surroundings, shifted away from and towards the light, shade the inside of the edges:
+ * light where they face the light and dark where they face away.
+ */
+function paintEdge(context: CanvasRenderingContext2D, area: Path2D, [left, top, right, bottom]: readonly [number, number, number, number], ratio: number) {
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const around = new Path2D();
+  around.rect(left - 3 * BEVEL, top - 3 * BEVEL, right - left + 6 * BEVEL, bottom - top + 6 * BEVEL);
+  around.addPath(area);
+  context.save();
+  context.clip(area);
+  castShadow(context, 'rgba(255, 255, 255, 0.5)', BEVEL, ratio);
+  context.fill(around, 'evenodd');
+  castShadow(context, 'rgba(0, 0, 0, 0.35)', -BEVEL, ratio);
+  context.fill(around, 'evenodd');
+  context.restore();
+  context.strokeStyle = COASTLINES;
+  context.lineWidth = 1.5;
+  context.lineJoin = 'round';
+  context.stroke(area);
+}
+
+/** An empty `canvas` of the given size in canvas pixels. */
+function emptied(canvas: HTMLCanvasElement, width: number, height: number): CanvasRenderingContext2D {
   const context = canvas.getContext('2d')!;
-  let corners: readonly LngLat[] | undefined;
-  let points: LngLat[] = [];
-  let fit = 0;
-  /** What the canvas shows: its size, the shadow's colour and the area's place on screen. */
+  if (canvas.width !== width || canvas.height !== height) [canvas.width, canvas.height] = [width, height];
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.clearRect(0, 0, width, height);
+  return context;
+}
+
+/** Draws the focus area's edge over `map` after each of its frames that moves the area on screen. */
+export function drawFocusShadow(map: MapLibreMap): void {
+  // The shadow is soft, so one canvas pixel to the CSS pixel will do; the bevel and outline are drawn sharp.
+  const soft = document.createElement('canvas');
+  const sharp = document.createElement('canvas');
+  soft.className = sharp.className = 'focus-shadow';
+  map.getCanvas().after(soft, sharp);
+  /** What the canvases show: their size, the background colour and the area's place on screen. */
   let shown = '';
-  const draw = () => {
-    const ratio = window.devicePixelRatio;
-    const width = Math.round(map.getCanvas().clientWidth * ratio);
-    const height = Math.round(map.getCanvas().clientHeight * ratio);
-    if (state.focus !== corners) {
-      [corners, points] = [state.focus, state.focus ? edgePoints(state.focus) : []];
-      fit = state.focus ? fitZoom(state.focus.map(([lng, lat]) => lngLatToMercator(lng, lat))) : 0;
-    }
-    const screen = points.map((p) => map.project(p));
-    const color = shadowColor(state.settings.background ?? MAP_BACKGROUND);
+  map.on('render', () => {
+    const ratio = map.getPixelRatio();
+    const { width, height } = map.getCanvas();
+    // The colour the cover is drawn in; none before the first composed style, nor a cover.
+    const background = map.getGlobalState()[BACKGROUND_STATE] as string | undefined;
+    const screen = (state.focus ? edgePoints(state.focus) : []).map((p) => map.project(p));
     // The map draws many frames that leave the area where it is, such as while tiles load.
-    const showing = [width, height, color, ...screen.map(({ x, y }) => `${Math.round(x * 4)},${Math.round(y * 4)}`)].join(' ');
+    const showing = [width, height, background, ...screen.map(({ x, y }) => `${Math.round(x * 4)},${Math.round(y * 4)}`)].join(' ');
     if (showing === shown) return;
     shown = showing;
-    if (canvas.width !== width || canvas.height !== height) [canvas.width, canvas.height] = [width, height];
-    context.setTransform(1, 0, 0, 1, 0, 0);
-    context.clearRect(0, 0, width, height);
-    if (screen.length === 0) return;
+    const softContext = emptied(soft, Math.round(width / ratio), Math.round(height / ratio));
+    const sharpContext = emptied(sharp, width, height);
+    if (!state.focus || !background) return;
     const area = new Path2D();
     screen.forEach(({ x, y }, i) => (i === 0 ? area.moveTo(x, y) : area.lineTo(x, y)));
     area.closePath();
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    // Canvas shadows are measured in device pixels, whatever the transform.
-    const shadow = (color: string, length: number, blur: number) => {
-      context.shadowColor = color;
-      context.shadowBlur = blur * ratio;
-      context.shadowOffsetX = -Math.sin(LIGHT) * length * ratio;
-      context.shadowOffsetY = Math.cos(LIGHT) * length * ratio;
-    };
-
-    // The area filled and casting its shadow, then the area wiped out, leaving the shadow.
-    context.save();
-    const length = shadowLength(map.getZoom(), fit);
-    shadow(color, length, length);
-    context.fill(area);
-    context.restore();
-    context.globalCompositeOperation = 'destination-out';
-    context.fill(area);
-    context.globalCompositeOperation = 'source-over';
-
-    // The bevel: the surroundings, shifted away from and towards the light, shade the inside
-    // of the edges, light where they face the light and dark where they face away.
-    const xs = screen.map((p) => p.x);
-    const ys = screen.map((p) => p.y);
-    const around = new Path2D();
-    around.rect(Math.min(...xs) - ELEVATION, Math.min(...ys) - ELEVATION, Math.max(...xs) - Math.min(...xs) + 2 * ELEVATION, Math.max(...ys) - Math.min(...ys) + 2 * ELEVATION);
-    around.addPath(area);
-    context.save();
-    context.clip(area);
-    shadow('rgba(255, 255, 255, 0.5)', 3, 3);
-    context.fill(around, 'evenodd');
-    shadow('rgba(0, 0, 0, 0.35)', -3, 3);
-    context.fill(around, 'evenodd');
-    context.restore();
-
-    context.strokeStyle = OUTLINE;
-    context.lineWidth = 1.5;
-    context.lineJoin = 'round';
-    context.stroke(area);
-  };
-  map.on('render', draw);
-  return () => {
-    map.off('render', draw);
-    canvas.remove();
-  };
+    const fit = fitZoom(state.focus.map(([lng, lat]) => lngLatToMercator(lng, lat)));
+    paintShadow(softContext, area, shadowColor(background), shadowLength(map.getZoom(), fit));
+    paintEdge(sharpContext, area, boxOf(screen.map(({ x, y }) => [x, y])), ratio);
+  });
 }

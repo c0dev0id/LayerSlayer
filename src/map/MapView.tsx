@@ -121,7 +121,7 @@ export function MapView() {
       if (icon) map.addImage(id, icon.image, { pixelRatio: icon.pixelRatio, sdf: icon.sdf });
     });
     watchGeoJsonBounds(map);
-    const stopFocusShadow = drawFocusShadow(map);
+    drawFocusShadow(map);
     // How many zoom levels a tilted map shows at once, nearest tiles to farthest: MapLibre's
     // default (9.314, tile count ratio 3) on a flat map and for the ground's shape, fewer for
     // the layers in 3D, which keeps the distance sharp for about twice the tiles. Each source
@@ -181,7 +181,6 @@ export function MapView() {
     window.addEventListener('hashchange', onHashChange);
     onCleanup(() => {
       window.removeEventListener('hashchange', onHashChange);
-      stopFocusShadow();
       setMap(undefined);
       map.remove();
     });
