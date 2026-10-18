@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LngLat, Route } from '../model/route';
-import { parseGpx } from '../services/gpx';
+import { parseGpx, type GpxContent } from '../services/gpx';
 import GARMIN_ROUTE from '../services/fixtures/gpx-garmin-route.gpx?raw';
 import { gpxToRouteData, MAX_TRACK_POINTS, routeTracks } from './gpx';
 import { routePoints } from './legs';
@@ -75,8 +75,7 @@ describe('gpxToRouteData', () => {
   });
 
   it('joins the way of a Garmin route point that repeats the one before to the leg it lies on', () => {
-    const ways: [number, number][][] = [[[11, 48]], [[11, 48], [11.1, 48.1]], [[11.2, 48.3]]];
-    const gpx = { waypoints: [], tracks: [], routes: [{ points: [[11, 48], [11, 48], [11.2, 48.3]] as [number, number][], ways }] };
+    const gpx: GpxContent = { waypoints: [], tracks: [], routes: [{ points: [[11, 48], [11, 48], [11.2, 48.3]], rpts: [[], [[11.1, 48.1]], []] }] };
     const [route] = gpxToRouteData(gpx, options).routes;
     expect(route!.points.map((p) => p.lngLat)).toEqual([
       [11, 48],
@@ -87,6 +86,18 @@ describe('gpxToRouteData', () => {
       [11.1, 48.1],
       [11.2, 48.3],
     ]);
+  });
+
+  it('leaves the legs Garmin calculated no way for to the routing', () => {
+    const points: LngLat[] = [
+      [11, 48],
+      [11.2, 48.3],
+      [11.5, 48.5],
+    ];
+    const gpx: GpxContent = { waypoints: [], tracks: [], routes: [{ points, rpts: [[[11.1, 48.1]], [], []] }] };
+    const [route] = gpxToRouteData(gpx, options).routes;
+    expect(Object.keys(route!.legs)).toEqual([`${options.profile}/11,48;11.2,48.3`]);
+    expect(route!.points.every((p) => !p.straight)).toBe(true);
   });
 
   it('puts waypoints without a route or track into a route of their own, named after the file', () => {
@@ -122,7 +133,7 @@ describe('gpxToRouteData', () => {
 
   it('routes every point of a long route and simplifies long tracks', () => {
     const zigzag = (count: number): LngLat[] => Array.from({ length: count }, (_, i) => [i * 0.0001, (i % 2) * 0.0002]);
-    const data = gpxToRouteData({ waypoints: [], routes: [{ points: zigzag(1000) }], tracks: [{ segments: [zigzag(3000)] }] }, options);
+    const data = gpxToRouteData({ waypoints: [], routes: [{ points: zigzag(1000), rpts: zigzag(1000).map(() => []) }], tracks: [{ segments: [zigzag(3000)] }] }, options);
     expect(data.routes[0]!.points).toHaveLength(1000);
     expect(data.routes[0]!.points.some((p) => p.straight)).toBe(false);
     expect(data.routes[1]!.points.length).toBeLessThanOrEqual(MAX_TRACK_POINTS);

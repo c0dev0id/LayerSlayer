@@ -49,10 +49,10 @@ export function toGpx(name: string, waypoints: readonly Waypoint[], tracks: read
 export interface GpxContent {
   waypoints: { lngLat: LngLat; name?: string; description?: string }[];
   /**
-   * `ways` holds, where the file has it, the way a Garmin device or BaseCamp calculated from
-   * each point on to the next: the point, then the points of the road after it.
+   * `rpts` holds for each point the points of the way a Garmin device or BaseCamp
+   * calculated from it on to the next, where the file has them; none otherwise.
    */
-  routes: { name?: string; points: LngLat[]; ways?: LngLat[][] }[];
+  routes: { name?: string; points: LngLat[]; rpts: LngLat[][] }[];
   tracks: { name?: string; segments: LngLat[][] }[];
 }
 
@@ -72,14 +72,10 @@ function garminShape(rtept: Element): Element[] {
   return extension ? children(extension, 'rpt') : [];
 }
 
-/** A route from its points, with the ways Garmin calculated between them where its points carry them. */
+/** A route from its points, with the way Garmin calculated on from each where it carries one. */
 function route(rte: Element): GpxContent['routes'][number] {
   const rtepts = children(rte, 'rtept').filter((p) => position(p) !== undefined);
-  const name = text(rte, 'name');
-  const points = positions(rtepts);
-  const shapes = rtepts.map(garminShape);
-  if (!shapes.some((shape) => shape.length > 0)) return { name, points };
-  return { name, points, ways: rtepts.map((p, i) => positions([p, ...shapes[i]!])) };
+  return { name: text(rte, 'name'), points: positions(rtepts), rpts: rtepts.map((p) => positions(garminShape(p))) };
 }
 
 /** Reads a GPX 1.0 or 1.1 document. */
@@ -106,7 +102,9 @@ export function parseGpx(xml: string): GpxContent {
  */
 export function gpxTracksGeoJson(xml: string): GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.MultiLineString> {
   const gpx = parseGpx(xml);
-  const courses = gpx.routes.flatMap((r) => (r.ways ? [{ name: r.name, segments: [r.ways.flat()] }] : []));
+  const courses = gpx.routes.flatMap((r) =>
+    r.rpts.some((rpts) => rpts.length > 0) ? [{ name: r.name, segments: [r.points.flatMap((p, i) => [p, ...r.rpts[i]!])] }] : [],
+  );
   const features = [...courses, ...gpx.tracks].flatMap((track) => {
     const segments = track.segments.filter((line) => line.length >= 2);
     if (segments.length === 0) return [];
