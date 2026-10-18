@@ -26,7 +26,7 @@ import {
 } from '../model/layer';
 import { labelStyle, MAX_LABEL_SIZE, MAX_OUTLINE_WIDTH, MIN_LABEL_SIZE, type LabelStyle } from '../model/label';
 import { lineWidth } from '../model/line';
-import { propertyKeys } from '../services/featureProperties';
+import { propertyKeys, withLayerStyle } from '../services/featureProperties';
 import { importAccept } from '../services/importFile';
 import { loadFile } from '../state/files';
 import { isUpdating, updateOsmQueryLayer } from '../state/osmQuery';
@@ -299,9 +299,10 @@ function dragToReorder(e: PointerEvent, layer: Layer, entry: HTMLLIElement, list
   handle.addEventListener('pointercancel', end);
 }
 
-/** Saves the features a layer keeps in the browser as a GeoJSON file, to archive, add again later or open elsewhere. */
+/** Saves the features a layer keeps in the browser as a GeoJSON file in the layer's style, to archive, add again later or open elsewhere. */
 async function saveGeoJson(layer: Layer, file: FileResource): Promise<void> {
-  downloadBlob(await loadFile(file.file), fileNameFor(layer.name, 'geojson'));
+  const geojson = JSON.parse(await (await loadFile(file.file)).text()) as GeoJSON.GeoJSON;
+  downloadBlob(new Blob([JSON.stringify(withLayerStyle(geojson, layer))], { type: 'application/geo+json' }), fileNameFor(layer.name, 'geojson'));
 }
 
 /** What an OSM query layer asked for and when; Update asks again, in the focus area as it is now. */
@@ -656,7 +657,7 @@ function ActiveLayer(props: { layer: Layer; externalTiles: string | undefined })
           {(file) => (
             <button
               class="icon"
-              title="Save the features as a GeoJSON file, to keep, add again later or open in another application"
+              title="Save the features as a GeoJSON file in the layer's colours, to keep, add again later or open in another application"
               aria-label={`Save ${layer.name} as GeoJSON`}
               onClick={() => void saveGeoJson(layer, file())}
             >

@@ -13,11 +13,13 @@ import { within } from '../model/stored';
 import {
   isShown,
   keepsTiles,
+  FILL_SHARE,
   layerColor,
   LINE_WIDTH,
   MAX_ZOOM,
   MIN_ZOOM,
   NO_ADJUSTMENTS,
+  OUTLINE_WIDTH,
   type ArcGisMapSource,
   type Bounds,
   type Layer,
@@ -455,9 +457,6 @@ const POINT = ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]] as
  */
 const LINE_DASHES: Record<LineDash, number[]> = { dashed: [2, 3], 'long-dashed': [5, 4], dotted: [0, 2] };
 
-/** Share of a polygon's fill against its outline, so what lies below stays readable. */
-const FILL_SHARE = 0.25;
-
 /**
  * Features drawn in the layer's colour: polygons filled and outlined, lines, and points as
  * dots, or, where the layer has an icon, points and areas marked with it. Where the layer
@@ -484,7 +483,7 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
         type: 'line',
         filter: POLYGON as never,
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': color, 'line-width': lineWidth(layer.lineWidth, 1.5), 'line-opacity': opacity, ...dash },
+        paint: { 'line-color': color, 'line-width': lineWidth(layer.lineWidth, OUTLINE_WIDTH), 'line-opacity': opacity, ...dash },
       },
       {
         ...base,

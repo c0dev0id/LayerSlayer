@@ -457,12 +457,21 @@
     by a box, network links fetch other files, and KML styles would override the colour
     that tells overlapping files apart, so all three are left out. Both libraries are
     loaded when such a file is imported.
-  - Saving a layer as GeoJSON hands out the file the layer keeps in the browser,
-    unchanged. File layers and OSM query layers keep their features as GeoJSON whatever
-    they came from, so there is nothing to convert: the saved file adds back with the same
-    features (an OSM query's tags and *Update* stay with the layer, not the file), and
-    other applications read GeoJSON more widely than the formats it came from. A GeoPDF
-    keeps only the picture of its map, so it is not offered.
+  - Saving a layer as GeoJSON hands out the features the layer keeps in the browser.
+    File layers and OSM query layers keep their features as GeoJSON whatever they came
+    from, so there is nothing to convert: the saved file adds back with the same features
+    (an OSM query's tags and *Update* stay with the layer, not the file), and other
+    applications read GeoJSON more widely than the formats it came from. A GeoPDF keeps
+    only the picture of its map, so it is not offered.
+  - GeoJSON itself has no styling; the one convention other applications read
+    (geojson.io, GitHub) is the simplestyle spec, properties on each feature. A saved file
+    carries the layer's look in them: colour, opacity and line width as stroke and fill,
+    and points as markers in its colour, small for dots, medium or large for icons by
+    their size, with the icon's name where it is a Maki icon, as simplestyle's symbols
+    are Maki's. Dashes and labels have no such property and are lost. Styling the
+    features brought along, such as a KML file's, is dropped first, so the file shows the
+    layer's colours rather than those of the file it came from. Adding the file back draws
+    it in a palette colour like any other file: styling in files is not read.
   - Requests to the routing server go out directly, not through the CORS proxy; it sends
     `Access-Control-Allow-Origin: *`.
 - **The focus area limits requests through source bounds.** The area is a polygon kept

@@ -257,8 +257,12 @@ const DEFAULT_OPACITY = 0.5;
 
 export type LineDash = 'dashed' | 'long-dashed' | 'dotted';
 
-/** Width of a vector layer's lines in pixels where it sets none. */
+/** Width of a vector layer's lines and area outlines in pixels where it sets none. */
 export const LINE_WIDTH = 2.5;
+export const OUTLINE_WIDTH = 1.5;
+
+/** Share of a polygon's fill against its outline, so what lies below stays readable. */
+export const FILL_SHARE = 0.25;
 
 
 export const MIN_ZOOM = 0;
