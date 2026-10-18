@@ -21,6 +21,8 @@
   off, on their own; and the properties of a tapped feature in words in the details sheet.
 - A map button that shows the open layer alone over the base map, leaving every layer's
   visibility as it was.
+- A fullscreen button on the map that shows the map alone, without the panel and the
+  other controls, and brings them back when pressed again or on Esc.
 - File layers that take a newer version of their file, keeping their settings; library
   entries for files that pages may not read, downloaded by a link, among them the
   motorcycle road closures of mintelonline.de, read from their names.

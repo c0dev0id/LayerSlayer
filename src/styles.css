@@ -182,6 +182,12 @@ header.section > .row {
   background: #fff;
 }
 
+/* In fullscreen the map shows alone: of the controls over it, only the button that ends it and the credits stay. */
+:is(.map-wrap:fullscreen, .map-wrap.maplibregl-pseudo-fullscreen)
+  :is(.search, .hint-bar, .toolbar, .maplibregl-ctrl-scale, .maplibregl-ctrl-group:not(:has(.maplibregl-ctrl-shrink))) {
+  display: none;
+}
+
 /* The focus area's shadow, bevel and outline, over the map's canvas and under its markers. */
 .focus-shadow {
   position: absolute;

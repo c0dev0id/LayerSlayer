@@ -27,6 +27,7 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
   words.
 - **3D terrain** — hillshaded relief from open worldwide elevation tiles, under a day or a
   night sky.
+- **Fullscreen** — one button shows the map alone, without the panel and controls.
 - **Focus area** — a polygon that limits requests and floats over a small outline map of
   the world, with precaching for later.
 - **Stays in the browser** — tiles kept per layer, everything survives a restart, and a

@@ -77,6 +77,9 @@ export function MapView() {
     // MapLibre's default (1/450) zooms about 0.15 levels per wheel notch; this makes it about
     // 0.55, two notches to a level.
     map.scrollZoom.setWheelZoomRate(1 / 100);
+    // The map's frame goes fullscreen, with what is drawn over the map and without the panel;
+    // where the page may not (iPhones, frames), it fills the window instead.
+    map.addControl(new maplibregl.FullscreenControl({ container: container.parentElement!, pseudo: !document.fullscreenEnabled }), 'top-right');
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     map.addControl(new maplibregl.GeolocateControl({ fitBoundsOptions: { maxZoom: 15 } }), 'top-right');
     const terrainControl = new TerrainControl(() => state.settings.terrain, setTerrain);

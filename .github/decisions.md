@@ -838,6 +838,19 @@
   symbols suffered from too. Waypoints keep an icon the same way (`MapIcon`), shown white
   in their pin in place of the dot; GPX export leaves it out, since GPX symbol names are
   device-specific.
+- **Fullscreen is MapLibre's control on the map's frame.** `FullscreenControl` puts the
+  element it is given into the browser's fullscreen and keeps its button in step with Esc
+  and the browser's own exit. Given the map's frame (`.map-wrap`) rather than the map, the
+  markers and controls drawn over the map come along and the panel, outside the frame,
+  does not; one CSS rule keyed to the frame's `:fullscreen` hides the search box, the hint
+  bar, the route toolbar, the scale and every control group but the fullscreen button's.
+  The credits stay: the licences of the map data ask for them wherever the map is shown,
+  and MapLibre's compact credits take a button's room on small screens. Where the page may
+  not go fullscreen (iPhones, frames without permission) the control fills the window
+  instead (`pseudo`); left to choose on its own, MapLibre entered that mode where
+  `requestFullscreen` was missing but tried to leave it through `webkitCancelFullScreen`,
+  which did nothing. Modal dialogs, such as spot details, open in the browser's top layer
+  and show over the fullscreen map.
 - **3D terrain is part of the composed style.** Every layer change applies the whole style
   with a diff, so terrain set with `map.setTerrain` (as MapLibre's TerrainControl does)
   would be dropped by the next change. The 3D button switches `settings.terrain` instead,
