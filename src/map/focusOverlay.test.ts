@@ -56,6 +56,12 @@ describe('focusAreaFeatures', () => {
     ]);
   });
 
+  it('cuts the world where the map draws the area edge, in Web Mercator rather than in degrees', () => {
+    // A slanted edge from 0,30 to 20,70 crosses 10 °E north of 54 °N on the map, not at 50 °N.
+    const [, upper] = coastOf([[0, 30], [20, 70], [20, 30]], [[10, 0], [10, 80]]);
+    expect(upper![0]![1]).toBeGreaterThan(54);
+  });
+
   it('shrinks the world around a small area, as if it were raised over its place on a map at zoom 4', () => {
     // The square fills an 800 px view at about zoom 8.5, so the world shrinks 16 to 32 times.
     const [line] = coastOf(square, [[38.5, 48.5], [68.5, 48.5]]);

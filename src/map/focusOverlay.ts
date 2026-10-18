@@ -2,6 +2,7 @@ import type { ExpressionSpecification, LayerSpecification } from 'maplibre-gl';
 import { createEffect, createMemo, createRoot, createSignal } from 'solid-js';
 import { linesOutside } from '../geo/clip';
 import { lngLatToMercator, MAX_LATITUDE, mercatorToLngLat, WORLD } from '../geo/mercator';
+import type { XY } from '../geo/nearest';
 import type { LngLat } from '../model/route';
 import { focusCursor, focusDraft } from '../state/drawing';
 import { state } from '../state/store';
@@ -33,8 +34,6 @@ export const FOCUS_COVER_LAYER = `${AREA_SOURCE}-cover`;
 
 /** How far an edge of the area faces away from the light, 0 to 1. */
 const AWAY: ExpressionSpecification = ['max', 0, ['-', ['get', 'facing']]];
-/** How far an edge of the area faces the light, 0 to 1. */
-const TOWARDS: ExpressionSpecification = ['max', 0, ['get', 'facing']];
 
 const AREA_LAYERS: LayerSpecification[] = [
   {
@@ -88,7 +87,7 @@ const AREA_LAYERS: LayerSpecification[] = [
     layout: ROUND_LINE,
     paint: {
       'line-color': ['case', ['>', ['get', 'facing'], 0], '#ffffff', '#000000'],
-      'line-opacity': ['case', ['>', ['get', 'facing'], 0], ['*', 0.6, TOWARDS], ['*', 0.35, AWAY]],
+      'line-opacity': ['case', ['>', ['get', 'facing'], 0], ['*', 0.6, ['get', 'facing']], ['*', 0.35, AWAY]],
       'line-width': 3,
       'line-offset': -2.5,
       'line-blur': 1.5,
@@ -142,10 +141,8 @@ function signedArea(ring: readonly LngLat[]): number {
   return sum;
 }
 
-/** How far an edge of a counterclockwise ring faces the light, -1 (away) to 1, on the map. */
-function facing(a: LngLat, b: LngLat): number {
-  const [ax, ay] = lngLatToMercator(a[0], a[1]);
-  const [bx, by] = lngLatToMercator(b[0], b[1]);
+/** How far an edge of a counterclockwise ring in Web Mercator faces the light, -1 (away) to 1. */
+function facing([ax, ay]: XY, [bx, by]: XY): number {
   const length = Math.hypot(bx - ax, by - ay);
   // The outside of a counterclockwise ring is to the right of each edge.
   return length === 0 ? 0 : ((by - ay) * LIGHT[0] - (bx - ax) * LIGHT[1]) / length;
@@ -157,25 +154,19 @@ const COVER_WORLD_ZOOM = 4;
 const FIT_VIEW = 800;
 
 /**
- * The world's outline as the cover shows it: shrunk around the area's centre, so that
- * with the area filling the view the world is at COVER_WORLD_ZOOM, as if the area were
- * raised over its place on a smaller map. The world keeps the map's scale around an area
- * too large for that. The shrinking is done in Web Mercator, where the map is drawn.
+ * How the cover shrinks the world around the area, in Web Mercator: so far that, with the
+ * area filling the view, the world is at COVER_WORLD_ZOOM, as if the area were raised over
+ * its place on a smaller map. The world keeps the map's scale around an area too large for
+ * that.
  */
-function coverWorld(lines: readonly LngLat[][], ring: readonly LngLat[]): LngLat[][] {
-  const corners = ring.map(([lng, lat]) => lngLatToMercator(lng, lat));
-  const xs = corners.map((p) => p[0]);
-  const ys = corners.map((p) => p[1]);
+function coverShrink(area: readonly XY[]): (point: XY) => XY {
+  const xs = area.map((p) => p[0]);
+  const ys = area.map((p) => p[1]);
   const [west, east, south, north] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
   const fitZoom = Math.log2(((FIT_VIEW / 512) * WORLD) / Math.max(east - west, north - south));
   const scale = 2 ** -Math.max(0, fitZoom - COVER_WORLD_ZOOM);
   const [cx, cy] = [(west + east) / 2, (south + north) / 2];
-  return lines.map((line) =>
-    line.map(([lng, lat]) => {
-      const [x, y] = lngLatToMercator(lng, lat);
-      return mercatorToLngLat(cx + (x - cx) * scale, cy + (y - cy) * scale);
-    }),
-  );
+  return ([x, y]) => [cx + (x - cx) * scale, cy + (y - cy) * scale];
 }
 
 /** Positions copied out of the store, so that the map gets plain data. */
@@ -202,12 +193,18 @@ export function focusAreaFeatures(focus: readonly LngLat[] | undefined, world?: 
   const corners = copy(focus);
   const ring = signedArea(corners) > 0 ? corners : [...corners].reverse();
   const closed = [...ring, ring[0]!];
+  // Shrinking, cutting and lighting are done in Web Mercator, where the map draws straight lines.
+  const area = closed.map(([lng, lat]) => lngLatToMercator(lng, lat));
+  const shrink = coverShrink(area);
   const onCover = (lines: readonly LngLat[][], kind: string) =>
-    linesOutside(coverWorld(lines, ring), ring).map((line) => feature({ type: 'LineString', coordinates: line }, { kind }));
+    linesOutside(
+      lines.map((line) => line.map(([lng, lat]) => shrink(lngLatToMercator(lng, lat)))),
+      area,
+    ).map((line) => feature({ type: 'LineString', coordinates: line.map(([x, y]) => mercatorToLngLat(x, y)) }, { kind }));
   return collection([
     feature({ type: 'Polygon', coordinates: [WORLD_RING, [...closed].reverse()] }, { kind: 'cover' }),
     ...(world ? [...onCover(world.coastlines, 'coast'), ...onCover(world.borders, 'border')] : []),
-    ...ring.map((a, i) => feature({ type: 'LineString', coordinates: [a, closed[i + 1]!] }, { kind: 'edge', facing: facing(a, closed[i + 1]!) })),
+    ...ring.map((a, i) => feature({ type: 'LineString', coordinates: [a, closed[i + 1]!] }, { kind: 'edge', facing: facing(area[i]!, area[i + 1]!) })),
   ]);
 }
 

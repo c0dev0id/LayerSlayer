@@ -1,3 +1,4 @@
+import { insideRing } from '../geo/clip';
 import type { LngLat } from '../model/route';
 import { postpassOrOverpass, type OsmObject } from './osm';
 import { askOverpass, fromOverpass } from './overpass';
@@ -208,22 +209,12 @@ function segmentDistance([px, py]: Point, [ax, ay]: Point, [bx, by]: Point): num
   return Math.hypot(px - ax - t * dx, py - ay - t * dy);
 }
 
-function inside([px, py]: Point, ring: Point[]): boolean {
-  let within = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i]!;
-    const [xj, yj] = ring[j]!;
-    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) within = !within;
-  }
-  return within;
-}
-
 /** Distance from the spot to a line of points, none where the spot lies within it as a closed ring. */
 function lineDistance(points: Point[]): number {
   const first = points[0];
   const last = points.at(-1);
   if (!first || !last) return Infinity;
-  if (points.length >= 4 && first[0] === last[0] && first[1] === last[1] && inside([0, 0], points)) return 0;
+  if (points.length >= 4 && first[0] === last[0] && first[1] === last[1] && insideRing([0, 0], points)) return 0;
   if (points.length === 1) return Math.hypot(first[0], first[1]);
   let nearest = Infinity;
   for (let i = 1; i < points.length; i++) nearest = Math.min(nearest, segmentDistance([0, 0], points[i - 1]!, points[i]!));

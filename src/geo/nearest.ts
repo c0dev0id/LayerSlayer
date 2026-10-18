@@ -1,4 +1,4 @@
-/** A point in screen pixels. */
+/** A point in a plane, such as screen pixels or Web Mercator metres. */
 export type XY = readonly [number, number];
 
 /** The point of the segment a–b closest to p. */
