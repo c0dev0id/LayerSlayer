@@ -443,6 +443,8 @@
     theme, and their pickers show the theme's colour. The outline and the waypoint look
     are set in panels like a layer's label style, beside the line width and waypoint size
     sliders; each panel names its own anchor, as every route's settings are shown at once.
+    A pin stands on a soft shadow centred on its tip, sized with the pin, so that it reads
+    as standing on the map rather than floating over it.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all

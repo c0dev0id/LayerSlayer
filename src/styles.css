@@ -1107,6 +1107,21 @@ input.swatch {
 
 .waypoint {
   position: relative;
+  isolation: isolate;
+}
+
+/* A soft shadow on the ground under the pin's tip, 1 of its 28 units above the bottom. */
+.waypoint::before {
+  position: absolute;
+  bottom: calc(100% / 28);
+  left: 50%;
+  z-index: -1;
+  width: 90%;
+  height: 28%;
+  transform: translate(-50%, 50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.35) 50%, transparent);
+  content: '';
 }
 
 .waypoint svg {
