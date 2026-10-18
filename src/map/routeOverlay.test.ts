@@ -69,6 +69,23 @@ describe('routeFeatures', () => {
     expect(routeFeatures([{ ...anew, coloring: 'elevation' }], new Set(), { ...NO_DATA, elevation: elevations }).features.some((f) => f.properties!['colored'])).toBe(false);
   });
 
+  it('colours each leg where it lies along the route, even a leg that runs twice', () => {
+    const there: Route['points'][number] = { id: 'x', lngLat: [2, 2], straight: true };
+    const twice: Route = { ...route, coloring: 'rainbow', points: [{ id: 'a', lngLat: [1, 1] }, there, { id: 'y', lngLat: [1, 1], straight: true }, { ...there, id: 'z' }] };
+    const pieces = routeFeatures([twice], new Set(), NO_DATA).features.filter((f) => f.properties!['state'] === 'piece');
+    expect(pieces[0]!.properties!['color']).toBe('hsl(0, 85%, 50%)');
+    expect(pieces.at(-1)!.properties!['color']).toBe('hsl(280, 85%, 50%)');
+  });
+
+  it('reuses a coloured route’s pieces while nothing they are made from changes', () => {
+    const coloured: Route = { ...route, coloring: 'rainbow' };
+    const pieceLines = (r: Route) => routeFeatures([r], new Set(), NO_DATA).features.filter((f) => f.properties!['state'] === 'piece').map((f) => f.geometry.coordinates);
+    const first = pieceLines(coloured);
+    const wider = pieceLines({ ...coloured, lineWidth: 8 });
+    expect(wider[0]).toBe(first[0]);
+    expect(pieceLines({ ...coloured, color: '#000000' })[0]).not.toBe(first[0]);
+  });
+
   it('outlines a route in its own colour and width, within bounds', () => {
     expect(routeFeatures([{ ...route, outline: { color: '#000000', width: 3 } }], new Set(), NO_DATA).features[0]!.properties).toMatchObject({ outlineColor: '#000000', outlineWidth: 3 });
     expect(routeFeatures([{ ...route, outline: { color: 'black', width: 50 } }], new Set(), NO_DATA).features[0]!.properties).toMatchObject({ outlineColor: '#ffffff', outlineWidth: 4 });

@@ -60,8 +60,11 @@ export function rainbowColor(t: number): string {
 export const ELEVATION_RAMP = ['#2f9e44', '#94d82d', '#fcc419', '#f76707', '#c92a2a'] as const;
 
 /** The colour of an elevation, `t` being its share of the way from the route's lowest point to its highest. */
-export function elevationColor(t: number): string {
-  const at = step(t) * (ELEVATION_RAMP.length - 1);
+export const elevationColor = (t: number): string => ELEVATION_STEPS[Math.round(within(t, 0, 1, 0) * STEPS)]!;
+
+/** The ramp's colour at `t` of the way along it. */
+function blend(t: number): string {
+  const at = t * (ELEVATION_RAMP.length - 1);
   const i = Math.min(Math.floor(at), ELEVATION_RAMP.length - 2);
   const [from, to] = [ELEVATION_RAMP[i]!, ELEVATION_RAMP[i + 1]!];
   const channel = (k: number) => {
@@ -72,6 +75,8 @@ export function elevationColor(t: number): string {
   };
   return `#${channel(1)}${channel(3)}${channel(5)}`;
 }
+
+const ELEVATION_STEPS = Array.from({ length: STEPS + 1 }, (_, k) => blend(k / STEPS));
 
 /**
  * Grades in percent, in the direction of travel: each class colours the grades below
