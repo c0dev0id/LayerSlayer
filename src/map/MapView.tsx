@@ -121,10 +121,13 @@ export function MapView() {
     });
     watchGeoJsonBounds(map);
     // How many zoom levels a tilted map shows at once, nearest tiles to farthest: MapLibre's
-    // default (9.314, tile count ratio 3) on a flat map, fewer in 3D, which keeps the distance
-    // sharp for about twice the tiles. Each source keeps its own setting, and a style change
-    // may bring new sources.
-    map.on('style.load', () => map.setSourceTileLodParams(state.settings.terrain ? 6 : 9.314, 3));
+    // default (9.314, tile count ratio 3) on a flat map and for the ground's shape, fewer for
+    // the layers in 3D, which keeps the distance sharp for about twice the tiles. Each source
+    // keeps its own setting, and a style change may bring new sources.
+    map.on('style.load', () => {
+      map.setSourceTileLodParams(state.settings.terrain ? 6 : 9.314, 3);
+      if (map.getSource(TERRAIN_SOURCE)) map.setSourceTileLodParams(9.314, 3, TERRAIN_SOURCE);
+    });
     map.on('sourcedata', (event) => {
       const id = layerOf(event.sourceId);
       if (id && event.tile) clearLayerError(id);
