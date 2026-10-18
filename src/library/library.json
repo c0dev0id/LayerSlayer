@@ -579,37 +579,44 @@
     {
       "id": "united-states-usfs-motor-vehicle-use-map",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MVUM_02/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MVUM_02/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-forest-roads",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RoadBasic_01/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RoadBasic_01/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-forest-trails",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_TrailNFSPublish_01/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_TrailNFSPublish_01/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-campgrounds-and-trailheads",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecreationOpportunities_01/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecreationOpportunities_01/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-wilderness-areas",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_Wilderness_01/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_Wilderness_01/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-blm-roads-and-trails",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/transportation/BLM_Natl_GTLF_Public_Display/MapServer?f=json"
+      "url": "https://gis.blm.gov/arcgis/rest/services/transportation/BLM_Natl_GTLF_Public_Display/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-blm-campgrounds-and-recreation-sites",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/recreation/BLM_Natl_Recreation_Sites_Facilities/MapServer?f=json"
+      "url": "https://gis.blm.gov/arcgis/rest/services/recreation/BLM_Natl_Recreation_Sites_Facilities/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-blm-land-managers",
@@ -620,17 +627,20 @@
     {
       "id": "united-states-blm-wilderness-and-wilderness-study-areas",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_NLCS_WLD_WSA/MapServer?f=json"
+      "url": "https://gis.blm.gov/arcgis/rest/services/lands/BLM_Natl_NLCS_WLD_WSA/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-nps-park-roads",
       "type": "arcgis-mapserver",
-      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Roads/MapServer?f=json"
+      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Roads/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-nps-park-trails",
       "type": "arcgis-mapserver",
-      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Trails/MapServer?f=json"
+      "url": "https://mapservices.nps.gov/arcgis/rest/services/NationalDatasets/NPS_Public_Trails/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-mines-and-mineral-resources",
@@ -659,7 +669,8 @@
     {
       "id": "united-states-usgs-protected-areas-by-manager-pad-us-4-1",
       "type": "arcgis-mapserver",
-      "url": "https://edits.nationalmap.gov/arcgis/rest/services/PAD-US/PAD_US_4_1/MapServer?f=json"
+      "url": "https://edits.nationalmap.gov/arcgis/rest/services/PAD-US/PAD_US_4_1/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-contours",
@@ -694,27 +705,32 @@
     {
       "id": "united-states-noaa-snow-analysis",
       "type": "arcgis-mapserver",
-      "url": "https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer?f=json"
+      "url": "https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-fire-history",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceAndPerimeter_01/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceAndPerimeter_01/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-fire-current-edition",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-fire-severity-mtbs",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MTBS_01/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MTBS_01/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usfs-fireshed-registry",
       "type": "arcgis-mapserver",
-      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireshedRegistry_01/MapServer?f=json"
+      "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireshedRegistry_01/MapServer?f=json",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-governmental-unit-boundaries",
@@ -870,37 +886,44 @@
     {
       "id": "united-states-usgs-place-names-gnis",
       "type": "arcgis-mapserver",
-      "url": "https://carto.nationalmap.gov/arcgis/rest/services/geonames/MapServer"
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/geonames/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-transportation",
       "type": "arcgis-mapserver",
-      "url": "https://carto.nationalmap.gov/arcgis/rest/services/transportation/MapServer"
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/transportation/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-structures",
       "type": "arcgis-mapserver",
-      "url": "https://carto.nationalmap.gov/arcgis/rest/services/structures/MapServer"
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/structures/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-trails",
       "type": "arcgis-mapserver",
-      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/USGSTrails/MapServer"
+      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/USGSTrails/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-nhdplus-high-resolution",
       "type": "arcgis-mapserver",
-      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer"
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-watershed-boundaries",
       "type": "arcgis-mapserver",
-      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer"
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-3d-hydrography-3dhp",
       "type": "arcgis-mapserver",
-      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/3DHP_all/MapServer"
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/3DHP_all/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-3d-hydrography-features-3dhp",
@@ -916,32 +939,38 @@
     {
       "id": "united-states-usgs-naip-imagery-coverage",
       "type": "arcgis-mapserver",
-      "url": "https://index.nationalmap.gov/arcgis/rest/services/USGSNAIPImageryIndex/MapServer"
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/USGSNAIPImageryIndex/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-3dep-elevation-coverage",
       "type": "arcgis-mapserver",
-      "url": "https://index.nationalmap.gov/arcgis/rest/services/3DEPElevationIndex/MapServer"
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/3DEPElevationIndex/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-3dep-lidar-acquisition-grid",
       "type": "arcgis-mapserver",
-      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/3DEPDataAcquisition_1KMGrid/MapServer"
+      "url": "https://partnerships.nationalmap.gov/arcgis/rest/services/3DEPDataAcquisition_1KMGrid/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-us-topo-availability",
       "type": "arcgis-mapserver",
-      "url": "https://index.nationalmap.gov/arcgis/rest/services/USTopoAvailability/MapServer"
+      "url": "https://index.nationalmap.gov/arcgis/rest/services/USTopoAvailability/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usgs-map-sheet-indices",
       "type": "arcgis-mapserver",
-      "url": "https://carto.nationalmap.gov/arcgis/rest/services/map_indices/MapServer"
+      "url": "https://carto.nationalmap.gov/arcgis/rest/services/map_indices/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-blm-public-land-survey-system",
       "type": "arcgis-mapserver",
-      "url": "https://gis.blm.gov/arcgis/rest/services/Cadastral/BLM_Natl_PLSS_CadNSDI/MapServer"
+      "url": "https://gis.blm.gov/arcgis/rest/services/Cadastral/BLM_Natl_PLSS_CadNSDI/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-nga-us-national-grid",
@@ -957,12 +986,14 @@
     {
       "id": "united-states-fema-flood-hazard-zones-nfhl",
       "type": "arcgis-mapserver",
-      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer"
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-usfws-wetlands-topographic-symbols",
       "type": "arcgis-mapserver",
-      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/WetlandsTopo/Wetlands_Topo_Service/MapServer"
+      "url": "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/WetlandsTopo/Wetlands_Topo_Service/MapServer",
+      "dmd": true
     },
     {
       "id": "united-states-nps-park-boundaries",
