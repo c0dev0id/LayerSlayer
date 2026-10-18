@@ -43,8 +43,8 @@
   on demand.
 - Optional CORS proxy, used per host.
 - Light and dark interface, following the browser unless switched.
-- A focus area: a polygon outside whose bounds no layer but the bottom one requests
-  tiles, with the map around it dimmed.
+- A focus area: a polygon outside whose bounds no layer requests tiles, with the map
+  around it covered in the dimmed background colour.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
   waypoints, undo and redo, car, bike and foot profiles, GPX export and import.
 - Layers, routes, settings, view and imported files survive a browser restart, and go

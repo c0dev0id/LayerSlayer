@@ -479,19 +479,33 @@
     it in a palette colour like any other file: styling in files is not read.
   - Requests to the routing server go out directly, not through the CORS proxy; it sends
     `Access-Control-Allow-Origin: *`.
-- **The focus area limits requests through source bounds.** The area is a polygon kept
-  with the layers. Its bounding box, intersected with each layer's bounds, becomes the
-  `bounds` of the layer's source, which MapLibre uses to skip tiles outside; explicit
-  bounds take precedence over a TileJSON's, so this also covers COGs and the tiled
-  sources of styles. Feature layers, otherwise not limited to their bounds, get the box
-  too. Whole-file sources (GeoJSON, images) cannot be limited and are only left out, like
-  every other layer, when their bounds miss the box. The bottom layer of the stack is
-  exempt, so the area keeps its surroundings for orientation.
-  - Tiles that meet the box load whole, so an upper layer still draws past the polygon up
-    to the edges of those tiles. The overlay dims everything outside the polygon: a world
-    polygon with the area as its hole, wound against the world ring, since MapLibre takes
-    a ring wound like the first as a polygon of its own. It sits between the layers and
-    the route lines.
+- **The focus area limits requests through source bounds and covers the rest.** The area
+  is a polygon kept with the layers. Its bounding box, intersected with each layer's
+  bounds, becomes the `bounds` of the layer's source, which MapLibre uses to skip tiles
+  outside; explicit bounds take precedence over a TileJSON's, so this also covers COGs and
+  the tiled sources of styles. Feature layers, otherwise not limited to their bounds, get
+  the box too. Whole-file sources (GeoJSON, images) cannot be limited and are only left
+  out, like every other layer, when their bounds miss the box.
+  - Tiles that meet the box load whole, so layers draw past the polygon up to the edges of
+    those tiles. Everything outside the polygon is therefore covered in the map's
+    background colour and dimmed: a world polygon with the area as its hole, wound against
+    the world ring, since MapLibre takes a ring wound like the first as a polygon of its
+    own. It sits between the layers and the route lines, so routes stay visible outside.
+    The colour is a property of the cover's feature, so a new colour reaches it through
+    `setData` like a new area.
+  - The bottom layer used to be exempt, loading everywhere so that the area kept its
+    surroundings, with the outside only dimmed. Zoomed out, with the area forgotten, the
+    base map everywhere and the upper layers in tile-shaped patches around the box read as
+    tiles failing to load. MapLibre cannot clip a layer to a polygon (there is no clip
+    layer, and raster layers take no geometry filter), so keeping the base map outside
+    while hiding the layers above it would need tiles masked pixel by pixel in the tile
+    protocol, or custom layers that copy and restore the framebuffer. The cover is one
+    fill; the bottom layer is now limited like the others, as its tiles outside would only
+    load to stay hidden.
+  - A tap on the cover finds no features: those under it are not drawn.
+  - In 3D the ground keeps its elevation everywhere: MapLibre takes ground without
+    elevation tiles as sea level, so limiting it would raise a wall at the box's edge in
+    the mountains, draped in the cover. The hillshading is limited like the layers.
   - A new area changes the sources' bounds, which the style diff applies by replacing the
     sources, so their tiles load again.
   - Drawing it goes through the route tool's `Interactions` and tap filter; drawing a
@@ -680,7 +694,8 @@
   where countries publish it, down to zoom 18 in Germany. Where finer data ends its tiles
   answer 404 and MapLibre keeps the coarser parent tile, so those errors are not shown.
   The AWS Terrain Tiles (Mapzen) were the alternative: also keyless, but coarser and
-  ending at zoom 15. Like the bottom layer, the ground is not limited to the focus area.
+  ending at zoom 15. The ground is not limited to the focus area, its shading is (see the
+  focus area).
   3D brings hillshading along: a hillshade layer inserted right above the bottom layer, so
   the base map is shaded and overlays are not. The map tilts up to 70°, ten more than
   MapLibre's default, which allows up to 180 but calls anything past 60 experimental:
