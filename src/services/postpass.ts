@@ -30,8 +30,9 @@ export function tagCondition(condition: TagCondition): string {
   return `tags @> ${sql(JSON.stringify({ [key]: condition.value }))}::jsonb`;
 }
 
-/** The `osm_type` of each kind of object. */
+/** The `osm_type` of each kind of object, and the kind of each `osm_type`. */
 const TYPE_LETTERS: Record<OsmType, string> = { node: 'N', way: 'W', relation: 'R' };
+const OSM_TYPES: Record<string, OsmType> = { N: 'node', W: 'way', R: 'relation' };
 
 /** A search as an SQL condition: all of its tags, or a value containing any of its texts, in the kind of object it names. */
 export function condition(search: Search): string {
@@ -59,8 +60,6 @@ export function postpassQuery(filters: readonly string[], area: readonly LngLat[
   const within = `ST_Intersects(geom, ST_GeomFromText('POLYGON((${ring.join(',')}))', 4326))`;
   return selectObjects('geom', searchesOf(filters).map((search) => `${within} AND ${condition(search)}`));
 }
-
-const OSM_TYPES: Record<string, OsmObject['type']> = { N: 'node', W: 'way', R: 'relation' };
 
 interface PostpassFeature {
   type: 'Feature';

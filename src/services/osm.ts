@@ -67,11 +67,15 @@ export function formatFilter(filter: Filter): string {
   return (filter.type ? [filter.type, ...tags] : tags).join(' ');
 }
 
-/**
- * What a query asks a source for: the tags of a filter, or a value containing any of the
- * texts, in the kind of object named, or in any.
- */
-export type Search = { type?: OsmType } & ({ conditions: TagCondition[] } | { key: string; texts: string[] });
+/** A value containing any of the texts, in the kind of object named, or in any. */
+export interface TextSearch {
+  type?: OsmType;
+  key: string;
+  texts: string[];
+}
+
+/** What a query asks a source for: the tags of a filter, or one of several texts. */
+export type Search = Filter | TextSearch;
 
 /**
  * The filters as a query asks for them. Filters that only look for a text in the same key,
@@ -81,23 +85,16 @@ export type Search = { type?: OsmType } & ({ conditions: TagCondition[] } | { ke
  */
 export function searchesOf(filters: readonly string[]): Search[] {
   const searches: Search[] = [];
-  const textSearches = new Map<string, { type?: OsmType; key: string; texts: string[] }>();
-  for (const filter of filters) {
-    const { type, conditions } = parseFilter(filter);
-    const kind = type && { type };
-    const only = conditions.length === 1 ? conditions[0]! : undefined;
+  for (const text of filters) {
+    const filter = parseFilter(text);
+    const only = filter.conditions.length === 1 ? filter.conditions[0]! : undefined;
     if (only?.op !== 'contains') {
-      searches.push({ ...kind, conditions });
+      searches.push(filter);
       continue;
     }
-    const id = JSON.stringify([type, only.key]);
-    let search = textSearches.get(id);
-    if (!search) {
-      search = { ...kind, key: only.key, texts: [] };
-      textSearches.set(id, search);
-      searches.push(search);
-    }
-    search.texts.push(only.value);
+    const joined = searches.find((s): s is TextSearch => 'texts' in s && s.type === filter.type && s.key === only.key);
+    if (joined) joined.texts.push(only.value);
+    else searches.push({ ...(filter.type && { type: filter.type }), key: only.key, texts: [only.value] });
   }
   return searches;
 }

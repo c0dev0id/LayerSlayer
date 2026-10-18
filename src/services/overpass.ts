@@ -1,7 +1,7 @@
 import type { LngLat } from '../model/route';
 import { roundLngLat } from '../routing/legs';
 import { fetchResource } from '../state/net';
-import { searchesOf, type OsmObject } from './osm';
+import { searchesOf, type OsmObject, type OsmType } from './osm';
 
 /**
  * OpenStreetMap features found with the Overpass API (wiki.openstreetmap.org/wiki/Overpass_API)
@@ -52,7 +52,7 @@ export interface LatLon {
  * With `out geom(box)`, points outside the box are null.
  */
 export interface OsmElement {
-  type: 'node' | 'way' | 'relation';
+  type: OsmType;
   id: number;
   tags?: Record<string, string>;
   /** A node's position. */
