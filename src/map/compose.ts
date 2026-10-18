@@ -83,10 +83,11 @@ export interface MapOptions {
   /** The colour the map is drawn on. */
   background?: string;
   /**
-   * The ground in 3D, raised by its elevation and shaded by its relief, everywhere like the
-   * bottom layer. The shading lies on the bottom layer, under every layer above it.
+   * The ground in 3D under a day or night sky, raised by its elevation and shaded by its
+   * relief, everywhere like the bottom layer. The shading lies on the bottom layer, under
+   * every layer above it.
    */
-  terrain?: boolean;
+  terrain?: TerrainSky;
   /** The id of the one layer shown, with the bottom layer under it; see `isShown`. */
   only?: string;
   /** Whether layers keep tiles as each says; false, none does (a switch for testing). */
@@ -139,14 +140,27 @@ interface Fragment {
  *
  * See MapOptions for what is drawn around the layers.
  */
-/** The sky of 3D terrain, above the horizon when the map is tilted far, and its fog over the distant ground. */
-const SKY: StyleSpecification['sky'] = {
-  'sky-color': '#88c6fc',
-  'horizon-color': '#ffffff',
-  'fog-color': '#ffffff',
-  'sky-horizon-blend': 0.8,
-  'horizon-fog-blend': 0.8,
-  'fog-ground-blend': 0.5,
+/** The sky over 3D terrain. */
+export type TerrainSky = 'day' | 'night';
+
+/** The skies of 3D terrain, above the horizon when the map is tilted far, and their fog over the distant ground. */
+const SKIES: Record<TerrainSky, StyleSpecification['sky']> = {
+  day: {
+    'sky-color': '#88c6fc',
+    'horizon-color': '#ffffff',
+    'fog-color': '#ffffff',
+    'sky-horizon-blend': 0.8,
+    'horizon-fog-blend': 0.8,
+    'fog-ground-blend': 0.5,
+  },
+  night: {
+    'sky-color': '#070b1c',
+    'horizon-color': '#24305a',
+    'fog-color': '#141b36',
+    'sky-horizon-blend': 0.8,
+    'horizon-fog-blend': 0.8,
+    'fog-ground-blend': 0.5,
+  },
 };
 
 export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain, only, tileCache = true }: MapOptions = {}): StyleSpecification {
@@ -200,7 +214,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     style.sources[TERRAIN_SOURCE] = TERRAIN;
     style.sources[HILLSHADE_SOURCE] = TERRAIN;
     style.terrain = { source: TERRAIN_SOURCE, exaggeration: 1 };
-    style.sky = SKY;
+    style.sky = SKIES[terrain];
     style.layers.splice(aboveBottom, 0, { id: HILLSHADE_LAYER, type: 'hillshade', source: HILLSHADE_SOURCE, paint: HILLSHADE_PAINT });
   }
   return style;

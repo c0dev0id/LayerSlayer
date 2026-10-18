@@ -78,9 +78,9 @@ export function MapView() {
     map.scrollZoom.setWheelZoomRate(1 / 100);
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     map.addControl(new maplibregl.GeolocateControl({ fitBoundsOptions: { maxZoom: 15 } }), 'top-right');
-    const terrainControl = new TerrainControl(() => !!state.settings.terrain, setTerrain);
+    const terrainControl = new TerrainControl(() => state.settings.terrain, setTerrain);
     map.addControl(terrainControl, 'top-right');
-    createEffect(() => terrainControl.show(!!state.settings.terrain));
+    createEffect(() => terrainControl.show(state.settings.terrain));
     const onlyControl = new OnlyControl(() => setOnlyOpen(!onlyOpen()));
     map.addControl(onlyControl, 'top-right');
     createEffect(() => onlyControl.show(onlyOpen(), state.layers.find((l) => l.id === state.activeLayerId)?.name));

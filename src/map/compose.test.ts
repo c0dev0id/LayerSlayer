@@ -82,7 +82,7 @@ describe('composeStyle', () => {
     const xyz = (id: string) => layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 } }, {}, id);
     expect(compose([xyz('A')])).not.toHaveProperty('terrain');
     // Like the bottom layer, the ground is not limited to the focus area.
-    const style = compose([xyz('A'), xyz('B')], {}, { terrain: true, focus: [8, 48, 9, 49], background: '#1b2b44' });
+    const style = compose([xyz('A'), xyz('B')], {}, { terrain: 'day', focus: [8, 48, 9, 49], background: '#1b2b44' });
     expect(style.terrain).toEqual({ source: TERRAIN_SOURCE, exaggeration: 1 });
     expect(style.sources[TERRAIN_SOURCE]).toMatchObject({ type: 'raster-dem', encoding: 'terrarium', tileSize: 512 });
     expect(style.sources[TERRAIN_SOURCE]).not.toHaveProperty('bounds');
@@ -90,7 +90,16 @@ describe('composeStyle', () => {
     expect(style.layers.map((l) => l.id)).toEqual(['map-background', 'A', 'terrain-hillshade', 'B']);
     expect(style.layers[2]).toMatchObject({ type: 'hillshade', source: HILLSHADE_SOURCE });
     // Without a bottom layer to lie on, the shading lies on the background.
-    expect(compose([], {}, { terrain: true }).layers.map((l) => l.id)).toEqual(['terrain-hillshade']);
+    expect(compose([], {}, { terrain: 'day' }).layers.map((l) => l.id)).toEqual(['terrain-hillshade']);
+  });
+
+  it('puts a day or night sky over 3D terrain and none over a flat map', () => {
+    expect(compose([])).not.toHaveProperty('sky');
+    const day = compose([], {}, { terrain: 'day' }).sky!;
+    const night = compose([], {}, { terrain: 'night' }).sky!;
+    expect(day['sky-color']).toBe('#88c6fc');
+    expect(night['sky-color']).not.toBe(day['sky-color']);
+    expect(night['fog-color']).not.toBe(day['fog-color']);
   });
 
   it('draws the map on its background colour, under every layer', () => {

@@ -24,7 +24,8 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
   GPX import and export.
 - **Spot details** — right-click anywhere for what OpenStreetMap knows there, in plain
   words.
-- **3D terrain** — hillshaded relief from open worldwide elevation tiles.
+- **3D terrain** — hillshaded relief from open worldwide elevation tiles, under a day or a
+  night sky.
 - **Focus area** — a polygon that limits requests and dims the map around it, with
   precaching for later.
 - **Stays in the browser** — tiles kept per layer, everything survives a restart, and a

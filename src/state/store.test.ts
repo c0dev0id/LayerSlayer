@@ -39,6 +39,8 @@ describe('parseState', () => {
     ];
     expect(parseState(JSON.stringify({ layers: [], focus: corners })).focus).toEqual(corners);
     expect(parseState(JSON.stringify({ layers: [], focus: corners.slice(1) }))).not.toHaveProperty('focus');
+    expect(parseState(JSON.stringify({ layers: [], settings: { terrain: 'night' } })).settings.terrain).toBe('night');
+    expect(parseState(JSON.stringify({ layers: [], settings: { terrain: true } })).settings).not.toHaveProperty('terrain');
     expect(parseState(JSON.stringify({ layers: [], focus: [[1, 1], [2, 'x'], [2, 2]] }))).not.toHaveProperty('focus');
   });
 
@@ -97,8 +99,8 @@ describe('replaceLayerFile', () => {
 
 describe('browserSettings and projectSettings', () => {
   it('split the settings into this browser\'s own and the project\'s', () => {
-    const settings = { proxy: 'p', proxiedHosts: ['h'], terrain: true, tileCacheOff: true, proxyMode: 'off' as const };
-    expect(projectSettings(settings)).toEqual({ proxiedHosts: ['h'], terrain: true });
+    const settings = { proxy: 'p', proxiedHosts: ['h'], terrain: 'night' as const, tileCacheOff: true, proxyMode: 'off' as const };
+    expect(projectSettings(settings)).toEqual({ proxiedHosts: ['h'], terrain: 'night' });
     expect({ ...projectSettings(settings), ...browserSettings(settings) }).toEqual(settings);
     // Every key of this browser's own, so that a project's cannot outlast them.
     expect(Object.keys(browserSettings({ proxy: '', proxiedHosts: [] }))).toEqual(['proxy', 'tileCacheOff', 'proxyMode']);

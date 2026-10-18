@@ -17,6 +17,7 @@ import {
 import { isLngLat, type LngLat } from '../model/route';
 import { fileSourceType, importFile } from '../services/importFile';
 import { deleteFile } from './files';
+import type { TerrainSky } from '../map/compose';
 import { parsePmtilesUrl } from '../map/urls';
 import { hostOf, setProxy } from './net';
 import { persistedStore } from './persist';
@@ -28,8 +29,8 @@ export interface Settings {
   proxiedHosts: string[];
   /** The colour the map is drawn on, as #rrggbb; none for the page's white. */
   background?: string;
-  /** The ground in 3D, raised by its elevation. */
-  terrain?: boolean;
+  /** The ground in 3D, raised by its elevation, under a day or night sky; flat where unset. */
+  terrain?: TerrainSky;
   /** No layer keeps tiles, whatever its own setting says: a switch of this browser, for testing. */
   tileCacheOff?: boolean;
   /**
@@ -183,7 +184,7 @@ export function parseState(json: string): AppState {
       proxy: typeof settings?.proxy === 'string' ? settings.proxy : '',
       proxiedHosts: Array.isArray(settings?.proxiedHosts) ? settings.proxiedHosts.filter((h) => typeof h === 'string') : [],
       ...(typeof settings?.background === 'string' && /^#[0-9a-f]{6}$/i.test(settings.background) && { background: settings.background }),
-      ...(settings?.terrain === true && { terrain: true }),
+      ...((settings?.terrain === 'day' || settings?.terrain === 'night') && { terrain: settings.terrain }),
       ...(settings?.tileCacheOff === true && { tileCacheOff: true }),
       ...((settings?.proxyMode === 'off' || settings?.proxyMode === 'all') && { proxyMode: settings.proxyMode }),
     },
@@ -322,9 +323,9 @@ export function setBackground(color: string | undefined): void {
   setState('settings', 'background', color);
 }
 
-/** Shows the ground in 3D, raised by its elevation, or flat. */
-export function setTerrain(on: boolean): void {
-  setState('settings', 'terrain', on || undefined);
+/** Shows the ground in 3D, raised by its elevation, under a day or night sky, or flat. */
+export function setTerrain(sky: TerrainSky | undefined): void {
+  setState('settings', 'terrain', sky);
 }
 
 /** Routes a host's requests through the CORS proxy, or stops doing so. */

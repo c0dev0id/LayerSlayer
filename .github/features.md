@@ -32,8 +32,8 @@
   barrier, piece of history, water and bridge, in words) and the sea it lies in, its
   coordinates, a link that opens Layer Slayer there, Google Maps and Street View (Google's
   documented Maps URLs, no key).
-- 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched by a button
-  on the map.
+- 3D terrain with hillshading from Mapterhorn's open elevation tiles, under a day or a
+  night sky, switched by a button on the map from flat to day to night.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
   a disc of the layer's colour, picked by search; OSM presets come with theirs.
 - OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about

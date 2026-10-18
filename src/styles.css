@@ -29,6 +29,8 @@
   --warn-text: light-dark(#8f5f00, #ffe066);
   --tag-bg: light-dark(#d6e0ea, #34404c);
   --tag-text: light-dark(#4a6580, #a3b8cc);
+  --night: light-dark(#1f2a4d, #0e1530);
+  --night-text: light-dark(#ffe9a8, #ffe066);
   color-scheme: light dark;
 }
 
@@ -1295,6 +1297,11 @@ input.swatch {
 .maplibregl-ctrl button:is(.terrain-toggle, .only-toggle)[aria-pressed='true'] {
   background: var(--active);
   color: var(--accent-text);
+}
+
+.maplibregl-ctrl button.terrain-toggle[data-sky='night'] {
+  background: var(--night);
+  color: var(--night-text);
 }
 
 .maplibregl-ctrl button.only-toggle {
