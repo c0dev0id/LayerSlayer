@@ -50,13 +50,13 @@
   shadow that keeps its side as the map turns and tilts; outline and shadow colours can
   be chosen.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
-  waypoints, undo and redo, car, bike and foot profiles, GPX export and import. Each route
-  has its own colour, line width and outline, and its waypoints their own size, pin colour
-  and name colour, size and box colour. A waypoint is a pin, with a symbol of choice, or
-  one of ten little objects standing on the map: start and finish flags, a camera for a
-  photo spot, a meeting point sign, a pause sign for a break, a plate, a coffee cup, a
-  fuel pump, a warning triangle and an information sign. Waypoints shrink as the map zooms
-  out, and in 3D with distance.
+  waypoints, undo and redo, car, bike and foot profiles, recalculation of a whole route,
+  GPX export and import. Each route has its own colour, line width and outline, and its
+  waypoints their own size, pin colour and name colour, size and box colour. A waypoint is
+  a pin, with a symbol of choice, or one of ten little objects standing on the map: start
+  and finish flags, a camera for a photo spot, a meeting point sign, a pause sign for a
+  break, a plate, a coffee cup, a fuel pump, a warning triangle and an information sign.
+  Waypoints shrink as the map zooms out, and in 3D with distance.
 - Layers, routes, settings, view and imported files survive a browser restart, and go
   to another browser as a `.lslay` project file (`.webmap` files from before the
   rename still open).

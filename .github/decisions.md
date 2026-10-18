@@ -417,6 +417,14 @@
     `layerslayer-routes`, apart from the layers. Undo and redo cover this store only, so
     layer changes are never undone; the toolbar and Ctrl+Z work while a route is drawn.
     Routing results are not undo steps; an undo restores the cached legs with the points.
+  - A route can be recalculated, for a road network that changed since or legs that
+    failed: its cached legs are dropped and routed again, failed ones included. The old
+    lines are not kept on screen until the new ones arrive; the pump knows only missing
+    legs, and a third state for outdated ones would reach into the drawing, the counts
+    and the export. The legs are drawn straight meanwhile, which also shows the progress.
+    Dropping them is an undo step, so an undo brings the old legs back, also halfway
+    through. Above 500 legs, at least nine minutes at one request per 1.1 s, it asks
+    first.
   - The GPX format, reading and writing, is `services/gpx.ts`; reading keeps track
     segments, which the layer import draws apart and the route import joins.
   - Waypoints belong to a route (`routeId`): the one being drawn when the waypoint is
