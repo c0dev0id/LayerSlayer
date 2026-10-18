@@ -994,6 +994,30 @@ input.swatch {
   font-size: 13px;
 }
 
+/* A layer's label style: a small panel under its button, above everything else, closed by a click elsewhere or Esc. */
+.label-style-button {
+  anchor-name: --label-style;
+}
+
+.label-style {
+  position-anchor: --label-style;
+  position-area: bottom span-right;
+  position-try-fallbacks: flip-inline, flip-block, flip-block flip-inline;
+  inset: auto;
+  width: 270px;
+  margin: 4px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.label-style .label-style-reset {
+  margin-top: 4px;
+}
+
 .badge {
   padding: 0 6px;
   border-radius: 8px;

@@ -794,6 +794,13 @@
   first vertex, so it was not used. The label list offers the text and number
   properties the features have (all of a GeoJSON file, those of the loaded tiles
   otherwise), most common first, without KML styling properties.
+  Labels are dark text in a white outline unless the layer sets its own colour and size
+  for the text and colour and width for the outline, in a small panel beside the label
+  choice. The panel is a native popover placed under its button by CSS anchor positioning:
+  no script places or closes it, a click elsewhere or Esc closes it, and the map stays in
+  view while it is open, unlike in a modal dialog. Label offsets are counted in ems of the
+  text, so they are worked out from its size and labels keep their distance from lines and
+  dots at any size.
 - **Tapping features queries what is drawn.** A tap outside route and focus area drawing
   asks MapLibre for the rendered features within the tap radius in the style layers of
   vector layers only (those whose source is a user layer's, so the base map is not

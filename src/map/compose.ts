@@ -7,6 +7,7 @@ import type {
 } from 'maplibre-gl';
 import { intersectBounds } from '../geo/bounds';
 import { iconSize, type MapIcon } from '../model/icon';
+import { labelStyle } from '../model/label';
 import { lineWidth, MAX_LINE_WIDTH } from '../model/line';
 import {
   isShown,
@@ -496,31 +497,27 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
   };
 }
 
-/** Size of label text in CSS pixels, which offsets in ems are counted in. */
-const LABEL_SIZE = 12;
-
-/**
- * How far line labels lie beside their line, in ems: clear of the widest line, so that a
- * change of width only repaints the line instead of laying out its labels again.
- */
-const LINE_LABEL_OFFSET = 0.5 + (MAX_LINE_WIDTH / 2 + 2) / LABEL_SIZE;
-
 /**
  * A feature property written beside the features: along lines, and next to the dot or icon
- * of points and areas, on whichever side has room. Dark text ringed in white reads on any
- * base map; features without the property are left without a label.
+ * of points and areas, on whichever side has room, in the layer's label style (by default
+ * dark text ringed in white, which reads on any base map); features without the property
+ * are left without a label.
  */
 function labels(layer: Layer, key: string, base: LayerBase, font: string[]): LayerSpecification[] {
-  const text = { 'text-field': ['to-string', ['get', key]] as never, 'text-font': font, 'text-size': LABEL_SIZE };
-  const paint = { 'text-color': '#212529', 'text-halo-color': '#ffffff', 'text-halo-width': 1.5, 'text-opacity': layer.opacity };
+  const style = labelStyle(layer.labelStyle);
+  const text = { 'text-field': ['to-string', ['get', key]] as never, 'text-font': font, 'text-size': style.size };
+  const paint = { 'text-color': style.color, 'text-halo-color': style.outlineColor, 'text-halo-width': style.outlineWidth, 'text-opacity': layer.opacity };
   const reach = layer.icon ? POI_REACH * iconSize(layer.iconSize) : DOT_RADIUS + DOT_STROKE;
+  // Offsets are in ems of the text. Line labels lie clear of the widest line, so that a
+  // change of width only repaints the line instead of laying out its labels again.
+  const lineOffset = 0.5 + (MAX_LINE_WIDTH / 2 + 2) / style.size;
   return [
     {
       ...base,
       id: `${layer.id}/line-label`,
       type: 'symbol',
       filter: LINE as never,
-      layout: { ...text, 'symbol-placement': 'line', 'text-offset': [0, -LINE_LABEL_OFFSET] },
+      layout: { ...text, 'symbol-placement': 'line', 'text-offset': [0, -lineOffset] },
       paint,
     },
     {
@@ -531,7 +528,7 @@ function labels(layer: Layer, key: string, base: LayerBase, font: string[]): Lay
       layout: {
         ...text,
         'text-variable-anchor': ['left', 'right', 'top', 'bottom'],
-        'text-radial-offset': (reach + 3) / LABEL_SIZE,
+        'text-radial-offset': (reach + 3) / style.size,
         'text-justify': 'auto',
         'text-max-width': 12,
       },

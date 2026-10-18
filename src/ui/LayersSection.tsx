@@ -24,6 +24,7 @@ import {
   type RasterAdjustments,
   type WmsTime,
 } from '../model/layer';
+import { labelStyle, MAX_LABEL_SIZE, MAX_OUTLINE_WIDTH, MIN_LABEL_SIZE, type LabelStyle } from '../model/label';
 import { lineWidth } from '../model/line';
 import { propertyKeys } from '../services/featureProperties';
 import { importAccept } from '../services/importFile';
@@ -40,7 +41,7 @@ import { LineWidthSlider } from './LineWidthSlider';
 import { downloadBlob, fileNameFor } from './download';
 import { createOutcome, OutcomeNote } from './outcome';
 import { LayerInfo, layerAddress } from './LayerInfo';
-import { AlertIcon, AreaIcon, CloseIcon, DownloadIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge, InfoIcon } from './icons';
+import { AlertIcon, AreaIcon, CloseIcon, DownloadIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge, InfoIcon, TypographyIcon } from './icons';
 import { reorderTarget } from './reorder';
 
 export function LayersSection(props: { onAdd: () => void }) {
@@ -411,7 +412,67 @@ function LabelRow(props: { layer: Layer }) {
           )}
         </For>
       </select>
+      <Show when={layer.label}>
+        <button class="icon label-style-button" popovertarget="label-style" title="How the labels look" aria-label={`Label style of ${layer.name}`}>
+          <TypographyIcon />
+        </button>
+        <div id="label-style" popover class="label-style">
+          <LabelStyleRows layer={layer} />
+        </div>
+      </Show>
     </div>
+  );
+}
+
+/** The colour and size of a layer's label text, and the colour and width of its outline. */
+function LabelStyleRows(props: { layer: Layer }) {
+  const layer = props.layer;
+  const style = () => labelStyle(layer.labelStyle);
+  const set = (patch: LabelStyle) => updateLayer(layer.id, { labelStyle: { ...layer.labelStyle, ...patch } });
+  return (
+    <>
+      <div class="row" title="The colour and size of the text">
+        <span class="muted label">Text</span>
+        <input type="color" class="swatch" aria-label={`Label colour of ${layer.name}`} value={style().color} onInput={(e) => set({ color: e.currentTarget.value })} />
+        <input
+          class="grow"
+          type="range"
+          aria-label={`Label size of ${layer.name}`}
+          min={MIN_LABEL_SIZE}
+          max={MAX_LABEL_SIZE}
+          step="1"
+          value={style().size}
+          onInput={(e) => set({ size: e.currentTarget.valueAsNumber })}
+        />
+        <span class="value">{style().size} px</span>
+      </div>
+      <div class="row" title="The colour and width of the outline that keeps the text readable on the map">
+        <span class="muted label">Outline</span>
+        <input
+          type="color"
+          class="swatch"
+          aria-label={`Label outline colour of ${layer.name}`}
+          value={style().outlineColor}
+          onInput={(e) => set({ outlineColor: e.currentTarget.value })}
+        />
+        <input
+          class="grow"
+          type="range"
+          aria-label={`Label outline width of ${layer.name}`}
+          min="0"
+          max={MAX_OUTLINE_WIDTH}
+          step="0.5"
+          value={style().outlineWidth}
+          onInput={(e) => set({ outlineWidth: e.currentTarget.valueAsNumber })}
+        />
+        <span class="value">{style().outlineWidth} px</span>
+      </div>
+      <Show when={layer.labelStyle}>
+        <button class="label-style-reset" onClick={() => updateLayer(layer.id, { labelStyle: undefined })}>
+          Back to dark text in white
+        </button>
+      </Show>
+    </>
   );
 }
 

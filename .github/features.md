@@ -16,8 +16,9 @@
 - Tile addresses for apps that fill them in themselves, such as DMD2: a raster layer that
   has one shows it in its settings, tagged DMD in the layer list and on library entries
   whose layers all have one.
-- Labels for vector layers from a feature property, and the properties of a tapped feature
-  in words in the details sheet.
+- Labels for vector layers from a feature property, in a chosen colour and size with an
+  outline of a chosen colour and width, and the properties of a tapped feature in words in
+  the details sheet.
 - A map button that shows the open layer alone over the base map, leaving every layer's
   visibility as it was.
 - File layers that take a newer version of their file, keeping their settings; library

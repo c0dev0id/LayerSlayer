@@ -234,6 +234,16 @@ describe('composeStyle', () => {
     expect(compose([layer({ name: 'g', source })])).not.toHaveProperty('glyphs');
   });
 
+  it('draws labels in the layer\'s label style, keeping their distance in ems of the text', () => {
+    const source = { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } as const;
+    const labelStyle = { color: '#0000ff', size: 16, outlineColor: '#000000', outlineWidth: 3 };
+    const style = compose([layer({ name: 'g', source }, { label: 'name', labelStyle })]);
+    const [line, point] = [style.layers.find((l) => l.id === 'L/line-label')!, style.layers.find((l) => l.id === 'L/label')!];
+    expect(line.paint).toMatchObject({ 'text-color': '#0000ff', 'text-halo-color': '#000000', 'text-halo-width': 3 });
+    expect(line.layout).toMatchObject({ 'text-size': 16, 'text-offset': [0, -(0.5 + (5 + 2) / 16)] });
+    expect(point.layout).toMatchObject({ 'text-size': 16, 'text-radial-offset': (5 + 1.5 + 3) / 16 });
+  });
+
   it('queries feature layers as vector tiles through the feature protocol', () => {
     const style = compose([
       layer({

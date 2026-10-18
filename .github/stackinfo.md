@@ -30,7 +30,8 @@
 ## Targets
 
 - Desktop and phone browsers with WebGL 2, which MapLibre GL JS 6 requires; the build
-  targets ES2022.
+  targets ES2022. The label style panel is placed by CSS anchor positioning (Chrome 125,
+  Safari 26, Firefox 147); older browsers show it unplaced.
 - Screens down to 360 px wide. At 720 px and less the panel lies below the map; touch
   screens get larger controls.
 - A secure context (HTTPS, or localhost in development): kept tiles use Cache Storage,

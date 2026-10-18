@@ -1,4 +1,5 @@
 import type { MapIcon } from './icon';
+import type { LabelStyle } from './label';
 
 /** West, south, east, north in degrees. */
 export type Bounds = [number, number, number, number];
@@ -207,6 +208,8 @@ export interface Layer {
   lineDash?: LineDash;
   /** The feature property a vector layer writes beside its features: along lines, next to points and in areas. */
   label?: string;
+  /** How the labels look; dark text in a white outline where unset. */
+  labelStyle?: LabelStyle;
   /** Where the source has data; raster tiles are not fetched outside it. */
   bounds?: Bounds;
   attribution?: string;

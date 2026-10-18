@@ -239,6 +239,17 @@ export const DeleteIcon = () => (
 );
 
 /** Rename (Tabler's pencil). */
+/** How labels look (Tabler's typography). */
+export const TypographyIcon = () => (
+  <Icon>
+    <path d="M4 20l3 0" />
+    <path d="M14 20l7 0" />
+    <path d="M6.9 15l6.9 0" />
+    <path d="M10.2 6.3l5.8 13.7" />
+    <path d="M5 20l6 -16l2 0l7 16" />
+  </Icon>
+);
+
 export const PencilIcon = () => (
   <Icon>
     <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
