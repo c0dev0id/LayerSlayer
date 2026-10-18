@@ -1,6 +1,6 @@
 import { For, Match, Show, Switch } from 'solid-js';
 import type { Route } from '../model/route';
-import { ELEVATION_RAMP, rainbowColor, SLOPE_CLASSES, SURFACES, type RouteColoring } from '../model/routeColoring';
+import { dataOf, ELEVATION_RAMP, rainbowColor, SLOPE_CLASSES, SURFACES, type RouteColoring } from '../model/routeColoring';
 import { coloringStatus, elevationSpan, retryColoring } from '../state/routeColoring';
 
 const RAINBOW = [0, 0.25, 0.5, 0.75, 1].map(rainbowColor).join(', ');
@@ -10,7 +10,7 @@ const minus = (n: number) => String(n).replace('-', '−');
 /** What the colours of a coloured route's line stand for, and whether their data is still being read. */
 export function ColoringLegend(props: { route: Route; coloring: RouteColoring }) {
   const status = () => coloringStatus(props.route);
-  const data = () => (props.coloring === 'surface' ? 'Surfaces' : 'Elevations');
+  const data = () => (dataOf(props.coloring) === 'surface' ? 'Surfaces' : 'Elevations');
   return (
     <div class="coloring-legend">
       <Switch>

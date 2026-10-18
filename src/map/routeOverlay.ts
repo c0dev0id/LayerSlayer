@@ -1,17 +1,17 @@
 import type { FilterSpecification, LayerSpecification } from 'maplibre-gl';
 import { createMemo, createRoot } from 'solid-js';
-import type { Measured } from '../geo/densify';
 import { lineWidth } from '../model/line';
 import { ROUTE_LINE_WIDTH, routeOutline, type LngLat, type Route } from '../model/route';
-import { legSamples, sampleKey } from '../routing/legSamples';
-import { legCoordinates, legState, routeLegs, type Leg } from '../routing/legs';
+import type { ColoringData } from '../model/routeColoring';
+import { legSamples, sampleKey, turnSampleCache } from '../routing/legSamples';
+import { isDrawn, legCoordinates, legState, routeLegs } from '../routing/legs';
 import { ROUTING_ATTRIBUTION } from '../routing/osrm';
 import { decodePolyline } from '../routing/polyline';
 import { failedLegs } from '../routing/service';
 import { coloringData } from '../state/routeColoring';
 import { routeData } from '../state/routes';
 import { ROUND_LINE, type Overlay } from './overlays';
-import { coloredPieces, type ColoringData } from './routeColoring';
+import { coloredPieces } from './routeColoring';
 
 /** The source of the route tool's lines. */
 const ROUTES_SOURCE = 'route-tool';
@@ -54,8 +54,6 @@ const ROUTE_LAYERS: LayerSpecification[] = [
 
 /** Decoded leg geometries; polyline strings are immutable, so they are their own cache key. */
 let decoded = new Map<string, LngLat[]>();
-/** The samples of the legs of coloured routes, by sample key. */
-let sampled = new Map<string, Measured>();
 
 /**
  * Every leg of every route as a line: routed and straight legs solid in the route's
@@ -64,26 +62,22 @@ let sampled = new Map<string, Measured>();
  * them. Coordinates are copied, so the result holds no store proxies.
  */
 export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<string>, data: ColoringData): GeoJSON.FeatureCollection<GeoJSON.LineString> {
-  const [decodedNow, sampledNow] = [new Map<string, LngLat[]>(), new Map<string, Measured>()];
+  const decodedNow = new Map<string, LngLat[]>();
   const decode = (geometry: string) => {
     const coordinates = decoded.get(geometry) ?? decodePolyline(geometry);
     decodedNow.set(geometry, coordinates);
     return coordinates;
   };
-  const sample = (route: Route, leg: Leg) => {
-    const key = sampleKey(route, leg);
-    const samples = sampled.get(key) ?? legSamples(route, leg, decode);
-    sampledNow.set(key, samples);
-    return { key, samples };
-  };
+  turnSampleCache();
   const features: GeoJSON.Feature<GeoJSON.LineString>[] = [];
   for (const route of routes) {
     const outline = routeOutline(route.outline);
     const look = { color: route.color, width: lineWidth(route.lineWidth, ROUTE_LINE_WIDTH), outlineColor: outline.color, outlineWidth: outline.width };
-    const legs = routeLegs(route).map((leg) => ({ leg, state: legState(route, leg, failed) }));
-    const drawn = legs.filter(({ state }) => state === 'routed' || state === 'straight');
-    const pieces = route.coloring && coloredPieces(route.coloring, drawn.map(({ leg }) => sample(route, leg)), data, route.color);
-    for (const { leg, state } of legs) {
+    const legs = routeLegs(route);
+    const drawn = legs.filter((leg) => isDrawn(route, leg)).map((leg) => ({ key: sampleKey(route, leg), samples: legSamples(route, leg, decode) }));
+    const pieces = route.coloring && coloredPieces(route.coloring, drawn, data, route.color);
+    for (const leg of legs) {
+      const state = legState(route, leg, failed);
       const coordinates = legCoordinates(route, leg, decode).map((p): LngLat => [p[0], p[1]]);
       const colored = pieces?.get(sampleKey(route, leg));
       features.push({ type: 'Feature', properties: { state, ...look, ...(colored && { colored: true }) }, geometry: { type: 'LineString', coordinates } });
@@ -93,7 +87,7 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
       }
     }
   }
-  [decoded, sampled] = [decodedNow, sampledNow];
+  decoded = decodedNow;
   return { type: 'FeatureCollection', features };
 }
 

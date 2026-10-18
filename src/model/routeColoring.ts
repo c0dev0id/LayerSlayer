@@ -1,12 +1,12 @@
 import { within } from './stored';
 
-/** The ways a route's line can be coloured along its length instead of in its own colour. */
+/** The ways a route's line can be coloured along its length instead of in its own colour, and the data each reads. */
 export const ROUTE_COLORINGS = [
   { id: 'rainbow', name: 'Rainbow' },
-  { id: 'elevation', name: 'Elevation' },
-  { id: 'slope', name: 'Slope' },
-  { id: 'slope-reversed', name: 'Slope, reversed' },
-  { id: 'surface', name: 'Surface' },
+  { id: 'elevation', name: 'Elevation', reads: 'elevation' },
+  { id: 'slope', name: 'Slope', reads: 'elevation' },
+  { id: 'slope-reversed', name: 'Slope, reversed', reads: 'elevation' },
+  { id: 'surface', name: 'Surface', reads: 'surface' },
 ] as const;
 
 export type RouteColoring = (typeof ROUTE_COLORINGS)[number]['id'];
@@ -14,9 +14,37 @@ export type RouteColoring = (typeof ROUTE_COLORINGS)[number]['id'];
 /** Whether a stored value is a colouring; routes with one this version does not know are drawn in their colour. */
 export const isRouteColoring = (value: unknown): value is RouteColoring => ROUTE_COLORINGS.some((c) => c.id === value);
 
-/** Whether a colouring is drawn from the ground's elevation along the route. */
-export const needsElevation = (coloring: RouteColoring | undefined): boolean =>
-  coloring === 'elevation' || coloring === 'slope' || coloring === 'slope-reversed';
+/** The data per drawn leg colourings are drawn from: the elevation at each sample, and the surface of each stretch between samples. */
+export interface LegData {
+  elevation: readonly number[];
+  surface: readonly Surface[];
+}
+
+export type DataKind = keyof LegData;
+
+export const DATA_KINDS: readonly DataKind[] = ['elevation', 'surface'];
+
+/** The data read so far, per kind and drawn leg by its sample key. */
+export type ColoringData = { readonly [K in DataKind]: ReadonlyMap<string, LegData[K]> };
+
+/** The kind of data a colouring is drawn from, if it needs any. */
+export function dataOf(coloring: RouteColoring | undefined): DataKind | undefined {
+  const entry = ROUTE_COLORINGS.find((c) => c.id === coloring);
+  return entry && 'reads' in entry ? entry.reads : undefined;
+}
+
+/** The lowest and highest elevation the legs have data for. */
+export function elevationRange(keys: readonly string[], elevations: ColoringData['elevation']): [number, number] {
+  let [lowest, highest] = [Infinity, -Infinity];
+  for (const key of keys) {
+    for (const height of elevations.get(key) ?? []) {
+      if (!Number.isFinite(height)) continue;
+      lowest = Math.min(lowest, height);
+      highest = Math.max(highest, height);
+    }
+  }
+  return [lowest, highest];
+}
 
 /** Continuous colourings come in this many steps, so that a line falls into pieces of one colour each. */
 const STEPS = 32;

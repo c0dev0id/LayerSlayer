@@ -1,15 +1,6 @@
 import type { Measured } from '../geo/densify';
 import type { LngLat } from '../model/route';
-import { elevationColor, rainbowColor, slopeColor, surfaceColor, type RouteColoring, type Surface } from '../model/routeColoring';
-
-/**
- * What colourings are drawn from, per drawn leg by its sample key: the elevation at each of
- * the leg's samples, and the surface of each stretch between consecutive samples.
- */
-export interface ColoringData {
-  elevations: ReadonlyMap<string, readonly number[]>;
-  surfaces: ReadonlyMap<string, readonly Surface[]>;
-}
+import { elevationColor, elevationRange, rainbowColor, slopeColor, surfaceColor, type ColoringData, type RouteColoring } from '../model/routeColoring';
 
 /** A leg's samples under its sample key. */
 export interface SampledLeg {
@@ -36,12 +27,12 @@ export function coloredPieces(coloring: RouteColoring, legs: readonly SampledLeg
   const pieces = new Map<string, Piece[]>();
   const length = (leg: SampledLeg) => leg.samples.distances.at(-1) ?? 0;
   const total = legs.reduce((sum, leg) => sum + length(leg), 0);
-  const [lowest, highest] = elevationRange(legs, data.elevations);
+  const [lowest, highest] = elevationRange(legs.map((leg) => leg.key), data.elevation);
   let offset = 0;
   for (const leg of legs) {
     const { distances } = leg.samples;
-    const elevations = data.elevations.get(leg.key);
-    const surfaces = data.surfaces.get(leg.key);
+    const elevations = data.elevation.get(leg.key);
+    const surfaces = data.surface.get(leg.key);
     let colors: string[] | undefined;
     if (coloring === 'rainbow') colors = stretches(distances, (i) => rainbowColor((offset + (distances[i]! + distances[i + 1]!) / 2) / total));
     else if (coloring === 'surface') colors = surfaces?.map(surfaceColor);
@@ -63,19 +54,6 @@ export function coloredPieces(coloring: RouteColoring, legs: readonly SampledLeg
 /** One value per stretch between consecutive samples. */
 function stretches<T>(distances: readonly number[], value: (i: number) => T): T[] {
   return Array.from({ length: Math.max(0, distances.length - 1) }, (_, i) => value(i));
-}
-
-/** The lowest and highest elevation the legs have data for. */
-export function elevationRange(legs: readonly { key: string }[], elevations: ColoringData['elevations']): [number, number] {
-  let [lowest, highest] = [Infinity, -Infinity];
-  for (const leg of legs) {
-    for (const height of elevations.get(leg.key) ?? []) {
-      if (!Number.isFinite(height)) continue;
-      lowest = Math.min(lowest, height);
-      highest = Math.max(highest, height);
-    }
-  }
-  return [lowest, highest];
 }
 
 /**

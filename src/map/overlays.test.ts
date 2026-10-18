@@ -6,7 +6,7 @@ import { focusAreaFeatures, focusAreaOverlay, focusDraftFeatures, focusDraftOver
 import { withOverlays } from './overlays';
 import { routeFeatures, routeOverlay } from './routeOverlay';
 
-const NO_DATA = { elevations: new Map(), surfaces: new Map() };
+const NO_DATA = { elevation: new Map(), surface: new Map() };
 
 const corners: LngLat[] = [
   [8, 48],

@@ -40,6 +40,9 @@ export function routedLegCount(route: Pick<Route, 'points'>): number {
 /** Routed and straight legs are drawn as part of the route; pending and failed ones wait for routing. */
 export type LegState = 'routed' | 'straight' | 'pending' | 'failed';
 
+/** Whether a leg is drawn as part of its route: straight, or routed with its geometry. */
+export const isDrawn = (route: Pick<Route, 'legs'>, leg: Leg): boolean => leg.straight || leg.key in route.legs;
+
 export function legState(route: Pick<Route, 'legs'>, leg: Leg, failed: ReadonlySet<string>): LegState {
   if (leg.straight) return 'straight';
   if (leg.key in route.legs) return 'routed';

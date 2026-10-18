@@ -4,6 +4,7 @@ import type { LngLat, Profile } from '../model/route';
 export const ROUTING_URL = 'https://routing.openstreetmap.de';
 export const ROUTING_ATTRIBUTION =
   'Routing: <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener">FOSSGIS OSRM</a>';
+/** Milliseconds between routing requests: FOSSGIS allows at most one request per second. */
 export const ROUTING_MIN_INTERVAL_MS = 1100;
 const ROUTING_TIMEOUT_MS = 15_000;
 

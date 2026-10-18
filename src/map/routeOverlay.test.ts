@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { Route } from '../model/route';
-import type { ColoringData } from './routeColoring';
+import type { ColoringData } from '../model/routeColoring';
 import { routeFeatures } from './routeOverlay';
 
-const NO_DATA: ColoringData = { elevations: new Map(), surfaces: new Map() };
+const NO_DATA: ColoringData = { elevation: new Map(), surface: new Map() };
 
 const route: Route = {
   id: 'r',
@@ -66,7 +66,7 @@ describe('routeFeatures', () => {
     const pieces = routeFeatures([{ ...anew, coloring: 'rainbow' }], new Set(), NO_DATA).features.filter((f) => f.properties!['state'] === 'piece');
     expect(pieces.flatMap((f) => f.geometry.coordinates)).toContainEqual([1.5, 1.2]);
     const elevations = new Map([[route.legs['car/1,1;2,2']!, [100, 150, 200]]]);
-    expect(routeFeatures([{ ...anew, coloring: 'elevation' }], new Set(), { ...NO_DATA, elevations }).features.some((f) => f.properties!['colored'])).toBe(false);
+    expect(routeFeatures([{ ...anew, coloring: 'elevation' }], new Set(), { ...NO_DATA, elevation: elevations }).features.some((f) => f.properties!['colored'])).toBe(false);
   });
 
   it('outlines a route in its own colour and width, within bounds', () => {
