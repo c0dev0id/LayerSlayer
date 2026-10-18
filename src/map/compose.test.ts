@@ -84,12 +84,12 @@ describe('composeStyle', () => {
   it('raises the ground by its elevation in 3D and shades the bottom layer by its relief', () => {
     const xyz = (id: string) => layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 } }, {}, id);
     expect(compose([xyz('A')])).not.toHaveProperty('terrain');
-    // Like the bottom layer, the ground is not limited to the focus area.
+    // The ground is not limited to the focus area; its shading is, like the layers.
     const style = compose([xyz('A'), xyz('B')], {}, { terrain: 'day', focus: [8, 48, 9, 49] });
     expect(style.terrain).toEqual({ source: TERRAIN_SOURCE, exaggeration: 1 });
     expect(style.sources[TERRAIN_SOURCE]).toMatchObject({ type: 'raster-dem', encoding: 'terrarium', tileSize: 512 });
     expect(style.sources[TERRAIN_SOURCE]).not.toHaveProperty('bounds');
-    expect(style.sources[HILLSHADE_SOURCE]).toEqual(style.sources[TERRAIN_SOURCE]);
+    expect(style.sources[HILLSHADE_SOURCE]).toEqual({ ...style.sources[TERRAIN_SOURCE], bounds: [8, 48, 9, 49] });
     expect(style.layers.map((l) => l.id)).toEqual(['A', 'terrain-hillshade', 'B']);
     expect(style.layers[1]).toMatchObject({ type: 'hillshade', source: HILLSHADE_SOURCE });
     // Without a bottom layer to lie on, the shading lies on the background.
@@ -409,16 +409,16 @@ describe('composeStyle with a focus area', () => {
   const xyz = (id: string, bounds?: Bounds) =>
     layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 }, ...(bounds && { bounds }) }, {}, id);
 
-  it('limits every layer but the bottom one to the area', () => {
+  it('limits every layer to the area, the bottom one too', () => {
     const style = compose([xyz('A'), xyz('B'), xyz('C', [8.5, 40, 20, 48.5])], {}, { focus });
-    expect(style.sources.A).not.toHaveProperty('bounds');
+    expect(style.sources.A).toMatchObject({ bounds: focus });
     expect(style.sources.B).toMatchObject({ bounds: focus });
     expect(style.sources.C).toMatchObject({ bounds: [8.5, 48, 9, 48.5] });
   });
 
-  it('leaves out layers whose bounds lie outside the area, unless at the bottom', () => {
-    const style = compose([xyz('A', [0, 0, 1, 1]), xyz('B', [0, 0, 1, 1])], {}, { focus });
-    expect(Object.keys(style.sources)).toEqual(['A']);
+  it('leaves out layers whose bounds lie outside the area', () => {
+    const style = compose([xyz('A', [0, 0, 1, 1]), xyz('B', [0, 0, 1, 1]), xyz('C', [8, 48, 8.5, 48.5])], {}, { focus });
+    expect(Object.keys(style.sources)).toEqual(['C']);
   });
 
   it('limits feature layers and the tiled sources of styles', () => {

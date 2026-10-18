@@ -81,17 +81,16 @@ function cached(keep: boolean, tiles: string[]): string[] {
 /** What is drawn around the layers. */
 export interface MapOptions {
   /**
-   * The bounds of the focus area: every layer but the bottom one requests tiles within them
-   * only, and a layer whose bounds lie outside is left out. The bottom layer, usually the
-   * base map, is drawn everywhere, so that the area has surroundings.
+   * The bounds of the focus area: every layer requests tiles within them only, and a layer
+   * whose bounds lie outside is left out. Outside the area the focus overlay covers them.
    */
   focus?: Bounds;
   /** The colour the map is drawn on; MAP_BACKGROUND where unset. */
   background?: string;
   /**
-   * The ground in 3D under a day or night sky, raised by its elevation and shaded by its
-   * relief, everywhere like the bottom layer. The shading lies on the bottom layer, under
-   * every layer above it.
+   * The ground in 3D under a day or night sky, raised by its elevation everywhere and
+   * shaded by its relief within the focus area, like the layers. The shading lies on the
+   * bottom layer, under every layer above it.
    */
   terrain?: TerrainSky;
   /** The id of the one layer shown, with the bottom layer under it; see `isShown`. */
@@ -183,12 +182,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   const sprites: { id: string; url: string }[] = [];
   /** Where the layers above the bottom one begin, which the hillshading goes under. */
   let aboveBottom = style.layers.length;
-  /** The focus area a layer requests tiles within; none for the bottom layer. */
-  const withinOf = (index: number) => (index > 0 ? focus : undefined);
-  const drawn = (layer: Layer, index: number) => {
-    const within = withinOf(index);
-    return isShown(layer, index, only) && !(within && layer.bounds && !intersectBounds(layer.bounds, within));
-  };
+  const drawn = (layer: Layer, index: number) => isShown(layer, index, only) && !(focus && layer.bounds && !intersectBounds(layer.bounds, focus));
   // The first style drawn with fonts brings the map's font source, and the labels' font.
   let labelFont = LABEL_FONT;
   for (const [index, layer] of layers.entries()) {
@@ -202,7 +196,6 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   }
   for (const [index, layer] of layers.entries()) {
     if (!drawn(layer, index)) continue;
-    const within = withinOf(index);
     const part = fragment(layer, assets.get(layer.id), labelFont, tileCache && keepsTiles(layer));
     if (!part) continue;
     let partLayers = part.layers;
@@ -218,7 +211,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     } else if (sprite) {
       console.warn(`${layer.name}: a sprite list is only supported in the bottom style; its icons are left out.`);
     }
-    for (const [id, source] of Object.entries(part.sources)) style.sources[id] = withinFocus(source, within);
+    for (const [id, source] of Object.entries(part.sources)) style.sources[id] = withinFocus(source, focus);
     style.layers.push(...partLayers);
     if (index === 0) aboveBottom = style.layers.length;
   }
@@ -226,7 +219,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   if (!style.glyphs && style.layers.some(hasText)) style.glyphs = LABEL_GLYPHS;
   if (terrain) {
     style.sources[TERRAIN_SOURCE] = TERRAIN;
-    style.sources[HILLSHADE_SOURCE] = TERRAIN;
+    style.sources[HILLSHADE_SOURCE] = withinFocus(TERRAIN, focus);
     style.terrain = { source: TERRAIN_SOURCE, exaggeration: 1 };
     style.sky = SKIES[terrain];
     style.layers.splice(aboveBottom, 0, { id: HILLSHADE_LAYER, type: 'hillshade', source: HILLSHADE_SOURCE, paint: HILLSHADE_PAINT });

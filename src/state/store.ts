@@ -108,8 +108,8 @@ export interface AppState {
   settings: Settings;
   view: View;
   /**
-   * The corners of the focus area, a polygon. Every layer but the bottom one requests
-   * tiles within its bounds only.
+   * The corners of the focus area, a polygon. Every layer requests tiles within its bounds
+   * only and is covered outside it.
    */
   focus?: LngLat[];
 }

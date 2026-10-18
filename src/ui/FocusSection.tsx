@@ -12,9 +12,8 @@ function showFocus() {
   if (bounds) showBounds(bounds);
 }
 
-/** The focus area: a polygon drawn on the map, outside whose bounds layers request no tiles. */
+/** The focus area: a polygon drawn on the map, outside which the layers are covered and request no tiles beyond its bounds. */
 export function FocusSection() {
-  const bottom = () => state.layers[0]?.name;
   return (
     <section class="section">
       <div class="row">
@@ -41,8 +40,7 @@ export function FocusSection() {
         </button>
       </div>
       <p class="muted hint">
-        {state.focus ? 'Layers load only within the bounds of the area' : 'Draw an area, and layers load only within its bounds'}
-        <Show when={bottom()}>{(name) => <>; {name()}, the bottom layer, loads everywhere</>}</Show>.
+        {state.focus ? 'Layers load and show only within the area.' : 'Draw an area, and layers load and show only within it.'}
       </p>
       <Show when={precacheRun()}>{(run) => <PrecacheProgress run={run()} />}</Show>
     </section>
