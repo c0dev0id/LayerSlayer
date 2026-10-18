@@ -123,6 +123,16 @@
     { "name": "Cycling routes", "category": "Routes", "lines": true, "filters": ["route=bicycle"] },
     { "name": "Mountain bike routes", "category": "Routes", "lines": true, "filters": ["route=mtb"] },
 
+    { "name": "Countries", "category": "Place names", "nameOnly": true, "filters": ["node place=country"] },
+    { "name": "States and provinces", "category": "Place names", "nameOnly": true, "filters": ["node place=state", "node place=province"] },
+    { "name": "Cities", "category": "Place names", "nameOnly": true, "filters": ["node place=city"] },
+    { "name": "Towns", "category": "Place names", "nameOnly": true, "filters": ["node place=town"] },
+    { "name": "Suburbs, boroughs and quarters", "category": "Place names", "nameOnly": true, "filters": ["node place=suburb", "node place=borough", "node place=quarter"] },
+    { "name": "Villages", "category": "Place names", "nameOnly": true, "filters": ["node place=village"] },
+    { "name": "Hamlets", "category": "Place names", "nameOnly": true, "filters": ["node place=hamlet"] },
+    { "name": "Farms and single houses", "category": "Place names", "nameOnly": true, "filters": ["node place=isolated_dwelling", "node place=farm"] },
+    { "name": "Named localities (fields, woods, corners)", "category": "Place names", "nameOnly": true, "filters": ["node place=locality"] },
+
     { "name": "Peaks", "category": "Nature", "icon": "maki:mountain", "filters": ["natural=peak"] },
     { "name": "Mountain passes and saddles", "category": "Nature", "icon": "temaki:valley", "filters": ["mountain_pass=yes", "natural=saddle"] },
     { "name": "Cliffs", "category": "Nature", "lines": true, "filters": ["natural=cliff"] },

@@ -4,7 +4,8 @@ import { formatFilter, matchesFilter, parseFilter } from '../services/osm';
 /**
  * A kind of OpenStreetMap feature to query: what it is called, the tag filters that find
  * it, and its icon, which features found as lines have none of: icons mark points, and
- * areas at their middle, but not lines.
+ * areas at their middle, but not lines. Place names have none either: they are shown by
+ * their name alone.
  */
 export interface OsmFeature {
   name: string;
@@ -14,6 +15,8 @@ export interface OsmFeature {
   icon?: MapIcon;
   /** Found as lines (ways and routes), such as roads, paths and fences. */
   lines?: boolean;
+  /** Shown by their name alone, without a dot: place names. */
+  nameOnly?: boolean;
 }
 
 /** The kinds of features the OSM Query tab offers, with their icons. */

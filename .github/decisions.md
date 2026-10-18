@@ -689,6 +689,13 @@
   200 and a `remark`, which is treated as the failure it is; its 429 and 504 pages, like
   any busy server's, are put in words by `statusMessage`. One layer has one colour;
   features that should look different go in separate layers.
+  - Place names are presets of their own (`"nameOnly": true`): their layers are labelled
+    with `name` and have no dots, so they read as a labels layer over any base map, and
+    start opaque like layers with icons. They ask for nodes only (`node place=town`): in a
+    box around Germany, beside 2 902 town and 51 457 village nodes, 309 towns and 746
+    villages are also areas, nearly all municipality boundaries tagged with the place and
+    mostly with a node of the same name inside, which drew a filled area and the name
+    twice. Islands are left out, being mostly areas.
   - Postpass first, Overpass as fallback. overpass-api.de was often too busy to answer at
     all ("Dispatcher_Client … timeout", 504 even for one node), and its mirrors refused or
     failed in turn. Postpass (github.com/woodpeck/postpass, run by Geofabrik) is an

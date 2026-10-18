@@ -1,4 +1,4 @@
-import { createMemo, createResource, createSignal, For, Show } from 'solid-js';
+import { createMemo, createResource, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { filterOsmFeatures, loadOsmFeatures, typedFeature, type OsmFeature } from '../library/osmFeatures';
 import type { MapIcon } from '../model/icon';
 import { OSM_CREDIT } from '../services/osm';
@@ -7,14 +7,15 @@ import { addOsmQueryLayer } from '../state/osmQuery';
 import { state } from '../state/store';
 import { errorMessage } from '../state/ui';
 import { IconPickButton } from './IconPicker';
-import { IconGlyph, RouteIcon } from './icons';
+import { IconGlyph, RouteIcon, TypographyIcon } from './icons';
 import { createOutcome, OutcomeNote } from './outcome';
 
 /**
  * A layer of OpenStreetMap features found in the focus area: features chosen from the list
  * or typed in as tags, queried together. Tags typed in join the list at the top. The layer
  * takes the icon of the first chosen feature that has one, unless another is picked; a layer
- * of features found as lines only has none, as icons do not mark lines.
+ * of features found as lines only has none, as icons do not mark lines. A layer of place
+ * names only shows their names, without dots.
  */
 export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
   // The list and its icons load the first time the tab is shown, not with the app.
@@ -44,6 +45,7 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
     setChosen(isChosen(feature) ? chosen().filter((c) => c.name !== feature.name) : [...chosen(), feature]);
   const layerName = () => chosen().map((f) => f.name).join(', ');
   const linesOnly = () => chosen().length > 0 && chosen().every((f) => f.lines);
+  const namesOnly = () => chosen().length > 0 && chosen().every((f) => f.nameOnly);
   const icon = () => {
     const choice = picked();
     if (linesOnly()) return undefined;
@@ -66,8 +68,9 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
     const name = layerName();
     const filters = [...new Set(chosen().flatMap((f) => f.filters))];
     const layerIcon = icon();
+    const look = { ...(layerIcon && { icon: layerIcon }), ...(namesOnly() && { label: 'name', dots: false }) };
     void querying.run(async () => {
-      const count = await addOsmQueryLayer(name, filters, layerIcon);
+      const count = await addOsmQueryLayer(name, filters, look);
       if (count === 0) return 'Nothing was found in the focus area.';
       setChosen([]);
       setPicked(undefined);
@@ -102,18 +105,19 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
                     <li>
                       <button class="offer" classList={{ added: isChosen(feature) }} aria-pressed={isChosen(feature)} onClick={() => toggle(feature)}>
                         <span class="mark" aria-hidden="true" />
-                        <Show
-                          when={feature.icon}
-                          fallback={
-                            <Show when={feature.lines}>
-                              <span class="muted lines-mark" title="Found as lines, which icons do not mark">
-                                <RouteIcon />
-                              </span>
-                            </Show>
-                          }
-                        >
-                          {(glyph) => <IconGlyph icon={glyph()} />}
-                        </Show>
+                        <Switch>
+                          <Match when={feature.icon}>{(glyph) => <IconGlyph icon={glyph()} />}</Match>
+                          <Match when={feature.lines}>
+                            <span class="muted kind-mark" title="Found as lines, which icons do not mark">
+                              <RouteIcon />
+                            </span>
+                          </Match>
+                          <Match when={feature.nameOnly}>
+                            <span class="muted kind-mark" title="Shown by name alone">
+                              <TypographyIcon />
+                            </span>
+                          </Match>
+                        </Switch>
                         <span class="grow">
                           <span class="name">{feature.name}</span>
                           <Show when={feature.category !== 'Tags'}>

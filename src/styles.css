@@ -292,7 +292,8 @@ header.section > .row {
   fill: currentColor;
 }
 
-.lines-mark {
+/* What an OSM feature without an icon is instead: found as lines, or shown by name. */
+.kind-mark {
   display: inline-grid;
   flex: none;
 }

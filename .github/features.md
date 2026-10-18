@@ -38,9 +38,10 @@
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
   a disc of the layer's colour, picked by search; OSM presets come with theirs.
 - OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about
-  160 led by what off-road riders look for (tracks, trails, surfaces, barriers, access)
+  170 led by what off-road riders look for (tracks, trails, surfaces, barriers, access)
   or typed as tags, queried once (Postpass, Overpass where Postpass fails) and updated
-  on demand.
+  on demand. Place presets (countries down to farms and named localities) show names
+  alone.
 - Optional CORS proxy, used per host.
 - Light and dark interface, following the browser unless switched.
 - A focus area: a polygon outside whose bounds no layer requests tiles, with the map

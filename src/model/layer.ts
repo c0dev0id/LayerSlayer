@@ -252,9 +252,12 @@ export const NO_ADJUSTMENTS: RasterAdjustments = { hue: 0, saturation: 0, contra
 
 /** What a service offers to add: a layer before it gets an id and the user's settings. */
 export type LayerDraft = Pick<Layer, 'name' | 'source'> &
-  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin' | 'originPath' | 'icon' | 'ownStyle'>>;
+  Partial<Pick<Layer, 'opacity' | 'minzoom' | 'maxzoom' | 'bounds' | 'attribution' | 'origin' | 'originPath' | 'icon' | 'dots' | 'label' | 'ownStyle'>>;
 
-/** New layers are half transparent, so what lies below them shows; layers with an icon start opaque, as icons read best that way. */
+/**
+ * New layers are half transparent, so what lies below them shows; layers with an icon or a
+ * label start opaque, as icons and text read best that way.
+ */
 const DEFAULT_OPACITY = 0.5;
 
 export type LineDash = 'dashed' | 'long-dashed' | 'dotted';
@@ -371,7 +374,7 @@ export function createLayer(draft: LayerDraft, existing: readonly Layer[], id: s
   const layer: Layer = {
     id,
     visible: true,
-    opacity: draft.icon ? 1 : DEFAULT_OPACITY,
+    opacity: draft.icon || draft.label ? 1 : DEFAULT_OPACITY,
     minzoom: MIN_ZOOM,
     maxzoom: MAX_ZOOM,
     ...draft,

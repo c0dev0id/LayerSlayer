@@ -19,7 +19,7 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
   ArcGIS map service) show it for apps such as DMD2, tagged DMD in the layer list and in
   Add layer.
 - **OSM queries** — build a layer of OpenStreetMap features in an area, from a preset list
-  or typed tags.
+  or typed tags; place presets add town and village names as a labels layer.
 - **Routing** — draw routes along roads (OSRM) or straight, with waypoints drawn as pins,
   flags, cameras, cups or fuel pumps, undo/redo and GPX import and export.
 - **Spot details** — right-click anywhere for what OpenStreetMap knows there, in plain
