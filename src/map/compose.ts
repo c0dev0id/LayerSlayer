@@ -174,8 +174,12 @@ const SKIES: Record<TerrainSky, StyleSpecification['sky']> = {
  * See MapOptions for what is drawn around the layers.
  */
 export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background = MAP_BACKGROUND, terrain, only, tileCache = true }: MapOptions = {}): StyleSpecification {
-  const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
-  style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
+  const style: StyleSpecification = {
+    version: 8,
+    sources: {},
+    layers: [{ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } }],
+    transition: { duration: 0, delay: 0 },
+  };
   const sprites: { id: string; url: string }[] = [];
   /** Where the layers above the bottom one begin, which the hillshading goes under. */
   let aboveBottom = style.layers.length;

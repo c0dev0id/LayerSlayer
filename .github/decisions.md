@@ -38,8 +38,10 @@
   see-through layers and is in anything drawn from the canvas. In 3D it also keeps the
   ground opaque: MapLibre draws background layers onto the ground, and ground left
   see-through by a transparent bottom layer showed the walls hanging from the tile edges
-  through it. The colour is a setting kept with the others and carried by project files,
-  as part of how a project looks.
+  through it. MapLibre's documentation names a background layer as the remedy; turning the
+  walls off (`terrainSkirtLength: 'none'`) can leave hairline gaps between tiles of
+  different zooms instead. The colour is a setting kept with the others and carried by
+  project files, as part of how a project looks.
 - **ArcGIS symbology as a per-layer choice.** Vector layers without a style are drawn in
   one colour each (5 px dots with a white rim, 2.5 px lines, areas filled at a quarter of
   the opacity), which keeps overlapping layers apart. ArcGIS feature layers describe their
@@ -697,13 +699,13 @@
   Compared at 70° over the Alps, 6 zoom levels on screen (`setSourceTileLodParams`,
   default about 9.3) sharpened the distance for about twice the tiles and left the near
   ground as it was; 4 made the near ground coarser, and allowing more tiles (a ratio of 6
-  instead of 3) cost three times the tiles for little more. The ground's shape keeps
-  MapLibre's default: finer elevation tiles in the distance raised whole tiles above their
-  neighbours, walls and all (seen in the Hunsrück), and added nothing to the layers'
-  detail. The setting belongs to each source rather than to the style, so it is set again
-  after every style change, which may bring new sources; a flat map keeps MapLibre's
-  default. Finer distant tiles also draw a far track thinner, down to broken dashes near
-  the horizon.
+  instead of 3) cost three times the tiles for little more. The elevation source keeps
+  MapLibre's default: the ground's mesh picks its tiles by that default whatever the
+  source says, and elevation tiles picked otherwise did not match its tiles, which raised
+  whole tiles above their neighbours, walls and all (seen in the Hunsrück). The setting
+  belongs to each source rather than to the style, so it is set again after every style
+  change, which may bring new sources; a flat map keeps MapLibre's default. Finer distant
+  tiles also draw a far track thinner, down to broken dashes near the horizon.
 - **Spot details pick what matters on the move.** One Overpass query (`around`, about 40
   pixels at the zoom, 15 to 250 m) asks for drivable ways (motorways down to tracks,
   paths and bridleways; footways and cycleways are left out), places to go to (amenity,

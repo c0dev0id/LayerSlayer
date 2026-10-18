@@ -85,7 +85,7 @@ describe('composeStyle', () => {
     const xyz = (id: string) => layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 } }, {}, id);
     expect(compose([xyz('A')])).not.toHaveProperty('terrain');
     // Like the bottom layer, the ground is not limited to the focus area.
-    const style = compose([xyz('A'), xyz('B')], {}, { terrain: 'day', focus: [8, 48, 9, 49], background: '#1b2b44' });
+    const style = compose([xyz('A'), xyz('B')], {}, { terrain: 'day', focus: [8, 48, 9, 49] });
     expect(style.terrain).toEqual({ source: TERRAIN_SOURCE, exaggeration: 1 });
     expect(style.sources[TERRAIN_SOURCE]).toMatchObject({ type: 'raster-dem', encoding: 'terrarium', tileSize: 512 });
     expect(style.sources[TERRAIN_SOURCE]).not.toHaveProperty('bounds');
@@ -107,9 +107,10 @@ describe('composeStyle', () => {
 
   it('draws the map on its background colour, white where unset, under every layer', () => {
     const xyz = layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } });
-    const background = (options?: MapOptions) => composeStyle([xyz], new Map(), options).layers.slice(0, 2);
-    expect(background({ background: '#1b2b44' })).toMatchObject([{ id: 'map-background', type: 'background', paint: { 'background-color': '#1b2b44' } }, { id: 'L' }]);
-    expect(background()).toMatchObject([{ paint: { 'background-color': MAP_BACKGROUND } }, { id: 'L' }]);
+    // compose() checks that the background layer comes first; this checks its colour.
+    const background = (options?: MapOptions) => composeStyle([xyz], new Map(), options).layers[0];
+    expect(background({ background: '#1b2b44' })).toMatchObject({ paint: { 'background-color': '#1b2b44' } });
+    expect(background()).toMatchObject({ paint: { 'background-color': MAP_BACKGROUND } });
   });
 
   it('shows one layer alone over the bottom layer, whatever its eye, the bottom one as its eye says', () => {
