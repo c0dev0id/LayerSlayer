@@ -11,20 +11,26 @@ export function fromMarker(event: Event | undefined): boolean {
   return event?.target instanceof Element && event.target.closest('.maplibregl-marker') !== null;
 }
 
+/** The map events on which MapLibre places a marker on screen again (Marker.addTo). */
+const PLACING_EVENTS = ['move', 'moveend', 'terrain', 'projectiontransition', 'idle'] as const;
+
 /**
  * A draggable marker whose root element is owned by MapLibre (it sets transform, opacity
- * and pointer-events); the given content is placed inside it.
+ * and pointer-events); the given content is placed inside it. `onPlace` runs whenever the
+ * marker is placed on screen: when it is shown or dragged, and when MapLibre moves it.
  */
 export class MarkerHandle {
   readonly marker: maplibregl.Marker;
   readonly root: HTMLDivElement;
   private added = false;
+  private readonly onPlace: (() => void) | undefined;
 
   constructor(
     private readonly map: maplibregl.Map,
     content: Node,
-    options: { className: string; anchor?: maplibregl.PositionAnchor },
+    options: { className: string; anchor?: maplibregl.PositionAnchor; onPlace?: () => void },
   ) {
+    this.onPlace = options.onPlace;
     this.root = document.createElement('div');
     this.root.className = options.className;
     this.root.append(content);
@@ -35,6 +41,7 @@ export class MarkerHandle {
     this.root.addEventListener('mousedown', (e) => {
       if (e.button !== 0) e.stopPropagation();
     });
+    if (this.onPlace) this.marker.on('drag', this.onPlace);
   }
 
   /** Shows the marker at a position, or hides it for undefined. */
@@ -47,11 +54,14 @@ export class MarkerHandle {
     if (!this.added) {
       this.marker.addTo(this.map);
       this.added = true;
+      if (this.onPlace) for (const type of PLACING_EVENTS) this.map.on(type, this.onPlace);
     }
+    this.onPlace?.();
   }
 
   remove(): void {
     this.marker.remove();
+    if (this.added && this.onPlace) for (const type of PLACING_EVENTS) this.map.off(type, this.onPlace);
     this.added = false;
   }
 }

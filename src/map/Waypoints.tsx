@@ -40,18 +40,20 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
       <span class="waypoint-name">{waypoint()?.name}</span>
     </div>
   ) as HTMLElement;
-  const handle = new MarkerHandle(map, content, { className: 'waypoint-marker', anchor: 'bottom' });
+  // The waypoint shrinks with the map, and in 3D with distance from the camera.
+  let shownScale = '';
+  const fit = () => {
+    const { lng, lat } = handle.marker.getLngLat();
+    const scale = waypointScale(zoomAt(map, [lng, lat])).toFixed(3);
+    if (scale === shownScale) return;
+    shownScale = scale;
+    content.style.transform = `scale(${scale})`;
+  };
+  const handle = new MarkerHandle(map, content, { className: 'waypoint-marker', anchor: 'bottom', onPlace: fit });
   createEffect(() => {
     const w = waypoint();
     handle.setPosition(w && [w.lngLat[0], w.lngLat[1]]);
   });
-  // The waypoint shrinks with the map, and in 3D with distance from the camera.
-  const fit = () => {
-    const w = waypoint();
-    if (w) content.style.setProperty('--waypoint-scale', String(waypointScale(zoomAt(map, w.lngLat))));
-  };
-  createEffect(fit);
-  map.on('move', fit);
   // Inline, since MapLibre sets pointer-events on a marker after dragging it.
   createEffect(() => {
     handle.marker.setDraggable(editable());
@@ -77,7 +79,6 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
     ];
   });
   onCleanup(() => {
-    map.off('move', fit);
     stopMenu();
     handle.remove();
   });

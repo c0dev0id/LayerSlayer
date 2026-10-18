@@ -1108,11 +1108,10 @@ input.swatch {
   cursor: pointer;
 }
 
-/* A waypoint with its name, shrunk from its foot as Waypoints.tsx sets --waypoint-scale. */
+/* A waypoint with its name; Waypoints.tsx shrinks it from its foot. */
 .waypoint {
   position: relative;
   isolation: isolate;
-  transform: scale(var(--waypoint-scale, 1));
   transform-origin: 50% 100%;
 }
 
