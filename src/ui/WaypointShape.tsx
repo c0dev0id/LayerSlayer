@@ -125,6 +125,23 @@ const DRAWINGS: Record<WaypointType, (id: string) => JSX.Element> = {
       <path d="M16 19.5 c0 0 -3 3.5 -3 5.3 a3 3 0 0 0 6 0 c0 -1.8 -3 -5.3 -3 -5.3z" fill="#fff" />
     </>
   ),
+  warning: () => (
+    <>
+      <rect x="15" y="20" width="2" height="15" rx="0.6" fill={POLE} />
+      <path d="M16 2.2 L29.4 24.6 L2.6 24.6 Z" fill="#fcc419" stroke="#212529" stroke-width="2.2" stroke-linejoin="round" />
+      <rect x="14.8" y="8.5" width="2.4" height="8.6" rx="1.1" fill="#111" />
+      <circle cx="16" cy="20.2" r="1.4" fill="#111" />
+    </>
+  ),
+  info: () => (
+    <>
+      <rect x="15" y="21" width="2" height="14" rx="0.6" fill={POLE} />
+      <rect x="5" y="2.5" width="22" height="20" rx="3" fill="#1971c2" />
+      <rect x="6.5" y="4" width="19" height="17" rx="2" fill="none" stroke="#fff" stroke-width="0.9" />
+      <circle cx="16" cy="7.8" r="2" fill="#fff" />
+      <path d="M13.6 11 h3.8 v6.6 h1.4 v1.6 h-5.6 v-1.6 h1.4 v-5 h-1 z" fill="#fff" />
+    </>
+  ),
 };
 
 /**
