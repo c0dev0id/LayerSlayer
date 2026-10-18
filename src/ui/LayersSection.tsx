@@ -1,5 +1,6 @@
 import { createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { coversMostOfWorld } from '../geo/mercator';
+import { MAP_BACKGROUND } from '../map/compose';
 import { layerFeatures } from '../map/layerFeatures';
 import { externalTileUrl } from '../map/externalTiles';
 import { TILE_MAX_AGE_HOURS } from '../map/tileCache';
@@ -69,7 +70,7 @@ export function LayersSection(props: { onAdd: () => void }) {
           type="color"
           class="swatch"
           aria-label="Background colour of the map"
-          value={state.settings.background ?? '#ffffff'}
+          value={state.settings.background ?? MAP_BACKGROUND}
           onInput={(e) => setBackground(e.currentTarget.value)}
         />
         <Show when={state.settings.background}>

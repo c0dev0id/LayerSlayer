@@ -10,6 +10,7 @@ import {
   scaleOpacity,
   styleFont,
   HILLSHADE_SOURCE,
+  MAP_BACKGROUND,
   TERRAIN_SOURCE,
   wmtsTileUrl,
   type Assets,
@@ -18,10 +19,12 @@ import {
 
 const layer = (draft: LayerDraft, patch: Partial<Layer> = {}, id = 'L'): Layer => ({ ...createLayer(draft, [], id), ...patch });
 
+/** A valid composed style, with the layers above the background layer every style starts with. */
 function compose(layers: Layer[], assets: Record<string, Assets> = {}, options: MapOptions = {}): StyleSpecification {
   const style = composeStyle(layers, new Map(Object.entries(assets)), options);
   expect(validateStyleMin(style)).toEqual([]);
-  return style;
+  expect(style.layers[0]).toMatchObject({ id: 'map-background', type: 'background' });
+  return { ...style, layers: style.layers.slice(1) };
 }
 
 describe('composeStyle', () => {
@@ -87,8 +90,8 @@ describe('composeStyle', () => {
     expect(style.sources[TERRAIN_SOURCE]).toMatchObject({ type: 'raster-dem', encoding: 'terrarium', tileSize: 512 });
     expect(style.sources[TERRAIN_SOURCE]).not.toHaveProperty('bounds');
     expect(style.sources[HILLSHADE_SOURCE]).toEqual(style.sources[TERRAIN_SOURCE]);
-    expect(style.layers.map((l) => l.id)).toEqual(['map-background', 'A', 'terrain-hillshade', 'B']);
-    expect(style.layers[2]).toMatchObject({ type: 'hillshade', source: HILLSHADE_SOURCE });
+    expect(style.layers.map((l) => l.id)).toEqual(['A', 'terrain-hillshade', 'B']);
+    expect(style.layers[1]).toMatchObject({ type: 'hillshade', source: HILLSHADE_SOURCE });
     // Without a bottom layer to lie on, the shading lies on the background.
     expect(compose([], {}, { terrain: 'day' }).layers.map((l) => l.id)).toEqual(['terrain-hillshade']);
   });
@@ -102,11 +105,11 @@ describe('composeStyle', () => {
     expect(night['fog-color']).not.toBe(day['fog-color']);
   });
 
-  it('draws the map on its background colour, under every layer', () => {
+  it('draws the map on its background colour, white where unset, under every layer', () => {
     const xyz = layer({ name: 'x', source: { type: 'xyz', tiles: ['https://t/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 } });
-    expect(compose([xyz], {}, { background: '#1b2b44' }).layers.slice(0, 2).map((l) => l.id)).toEqual(['map-background', 'L']);
-    expect(compose([xyz], {}, { background: '#1b2b44' }).layers[0]).toEqual({ id: 'map-background', type: 'background', paint: { 'background-color': '#1b2b44' } });
-    expect(compose([xyz]).layers.map((l) => l.id)).toEqual(['L']);
+    const background = (options?: MapOptions) => composeStyle([xyz], new Map(), options).layers.slice(0, 2);
+    expect(background({ background: '#1b2b44' })).toMatchObject([{ id: 'map-background', type: 'background', paint: { 'background-color': '#1b2b44' } }, { id: 'L' }]);
+    expect(background()).toMatchObject([{ paint: { 'background-color': MAP_BACKGROUND } }, { id: 'L' }]);
   });
 
   it('shows one layer alone over the bottom layer, whatever its eye, the bottom one as its eye says', () => {

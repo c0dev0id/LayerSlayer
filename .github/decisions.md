@@ -32,11 +32,14 @@
   levels, so tinting toward a chosen colour is not possible. Every layer is composited
   with plain alpha blending (`ColorMode.alphaBlended`). Vector layers and imported styles
   have no such properties; adjusting them would mean rewriting the colours in the style.
-- **The background colour is a MapLibre background layer.** Choosing a colour adds a
-  `background` layer at the bottom of the composed style rather than colouring the page
-  behind the canvas, so it is part of the map: it shows through see-through layers and is
-  in anything drawn from the canvas. It is a setting kept with the others and carried by
-  project files, as part of how a project looks; without one the map stays on white.
+- **The background colour is a MapLibre background layer.** The composed style always
+  starts with a `background` layer, white unless the project sets a colour, rather than
+  colouring the page behind the canvas, so it is part of the map: it shows through
+  see-through layers and is in anything drawn from the canvas. In 3D it also keeps the
+  ground opaque: MapLibre draws background layers onto the ground, and ground left
+  see-through by a transparent bottom layer showed the walls hanging from the tile edges
+  through it. The colour is a setting kept with the others and carried by project files,
+  as part of how a project looks.
 - **ArcGIS symbology as a per-layer choice.** Vector layers without a style are drawn in
   one colour each (5 px dots with a white rim, 2.5 px lines, areas filled at a quarter of
   the opacity), which keeps overlapping layers apart. ArcGIS feature layers describe their

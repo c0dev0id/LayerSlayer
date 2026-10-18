@@ -55,6 +55,8 @@ export const WMTS_PROTOCOL = 'wmts-matrix';
 
 /** The layer of the map's background colour, under every user layer. */
 const BACKGROUND_LAYER = 'map-background';
+/** The colour the map is drawn on where a project sets none. */
+export const MAP_BACKGROUND = '#ffffff';
 
 /** The protocol of Cloud Optimized GeoTIFFs (@geomatico/maplibre-cog-protocol). */
 export const COG_PROTOCOL = 'cog';
@@ -84,7 +86,7 @@ export interface MapOptions {
    * base map, is drawn everywhere, so that the area has surroundings.
    */
   focus?: Bounds;
-  /** The colour the map is drawn on. */
+  /** The colour the map is drawn on; MAP_BACKGROUND where unset. */
   background?: string;
   /**
    * The ground in 3D under a day or night sky, raised by its elevation and shaded by its
@@ -171,9 +173,9 @@ const SKIES: Record<TerrainSky, StyleSpecification['sky']> = {
  *
  * See MapOptions for what is drawn around the layers.
  */
-export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain, only, tileCache = true }: MapOptions = {}): StyleSpecification {
+export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background = MAP_BACKGROUND, terrain, only, tileCache = true }: MapOptions = {}): StyleSpecification {
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
-  if (background) style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
+  style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
   const sprites: { id: string; url: string }[] = [];
   /** Where the layers above the bottom one begin, which the hillshading goes under. */
   let aboveBottom = style.layers.length;
