@@ -43,8 +43,9 @@ describe('simplifyToCount', () => {
     expect(simple.at(-1)).toEqual(line.at(-1));
   });
 
-  it('keeps as many points as fit, rather than doubling the tolerance past them', () => {
-    // A winding line of 6000 points, 10 m apart, turning a little at each.
+  it('keeps as many points as fit, at the least tolerance from 5 m on', () => {
+    // A winding line of 6000 points, 10 m apart, turning a little at each: 516 of them
+    // are kept at 5 m, and 314 when doubling the tolerance to 10 m.
     let [x, y, heading, seed] = [0, 0, 0, 1];
     const line: LngLat[] = Array.from({ length: 6000 }, () => {
       seed = (seed * 16807) % 2147483647;
@@ -52,13 +53,9 @@ describe('simplifyToCount', () => {
       [x, y] = [x + Math.cos(heading) * 10, y + Math.sin(heading) * 10];
       return [x * M, y * M];
     });
-    const doubled = [5, 10, 20, 40, 80, 160, 320].map((t) => simplifyLine(line, t)).find((l) => l.length <= 500)!;
-    const simple = simplifyToCount(line, 500);
-    expect(simple.length).toBeLessThanOrEqual(500);
-    // Doubling from 5 m keeps 516 points at 5 m and 314 at 10 m.
-    expect(doubled).toHaveLength(314);
-    expect(simple.length).toBeGreaterThan(450);
-    expect(simple.length).toBeGreaterThan(doubled.length);
+    expect(simplifyToCount(line, 500)).toHaveLength(500);
+    // Where 5 m keeps few enough, the line is not simplified further.
+    expect(simplifyToCount(line, 600)).toEqual(simplifyLine(line, 5));
   });
 
   it('keeps lines that already fit', () => {
