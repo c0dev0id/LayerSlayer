@@ -15,6 +15,7 @@ flowchart LR
     maplibre["MapLibre GL JS<br/>map and tile workers"]
     protocols["Protocol handlers<br/>features, wmts-matrix, pmtiles, cog, cache+"]
     routing["Routing pump<br/>one OSRM leg at a time"]
+    coloring["Route colouring<br/>elevations and surfaces per leg"]
     net["Network<br/>HTTPS upgrade, CORS proxy per host"]
   end
   subgraph storage["Browser storage"]
@@ -38,6 +39,7 @@ flowchart LR
   stores <--> idb
   protocols <--> cache
   stores <-->|legs| routing
+  stores --> coloring --> net
   readers --> net
   protocols --> net
   maplibre -->|transformRequest| net
@@ -149,6 +151,7 @@ erDiagram
     string profile "car, bike or foot"
     string color
     map legs "polyline6 per routed leg"
+    string coloring "rainbow, elevation, slope, slope-reversed or surface"
   }
   ROUTE_POINT {
     string id PK

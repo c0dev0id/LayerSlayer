@@ -1086,6 +1086,61 @@ input.swatch {
   border-radius: 4px;
 }
 
+/* What the colours of a coloured route's line stand for. */
+.coloring-legend {
+  margin: 2px 0 4px;
+  font-size: 12px;
+}
+
+.legend-bar,
+.legend-steps {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.legend-ends {
+  display: flex;
+  justify-content: space-between;
+}
+
+.legend-steps,
+.legend-ticks {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+}
+
+.legend-steps {
+  overflow: hidden;
+}
+
+/* Each tick stands on the border between two steps. */
+.legend-ticks span {
+  justify-self: start;
+  transform: translateX(-50%);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-surfaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend-surfaces li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
 .route.active {
   background: var(--active);
 }

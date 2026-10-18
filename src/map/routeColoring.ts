@@ -66,7 +66,7 @@ function stretches<T>(distances: readonly number[], value: (i: number) => T): T[
 }
 
 /** The lowest and highest elevation the legs have data for. */
-export function elevationRange(legs: readonly SampledLeg[], elevations: ColoringData['elevations']): [number, number] {
+export function elevationRange(legs: readonly { key: string }[], elevations: ColoringData['elevations']): [number, number] {
   let [lowest, highest] = [Infinity, -Infinity];
   for (const leg of legs) {
     for (const height of elevations.get(leg.key) ?? []) {

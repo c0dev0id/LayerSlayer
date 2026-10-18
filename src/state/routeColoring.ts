@@ -1,6 +1,6 @@
 import { createEffect, createMemo, createRoot, createSignal } from 'solid-js';
 import type { Measured } from '../geo/densify';
-import type { ColoringData } from '../map/routeColoring';
+import { elevationRange, type ColoringData } from '../map/routeColoring';
 import type { Route } from '../model/route';
 import { needsElevation, type RouteColoring, type Surface } from '../model/routeColoring';
 import { legSamples, sampleKey } from '../routing/legSamples';
@@ -110,6 +110,12 @@ export function coloringStatus(route: Route): { reading: boolean; failure?: stri
   const failure = keys.map((key) => failures().get(failureKey(kind, key))).find((reason) => reason !== undefined);
   const known = have(kind);
   return { reading: keys.some((key) => !known.has(key) && !failures().has(failureKey(kind, key))), ...(failure && { failure }) };
+}
+
+/** The lowest and highest elevation read along a route, once any is. */
+export function elevationSpan(route: Route): [number, number] | undefined {
+  const [lowest, highest] = elevationRange(drawnLegs(route), elevations());
+  return Number.isFinite(lowest) ? [lowest, highest] : undefined;
 }
 
 /** Lets the legs of a route whose reading failed be asked for again. */
