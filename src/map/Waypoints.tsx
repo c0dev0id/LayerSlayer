@@ -1,11 +1,13 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
-import { createEffect, createMemo, For, onCleanup } from 'solid-js';
+import { createEffect, createMemo, For, onCleanup, Show } from 'solid-js';
 import { roundLngLat } from '../routing/legs';
 import { editingRouteId, setWaypointDraft, tool } from '../state/drawing';
 import { iconSize } from '../model/icon';
 import { waypointLook } from '../model/route';
+import { isWaypointType } from '../model/waypointType';
 import { removeWaypoint, routeById, routeData, updateWaypoint } from '../state/routes';
 import { WaypointPin } from '../ui/icons';
+import { WaypointShape } from '../ui/WaypointShape';
 import { MarkerHandle, onMarkerMenu } from './markers';
 
 /**
@@ -23,14 +25,21 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
   const route = () => routeById(waypoint()?.routeId);
   const scale = createMemo(() => iconSize(route()?.waypointSize));
   const look = createMemo(() => waypointLook(route()));
+  const type = () => {
+    const t = waypoint()?.type;
+    return isWaypointType(t) ? t : undefined;
+  };
 
   const content = (
     <div
       class="waypoint"
+      classList={{ shape: type() !== undefined }}
       title={waypoint()?.description ?? ''}
       style={{ '--waypoint-text': look().text, '--waypoint-size': `${look().size}px`, '--waypoint-box': look().box }}
     >
-      <WaypointPin icon={waypoint()?.icon} scale={scale()} color={look().pin} />
+      <Show when={type()} fallback={<WaypointPin icon={waypoint()?.icon} scale={scale()} color={look().pin} />}>
+        {(type) => <WaypointShape type={type()} scale={scale()} />}
+      </Show>
       <span class="waypoint-name">{waypoint()?.name}</span>
     </div>
   ) as HTMLElement;
@@ -58,7 +67,7 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
       {
         label: 'Edit waypoint…',
         run: () =>
-          setWaypointDraft({ id, lngLat: w.lngLat, name: w.name, description: w.description ?? '', ...(w.icon && { icon: w.icon }) }),
+          setWaypointDraft({ id, lngLat: w.lngLat, name: w.name, description: w.description ?? '', ...(isWaypointType(w.type) && { type: w.type }), ...(w.icon && { icon: w.icon }) }),
       },
       { label: 'Delete waypoint', run: () => removeWaypoint(id) },
     ];

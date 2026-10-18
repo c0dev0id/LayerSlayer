@@ -3,6 +3,7 @@ import type { MapIcon } from '../model/icon';
 import type { LngLat } from '../model/route';
 import { routeById } from './routes';
 import { setFocus } from './store';
+import type { WaypointType } from '../model/waypointType';
 
 /**
  * Transient state of drawing on the map; never kept. A route is being drawn while
@@ -41,6 +42,7 @@ export type WaypointDraft = ({ id: string } | { routeId: string }) & {
   lngLat: LngLat;
   name: string;
   description: string;
+  type?: WaypointType;
   icon?: MapIcon;
 };
 

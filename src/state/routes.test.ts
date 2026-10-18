@@ -130,6 +130,17 @@ describe('route history', () => {
     expect(s.undoLabel()).toBe('Change waypoint look');
   });
 
+  it('gives a waypoint a type, and drops it again when the type is cleared', async () => {
+    const s = await freshStore();
+    s.addRoute(route('r'));
+    s.addWaypoint({ id: 'w', routeId: 'r', lngLat: [1, 1], name: 'Lunch', icon: { id: 'maki:cafe', size: [15, 15], paths: ['M0 0h1z'] } });
+    s.updateWaypoint('w', { type: 'food', icon: undefined }, 'Edit waypoint');
+    expect(s.routeData.waypoints[0]).toMatchObject({ type: 'food' });
+    expect(s.routeData.waypoints[0]).not.toHaveProperty('icon');
+    s.updateWaypoint('w', { type: undefined }, 'Edit waypoint');
+    expect(s.routeData.waypoints[0]).not.toHaveProperty('type');
+  });
+
   it('keeps routes in the browser', async () => {
     const s = await freshStore();
     s.addRoute(route('kept'));

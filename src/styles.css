@@ -1129,6 +1129,17 @@ input.swatch {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
 }
 
+/* Shapes stand on their foot, half a unit of their 36.5 above the bottom; their name sits
+   level with their upper part. */
+.waypoint.shape::before {
+  bottom: calc(100% * 0.5 / 36.5);
+  width: 50%;
+}
+
+.waypoint.shape .waypoint-name {
+  top: 30%;
+}
+
 /* Level with the middle of the pin's head, 11 of its 28 units down. */
 .waypoint-name {
   position: absolute;
@@ -1455,6 +1466,60 @@ input.swatch {
 
 .form-dialog textarea {
   resize: vertical;
+}
+
+/* The waypoint types to pick from, each drawn as the map draws it. */
+.waypoint-types {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.waypoint-types legend {
+  margin-bottom: 4px;
+  padding: 0;
+}
+
+/* The drawings stand on one line, whether their name takes one line or two. */
+.form-dialog .waypoint-types label {
+  position: relative;
+  display: grid;
+  grid-template-rows: 32px auto;
+  align-items: end;
+  justify-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+.waypoint-types label span {
+  align-self: start;
+}
+
+.waypoint-types label:hover {
+  background: var(--hover);
+}
+
+.waypoint-types label:has(input:checked) {
+  border-color: var(--accent);
+}
+
+.waypoint-types label:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+}
+
+.form-dialog .waypoint-types input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .form-dialog .question {

@@ -49,7 +49,10 @@
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
   waypoints, undo and redo, car, bike and foot profiles, GPX export and import. Each route
   has its own colour, line width and outline, and its waypoints their own size, pin colour
-  and name colour, size and box colour.
+  and name colour, size and box colour. A waypoint is a pin, with a symbol of choice, or
+  one of eight little objects standing on the map: start and finish flags, a camera for a
+  photo spot, a meeting point sign, a pause sign for a break, a plate, a coffee cup and a
+  fuel pump.
 - Layers, routes, settings, view and imported files survive a browser restart, and go
   to another browser as a `.lslay` project file (`.webmap` files from before the
   rename still open).

@@ -20,8 +20,8 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
   Add layer.
 - **OSM queries** — build a layer of OpenStreetMap features in an area, from a preset list
   or typed tags.
-- **Routing** — draw routes along roads (OSRM) or straight, with waypoints, undo/redo and
-  GPX import and export.
+- **Routing** — draw routes along roads (OSRM) or straight, with waypoints drawn as pins,
+  flags, cameras, cups or fuel pumps, undo/redo and GPX import and export.
 - **Spot details** — right-click anywhere for what OpenStreetMap knows there, in plain
   words.
 - **3D terrain** — hillshaded relief from open worldwide elevation tiles, under a day or a

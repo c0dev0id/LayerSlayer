@@ -445,6 +445,18 @@
     sliders; each panel names its own anchor, as every route's settings are shown at once.
     A pin stands on a soft shadow centred on its tip, sized with the pin, so that it reads
     as standing on the map rather than floating over it.
+  - A waypoint has a type: a plain pin, or one of eight little objects standing on the map
+    (start and finish flags, a camera on a tripod for a photo spot, a meeting point sign,
+    a pause sign for a break, a plate with fork and knife, a coffee cup and a fuel pump).
+    They are drawn by hand as SVG (`ui/WaypointShape.tsx`) rather than as icon-set symbols
+    in a pin, which was the first plan: objects stand out from the map's own markers, and
+    need no icon set loaded. Each has fixed colours, so that a start flag or a fuel pump
+    reads the same on every route; the route's pin colour is for plain pins. A white
+    outline around the whole drawing, an SVG filter that grows its silhouette, sets every
+    object off from the map, and the waypoint size scales them as it does pins. A plain
+    pin keeps the free choice of a symbol from the icon sets; picking a type drops it. The
+    dialog shows the types drawn as the map draws them. A type this version does not know
+    is drawn as a pin. GPX export writes no types, as it writes no symbols.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all

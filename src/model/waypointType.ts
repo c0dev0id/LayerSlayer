@@ -11,3 +11,6 @@ export const WAYPOINT_TYPES: readonly { id: WaypointType; name: string }[] = [
   { id: 'drinks', name: 'Drinks' },
   { id: 'fuel', name: 'Fuel' },
 ];
+
+/** Whether a stored value is a waypoint type; waypoints of a type this version does not know are drawn as pins. */
+export const isWaypointType = (value: unknown): value is WaypointType => WAYPOINT_TYPES.some((t) => t.id === value);
