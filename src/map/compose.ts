@@ -139,6 +139,16 @@ interface Fragment {
  *
  * See MapOptions for what is drawn around the layers.
  */
+/** The sky of 3D terrain, above the horizon when the map is tilted far, and its fog over the distant ground. */
+const SKY: StyleSpecification['sky'] = {
+  'sky-color': '#88c6fc',
+  'horizon-color': '#ffffff',
+  'fog-color': '#ffffff',
+  'sky-horizon-blend': 0.8,
+  'horizon-fog-blend': 0.8,
+  'fog-ground-blend': 0.5,
+};
+
 export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain, only, tileCache = true }: MapOptions = {}): StyleSpecification {
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
   if (background) style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
@@ -190,6 +200,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     style.sources[TERRAIN_SOURCE] = TERRAIN;
     style.sources[HILLSHADE_SOURCE] = TERRAIN;
     style.terrain = { source: TERRAIN_SOURCE, exaggeration: 1 };
+    style.sky = SKY;
     style.layers.splice(aboveBottom, 0, { id: HILLSHADE_LAYER, type: 'hillshade', source: HILLSHADE_SOURCE, paint: HILLSHADE_PAINT });
   }
   return style;

@@ -656,20 +656,25 @@
   symbols suffered from too. Waypoints keep an icon the same way (`MapIcon`), shown white
   in their pin in place of the dot; GPX export leaves it out, since GPX symbol names are
   device-specific.
-- **3D terrain is part of the composed style.** Every layer change applies the whole
-  style with a diff, so terrain set with `map.setTerrain` (as MapLibre's TerrainControl
-  does) would be dropped by the next change. The 3D button switches `settings.terrain`
-  instead, and `composeStyle` then adds a `raster-dem` source and the style's `terrain`;
-  the button also tilts the map, so the relief shows. Elevation comes from Mapterhorn
+- **3D terrain is part of the composed style.** Every layer change applies the whole style
+  with a diff, so terrain set with `map.setTerrain` (as MapLibre's TerrainControl does)
+  would be dropped by the next change. The 3D button switches `settings.terrain` instead,
+  and `composeStyle` then adds a `raster-dem` source and the style's `terrain`; the button
+  also tilts the map, so the relief shows. Elevation comes from Mapterhorn
   (Terrarium-encoded WebP tiles, 512 px, CORS, no key): global at about 30 m and finer
   where countries publish it, down to zoom 18 in Germany. Where finer data ends its tiles
   answer 404 and MapLibre keeps the coarser parent tile, so those errors are not shown.
   The AWS Terrain Tiles (Mapzen) were the alternative: also keyless, but coarser and
   ending at zoom 15. Like the bottom layer, the ground is not limited to the focus area.
   3D brings hillshading along: a hillshade layer inserted right above the bottom layer, so
-  the base map is shaded and overlays are not. It reads the same tiles through a second
-  source, as MapLibre advises for terrain and hillshade, and is lighter than MapLibre's
-  default (exaggeration 0.3), which darkened a raster base map's labels in the Alps.
+  the base map is shaded and overlays are not. The map tilts up to 70°, ten more than
+  MapLibre's default, which allows up to 180 but calls anything past 60 experimental:
+  tried over the Alps with terrain, from 75° on the ground nearest the camera went missing
+  in wedges. With terrain the style has a sky (MapLibre's own colours), whose fog blends
+  the distant ground into the horizon; a flat map tilted that far shows white above the
+  horizon, which is fine for a map. It reads the same tiles through a second source, as
+  MapLibre advises for terrain and hillshade, and is lighter than MapLibre's default
+  (exaggeration 0.3), which darkened a raster base map's labels in the Alps.
 - **Spot details pick what matters on the move.** One Overpass query (`around`, about 40
   pixels at the zoom, 15 to 250 m) asks for drivable ways (motorways down to tracks,
   paths and bridleways; footways and cycleways are left out), places to go to (amenity,

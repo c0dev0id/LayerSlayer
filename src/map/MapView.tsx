@@ -69,6 +69,7 @@ export function MapView() {
       zoom,
       bearing,
       pitch,
+      maxPitch: 70,
       attributionControl: { compact: true },
       transformRequest: (url) => ({ url: requestUrl(url) }),
     });
