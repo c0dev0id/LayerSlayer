@@ -31,7 +31,7 @@ import {
   type XyzSource,
 } from '../model/layer';
 import type { Symbology } from '../services/arcgisSymbology';
-import { ELEVATION_TILES } from '../services/elevation';
+import { ELEVATION_TILE_SIZE, ELEVATION_TILES } from '../services/elevation';
 import type { Icon } from './icon';
 import { POI_DISC, POI_REACH, POI_RING, poiImageId } from './poiIcons';
 import { FEATURE_LAYER, FEATURE_PROTOCOL, FEATURE_TILE_MAXZOOM, featureTileUrl } from './featureTiles';
@@ -118,7 +118,7 @@ const HILLSHADE_PAINT = { 'hillshade-exaggeration': 0.3, 'hillshade-shadow-color
 const TERRAIN: RasterDEMSourceSpecification = {
   type: 'raster-dem',
   tiles: [ELEVATION_TILES],
-  tileSize: 512,
+  tileSize: ELEVATION_TILE_SIZE,
   encoding: 'terrarium',
   maxzoom: 18,
   attribution: '<a href="https://mapterhorn.com/attribution">© Mapterhorn</a>',
