@@ -30,6 +30,10 @@ export interface Settings {
   proxiedHosts: string[];
   /** The colour the map is drawn on, as #rrggbb; none for the page's white. */
   background?: string;
+  /** The colour of the focus area's outline, as #rrggbb; none for that of the coastlines on the cover. */
+  focusOutline?: string;
+  /** The colour of the focus area's shadow, as #rrggbb; none for one that suits the background. */
+  focusShadow?: string;
   /** The ground in 3D, raised by its elevation, under a day or night sky; flat where unset. */
   terrain?: TerrainSky;
   /** No layer keeps tiles, whatever its own setting says: a switch of this browser, for testing. */
@@ -185,6 +189,8 @@ export function parseState(json: string): AppState {
       proxy: typeof settings?.proxy === 'string' ? settings.proxy : '',
       proxiedHosts: Array.isArray(settings?.proxiedHosts) ? settings.proxiedHosts.filter((h) => typeof h === 'string') : [],
       ...(isHexColor(settings?.background) && { background: settings.background }),
+      ...(isHexColor(settings?.focusOutline) && { focusOutline: settings.focusOutline }),
+      ...(isHexColor(settings?.focusShadow) && { focusShadow: settings.focusShadow }),
       ...((settings?.terrain === 'day' || settings?.terrain === 'night') && { terrain: settings.terrain }),
       ...(settings?.tileCacheOff === true && { tileCacheOff: true }),
       ...((settings?.proxyMode === 'off' || settings?.proxyMode === 'all') && { proxyMode: settings.proxyMode }),
@@ -322,6 +328,16 @@ export function setProxyMode(mode: ProxyMode): void {
 /** Sets the colour the map is drawn on, or with none goes back to white. */
 export function setBackground(color: string | undefined): void {
   setState('settings', 'background', color);
+}
+
+/** Sets the colour of the focus area's outline, or with none goes back to that of the coastlines. */
+export function setFocusOutline(color: string | undefined): void {
+  setState('settings', 'focusOutline', color);
+}
+
+/** Sets the colour of the focus area's shadow, or with none goes back to one that suits the background. */
+export function setFocusShadow(color: string | undefined): void {
+  setState('settings', 'focusShadow', color);
 }
 
 /** Shows the ground in 3D, raised by its elevation, under a day or night sky, or flat. */

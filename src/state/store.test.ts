@@ -47,6 +47,9 @@ describe('parseState', () => {
   it('keeps a background colour only where it is one', () => {
     expect(parseState(JSON.stringify({ layers: [], settings: { background: '#1B2B44' } })).settings.background).toBe('#1B2B44');
     expect(parseState(JSON.stringify({ layers: [], settings: { background: 'red' } })).settings).not.toHaveProperty('background');
+    const focusColors = { focusOutline: '#e8590c', focusShadow: '#1b2b44' };
+    expect(parseState(JSON.stringify({ layers: [], settings: focusColors })).settings).toMatchObject(focusColors);
+    expect(parseState(JSON.stringify({ layers: [], settings: { focusOutline: 'red', focusShadow: 3 } })).settings).not.toHaveProperty('focusOutline');
     expect(parseState(JSON.stringify({ layers: [], settings: { tileCacheOff: true, proxyMode: 'all' } })).settings).toMatchObject({ tileCacheOff: true, proxyMode: 'all' });
     expect(parseState(JSON.stringify({ layers: [], settings: { proxyMode: 'some' } })).settings).not.toHaveProperty('proxyMode');
     expect(parseState(JSON.stringify({ layers: [], settings: { tileCacheOff: 'yes' } })).settings).not.toHaveProperty('tileCacheOff');
