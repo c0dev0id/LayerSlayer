@@ -226,6 +226,11 @@ export function setRouteLeg(routeId: string, key: string, geometry: string): voi
   updateRoute(routeId, (r) => edit.addLeg(r, key, geometry));
 }
 
+/** Drops a route's routed legs so that they are routed again, as one undo step: undoing it brings the old ones back. */
+export function clearRouteLegs(id: string): void {
+  updateRoute(id, (r) => (Object.keys(r.legs).length === 0 ? r : { ...r, legs: {} }), 'Recalculate route');
+}
+
 /** The waypoint as kept: without an empty description, type or icon, and without an icon where its type draws it. */
 function keptWaypoint(waypoint: Waypoint): Waypoint {
   const kept = { ...waypoint };

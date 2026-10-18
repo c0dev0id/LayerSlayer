@@ -58,6 +58,19 @@ describe('route history', () => {
     expect(s.undoLabel()).toBeUndefined();
   });
 
+  it('drops the routed legs to recalculate a route, and brings them back on undo', async () => {
+    const s = await freshStore();
+    s.addRoute(route('r'));
+    s.appendPoint('r', [1, 1]);
+    s.appendPoint('r', [2, 2]);
+    s.setRouteLeg('r', 'car/1,1;2,2', 'geometry');
+    s.clearRouteLegs('r');
+    expect(s.routeById('r')?.legs).toEqual({});
+    expect(s.undoLabel()).toBe('Recalculate route');
+    s.undo();
+    expect(s.routeById('r')?.legs).toEqual({ 'car/1,1;2,2': 'geometry' });
+  });
+
   it('imports routes and waypoints as one step', async () => {
     const s = await freshStore();
     s.importRouteData({ routes: [route('a'), route('b')], waypoints: [{ id: 'w', routeId: 'a', name: 'W', lngLat: [1, 2] }] }, 'Import GPX');
