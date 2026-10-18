@@ -73,7 +73,7 @@ flowchart TB
 |---|---|
 | Presentation | The panel and its dialogs (`ui/`); the map view, toolbar, route editor, context menu and search box (`map/*.tsx`). |
 | Application state | The layer store with settings, view and focus area; the route store with undo and redo; local storage, stored files and project files (`state/`). |
-| Domain | Service readers and file import (`services/`); route edits, legs and the OSRM pump (`routing/`); style composition, overlays, protocol handlers, feature tiles and the tile cache (`map/*.ts`). |
+| Domain | Service readers and file import (`services/`); route edits, legs and the OSRM pump (`routing/`); style composition, overlays, the focus area's shadow canvas, protocol handlers, feature tiles and the tile cache (`map/*.ts`). |
 | Network | HTTPS upgrade, the per-host CORS proxy and readable errors for every request but routing (`state/net.ts`). |
 | Foundation | Layer, route and icon types (`model/`); Web Mercator, bounds and geometry (`geo/`). |
 | Build time (secondary) | Vite plugins that serve the service library and the icon sets as virtual modules (`tools/`). |

@@ -25,21 +25,7 @@ describe('focusAreaFeatures', () => {
       expect(Math.sign(winding(world!))).toBe(1);
       expect(Math.sign(winding(hole!))).toBe(-1);
       expect(hole).toHaveLength(5);
-      // The edges run counterclockwise, so that the outside of each is to its right.
-      const starts = ofKind(features, 'edge').map((e) => (e.geometry as GeoJSON.LineString).coordinates[0]!);
-      expect(starts).toHaveLength(4);
-      expect(Math.sign(winding([...starts, starts[0]!]))).toBe(1);
     }
-  });
-
-  it('lights the edges from the north-north-west', () => {
-    const facing = (from: LngLat) =>
-      ofKind(focusAreaFeatures(square).features, 'edge').find((e) => String((e.geometry as GeoJSON.LineString).coordinates[0]) === String(from))!.properties!.facing as number;
-    const toLight = (25 * Math.PI) / 180;
-    expect(facing([8, 49])).toBeCloseTo(Math.sin(toLight));
-    expect(facing([9, 49])).toBeCloseTo(Math.cos(toLight));
-    expect(facing([8, 48])).toBeCloseTo(-Math.cos(toLight));
-    expect(facing([9, 48])).toBeCloseTo(-Math.sin(toLight));
   });
 
   /** The coastline the cover shows of `line` around `area`. */

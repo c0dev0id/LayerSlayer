@@ -32,9 +32,6 @@ const kind = (name: string): ExpressionSpecification => ['==', ['get', 'kind'], 
 /** The layer that hides the map outside the focus area: a tap on it finds no features. */
 export const FOCUS_COVER_LAYER = `${AREA_SOURCE}-cover`;
 
-/** How far an edge of the area faces away from the light, 0 to 1. */
-const AWAY: ExpressionSpecification = ['max', 0, ['-', ['get', 'facing']]];
-
 const AREA_LAYERS: LayerSpecification[] = [
   {
     id: FOCUS_COVER_LAYER,
@@ -59,39 +56,6 @@ const AREA_LAYERS: LayerSpecification[] = [
     filter: kind('coast'),
     layout: ROUND_LINE,
     paint: { 'line-color': COVER_LINES, 'line-opacity': 0.55, 'line-width': 1.2 },
-  },
-  // The area lifted off the cover: a soft shadow all round, deeper beyond the edges that
-  // face away from the light, and a bevel inside, light or dark as the edge faces. Each
-  // edge is a line of its own, as the corners of a whole ring shoot out when offset.
-  {
-    id: `${AREA_SOURCE}-shadow`,
-    type: 'line',
-    source: AREA_SOURCE,
-    filter: kind('edge'),
-    layout: ROUND_LINE,
-    paint: { 'line-color': '#000000', 'line-opacity': 0.25, 'line-width': 6, 'line-offset': 3, 'line-blur': 6 },
-  },
-  {
-    id: `${AREA_SOURCE}-cast-shadow`,
-    type: 'line',
-    source: AREA_SOURCE,
-    filter: kind('edge'),
-    layout: ROUND_LINE,
-    paint: { 'line-color': '#000000', 'line-opacity': ['*', 0.45, AWAY], 'line-width': ['*', 18, AWAY], 'line-offset': ['*', 9, AWAY], 'line-blur': ['*', 12, AWAY] },
-  },
-  {
-    id: `${AREA_SOURCE}-bevel`,
-    type: 'line',
-    source: AREA_SOURCE,
-    filter: kind('edge'),
-    layout: ROUND_LINE,
-    paint: {
-      'line-color': ['case', ['>', ['get', 'facing'], 0], '#ffffff', '#000000'],
-      'line-opacity': ['case', ['>', ['get', 'facing'], 0], ['*', 0.6, ['get', 'facing']], ['*', 0.35, AWAY]],
-      'line-width': 3,
-      'line-offset': -2.5,
-      'line-blur': 1.5,
-    },
   },
 ];
 
@@ -128,9 +92,6 @@ const WORLD_RING: LngLat[] = [
   [-180, -MAX_LATITUDE],
 ];
 
-/** Where the light comes from, east and north: the north-north-west, as in MapLibre's hillshading. */
-const LIGHT = [Math.sin((335 * Math.PI) / 180), Math.cos((335 * Math.PI) / 180)] as const;
-
 /** Twice the signed area of a ring: positive when it runs counterclockwise. */
 function signedArea(ring: readonly LngLat[]): number {
   let sum = 0;
@@ -139,13 +100,6 @@ function signedArea(ring: readonly LngLat[]): number {
     sum += x1 * y2 - x2 * y1;
   });
   return sum;
-}
-
-/** How far an edge of a counterclockwise ring in Web Mercator faces the light, -1 (away) to 1. */
-function facing([ax, ay]: XY, [bx, by]: XY): number {
-  const length = Math.hypot(bx - ax, by - ay);
-  // The outside of a counterclockwise ring is to the right of each edge.
-  return length === 0 ? 0 : ((by - ay) * LIGHT[0] - (bx - ax) * LIGHT[1]) / length;
 }
 
 /** The zoom the world on the cover is shown at while the area fills the view. */
@@ -183,17 +137,15 @@ const feature = (geometry: GeoJSON.Geometry, properties: GeoJSON.GeoJsonProperti
 /**
  * The focus area as map features, each marked with its `kind`: the world with the area cut
  * out, to cover what lies outside; on the cover, the world's outline where it is loaded,
- * shrunk around the area and cut off at it; and the area's edges, each with how far it
- * faces the light. The area runs counterclockwise, so the outside of each edge is to its
- * right; MapLibre takes a ring wound like the first as a polygon of its own, so the
- * cut-out runs clockwise, against the world.
+ * shrunk around the area and cut off at it. MapLibre takes a ring wound like the first as
+ * a polygon of its own, so the cut-out runs clockwise, against the world.
  */
 export function focusAreaFeatures(focus: readonly LngLat[] | undefined, world?: WorldOutline): GeoJSON.FeatureCollection {
   if (!focus || focus.length < 3) return collection([]);
   const corners = copy(focus);
   const ring = signedArea(corners) > 0 ? corners : [...corners].reverse();
   const closed = [...ring, ring[0]!];
-  // Shrinking, cutting and lighting are done in Web Mercator, where the map draws straight lines.
+  // Shrinking and cutting are done in Web Mercator, where the map draws straight lines.
   const area = closed.map(([lng, lat]) => lngLatToMercator(lng, lat));
   const shrink = coverShrink(area);
   const onCover = (lines: readonly LngLat[][], kind: string) =>
@@ -204,7 +156,6 @@ export function focusAreaFeatures(focus: readonly LngLat[] | undefined, world?: 
   return collection([
     feature({ type: 'Polygon', coordinates: [WORLD_RING, [...closed].reverse()] }, { kind: 'cover' }),
     ...(world ? [...onCover(world.coastlines, 'coast'), ...onCover(world.borders, 'border')] : []),
-    ...ring.map((a, i) => feature({ type: 'LineString', coordinates: [a, closed[i + 1]!] }, { kind: 'edge', facing: facing(area[i]!, area[i + 1]!) })),
   ]);
 }
 

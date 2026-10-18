@@ -555,16 +555,25 @@
     size. A build-time plugin reading the package, as for the icon sets, was the
     alternative: easier to regenerate, but three development dependencies for data that
     does not change.
-  - A graticule on the cover was tried and dropped as clutter, and the area's blue outline
-    went once the shadow and bevel marked its edge.
-  - The area looks lifted off the cover: a soft shadow beyond every edge, deeper beyond
-    the edges that face away from the light, and a bevel inside, light where an edge
-    faces the light and dark where it faces away. The light comes from 335°, where
-    MapLibre's hillshading has it, but is fixed to the map, while the hillshading's turns
-    with the view; they only differ on a rotated map. Shadow and bevel are lines offset
-    from each edge in pixels, so they keep their size at every zoom. Each edge is a line
-    of its own, with how far it faces the light as a property: offsetting the whole ring
-    made its sharp corners shoot out as spikes.
+  - A graticule on the cover was tried and dropped as clutter. The area's blue outline
+    looked like a debugging aid; its outline is now in the colour of the coastlines, and
+    it also hides where the drawn edge and the map's own differ by a pixel.
+  - The area looks raised over the cover: it casts a shadow, has a bevel just inside its
+    edge, light where the edge faces the light and dark where it faces away, and an
+    outline. The light comes from 335° on screen, where MapLibre's hillshading has it, so
+    the shadow keeps its side as the map turns and tilts. They are drawn on a 2D canvas
+    over the map's (`map/focusShadow.ts`), the one thing drawn over the layers outside
+    the composed style: the area filled with a canvas shadow and then wiped out leaves an
+    exact drop shadow, corners included, and the bevel is the surroundings' shadow inside
+    the area. Each edge is drawn in steps projected onto the ground, so it follows the
+    terrain in 3D. The canvas is drawn after each frame of the map that moves the area on
+    screen; redrawn after every frame, its blur halved the frame rate while 3D tiles
+    loaded. In the style, the edges' lighting would have to come from the bearing in the
+    global state, and a feature property drawn with a value from the global state makes
+    MapLibre load the source again on every change, so on every frame of a turn; lines
+    offset from each edge also left notches at the corners.
+  - On a dark background no shadow shows on the dimmed cover, so there the area casts a
+    light glow instead; the switch is where the cover's luminance falls below 0.2.
   - In 3D the ground keeps its elevation everywhere: MapLibre takes ground without
     elevation tiles as sea level, so limiting it would raise a wall at the box's edge in
     the mountains, draped in the cover. The hillshading is limited like the layers.
