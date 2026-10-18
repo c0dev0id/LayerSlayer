@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bulkPolicy, fullSpeedFetches } from './bulkPolicies';
+import { bulkPolicy } from './bulkPolicies';
 
 describe('bulkPolicy', () => {
   it('forbids the OSM Foundation and OpenRailwayMap servers, whatever the subdomain', () => {
@@ -15,14 +15,11 @@ describe('bulkPolicy', () => {
     expect(bulkPolicy('notopenstreetmap.org')).toBeUndefined();
     expect(bulkPolicy(undefined)).toBeUndefined();
   });
-});
 
-describe('fullSpeedFetches', () => {
-  it('fetches codevoid.de four tiles at a time, whatever the subdomain, and no other server', () => {
-    expect(fullSpeedFetches('codevoid.de')).toBe(4);
-    expect(fullSpeedFetches('tiles.codevoid.de')).toBe(4);
-    expect(fullSpeedFetches('notcodevoid.de')).toBeUndefined();
-    expect(fullSpeedFetches('codevoid.de.example.com')).toBeUndefined();
-    expect(fullSpeedFetches(undefined)).toBeUndefined();
+  it('allows codevoid.de full speed, whatever the subdomain', () => {
+    expect(bulkPolicy('codevoid.de')?.level).toBe('full');
+    expect(bulkPolicy('tiles.codevoid.de')?.level).toBe('full');
+    expect(bulkPolicy('notcodevoid.de')).toBeUndefined();
+    expect(bulkPolicy('codevoid.de.example.com')).toBeUndefined();
   });
 });

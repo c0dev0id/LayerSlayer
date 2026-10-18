@@ -1,14 +1,13 @@
 /**
  * Tile servers whose operators restrict downloading areas ahead of viewing them, which is
- * what precaching does, and those whose operators allow it at full speed. Some forbid it
- * outright; others, mostly run by volunteers on donations, ask that their servers not be
- * strained. Any server a layer of these lists' hosts uses is found by its host, whatever
- * its subdomain.
+ * what precaching does, or allow it at full speed. Some forbid it outright; others, mostly
+ * run by volunteers on donations, ask that their servers not be strained. Any server a
+ * layer of this list's hosts uses is found by its host, whatever its subdomain.
  */
 
 export interface BulkPolicy {
-  /** Forbidden: the layer is left out. Warned: the user leaves it out or fetches it slowly. */
-  level: 'forbidden' | 'warn';
+  /** Forbidden: the layer is left out. Warned: the user leaves it out or fetches it slowly. Full: fetched at full speed. */
+  level: 'forbidden' | 'warn' | 'full';
   /** Who runs the servers, and what they say about it. */
   operator: string;
   says: string;
@@ -45,17 +44,13 @@ const POLICIES: { host: RegExp; policy: BulkPolicy }[] = [
     host: /(^|\.)openinframap\.org$/,
     policy: { level: 'warn', operator: 'Open Infrastructure Map', says: 'is run by volunteers', url: 'https://openinframap.org/about' },
   },
+  {
+    host: /(^|\.)codevoid\.de$/,
+    policy: { level: 'full', operator: 'codevoid.de', says: 'allows downloading at full speed', url: 'https://codevoid.de' },
+  },
 ];
 
 /** What the operator of a tile server says about downloading areas, where it restricts it. */
 export function bulkPolicy(host: string | undefined): BulkPolicy | undefined {
   return host ? POLICIES.find((p) => p.host.test(host))?.policy : undefined;
-}
-
-/** Servers whose operators allow areas to be downloaded at full speed, and how many tiles at a time. */
-const FULL_SPEED: { host: RegExp; parallel: number }[] = [{ host: /(^|\.)codevoid\.de$/, parallel: 4 }];
-
-/** How many tiles of a server are fetched at once, without pauses, where its operator allows full speed. */
-export function fullSpeedFetches(host: string | undefined): number | undefined {
-  return host ? FULL_SPEED.find((s) => s.host.test(host))?.parallel : undefined;
 }

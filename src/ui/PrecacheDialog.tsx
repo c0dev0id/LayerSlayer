@@ -4,11 +4,11 @@ import { MAX_ZOOM, MIN_ZOOM } from '../model/layer';
 import {
   chosenLayers,
   estimatedBytes,
-  PAUSE_MS,
+  paceFor,
   planPrecache,
   sampled,
   sampleTiles,
-  SLOW_PAUSE_MS,
+  SLOW_PACE,
   startPrecache,
   type LayerChoice,
   type PrecacheJob,
@@ -31,7 +31,7 @@ type Restraint = 'exclude' | 'slow';
 
 const RESTRAINTS: SegmentedOption<Restraint>[] = [
   { value: 'exclude', label: 'Exclude' },
-  { value: 'slow', label: 'Slow fetch', title: `${SLOW_PAUSE_MS} ms between tiles` },
+  { value: 'slow', label: 'Slow fetch', title: `${SLOW_PACE.pause} ms between tiles` },
 ];
 
 /**
@@ -58,13 +58,12 @@ function PrecacheForm(props: { area: [number, number][] }) {
   const [restraint, setRestraint] = createStore<Record<string, Restraint>>({});
 
   const plan = createMemo(() => planPrecache(chosenLayers(choice(), state.layers, state.activeLayerId), props.area, from(), to()));
-  /** The zooms of each layer not left out, with the pause after each of its tiles and how many are asked for at once. */
+  /** The zooms of each layer not left out, at the pace of its server. */
   const jobs = createMemo(() =>
     plan().flatMap((planned): PrecacheJob[] => {
       if (!planned.source || planned.policy?.level === 'forbidden') return [];
       if (planned.policy?.level === 'warn' && restraint[planned.layer.id] !== 'slow') return [];
-      const pause = planned.parallel ? 0 : planned.policy ? SLOW_PAUSE_MS : PAUSE_MS;
-      return planned.zooms.map((zoom) => ({ source: planned.source, ...zoom, pause, ...(planned.parallel && { parallel: planned.parallel }) }));
+      return planned.zooms.map((zoom) => ({ source: planned.source, ...zoom, ...paceFor(planned.policy) }));
     }),
   );
 
@@ -91,7 +90,7 @@ function PrecacheForm(props: { area: [number, number][] }) {
     const wanted = jobs().filter((job) => Number.isFinite(job.count) && job.count > 0);
     return { done: wanted.filter((job) => sampled(job.source, job.z)).length, of: wanted.length };
   });
-  const atLeast = createMemo(() => jobs().reduce((sum, job) => sum + job.count * job.pause, 0) / 1000);
+  const atLeast = createMemo(() => jobs().reduce((sum, job) => sum + (job.count * job.pause) / job.parallel, 0) / 1000);
   const [space] = createResource(async () => {
     const estimate = await navigator.storage?.estimate?.();
     return estimate?.quota !== undefined ? estimate.quota - (estimate.usage ?? 0) : undefined;
@@ -193,7 +192,7 @@ function PrecacheForm(props: { area: [number, number][] }) {
           Estimating sizes from sampled tiles ({sampling().done} of {sampling().of})…
         </Show>{' '}
         <Show when={space() !== undefined}>The browser grants about {sizeText(space()!)} more.</Show>
-        <Show when={atLeast() > 0}> One tile at a time, this takes at least {durationText(atLeast())}.</Show>
+        <Show when={atLeast() > 0}> With the pauses between tiles, this takes at least {durationText(atLeast())}.</Show>
       </p>
 
       <ul class="precache-layers">

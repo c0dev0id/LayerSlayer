@@ -10,7 +10,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parse as parseToml } from 'smol-toml';
 import { it } from 'vitest';
-import { entryService, type ServiceEntry } from '../src/library/library';
+import { entryService } from '../src/library/library';
 import { externalTileUrl } from '../src/map/externalTiles';
 import { getParam, withParams } from '../src/map/urls';
 import { parseFeatureService, parseMapServer, serviceUrl } from '../src/services/arcgis';
@@ -78,7 +78,7 @@ async function parse(entry: Entry, body: string, url: string): Promise<ServiceIn
       return address ? parseCollections(JSON.parse(body), address.collections, address.id) : undefined;
     }
     case 'vector-tiles':
-      return entryService(entry as Pick<ServiceEntry, 'type' | 'url' | 'name' | 'layers'>) ?? parseTileJson(JSON.parse(body), entry.url);
+      return entryService(entry as Parameters<typeof entryService>[0]) ?? parseTileJson(JSON.parse(body), entry.url);
     case 'xyz':
       return parseXyz(entry.url);
     default:
@@ -112,9 +112,10 @@ async function check(entry: Entry): Promise<string> {
     const usable = info.offers.flatMap((o) => (o.draft ? [o.draft] : []));
     const refused = info.offers.filter((o) => o.reason).length;
     const dmd = usable.filter((draft) => externalTileUrl(draft.source)).length;
-    if (dmd > 0 && dmd === usable.length) entry.dmd = true;
+    const all = dmd > 0 && dmd === usable.length;
+    if (all) entry.dmd = true;
     else delete entry.dmd;
-    const tag = dmd === 0 ? '' : dmd === usable.length ? ', DMD' : `, DMD for ${dmd} of ${usable.length}`;
+    const tag = all ? ', DMD' : dmd ? `, DMD for ${dmd} of ${usable.length}` : '';
     return `${usable.length} usable, ${refused} refused${tag}${header}`;
   } catch (error) {
     return `failed: ${(error as Error).message}`;

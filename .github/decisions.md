@@ -512,15 +512,17 @@
   after each tile fetched, 500 ms where *Slow fetch* is chosen, and stops after 20
   failures in a row, as the server is then down or refusing; missing tiles (404) are
   counted, not failures. The app author's own server, codevoid.de, allows full speed: its
-  tiles are asked for four at a time without pauses, found by host like the servers that
-  ask for restraint. It counts as it goes and updates the panel about five times a second.
-  The OpenStreetMap Foundation's tile policy names "save area for later" features as
-  prohibited and OpenRailwayMap forbids bulk requests, so their layers are left out
-  without a choice; volunteer servers that ask for restraint are left out or fetched
-  slowly (`bulkPolicies.ts`). Feature layers (queries, as fresh as their last run),
-  PMTiles archives (better downloaded whole) and styles (tiles from addresses inside the
-  style) are not precached. There is no service worker, so a run lasts as long as the
-  page; the browser is asked to keep the site's storage (`storage.persist`).
+  tiles are asked for four at a time without pauses. It is listed by host with the servers
+  that ask for restraint, so the dialog names it the same way, and a pace (the pause after
+  each tile and how many at a time) follows from each server's entry. It counts as it goes
+  and updates the panel about five times a second. The OpenStreetMap Foundation's tile
+  policy names "save area for later" features as prohibited and OpenRailwayMap forbids
+  bulk requests, so their layers are left out without a choice; volunteer servers that ask
+  for restraint are left out or fetched slowly (`bulkPolicies.ts`). Feature layers
+  (queries, as fresh as their last run), PMTiles archives (better downloaded whole) and
+  styles (tiles from addresses inside the style) are not precached. There is no service
+  worker, so a run lasts as long as the page; the browser is asked to keep the site's
+  storage (`storage.persist`).
 - **UI after mappic.** Top-first layer list with an active layer whose settings open in
   its card, in place of its summary line: below the whole list they were a scroll away
   from the layer once the list grew, and editing several layers meant scrolling between

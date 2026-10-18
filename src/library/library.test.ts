@@ -6,7 +6,7 @@ import topplus from '../services/fixtures/wmts-topplus.xml?raw';
 import { parseWmts } from '../services/wmts';
 import terrestris from '../services/fixtures/wms130-terrestris.xml?raw';
 import { parseWms } from '../services/wms';
-import { parseXyz } from '../services/xyz';
+import { parseXyz, xyzSource } from '../services/xyz';
 import { originOf } from '../ui/offers';
 import { defaultState } from '../state/store';
 import library from 'virtual:library';
@@ -49,8 +49,7 @@ describe('library', () => {
   it('marks an XYZ template for DMD exactly where its tiles have an address for other apps', () => {
     for (const entry of entries) {
       if (entry.type !== 'xyz') continue;
-      const source = parseXyz(entry.url).offers[0]!.draft!.source;
-      expect(entry.dmd === true, entry.name).toBe(externalTileUrl(source) !== undefined);
+      expect(entry.dmd === true, entry.name).toBe(externalTileUrl(xyzSource(entry.url)) !== undefined);
     }
   });
 

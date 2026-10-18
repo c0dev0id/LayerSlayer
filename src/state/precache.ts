@@ -1,5 +1,5 @@
 import { createStore } from 'solid-js/store';
-import { bulkPolicy, fullSpeedFetches, type BulkPolicy } from '../map/bulkPolicies';
+import { bulkPolicy, type BulkPolicy } from '../map/bulkPolicies';
 import { layerSource } from '../map/compose';
 import { FEATURE_PROTOCOL } from '../map/featureTiles';
 import { tileThroughCache } from '../map/protocols';
@@ -20,9 +20,22 @@ import { map } from './ui';
  * operators allow full speed are asked several tiles at a time without pauses.
  */
 
-/** The pause after each tile fetched, and at servers fetched slowly. */
-export const PAUSE_MS = 100;
-export const SLOW_PAUSE_MS = 500;
+/** How a server's tiles are asked for: the pause after each one fetched, and how many at a time. */
+export interface Pace {
+  pause: number;
+  parallel: number;
+}
+
+export const NORMAL_PACE: Pace = { pause: 100, parallel: 1 };
+/** For servers whose operators ask for restraint. */
+export const SLOW_PACE: Pace = { pause: 500, parallel: 1 };
+/** For servers whose operators allow full speed. */
+export const FULL_PACE: Pace = { pause: 0, parallel: 4 };
+
+/** The pace of a layer's tiles, by what its server's operator says about downloading areas. */
+export function paceFor(policy: BulkPolicy | undefined): Pace {
+  return policy?.level === 'full' ? FULL_PACE : policy ? SLOW_PACE : NORMAL_PACE;
+}
 
 /** Tile sizes are estimated from this many tiles of each layer and zoom. */
 const SAMPLES = 3;
@@ -88,35 +101,27 @@ export function chosenLayers(choice: LayerChoice, layers: readonly Layer[], open
   return choice === 'visible' ? layers.filter((l) => l.visible) : [...layers];
 }
 
-/**
- * A layer as precaching sees it: its tiles, how many at each zoom, its server's policy and
- * how many tiles it allows at once at full speed, or why it is left out.
- */
+/** A layer as precaching sees it: its tiles, how many at each zoom and its server's policy, or why it is left out. */
 export type PlannedLayer =
-  | { layer: Layer; reason: string; source?: undefined; policy?: undefined; parallel?: undefined }
-  | { layer: Layer; reason?: undefined; source: TileSource; policy?: BulkPolicy; parallel?: number; zooms: { mapZoom: number; z: number; count: number }[] };
+  | { layer: Layer; reason: string; source?: undefined; policy?: undefined }
+  | { layer: Layer; reason?: undefined; source: TileSource; policy?: BulkPolicy; zooms: { mapZoom: number; z: number; count: number }[] };
 
 export function planPrecache(layers: readonly Layer[], area: readonly LngLat[], from: number, to: number): PlannedLayer[] {
   return layers.map((layer) => {
     const source = tileSource(layer);
     if (typeof source === 'string') return { layer, reason: source };
-    const host = layerHost(layer);
-    const policy = bulkPolicy(host);
-    const parallel = fullSpeedFetches(host);
+    const policy = bulkPolicy(layerHost(layer));
     const zooms = tileZooms(source, layer, from, to).map((zoom) => ({ ...zoom, count: countTiles(area, zoom.z, source.bounds) }));
-    return { layer, source, zooms, ...(policy && { policy }), ...(parallel && { parallel }) };
+    return { layer, source, zooms, ...(policy && { policy }) };
   });
 }
 
-/** A source's tiles at one zoom, first asked for at map zoom `mapZoom`, with the pause after each fetched. */
-export interface PrecacheJob {
+/** A source's tiles at one zoom, first asked for at map zoom `mapZoom`, at the pace of its server. */
+export interface PrecacheJob extends Pace {
   source: TileSource;
   mapZoom: number;
   z: number;
   count: number;
-  pause: number;
-  /** Tiles asked for at once; one where unset. */
-  parallel?: number;
 }
 
 /** The pixel ratio the map fills `{ratio}` with. */
@@ -128,15 +133,15 @@ const urlOf = (source: TileSource, tile: TileId) => tileUrl(source.templates, ti
 function sleep(ms: number, signal: AbortSignal): Promise<void> {
   if (ms <= 0) return Promise.resolve();
   return new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(resolve, ms);
-    signal.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer);
-        reject(signal.reason);
-      },
-      { once: true },
-    );
+    const abort = () => {
+      clearTimeout(timer);
+      reject(signal.reason);
+    };
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', abort);
+      resolve();
+    }, ms);
+    signal.addEventListener('abort', abort, { once: true });
   });
 }
 
@@ -205,15 +210,9 @@ export const precacheRun = () => store.run;
 export const precacheActive = () => store.run?.status === 'running' || store.run?.status === 'paused';
 
 let controller: AbortController | undefined;
-
-/** Settles when a paused run goes on or is cancelled; every tile waiting while paused waits on it. */
-let resumed: Promise<void> | undefined;
-let resume: (() => void) | undefined;
-const whenResumed = () => (resumed ??= new Promise<void>((done) => (resume = done)));
-const wake = () => {
-  resume?.();
-  resumed = resume = undefined;
-};
+/** The tiles waiting while a run is paused, woken all at once when it goes on or is cancelled. */
+const waiting: (() => void)[] = [];
+const wake = () => waiting.splice(0).forEach((done) => done());
 
 /** Recent fetches, for the rates shown. */
 const RATE_WINDOW_MS = 20_000;
@@ -263,11 +262,11 @@ export async function startPrecache(jobs: readonly PrecacheJob[], area: readonly
   let failuresInARow = 0;
   let stopped = false;
   /** Fetches tiles one after another until none are left; a job's parallel fetches share its tiles. */
-  const fetchTiles = async (tiles: Iterator<TileId>, source: TileSource, pause: number) => {
-    for (let next = tiles.next(); !next.done && !stopped; next = tiles.next()) {
-      const tile = next.value;
+  const fetchTiles = async (tiles: Iterable<TileId>, source: TileSource, pause: number) => {
+    for (const tile of tiles) {
+      if (stopped) return;
       if (store.run?.status === 'paused') show(true);
-      while (store.run?.status === 'paused' && !signal.aborted) await whenResumed();
+      while (store.run?.status === 'paused' && !signal.aborted) await new Promise<void>((done) => waiting.push(done));
       signal.throwIfAborted();
       let fetched = false;
       try {
@@ -295,7 +294,7 @@ export async function startPrecache(jobs: readonly PrecacheJob[], area: readonly
     }
   };
   try {
-    for (const { source, z, pause, parallel = 1 } of jobs) {
+    for (const { source, z, pause, parallel } of jobs) {
       const tiles = coveringTiles(area, z, source.bounds);
       await Promise.all(Array.from({ length: parallel }, () => fetchTiles(tiles, source, pause)));
       if (stopped) return end('stopped');
