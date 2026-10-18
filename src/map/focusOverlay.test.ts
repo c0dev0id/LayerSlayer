@@ -12,19 +12,47 @@ const square: LngLat[] = [
   [8, 49],
 ];
 
+const ofKind = (features: GeoJSON.Feature[], kind: string) => features.filter((f) => f.properties?.kind === kind);
+
 /** Twice the signed area of a closed ring, positive when counterclockwise. */
 const winding = (ring: GeoJSON.Position[]) => ring.slice(1).reduce((sum, [x2, y2], i) => sum + ring[i]![0]! * y2! - x2! * ring[i]![1]!, 0);
 
 describe('focusAreaFeatures', () => {
   it('cuts the area out of the world against its winding, whichever way it was drawn', () => {
     for (const corners of [square, [...square].reverse()]) {
-      const [mask, outline] = focusAreaFeatures(corners).features;
-      const [world, hole] = (mask!.geometry as GeoJSON.Polygon).coordinates;
+      const features = focusAreaFeatures(corners).features;
+      const [world, hole] = (ofKind(features, 'cover')[0]!.geometry as GeoJSON.Polygon).coordinates;
       expect(Math.sign(winding(world!))).toBe(1);
       expect(Math.sign(winding(hole!))).toBe(-1);
       expect(hole).toHaveLength(5);
-      expect((outline!.geometry as GeoJSON.LineString).coordinates).toEqual([...corners, corners[0]]);
+      // The outline runs counterclockwise, so that the outside of each edge is to its right.
+      const outline = (ofKind(features, 'outline')[0]!.geometry as GeoJSON.LineString).coordinates;
+      expect(Math.sign(winding(outline))).toBe(1);
+      expect(outline).toHaveLength(5);
     }
+  });
+
+  it('lights the edges from the north-north-west', () => {
+    const facing = (from: LngLat) =>
+      ofKind(focusAreaFeatures(square).features, 'edge').find((e) => String((e.geometry as GeoJSON.LineString).coordinates[0]) === String(from))!.properties!.facing as number;
+    const toLight = (25 * Math.PI) / 180;
+    expect(facing([8, 49])).toBeCloseTo(Math.sin(toLight));
+    expect(facing([9, 49])).toBeCloseTo(Math.cos(toLight));
+    expect(facing([8, 48])).toBeCloseTo(-Math.cos(toLight));
+    expect(facing([9, 48])).toBeCloseTo(-Math.sin(toLight));
+  });
+
+  it('draws the graticule and the world outline on the cover only, cut off at the area', () => {
+    const world = { coastlines: [[[7, 48.5], [10, 48.5]]] as LngLat[][], borders: [] };
+    const features = focusAreaFeatures(square, world).features;
+    const rounded = (f: GeoJSON.Feature) => (f.geometry as GeoJSON.LineString).coordinates.map((p) => p.map((v) => Number(v.toFixed(6))));
+    expect(ofKind(features, 'coast').map(rounded)).toEqual([
+      [[7, 48.5], [8, 48.5]],
+      [[9, 48.5], [10, 48.5]],
+    ]);
+    const grid = ofKind(features, 'grid').flatMap((f) => (f.geometry as GeoJSON.LineString).coordinates);
+    expect(grid.length).toBeGreaterThan(0);
+    expect(grid.some(([lng, lat]) => lng! > 8.001 && lng! < 8.999 && lat! > 48.001 && lat! < 48.999)).toBe(false);
   });
 
   it('has nothing to draw without an area', () => {

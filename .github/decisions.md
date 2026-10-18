@@ -506,6 +506,28 @@
     fill; the bottom layer is now limited like the others, as its tiles outside would only
     load to stay hidden.
   - A tap on the cover finds no features: those under it are not drawn.
+  - The cover keeps the area's surroundings readable without loading anything there: a
+    graticule, and the coastlines and country borders of Natural Earth at 1:110 million.
+    The graticule has levels from 30° to 1′, each shown from the zoom at which its lines
+    are about 100 px apart; coarse levels span the world, fine ones reach 40 lines beyond
+    the area, and a level that would need more than 1,500 lines is left out. The outline
+    data was generated once from the `world-atlas` 2.0.2 package (`countries-110m.json`:
+    the mesh of the land, and the borders between different countries) with coordinates
+    rounded to 0.01°; at 115 KB, 41 KB compressed, it is a chunk loaded with the first
+    focus area. The 1:50 million data is ten times the size. A build-time plugin reading
+    the package, as for the icon sets, was the alternative: easier to regenerate, but
+    three development dependencies for data that does not change. The outline is coarse,
+    so it fades out between zooms 6 and 8, before it strays visibly from the map's. All
+    lines on the cover are cut off where they meet the area, so nothing draws over it;
+    the cuts are found in Web Mercator, where MapLibre draws the area's edges straight.
+  - The area looks lifted off the cover: a soft shadow beyond every edge, deeper beyond
+    the edges that face away from the light, and a bevel inside, light where an edge
+    faces the light and dark where it faces away. The light comes from 335°, where
+    MapLibre's hillshading has it, but is fixed to the map, while the hillshading's turns
+    with the view; they only differ on a rotated map. Shadow and bevel are lines offset
+    from each edge in pixels, so they keep their size at every zoom. Each edge is a line
+    of its own, with how far it faces the light as a property: offsetting the whole ring
+    made its sharp corners shoot out as spikes.
   - In 3D the ground keeps its elevation everywhere: MapLibre takes ground without
     elevation tiles as sea level, so limiting it would raise a wall at the box's edge in
     the mountains, draped in the cover. The hillshading is limited like the layers.
