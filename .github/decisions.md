@@ -491,8 +491,11 @@
     background colour and dimmed: a world polygon with the area as its hole, wound against
     the world ring, since MapLibre takes a ring wound like the first as a polygon of its
     own. It sits between the layers and the route lines, so routes stay visible outside.
-    The colour is a property of the cover's feature, so a new colour reaches it through
-    `setData` like a new area.
+    Its colour is the background colour 40 % of the way to black, one opaque fill rather
+    than a second, see-through one over it. The cover reads the background colour from
+    the style's global state, which the composed style sets: a new colour is one state
+    change in the next diff, not new data, and a colour that is the same for every feature
+    lets MapLibre draw the cover in its opaque pass, skipping what lies beneath.
   - The bottom layer used to be exempt, loading everywhere so that the area kept its
     surroundings, with the outside only dimmed. Zoomed out, with the area forgotten, the
     base map everywhere and the upper layers in tile-shaped patches around the box read as

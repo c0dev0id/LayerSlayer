@@ -28,7 +28,7 @@ describe('withOverlays', () => {
   it('adds the overlays in order on top of the composed style without changing it', () => {
     const style: StyleSpecification = { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background' }] };
     const overlays = [
-      { ...focusAreaOverlay, data: () => focusAreaFeatures(corners, '#ffffff') },
+      { ...focusAreaOverlay, data: () => focusAreaFeatures(corners) },
       { ...focusDraftOverlay, data: () => focusDraftFeatures(corners, [8.5, 48.5]) },
       { ...routeOverlay, data: () => routeFeatures([route], new Set()) },
     ];

@@ -9,6 +9,7 @@ import {
   resolveWmtsTile,
   scaleOpacity,
   styleFont,
+  BACKGROUND_STATE,
   HILLSHADE_SOURCE,
   MAP_BACKGROUND,
   TERRAIN_SOURCE,
@@ -111,6 +112,8 @@ describe('composeStyle', () => {
     const background = (options?: MapOptions) => composeStyle([xyz], new Map(), options).layers[0];
     expect(background({ background: '#1b2b44' })).toMatchObject({ paint: { 'background-color': '#1b2b44' } });
     expect(background()).toMatchObject({ paint: { 'background-color': MAP_BACKGROUND } });
+    // The overlays read it from the style's global state.
+    expect(composeStyle([xyz], new Map(), { background: '#1b2b44' }).state).toEqual({ [BACKGROUND_STATE]: { default: '#1b2b44' } });
   });
 
   it('shows one layer alone over the bottom layer, whatever its eye, the bottom one as its eye says', () => {

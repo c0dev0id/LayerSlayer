@@ -50,13 +50,14 @@ bounds, the show-one-layer flag and the tile cache switch are `composeStyle` opt
 map calls (`map.setTerrain` would be lost on the next diff). Per-source settings a style
 cannot carry (`setSourceTileLodParams`) are applied again on every `style.load`, which a
 diff that changes anything also fires. Things the app draws over the layers (route lines,
-focus mask, details highlight) are `Overlay`s (`map/overlays.ts`) appended to the style;
-their data changes go through `setData` only. Source and layer ids are the user layer's
-id or `<id>/…`, which is how map errors are traced back to layers. The style is
-round-tripped through JSON before `setStyle`: Solid store proxies cannot be posted to
-MapLibre's workers. `setStyle` also gets a `transformStyle` from `map/geojsonDiff.ts`
-(`keepLoadedGeoJson`); without it every diff refetches each GeoJSON source loaded from an
-address.
+focus cover, details highlight) are `Overlay`s (`map/overlays.ts`) appended to the style;
+their data changes go through `setData` only, and map-wide values their fixed layers need
+(the background colour) come from the style's global `state`, set by `composeStyle`.
+Source and layer ids are the user layer's id or `<id>/…`, which is how map errors are
+traced back to layers. The style is round-tripped through JSON before `setStyle`: Solid
+store proxies cannot be posted to MapLibre's workers. `setStyle` also gets a
+`transformStyle` from `map/geojsonDiff.ts` (`keepLoadedGeoJson`); without it every diff
+refetches each GeoJSON source loaded from an address.
 
 **Custom protocols** (registered in `MapView.tsx`, handlers in `map/protocols.ts`):
 `features://` (ArcGIS FeatureServer, WFS and OGC API queried per tile, turned into vector

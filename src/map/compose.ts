@@ -57,6 +57,8 @@ export const WMTS_PROTOCOL = 'wmts-matrix';
 const BACKGROUND_LAYER = 'map-background';
 /** The colour the map is drawn on where a project sets none. */
 export const MAP_BACKGROUND = '#ffffff';
+/** The style's global state that holds the background colour, for what the overlays draw in it. */
+export const BACKGROUND_STATE = 'background';
 
 /** The protocol of Cloud Optimized GeoTIFFs (@geomatico/maplibre-cog-protocol). */
 export const COG_PROTOCOL = 'cog';
@@ -175,6 +177,7 @@ const SKIES: Record<TerrainSky, StyleSpecification['sky']> = {
 export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background = MAP_BACKGROUND, terrain, only, tileCache = true }: MapOptions = {}): StyleSpecification {
   const style: StyleSpecification = {
     version: 8,
+    state: { [BACKGROUND_STATE]: { default: background } },
     sources: {},
     layers: [{ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } }],
     transition: { duration: 0, delay: 0 },
