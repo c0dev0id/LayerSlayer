@@ -33,6 +33,12 @@ describe('overpassQuery', () => {
     expect(query).toContain('nwr["name"~"Nike-|Hawk-",i](poly:');
     expect(query).toContain('nwr["name"~"Pershing",i]["military"](poly:');
   });
+
+  it('asks for the kind of object a filter names', () => {
+    const query = overpassQuery(['node place=town', 'way name~Burg'], area);
+    expect(query).toContain('node["place"="town"](poly:');
+    expect(query).toContain('way["name"~"Burg",i](poly:');
+  });
 });
 
 describe('checkAnswer', () => {

@@ -34,6 +34,12 @@ describe('postpassQuery', () => {
     expect(query.match(/UNION ALL/g)).toHaveLength(1);
   });
 
+  it('asks for the kind of object a filter names', () => {
+    const query = postpassQuery(['node place=town', 'relation name~Burg'], area);
+    expect(query).toContain(`(osm_type = 'N' AND tags @> '{"place":"town"}'::jsonb)`);
+    expect(query).toContain("(osm_type = 'R' AND tags->>'name' ILIKE ANY (ARRAY['%Burg%']))");
+  });
+
   it('quotes keys and values for SQL and JSON', () => {
     // A backslash is escaped for JSON, an apostrophe for SQL.
     const query = postpassQuery(["name=O'Brien\\Pub", `"it's"=*`], area);

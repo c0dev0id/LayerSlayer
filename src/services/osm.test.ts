@@ -3,35 +3,54 @@ import { formatFilter, matchesFilter, parseFilter, postpassOrOverpass, searchesO
 
 describe('parseFilter', () => {
   it('reads tags with a value or any value', () => {
-    expect(parseFilter('amenity=drinking_water')).toEqual([{ key: 'amenity', op: 'eq', value: 'drinking_water' }]);
-    expect(parseFilter('shop=*')).toEqual([{ key: 'shop', op: 'any' }]);
-    expect(parseFilter('  shop ')).toEqual([{ key: 'shop', op: 'any' }]);
+    expect(parseFilter('amenity=drinking_water')).toEqual({ conditions: [{ key: 'amenity', op: 'eq', value: 'drinking_water' }] });
+    expect(parseFilter('shop=*')).toEqual({ conditions: [{ key: 'shop', op: 'any' }] });
+    expect(parseFilter('  shop ')).toEqual({ conditions: [{ key: 'shop', op: 'any' }] });
   });
 
   it('reads several tags, which must all match', () => {
-    expect(parseFilter('power=generator generator:source=wind')).toEqual([
-      { key: 'power', op: 'eq', value: 'generator' },
-      { key: 'generator:source', op: 'eq', value: 'wind' },
-    ]);
+    expect(parseFilter('power=generator generator:source=wind')).toEqual({
+      conditions: [
+        { key: 'power', op: 'eq', value: 'generator' },
+        { key: 'generator:source', op: 'eq', value: 'wind' },
+      ],
+    });
   });
 
   it('allows spaces around the equals sign and quotes around spaces', () => {
-    expect(parseFilter('amenity = bench')).toEqual([{ key: 'amenity', op: 'eq', value: 'bench' }]);
-    expect(parseFilter('operator="Deutsche Bahn" "a b"=c')).toEqual([
-      { key: 'operator', op: 'eq', value: 'Deutsche Bahn' },
-      { key: 'a b', op: 'eq', value: 'c' },
-    ]);
-    expect(parseFilter('name="*"')).toEqual([{ key: 'name', op: 'eq', value: '*' }]);
-    expect(parseFilter('name=""')).toEqual([{ key: 'name', op: 'eq', value: '' }]);
+    expect(parseFilter('amenity = bench')).toEqual({ conditions: [{ key: 'amenity', op: 'eq', value: 'bench' }] });
+    expect(parseFilter('operator="Deutsche Bahn" "a b"=c')).toEqual({
+      conditions: [
+        { key: 'operator', op: 'eq', value: 'Deutsche Bahn' },
+        { key: 'a b', op: 'eq', value: 'c' },
+      ],
+    });
+    expect(parseFilter('name="*"')).toEqual({ conditions: [{ key: 'name', op: 'eq', value: '*' }] });
+    expect(parseFilter('name=""')).toEqual({ conditions: [{ key: 'name', op: 'eq', value: '' }] });
   });
 
   it('reads values a tag must contain', () => {
-    expect(parseFilter('name~Sonderwaffenlager')).toEqual([{ key: 'name', op: 'contains', value: 'Sonderwaffenlager' }]);
-    expect(parseFilter('name ~ "Special Ammunition" military=*')).toEqual([
-      { key: 'name', op: 'contains', value: 'Special Ammunition' },
-      { key: 'military', op: 'any' },
-    ]);
+    expect(parseFilter('name~Sonderwaffenlager')).toEqual({ conditions: [{ key: 'name', op: 'contains', value: 'Sonderwaffenlager' }] });
+    expect(parseFilter('name ~ "Special Ammunition" military=*')).toEqual({
+      conditions: [
+        { key: 'name', op: 'contains', value: 'Special Ammunition' },
+        { key: 'military', op: 'any' },
+      ],
+    });
     expect(() => parseFilter('name~')).toThrow('is not a tag');
+  });
+
+  it('reads the kind of object a filter starts with, unless it is a key', () => {
+    expect(parseFilter('node place=town')).toEqual({ type: 'node', conditions: [{ key: 'place', op: 'eq', value: 'town' }] });
+    expect(parseFilter(' relation  route=hiking')).toEqual({ type: 'relation', conditions: [{ key: 'route', op: 'eq', value: 'hiking' }] });
+    expect(parseFilter('node=* way = x')).toEqual({
+      conditions: [
+        { key: 'node', op: 'any' },
+        { key: 'way', op: 'eq', value: 'x' },
+      ],
+    });
+    expect(parseFilter('nodes place=town').type).toBeUndefined();
+    expect(() => parseFilter('node')).toThrow('Name at least one tag');
   });
 
   it('says what it cannot read', () => {
@@ -49,6 +68,8 @@ describe('formatFilter', () => {
     expect(formatFilter(parseFilter('amenity = bench  shop'))).toBe('amenity=bench shop=*');
     expect(formatFilter(parseFilter('operator="Deutsche Bahn" name="*" ref=""'))).toBe('operator="Deutsche Bahn" name="*" ref=""');
     expect(formatFilter(parseFilter('name ~ "Special Ammunition" ref~*'))).toBe('name~"Special Ammunition" ref~*');
+    expect(formatFilter(parseFilter(' node  place = town'))).toBe('node place=town');
+    expect(formatFilter(parseFilter('node=*'))).toBe('node=*');
   });
 });
 
@@ -61,6 +82,14 @@ describe('searchesOf', () => {
       { conditions: [{ key: 'name', op: 'contains', value: 'Pershing' }, { key: 'military', op: 'any' }] },
     ]);
   });
+
+  it('keeps searches in different kinds of object apart', () => {
+    expect(searchesOf(['name~Burg', 'node name~Schloss', 'node place=town', 'node name~Turm'])).toEqual([
+      { key: 'name', texts: ['Burg'] },
+      { type: 'node', key: 'name', texts: ['Schloss', 'Turm'] },
+      { type: 'node', conditions: [{ key: 'place', op: 'eq', value: 'town' }] },
+    ]);
+  });
 });
 
 describe('matchesFilter', () => {
@@ -68,6 +97,7 @@ describe('matchesFilter', () => {
     const tags = { name: 'Ehemaliges US-Sonderwaffenlager Clausen', natural: 'grassland' };
     expect(matchesFilter('name~sonderwaffenlager', tags)).toBe(true);
     expect(matchesFilter('name~Sonderwaffenlager natural=grassland', tags)).toBe(true);
+    expect(matchesFilter('way natural=grassland', tags)).toBe(true);
     expect(matchesFilter('name~Raketenstellung', tags)).toBe(false);
     expect(matchesFilter('natural=*', tags)).toBe(true);
     expect(matchesFilter('natural=heath', tags)).toBe(false);

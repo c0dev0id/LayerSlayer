@@ -673,22 +673,22 @@
   Overpass API from tag filters, not Overpass QL: a curated list
   (`library/osmFeatures.json`, each entry a name, a category and its filters; off-road
   riders being the main audience, tracks and trails, access and barriers, roads and
-  vehicle services come first) and a field
-  for typed tags (`key=value`, `key=*`, several separated by spaces all having to match,
-  quotes around spaces). Filters are parsed and written one way (`services/osm.ts`),
-  so a curated entry and typed tags are the same thing to the query, which joins every
-  filter's `nwr` statement with the focus polygon (`poly:`, the polygon itself rather than
-  its bounds) and asks for `out geom`. The focus area is required, not just advised: a
-  query without one would be worldwide and time out anyway. Querying is done once; the
-  result is converted to GeoJSON and stored like an imported file, so it travels in
-  project files and costs Overpass nothing while the map is used. The layer is a plain
-  GeoJSON layer that records its `query` (filters and the time it ran), not a source kind
-  of its own, so drawing and file handling know nothing of Overpass; *Update* runs the
-  query again in the focus area as it is then, one update per layer at a time. Overpass
-  reports timeouts and memory exhaustion with status 200 and a `remark`, which is treated
-  as the failure it is; its 429 and 504 pages, like any busy server's, are put in words by
-  `statusMessage`. One layer has one colour; features that should look different go in
-  separate layers.
+  vehicle services come first) and a field for typed tags (`key=value`, `key=*`, several
+  separated by spaces all having to match, quotes around spaces, and `node`, `way` or
+  `relation` first for only that kind of object). Filters are parsed and written one way
+  (`services/osm.ts`), so a curated entry and typed tags are the same thing to the query,
+  which joins every filter's statement (`nwr`, or the kind it names) with the focus
+  polygon (`poly:`, the polygon itself rather than its bounds) and asks for `out geom`.
+  The focus area is required, not just advised: a query without one would be worldwide and
+  time out anyway. Querying is done once; the result is converted to GeoJSON and stored
+  like an imported file, so it travels in project files and costs Overpass nothing while
+  the map is used. The layer is a plain GeoJSON layer that records its `query` (filters
+  and the time it ran), not a source kind of its own, so drawing and file handling know
+  nothing of Overpass; *Update* runs the query again in the focus area as it is then, one
+  update per layer at a time. Overpass reports timeouts and memory exhaustion with status
+  200 and a `remark`, which is treated as the failure it is; its 429 and 504 pages, like
+  any busy server's, are put in words by `statusMessage`. One layer has one colour;
+  features that should look different go in separate layers.
   - Postpass first, Overpass as fallback. overpass-api.de was often too busy to answer at
     all ("Dispatcher_Client … timeout", 504 even for one node), and its mirrors refused or
     failed in turn. Postpass (github.com/woodpeck/postpass, run by Geofabrik) is an

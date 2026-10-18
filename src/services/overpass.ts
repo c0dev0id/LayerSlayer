@@ -20,7 +20,7 @@ const regexLiteral = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
  * The query for the nodes, ways and relations matching any of the filters within the
- * polygon, answered as JSON with the geometry of each.
+ * polygon, or those of the kind a filter names, answered as JSON with the geometry of each.
  */
 export function overpassQuery(filters: readonly string[], area: readonly LngLat[]): string {
   const poly = area
@@ -28,14 +28,15 @@ export function overpassQuery(filters: readonly string[], area: readonly LngLat[
     .map(([lng, lat]) => `${lat} ${lng}`)
     .join(' ');
   const statements = searchesOf(filters).map((search) => {
-    if (!('conditions' in search)) return `nwr[${ql(search.key)}~${ql(search.texts.map(regexLiteral).join('|'))},i](poly:"${poly}");`;
+    const kind = search.type ?? 'nwr';
+    if (!('conditions' in search)) return `${kind}[${ql(search.key)}~${ql(search.texts.map(regexLiteral).join('|'))},i](poly:"${poly}");`;
     const tags = search.conditions.map((condition) => {
       const key = ql(condition.key);
       if (condition.op === 'any') return `[${key}]`;
       if (condition.op === 'contains') return `[${key}~${ql(regexLiteral(condition.value))},i]`;
       return `[${key}=${ql(condition.value)}]`;
     });
-    return `nwr${tags.join('')}(poly:"${poly}");`;
+    return `${kind}${tags.join('')}(poly:"${poly}");`;
   });
   return `[out:json][timeout:${TIMEOUT_S}];(${statements.join('')});out geom;`;
 }

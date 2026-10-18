@@ -1,7 +1,7 @@
 import type { LngLat } from '../model/route';
 import { roundLngLat } from '../routing/legs';
 import { fetchResource } from '../state/net';
-import { searchesOf, type OsmObject, type Search, type TagCondition } from './osm';
+import { searchesOf, type OsmObject, type OsmType, type Search, type TagCondition } from './osm';
 
 /**
  * OpenStreetMap features found with Postpass (github.com/woodpeck/postpass), a public
@@ -30,10 +30,14 @@ export function tagCondition(condition: TagCondition): string {
   return `tags @> ${sql(JSON.stringify({ [key]: condition.value }))}::jsonb`;
 }
 
-/** A search as an SQL condition: all of its tags, or a value containing any of its texts. */
+/** The `osm_type` of each kind of object. */
+const TYPE_LETTERS: Record<OsmType, string> = { node: 'N', way: 'W', relation: 'R' };
+
+/** A search as an SQL condition: all of its tags, or a value containing any of its texts, in the kind of object it names. */
 export function condition(search: Search): string {
-  if ('conditions' in search) return `(${search.conditions.map(tagCondition).join(' AND ')})`;
-  return `(tags->>${sql(search.key)} ILIKE ANY (ARRAY[${search.texts.map(containing).join(', ')}]))`;
+  const kind = search.type ? `osm_type = '${TYPE_LETTERS[search.type]}' AND ` : '';
+  if ('conditions' in search) return `(${kind}${search.conditions.map(tagCondition).join(' AND ')})`;
+  return `(${kind}tags->>${sql(search.key)} ILIKE ANY (ARRAY[${search.texts.map(containing).join(', ')}]))`;
 }
 
 /**
