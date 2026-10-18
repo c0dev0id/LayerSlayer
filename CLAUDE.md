@@ -44,14 +44,19 @@ carrying a `LayerDraft`. `services/detect.ts` guesses the service type from an a
 **One composed style.** `map/compose.ts` (`composeStyle`) is a pure function from the
 layer list (bottom first) plus loaded assets to one MapLibre `StyleSpecification`, applied
 in `map/MapView.tsx` with `setStyle(style, { diff: true })`. Never add sources or layers
-to the map directly: the next diffed `setStyle` drops them. Things the app draws over the
-layers (route lines, focus mask, details highlight) are `Overlay`s (`map/overlays.ts`)
-appended to the style; their data changes go through `setData` only. Source and layer ids
-are the user layer's id or `<id>/…`, which is how map errors are traced back to layers.
-The style is round-tripped through JSON before `setStyle`: Solid store proxies cannot be
-posted to MapLibre's workers. `setStyle` also gets a `transformStyle` from
-`map/geojsonDiff.ts` (`keepLoadedGeoJson`); without it every diff refetches each GeoJSON
-source loaded from an address.
+to the map directly: the next diffed `setStyle` drops them. Map-wide state follows the
+same rule: the background colour, 3D terrain with its sky and hillshade, the focus area's
+bounds, the show-one-layer flag and the tile cache switch are `composeStyle` options, not
+map calls (`map.setTerrain` would be lost on the next diff). Per-source settings a style
+cannot carry (`setSourceTileLodParams`) are applied again on every `style.load`, which a
+diff that changes anything also fires. Things the app draws over the layers (route lines,
+focus mask, details highlight) are `Overlay`s (`map/overlays.ts`) appended to the style;
+their data changes go through `setData` only. Source and layer ids are the user layer's
+id or `<id>/…`, which is how map errors are traced back to layers. The style is
+round-tripped through JSON before `setStyle`: Solid store proxies cannot be posted to
+MapLibre's workers. `setStyle` also gets a `transformStyle` from `map/geojsonDiff.ts`
+(`keepLoadedGeoJson`); without it every diff refetches each GeoJSON source loaded from an
+address.
 
 **Custom protocols** (registered in `MapView.tsx`, handlers in `map/protocols.ts`):
 `features://` (ArcGIS FeatureServer, WFS and OGC API queried per tile, turned into vector
@@ -68,8 +73,10 @@ fetches must use them, or the proxy and readable error messages are bypassed. Ro
 local storage by `persistedStore` (`state/persist.ts`) under the key `layerslayer`.
 Routes and waypoints are a separate store (`state/routes.ts`, key `layerslayer-routes`)
 with its own undo/redo history (`state/history.ts`); layer changes are never undo steps.
-The theme choice is a third key, `layerslayer-theme` (`state/theme.ts`). Imported files
-are Blobs in IndexedDB (`state/files.ts`), referenced by key.
+The theme choice (`layerslayer-theme`, `state/theme.ts`) and the panel's width and
+collapsed state (`ui/PanelResizer.tsx`, `state/ui.ts`) have keys of their own: they belong
+to the browser, not the project. Imported files are Blobs in IndexedDB (`state/files.ts`),
+referenced by key.
 `state/projectFile.ts` reads and writes `.lslay` ZIP project files through the same
 parsers as local storage.
 
@@ -112,7 +119,8 @@ beside its consumer (`src/library/`, `src/icons/`).
   `ui/confirm.ts` and the app's own `ConfirmDialog`.
 - Below 1.0 there is no migration code: stored layers that no longer parse are dropped.
   The one exception: `decodeProjectFile` accepts `.webmap` files (`"app": "webmap"`) from
-  before the rename. Everything else uses the name `layerslayer`.
+  before the rename. The tile cache sweep also deletes caches left under the old name;
+  everything else uses the name `layerslayer`.
 - Unit tests sit beside their modules (`*.test.ts`) and cover the pure modules; service
   parsers are tested against captured responses in `src/services/fixtures/`.
 - Colours in `styles.css` are tokens on `:root` with a light and a dark value
