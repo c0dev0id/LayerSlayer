@@ -1,13 +1,14 @@
 import type { LayerSource, WmtsSource } from '../model/layer';
-import { wmsGetMapUrl, wmtsTileUrl } from './compose';
+import { arcgisExportUrl, wmsGetMapUrl, wmtsTileUrl } from './compose';
 
 /**
  * A layer's tiles as an address other apps fill in themselves, such as DMD2's custom
  * raster maps: https, and either only {z}, {x} and {y} with y counted from the top, or a
- * WMS GetMap with only {bbox}, the tile's extent in Web Mercator metres. An XYZ template
- * counted from the top (cached ArcGIS map services among them), a WMTS whose tile
- * matrices are named by their zoom, and a WMS have one; subdomain lists, {-y}, other
- * tile matrix names and raster archives do not.
+ * WMS GetMap or ArcGIS export with only {bbox}, the tile's extent in Web Mercator metres.
+ * An XYZ template counted from the top (cached ArcGIS map services among them), a WMTS
+ * whose tile matrices are named by their zoom, a WMS and an ArcGIS map service without a
+ * tile cache have one; subdomain lists, {-y}, other tile matrix names and raster archives
+ * do not.
  */
 
 /** Whether an address is one other apps fill in themselves. */
@@ -16,8 +17,8 @@ export function isExternalTileUrl(template: string): boolean {
   return /^https:\/\//i.test(template) && (names === '{x}{y}{z}' || names === '{bbox}');
 }
 
-/** Pixels across a WMS tile in the address given out, as tile apps draw 256-pixel tiles. */
-const WMS_TILE_SIZE = 256;
+/** Pixels across a tile of a WMS or ArcGIS export in the address given out, as tile apps draw 256-pixel tiles. */
+const BBOX_TILE_SIZE = 256;
 
 /**
  * A WMTS address as the map would build it if the tile matrices had no leading zeros
@@ -37,7 +38,9 @@ function template(source: LayerSource): string | undefined {
     case 'wmts':
       return wmtsZoomUrl(source);
     case 'wms':
-      return wmsGetMapUrl(source, '{bbox}', WMS_TILE_SIZE);
+      return wmsGetMapUrl(source, '{bbox}', BBOX_TILE_SIZE);
+    case 'arcgis-map':
+      return arcgisExportUrl(source, '{bbox}', BBOX_TILE_SIZE);
     default:
       return undefined;
   }

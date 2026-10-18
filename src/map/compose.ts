@@ -331,6 +331,20 @@ export function rasterAdjustments(adjust: RasterAdjustments | undefined): Record
   return Object.fromEntries(paint.filter(([, value, none]) => value !== none).map(([name, value]) => [name, value]));
 }
 
+/** An ArcGIS map service's export address for square tiles of `size` pixels, with `bbox` standing for each tile's extent. */
+export function arcgisExportUrl(src: ArcGisMapSource, bbox: string, size: number): string {
+  return withParams(`${src.url}/export`, {
+    bbox,
+    bboxSR: 3857,
+    imageSR: 3857,
+    size: `${size},${size}`,
+    format: src.format,
+    transparent: 'true',
+    f: 'image',
+    ...(src.layers && { layers: src.layers }),
+  });
+}
+
 /** A WMS GetMap address for square tiles of `size` pixels, with `bbox` standing for each tile's extent. */
 export function wmsGetMapUrl(src: WmsSource, bbox: string, size: number): string {
   return withParams(src.url, {
@@ -358,18 +372,7 @@ export function rasterTiles(src: XyzSource | WmsSource | WmtsSource | ArcGisMapS
     case 'wmts':
       return [wmtsTileUrl(src)];
     case 'arcgis-map':
-      return [
-        withParams(`${src.url}/export`, {
-          bbox: '{bbox-epsg-3857}',
-          bboxSR: 3857,
-          imageSR: 3857,
-          size: `${DYNAMIC_TILE_SIZE},${DYNAMIC_TILE_SIZE}`,
-          format: src.format,
-          transparent: 'true',
-          f: 'image',
-          ...(src.layers && { layers: src.layers }),
-        }),
-      ];
+      return [arcgisExportUrl(src, '{bbox-epsg-3857}', DYNAMIC_TILE_SIZE)];
   }
 }
 

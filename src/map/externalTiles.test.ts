@@ -27,6 +27,13 @@ describe('externalTileUrl', () => {
     expect(externalTileUrl({ ...wms, url: 'http://w.example/wms' })).toBeUndefined();
   });
 
+  it('gives an ArcGIS map service export with {bbox} for 256-pixel tiles', () => {
+    const map = { type: 'arcgis-map', url: 'https://a.example/arcgis/rest/services/Parks/MapServer', layers: 'show:0', format: 'png32' } as const;
+    expect(externalTileUrl(map)).toBe(
+      'https://a.example/arcgis/rest/services/Parks/MapServer/export?bbox={bbox}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:0',
+    );
+  });
+
   it('gives raster XYZ templates counted from the top and WMTS named by zoom, not vector tiles', () => {
     expect(externalTileUrl({ type: 'xyz', tiles: ['https://a.t.example/{z}/{x}/{y}.png', 'https://b.t.example/{z}/{x}/{y}.png'], scheme: 'xyz', tileSize: 256 })).toBe('https://a.t.example/{z}/{x}/{y}.png');
     expect(externalTileUrl({ type: 'xyz', tiles: ['https://t.example/{z}/{x}/{y}.png'], scheme: 'tms', tileSize: 256 })).toBeUndefined();

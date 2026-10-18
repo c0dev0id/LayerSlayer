@@ -613,7 +613,7 @@ function ActiveLayer(props: { layer: Layer; externalTiles: string | undefined })
       <Show when={props.externalTiles}>
         {(url) => (
           <div class="row external-tiles">
-            <span class="muted label" title="The tiles' address for DMD2 and other apps that take a custom map as an address to fill in: {z}/{x}/{y}, or {bbox} for a WMS">
+            <span class="muted label" title="The tiles' address for DMD2 and other apps that take a custom map as an address to fill in: {z}/{x}/{y}, or {bbox} for a WMS or an ArcGIS map service">
               DMD
             </span>
             <CopyText text={url()} label="Copy the tile address">
