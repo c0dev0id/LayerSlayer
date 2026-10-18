@@ -1,5 +1,6 @@
 import type { ExpressionSpecification, LayerSpecification } from 'maplibre-gl';
 import { createEffect, createMemo, createRoot, createSignal } from 'solid-js';
+import { boxOf } from '../geo/bounds';
 import { linesOutside } from '../geo/clip';
 import { lngLatToMercator, MAX_LATITUDE, mercatorToLngLat, WORLD } from '../geo/mercator';
 import type { XY } from '../geo/nearest';
@@ -15,8 +16,10 @@ import { ROUND_LINE, type Overlay } from './overlays';
  */
 
 const FOCUS_COLOR = '#1c7ed6';
-/** The colour of the lines drawn on the cover. */
-const COVER_LINES = '#ffffff';
+/** How far the cover takes the map's background colour towards black. */
+export const COVER_DIM = 0.4;
+/** The colour of the coastlines on the cover. */
+export const COASTLINES = 'rgba(255, 255, 255, 0.55)';
 
 const AREA_SOURCE = 'focus-area';
 const DRAFT_SOURCE = 'focus-draft';
@@ -38,8 +41,7 @@ const AREA_LAYERS: LayerSpecification[] = [
     type: 'fill',
     source: AREA_SOURCE,
     filter: kind('cover'),
-    // The map's background colour, dimmed: 40 % of the way to black.
-    paint: { 'fill-color': ['interpolate', ['linear'], 0.4, 0, ['global-state', BACKGROUND_STATE], 1, '#000000'] },
+    paint: { 'fill-color': ['interpolate', ['linear'], COVER_DIM, 0, ['global-state', BACKGROUND_STATE], 1, '#000000'] },
   },
   {
     id: `${AREA_SOURCE}-borders`,
@@ -47,7 +49,7 @@ const AREA_LAYERS: LayerSpecification[] = [
     source: AREA_SOURCE,
     filter: kind('border'),
     layout: ROUND_LINE,
-    paint: { 'line-color': COVER_LINES, 'line-opacity': 0.35, 'line-width': 1, 'line-dasharray': [3, 2] },
+    paint: { 'line-color': 'rgba(255, 255, 255, 0.35)', 'line-width': 1, 'line-dasharray': [3, 2] },
   },
   {
     id: `${AREA_SOURCE}-coastlines`,
@@ -55,7 +57,7 @@ const AREA_LAYERS: LayerSpecification[] = [
     source: AREA_SOURCE,
     filter: kind('coast'),
     layout: ROUND_LINE,
-    paint: { 'line-color': COVER_LINES, 'line-opacity': 0.55, 'line-width': 1.2 },
+    paint: { 'line-color': COASTLINES, 'line-width': 1.2 },
   },
 ];
 
@@ -126,12 +128,6 @@ export function fitZoom(area: readonly XY[]): number {
   return Math.log2(((FIT_VIEW / 512) * WORLD) / Math.max(east - west, north - south));
 }
 
-/** The west, south, east and north ends of points in a plane. */
-function boxOf(points: readonly XY[]): [number, number, number, number] {
-  const xs = points.map((p) => p[0]);
-  const ys = points.map((p) => p[1]);
-  return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
-}
 
 /** Positions copied out of the store, so that the map gets plain data. */
 const copy = (points: readonly LngLat[]): LngLat[] => points.map((p) => [p[0], p[1]]);
@@ -153,8 +149,8 @@ const feature = (geometry: GeoJSON.Geometry, properties: GeoJSON.GeoJsonProperti
 export function focusAreaFeatures(focus: readonly LngLat[] | undefined, world?: WorldOutline): GeoJSON.FeatureCollection {
   if (!focus || focus.length < 3) return collection([]);
   const corners = copy(focus);
-  const ring = signedArea(corners) > 0 ? corners : [...corners].reverse();
-  const closed = [...ring, ring[0]!];
+  const hole = signedArea(corners) > 0 ? [...corners].reverse() : corners;
+  const closed = [...hole, hole[0]!];
   // Shrinking and cutting are done in Web Mercator, where the map draws straight lines.
   const area = closed.map(([lng, lat]) => lngLatToMercator(lng, lat));
   const shrink = coverShrink(area);
@@ -164,7 +160,7 @@ export function focusAreaFeatures(focus: readonly LngLat[] | undefined, world?: 
       area,
     ).map((line) => feature({ type: 'LineString', coordinates: line.map(([x, y]) => mercatorToLngLat(x, y)) }, { kind }));
   return collection([
-    feature({ type: 'Polygon', coordinates: [WORLD_RING, [...closed].reverse()] }, { kind: 'cover' }),
+    feature({ type: 'Polygon', coordinates: [WORLD_RING, closed] }, { kind: 'cover' }),
     ...(world ? [...onCover(world.coastlines, 'coast'), ...onCover(world.borders, 'border')] : []),
   ]);
 }

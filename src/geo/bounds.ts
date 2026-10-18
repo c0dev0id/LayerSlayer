@@ -30,9 +30,14 @@ export function geojsonBounds(geojson: GeoJSON.GeoJSON): Bounds | undefined {
 }
 
 export function cornersBounds(corners: readonly (readonly [number, number])[]): Bounds | undefined {
-  const lngs = corners.map((c) => c[0]);
-  const lats = corners.map((c) => c[1]);
-  return validBounds(Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats));
+  return validBounds(...boxOf(corners));
+}
+
+/** The smallest and largest x and y of points in a plane: west, south, east and north. */
+export function boxOf(points: readonly (readonly [number, number])[]): [number, number, number, number] {
+  const xs = points.map((p) => p[0]);
+  const ys = points.map((p) => p[1]);
+  return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
 }
 
 /** Where two bounds overlap; none when they do not. */
