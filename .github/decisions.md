@@ -499,8 +499,9 @@
       compacted (with fine gravel), gravel (with `unpaved`, which says no more), dirt and
       sand, and grass. Without a surface tag a track's grade decides, and main and
       residential roads count as paved, as nearly all are; other roads stay unknown.
-    - Both are read per leg, keyed like its routing, for all legs missing them at once,
-      and kept for the session only: the route stores its colouring, not the data.
+    - Both are read per leg, keyed by its routed geometry, so that a leg recalculated
+      along other roads is read anew, for all legs missing them at once, and kept for the
+      session only: the route stores its colouring, not the data.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all

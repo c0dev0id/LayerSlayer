@@ -59,6 +59,16 @@ describe('routeFeatures', () => {
     expect(routeFeatures([{ ...route, coloring: 'elevation' }], new Set(), NO_DATA).features.some((f) => f.properties!['colored'])).toBe(false);
   });
 
+  it('takes a leg routed anew along another line as a new leg, not with the samples and data of the old line', () => {
+    routeFeatures([{ ...route, coloring: 'rainbow' }], new Set(), NO_DATA);
+    // [[1,1],[1.5,1.2],[2,2]] in polyline6, under the same routing key.
+    const anew: Route = { ...route, legs: { 'car/1,1;2,2': '_c`|@_c`|@_seK_qo]_oyo@_qo]' } };
+    const pieces = routeFeatures([{ ...anew, coloring: 'rainbow' }], new Set(), NO_DATA).features.filter((f) => f.properties!['state'] === 'piece');
+    expect(pieces.flatMap((f) => f.geometry.coordinates)).toContainEqual([1.5, 1.2]);
+    const elevations = new Map([[route.legs['car/1,1;2,2']!, [100, 150, 200]]]);
+    expect(routeFeatures([{ ...anew, coloring: 'elevation' }], new Set(), { ...NO_DATA, elevations }).features.some((f) => f.properties!['colored'])).toBe(false);
+  });
+
   it('outlines a route in its own colour and width, within bounds', () => {
     expect(routeFeatures([{ ...route, outline: { color: '#000000', width: 3 } }], new Set(), NO_DATA).features[0]!.properties).toMatchObject({ outlineColor: '#000000', outlineWidth: 3 });
     expect(routeFeatures([{ ...route, outline: { color: 'black', width: 50 } }], new Set(), NO_DATA).features[0]!.properties).toMatchObject({ outlineColor: '#ffffff', outlineWidth: 4 });

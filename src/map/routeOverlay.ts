@@ -71,7 +71,7 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
     return coordinates;
   };
   const sample = (route: Route, leg: Leg) => {
-    const key = sampleKey(leg);
+    const key = sampleKey(route, leg);
     const samples = sampled.get(key) ?? legSamples(route, leg, decode);
     sampledNow.set(key, samples);
     return { key, samples };
@@ -85,7 +85,7 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
     const pieces = route.coloring && coloredPieces(route.coloring, drawn.map(({ leg }) => sample(route, leg)), data, route.color);
     for (const { leg, state } of legs) {
       const coordinates = legCoordinates(route, leg, decode).map((p): LngLat => [p[0], p[1]]);
-      const colored = pieces?.get(sampleKey(leg));
+      const colored = pieces?.get(sampleKey(route, leg));
       features.push({ type: 'Feature', properties: { state, ...look, ...(colored && { colored: true }) }, geometry: { type: 'LineString', coordinates } });
       for (const piece of colored ?? []) {
         const properties = { state: 'piece', color: piece.color, width: look.width };

@@ -12,7 +12,7 @@ import { routeData } from './routes';
 
 /**
  * The data route colourings are drawn from, read for the drawn legs of the routes coloured
- * by it, by sample key: elevations from Mapterhorn's tiles, and surfaces from the roads
+ * by it, by sample key (a routed leg's geometry): elevations from Mapterhorn's tiles, and surfaces from the roads
  * OpenStreetMap has along them. Each kind is read for all legs missing it at once, one
  * reading at a time; legs whose reading failed are not asked for again until the colouring
  * is chosen anew.
@@ -40,7 +40,7 @@ const have = (kind: Kind): ReadonlyMap<string, unknown> => (kind === 'elevation'
 function drawnLegs(route: Route) {
   return routeLegs(route)
     .filter((leg) => leg.straight || leg.key in route.legs)
-    .map((leg) => ({ leg, key: sampleKey(leg) }));
+    .map((leg) => ({ leg, key: sampleKey(route, leg) }));
 }
 
 /** The drawn legs of the routes coloured from `kind` that lack it and have not failed, with their samples. */
