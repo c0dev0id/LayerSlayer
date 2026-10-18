@@ -3,6 +3,7 @@ import { isFeatureSource, isVector, type Layer } from '../model/layer';
 import { describeFeature } from '../services/featureDetails';
 import type { LayerFeature } from '../state/details';
 import { FEATURE_LAYER } from './featureTiles';
+import { FOCUS_COVER_LAYER } from './focusOverlay';
 
 /** The tile layer a vector layer's features are drawn from; none for GeoJSON. */
 function sourceLayerOf(layer: Layer): string | undefined {
@@ -32,7 +33,7 @@ const MAX_TAPPED = 10;
 
 /**
  * The features of the vector layers drawn within `radius` pixels of a point, in words
- * (the map holds the layers shown only):
+ * (the map holds the layers shown only; outside the focus area they are covered):
  * topmost first, each once, though the map draws it in several parts (line and label,
  * tile by tile). Lines and areas have their geometry of all the tiles loaded, not only of
  * those tapped.
@@ -42,6 +43,7 @@ export function featuresAt(map: MapLibreMap, point: { x: number; y: number }, ra
   const vector = new Map(layers.filter((l) => isVector(l.source)).map((l) => [l.id, l]));
   const styleLayers = map.getLayersOrder().filter((id) => vector.has(map.getLayer(id)?.source ?? ''));
   if (styleLayers.length === 0) return [];
+  if (map.queryRenderedFeatures([point.x, point.y], { layers: [FOCUS_COVER_LAYER] }).length > 0) return [];
   const box: [PointLike, PointLike] = [
     [point.x - radius, point.y - radius],
     [point.x + radius, point.y + radius],

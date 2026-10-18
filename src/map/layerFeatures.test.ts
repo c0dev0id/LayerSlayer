@@ -1,6 +1,7 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { describe, expect, it } from 'vitest';
 import { createLayer, type Layer } from '../model/layer';
+import { FOCUS_COVER_LAYER } from './focusOverlay';
 import { featuresAt } from './layerFeatures';
 
 const line = (x: number): GeoJSON.LineString => ({ type: 'LineString', coordinates: [[x, 0], [x + 1, 0]] });
@@ -26,6 +27,14 @@ const layers: Layer[] = [
 ];
 
 describe('featuresAt', () => {
+  it('finds nothing outside the focus area, where the layers are covered', () => {
+    const map = fakeMap([
+      { layer: 'c/line', properties: { name: 'Road' }, geometry: line(1) },
+      { layer: FOCUS_COVER_LAYER, properties: {}, geometry: { type: 'Polygon', coordinates: [] } },
+    ]);
+    expect(featuresAt(map, { x: 0, y: 0 }, 10, layers)).toEqual([]);
+  });
+
   it('finds the features of vector layers once, though drawn as line and label', () => {
     const closure = { name: '58285 -Ennepetal' };
     const map = fakeMap([

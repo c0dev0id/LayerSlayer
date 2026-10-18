@@ -22,7 +22,6 @@ import { searchRadius } from '../services/osmDetails';
 import { closeDetails, detailsRequest, showDetails, showFeatures } from '../state/details';
 import { appendPoint, redo, undo } from '../state/routes';
 import { state } from '../state/store';
-import { FOCUS_COVER_LAYER } from './focusOverlay';
 import { featuresAt } from './layerFeatures';
 import { fromMarker } from './markers';
 import { googleMapsUrl, latLonText, spotLink, streetViewUrl } from './placeLinks';
@@ -106,12 +105,11 @@ export function Interactions(props: { map: MapLibreMap }) {
   };
   /**
    * A tap that draws nothing opens the details of the layers' features there; a tap beside
-   * them, or outside the focus area, where they are covered, closes the features' details.
+   * them closes the features' details.
    */
   const onFeatureTap = (e: MapMouseEvent) => {
     if (fromMarker(e.originalEvent)) return;
-    const covered = map.queryRenderedFeatures(e.point, { layers: [FOCUS_COVER_LAYER] }).length > 0;
-    const found = covered ? [] : featuresAt(map, e.point, tapRadius(), state.layers);
+    const found = featuresAt(map, e.point, tapRadius(), state.layers);
     if (found.length > 0) {
       const { lng, lat } = e.lngLat.wrap();
       showFeatures([lng, lat], found);
