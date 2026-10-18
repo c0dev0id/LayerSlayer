@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LngLat } from '../model/route';
-import { edgePoints, shadowColor } from './focusShadow';
+import { edgePoints, shadowColor, shadowLength } from './focusShadow';
 
 describe('shadowColor', () => {
   it('casts a dark shadow on a light cover and a light glow on a dark one', () => {
@@ -8,6 +8,15 @@ describe('shadowColor', () => {
     expect(shadowColor('#e9e4d8')).toMatch(/^rgba\(0, 0, 0,/);
     expect(shadowColor('#1b2b44')).toMatch(/^rgba\(255, 255, 255,/);
     expect(shadowColor('#000000')).toMatch(/^rgba\(255, 255, 255,/);
+  });
+});
+
+describe('shadowLength', () => {
+  it('shrinks with the area when zoomed out, and keeps its length once the area fills the view', () => {
+    expect(shadowLength(9, 9)).toBe(28);
+    expect(shadowLength(8, 9)).toBe(14);
+    expect(shadowLength(6, 9)).toBe(3.5);
+    expect(shadowLength(12, 9)).toBe(28);
   });
 });
 

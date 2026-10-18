@@ -3,6 +3,7 @@ import { lngLatToMercator, mercatorToLngLat } from '../geo/mercator';
 import type { LngLat } from '../model/route';
 import { state } from '../state/store';
 import { MAP_BACKGROUND } from './compose';
+import { fitZoom } from './focusOverlay';
 
 /**
  * The focus area's edge, on a canvas over the map's: a shadow beyond it, a bevel just inside
@@ -11,7 +12,7 @@ import { MAP_BACKGROUND } from './compose';
  * on the map. The canvas is drawn again after each frame of the map that moves the area.
  */
 
-/** How high the area seems raised: the length of its shadow, in CSS pixels. */
+/** How high the area seems raised: the length of its shadow in CSS pixels while it fills the view. */
 const ELEVATION = 28;
 /** Where the light comes from on screen, clockwise from up: north-north-west, as in MapLibre's hillshading. */
 const LIGHT = (335 * Math.PI) / 180;
@@ -27,6 +28,15 @@ const OUTLINE = 'rgba(255, 255, 255, 0.55)';
 export function shadowColor(background: string): string {
   const [r, g, b] = [1, 3, 5].map((i) => (parseInt(background.slice(i, i + 2), 16) / 255) * 0.6) as [number, number, number];
   return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.2 ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.45)';
+}
+
+/**
+ * The length of the area's shadow at a map zoom, given the zoom at which the area fills the
+ * view: shorter as the area gets smaller, so that the shadow keeps its shape, and no longer
+ * once the area fills the view, where it would soon cover the screen.
+ */
+export function shadowLength(zoom: number, fit: number): number {
+  return ELEVATION * Math.min(1, 2 ** (zoom - fit));
 }
 
 /** Positions along the edges of an area, each edge in EDGE_STEPS straight in Web Mercator, where the map draws it straight. */
@@ -46,13 +56,17 @@ export function drawFocusShadow(map: MapLibreMap): () => void {
   const context = canvas.getContext('2d')!;
   let corners: readonly LngLat[] | undefined;
   let points: LngLat[] = [];
+  let fit = 0;
   /** What the canvas shows: its size, the shadow's colour and the area's place on screen. */
   let shown = '';
   const draw = () => {
     const ratio = window.devicePixelRatio;
     const width = Math.round(map.getCanvas().clientWidth * ratio);
     const height = Math.round(map.getCanvas().clientHeight * ratio);
-    if (state.focus !== corners) [corners, points] = [state.focus, state.focus ? edgePoints(state.focus) : []];
+    if (state.focus !== corners) {
+      [corners, points] = [state.focus, state.focus ? edgePoints(state.focus) : []];
+      fit = state.focus ? fitZoom(state.focus.map(([lng, lat]) => lngLatToMercator(lng, lat))) : 0;
+    }
     const screen = points.map((p) => map.project(p));
     const color = shadowColor(state.settings.background ?? MAP_BACKGROUND);
     // The map draws many frames that leave the area where it is, such as while tiles load.
@@ -77,7 +91,8 @@ export function drawFocusShadow(map: MapLibreMap): () => void {
 
     // The area filled and casting its shadow, then the area wiped out, leaving the shadow.
     context.save();
-    shadow(color, ELEVATION, ELEVATION);
+    const length = shadowLength(map.getZoom(), fit);
+    shadow(color, length, length);
     context.fill(area);
     context.restore();
     context.globalCompositeOperation = 'destination-out';

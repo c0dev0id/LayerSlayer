@@ -114,13 +114,23 @@ const FIT_VIEW = 800;
  * that.
  */
 function coverShrink(area: readonly XY[]): (point: XY) => XY {
-  const xs = area.map((p) => p[0]);
-  const ys = area.map((p) => p[1]);
-  const [west, east, south, north] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
-  const fitZoom = Math.log2(((FIT_VIEW / 512) * WORLD) / Math.max(east - west, north - south));
-  const scale = 2 ** -Math.max(0, fitZoom - COVER_WORLD_ZOOM);
+  const [west, south, east, north] = boxOf(area);
+  const scale = 2 ** -Math.max(0, fitZoom(area) - COVER_WORLD_ZOOM);
   const [cx, cy] = [(west + east) / 2, (south + north) / 2];
   return ([x, y]) => [cx + (x - cx) * scale, cy + (y - cy) * scale];
+}
+
+/** The zoom at which an area, in Web Mercator, fills a view of FIT_VIEW pixels. */
+export function fitZoom(area: readonly XY[]): number {
+  const [west, south, east, north] = boxOf(area);
+  return Math.log2(((FIT_VIEW / 512) * WORLD) / Math.max(east - west, north - south));
+}
+
+/** The west, south, east and north ends of points in a plane. */
+function boxOf(points: readonly XY[]): [number, number, number, number] {
+  const xs = points.map((p) => p[0]);
+  const ys = points.map((p) => p[1]);
+  return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
 }
 
 /** Positions copied out of the store, so that the map gets plain data. */

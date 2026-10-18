@@ -572,6 +572,11 @@
     global state, and a feature property drawn with a value from the global state makes
     MapLibre load the source again on every change, so on every frame of a turn; lines
     offset from each edge also left notches at the corners.
+  - The shadow is 28 px long and as wide blurred while the area fills the view, at the
+    zoom that also puts the cover's world at zoom 4, and halves with every zoom level out,
+    so that it keeps its shape as the area shrinks; a fixed length looked ever softer and
+    larger around a small area. Zoomed in further it keeps its length, as it would soon
+    cover the screen.
   - On a dark background no shadow shows on the dimmed cover, so there the area casts a
     light glow instead; the switch is where the cover's luminance falls below 0.2.
   - In 3D the ground keeps its elevation everywhere: MapLibre takes ground without
