@@ -47,7 +47,8 @@
 - A focus area: a polygon outside whose bounds no layer requests tiles, with the map
   around it covered in the dimmed background colour, showing the world's coastlines and
   borders on a smaller scale, with the area raised over its place on them and casting a
-  shadow that keeps its side as the map turns and tilts.
+  shadow that keeps its side as the map turns and tilts; outline and shadow colours can
+  be chosen.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
   waypoints, undo and redo, car, bike and foot profiles, GPX export and import. Each route
   has its own colour, line width and outline, and its waypoints their own size, pin colour

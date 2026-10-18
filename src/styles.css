@@ -1680,6 +1680,7 @@ input.swatch {
 }
 
 /* The map's background colour, under the last layer of the list. */
-.row.background {
+.row.background,
+.row.focus-color {
   padding: 0 0 0 4px;
 }

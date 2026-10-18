@@ -1,13 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import type { LngLat } from '../model/route';
-import { edgePoints, shadowColor, shadowLength } from './focusShadow';
+import { autoShadowColor, edgePoints, shadowFill, shadowLength } from './focusShadow';
 
-describe('shadowColor', () => {
+describe('autoShadowColor', () => {
   it('casts a dark shadow on a light cover and a light glow on a dark one', () => {
-    expect(shadowColor('#ffffff')).toMatch(/^rgba\(0, 0, 0,/);
-    expect(shadowColor('#e9e4d8')).toMatch(/^rgba\(0, 0, 0,/);
-    expect(shadowColor('#1b2b44')).toMatch(/^rgba\(255, 255, 255,/);
-    expect(shadowColor('#000000')).toMatch(/^rgba\(255, 255, 255,/);
+    expect(autoShadowColor('#ffffff')).toBe('#000000');
+    expect(autoShadowColor('#e9e4d8')).toBe('#000000');
+    expect(autoShadowColor('#1b2b44')).toBe('#ffffff');
+    expect(autoShadowColor('#000000')).toBe('#ffffff');
+  });
+});
+
+describe('shadowFill', () => {
+  it('draws a shadow see-through, a light one more so', () => {
+    expect(shadowFill('#000000')).toBe('#00000073');
+    expect(shadowFill('#e8590c')).toBe('#e8590c73');
+    expect(shadowFill('#ffffff')).toBe('#ffffff4d');
   });
 });
 

@@ -583,6 +583,11 @@
     cover the screen.
   - On a dark background no shadow shows on the dimmed cover, so there the area casts a
     light glow instead; the switch is where the cover's luminance falls below 0.2.
+  - The outline and the shadow can be given colours of one's own in the focus area
+    section, kept with the project like the background colour. A chosen outline is drawn
+    as it is; every shadow is see-through, a light one more so, as the glow is. A new
+    colour moves nothing on the map, so it has the map draw a frame, after which the
+    canvases are drawn again.
   - In 3D the ground keeps its elevation everywhere: MapLibre takes ground without
     elevation tiles as sea level, so limiting it would raise a wall at the box's edge in
     the mountains, draped in the cover. The hillshading is limited like the layers.

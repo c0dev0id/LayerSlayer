@@ -1,7 +1,9 @@
 import { Match, Show, Switch } from 'solid-js';
 import { focusDraft, startFocusDrawing } from '../state/drawing';
 import { cancelPrecache, dismissPrecache, pausePrecache, precacheActive, precacheRun, resumePrecache, type PrecacheRun } from '../state/precache';
-import { clearFocus, focusBounds, state } from '../state/store';
+import { MAP_BACKGROUND } from '../map/compose';
+import { autoShadowColor } from '../map/focusShadow';
+import { clearFocus, focusBounds, setFocusOutline, setFocusShadow, state } from '../state/store';
 import { showBounds } from '../state/ui';
 import { countText, durationText, sizeText } from './format';
 import { AreaIcon, CloseIcon, DownloadAreaIcon } from './icons';
@@ -42,6 +44,38 @@ export function FocusSection() {
       <p class="muted hint">
         {state.focus ? 'Layers load and show only within the area.' : 'Draw an area, and layers load and show only within it.'}
       </p>
+      <Show when={state.focus}>
+        <div class="row focus-color" title="The colour of the line around the area">
+          <span class="muted grow">Outline</span>
+          <input
+            type="color"
+            class="swatch"
+            aria-label="Outline colour of the focus area"
+            value={state.settings.focusOutline ?? '#ffffff'}
+            onInput={(e) => setFocusOutline(e.currentTarget.value)}
+          />
+          <Show when={state.settings.focusOutline}>
+            <button class="icon" title="Back to the colour of the coastlines" aria-label="Reset the outline colour" onClick={() => setFocusOutline(undefined)}>
+              <CloseIcon />
+            </button>
+          </Show>
+        </div>
+        <div class="row focus-color" title="The colour of the shadow the area casts">
+          <span class="muted grow">Shadow</span>
+          <input
+            type="color"
+            class="swatch"
+            aria-label="Shadow colour of the focus area"
+            value={state.settings.focusShadow ?? autoShadowColor(state.settings.background ?? MAP_BACKGROUND)}
+            onInput={(e) => setFocusShadow(e.currentTarget.value)}
+          />
+          <Show when={state.settings.focusShadow}>
+            <button class="icon" title="Back to a shadow that suits the background" aria-label="Reset the shadow colour" onClick={() => setFocusShadow(undefined)}>
+              <CloseIcon />
+            </button>
+          </Show>
+        </div>
+      </Show>
       <Show when={precacheRun()}>{(run) => <PrecacheProgress run={run()} />}</Show>
     </section>
   );
