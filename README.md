@@ -26,8 +26,8 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
   words.
 - **3D terrain** — hillshaded relief from open worldwide elevation tiles, under a day or a
   night sky.
-- **Focus area** — a polygon that limits requests and hides the map around it, leaving a
-  grid, coastlines and borders, with precaching for later.
+- **Focus area** — a polygon that limits requests and floats over a small outline map of
+  the world, with precaching for later.
 - **Stays in the browser** — tiles kept per layer, everything survives a restart, and a
   whole setup travels as one `.lslay` project file.
 - **Light and dark** — follows the browser, or switch by hand.

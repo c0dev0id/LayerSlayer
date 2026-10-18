@@ -531,20 +531,25 @@
     fill; the bottom layer is now limited like the others, as its tiles outside would only
     load to stay hidden.
   - A tap on the cover finds no features: those under it are not drawn.
-  - The cover keeps the area's surroundings readable without loading anything there: a
-    graticule, and the coastlines and country borders of Natural Earth at 1:110 million.
-    The graticule has levels from 30° to 1′, each shown from the zoom at which its lines
-    are about 100 px apart; coarse levels span the world, fine ones reach 40 lines beyond
-    the area, and a level that would need more than 1,500 lines is left out. The outline
-    data was generated once from the `world-atlas` 2.0.2 package (`countries-110m.json`:
-    the mesh of the land, and the borders between different countries) with coordinates
-    rounded to 0.01°; at 115 KB, 41 KB compressed, it is a chunk loaded with the first
-    focus area. The 1:50 million data is ten times the size. A build-time plugin reading
-    the package, as for the icon sets, was the alternative: easier to regenerate, but
-    three development dependencies for data that does not change. The outline is coarse,
-    so it fades out between zooms 6 and 8, before it strays visibly from the map's. All
-    lines on the cover are cut off where they meet the area, so nothing draws over it;
-    the cuts are found in Web Mercator, where MapLibre draws the area's edges straight.
+  - The cover shows the coastlines and country borders of Natural Earth at 1:110 million,
+    loading nothing there, as if the area were raised over its place on a smaller map:
+    they are shrunk around the area's centre so that, with the area filling an 800 px
+    view, the world is at zoom 4, and they zoom with the map, keeping that distance. The
+    world keeps the map's scale around an area too large for that. The shrinking is done
+    in the data, in Web Mercator, so the map keeps one camera; panning far from the area
+    leaves the small world behind. The lines are cut off where they meet the area, the
+    cuts found in Web Mercator too, where MapLibre draws the area's edges straight.
+  - The outline data was generated once from the `world-atlas` 2.0.2 package
+    (`countries-110m.json`: the mesh of the land, and the borders between different
+    countries) with coordinates rounded to 0.01° and the cuts of the data left out:
+    edges along and across the antimeridian and along the bottom of Antarctica, which
+    would draw as straight lines across the small world. At 115 KB, 41 KB compressed, it
+    is a chunk loaded with the first focus area; the 1:50 million data is ten times the
+    size. A build-time plugin reading the package, as for the icon sets, was the
+    alternative: easier to regenerate, but three development dependencies for data that
+    does not change.
+  - A graticule on the cover was tried and dropped as clutter, and the area's blue outline
+    went once the shadow and bevel marked its edge.
   - The area looks lifted off the cover: a soft shadow beyond every edge, deeper beyond
     the edges that face away from the light, and a bevel inside, light where an edge
     faces the light and dark where it faces away. The light comes from 335°, where

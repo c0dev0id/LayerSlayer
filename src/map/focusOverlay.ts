@@ -1,9 +1,7 @@
-import type { ExpressionSpecification, FilterSpecification, LayerSpecification } from 'maplibre-gl';
+import type { ExpressionSpecification, LayerSpecification } from 'maplibre-gl';
 import { createEffect, createMemo, createRoot, createSignal } from 'solid-js';
-import { cornersBounds } from '../geo/bounds';
 import { linesOutside } from '../geo/clip';
-import { graticule } from '../geo/graticule';
-import { lngLatToMercator, MAX_LATITUDE } from '../geo/mercator';
+import { lngLatToMercator, MAX_LATITUDE, mercatorToLngLat, WORLD } from '../geo/mercator';
 import type { LngLat } from '../model/route';
 import { focusCursor, focusDraft } from '../state/drawing';
 import { state } from '../state/store';
@@ -30,15 +28,6 @@ export interface WorldOutline {
 
 const kind = (name: string): ExpressionSpecification => ['==', ['get', 'kind'], name];
 
-const lineLayer = (source: string, filter: FilterSpecification): LayerSpecification => ({
-  id: `${source}-line`,
-  type: 'line',
-  source,
-  filter,
-  layout: ROUND_LINE,
-  paint: { 'line-color': FOCUS_COLOR, 'line-width': 2 },
-});
-
 /** The layer that hides the map outside the focus area: a tap on it finds no features. */
 export const FOCUS_COVER_LAYER = `${AREA_SOURCE}-cover`;
 
@@ -57,30 +46,20 @@ const AREA_LAYERS: LayerSpecification[] = [
     paint: { 'fill-color': ['interpolate', ['linear'], 0.4, 0, ['global-state', BACKGROUND_STATE], 1, '#000000'] },
   },
   {
-    id: `${AREA_SOURCE}-grid`,
-    type: 'line',
-    source: AREA_SOURCE,
-    filter: ['all', kind('grid'), ['>=', ['zoom'], ['get', 'minzoom']]],
-    paint: { 'line-color': COVER_LINES, 'line-opacity': 0.25, 'line-width': 1 },
-  },
-  // The world's outline is coarse, so it fades out before it strays visibly from the map's.
-  {
     id: `${AREA_SOURCE}-borders`,
     type: 'line',
     source: AREA_SOURCE,
     filter: kind('border'),
-    maxzoom: 8,
     layout: ROUND_LINE,
-    paint: { 'line-color': COVER_LINES, 'line-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.35, 8, 0], 'line-width': 1, 'line-dasharray': [3, 2] },
+    paint: { 'line-color': COVER_LINES, 'line-opacity': 0.35, 'line-width': 1, 'line-dasharray': [3, 2] },
   },
   {
     id: `${AREA_SOURCE}-coastlines`,
     type: 'line',
     source: AREA_SOURCE,
     filter: kind('coast'),
-    maxzoom: 8,
     layout: ROUND_LINE,
-    paint: { 'line-color': COVER_LINES, 'line-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.55, 8, 0], 'line-width': 1.2 },
+    paint: { 'line-color': COVER_LINES, 'line-opacity': 0.55, 'line-width': 1.2 },
   },
   // The area lifted off the cover: a soft shadow all round, deeper beyond the edges that
   // face away from the light, and a bevel inside, light or dark as the edge faces. Each
@@ -115,11 +94,17 @@ const AREA_LAYERS: LayerSpecification[] = [
       'line-blur': 1.5,
     },
   },
-  lineLayer(AREA_SOURCE, kind('outline')),
 ];
 
 const DRAFT_LAYERS: LayerSpecification[] = [
-  lineLayer(DRAFT_SOURCE, ['==', ['geometry-type'], 'LineString']),
+  {
+    id: `${DRAFT_SOURCE}-line`,
+    type: 'line',
+    source: DRAFT_SOURCE,
+    filter: ['==', ['geometry-type'], 'LineString'],
+    layout: ROUND_LINE,
+    paint: { 'line-color': FOCUS_COLOR, 'line-width': 2 },
+  },
   {
     id: `${DRAFT_SOURCE}-corner`,
     type: 'circle',
@@ -136,7 +121,7 @@ const DRAFT_LAYERS: LayerSpecification[] = [
 ];
 
 /** The world as far as Web Mercator draws it, counterclockwise. */
-const WORLD: LngLat[] = [
+const WORLD_RING: LngLat[] = [
   [-180, -MAX_LATITUDE],
   [180, -MAX_LATITUDE],
   [180, MAX_LATITUDE],
@@ -166,6 +151,33 @@ function facing(a: LngLat, b: LngLat): number {
   return length === 0 ? 0 : ((by - ay) * LIGHT[0] - (bx - ax) * LIGHT[1]) / length;
 }
 
+/** The zoom the world on the cover is shown at while the area fills the view. */
+const COVER_WORLD_ZOOM = 4;
+/** The size in pixels of the view the area is fitted into for that. */
+const FIT_VIEW = 800;
+
+/**
+ * The world's outline as the cover shows it: shrunk around the area's centre, so that
+ * with the area filling the view the world is at COVER_WORLD_ZOOM, as if the area were
+ * raised over its place on a smaller map. The world keeps the map's scale around an area
+ * too large for that. The shrinking is done in Web Mercator, where the map is drawn.
+ */
+function coverWorld(lines: readonly LngLat[][], ring: readonly LngLat[]): LngLat[][] {
+  const corners = ring.map(([lng, lat]) => lngLatToMercator(lng, lat));
+  const xs = corners.map((p) => p[0]);
+  const ys = corners.map((p) => p[1]);
+  const [west, east, south, north] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const fitZoom = Math.log2(((FIT_VIEW / 512) * WORLD) / Math.max(east - west, north - south));
+  const scale = 2 ** -Math.max(0, fitZoom - COVER_WORLD_ZOOM);
+  const [cx, cy] = [(west + east) / 2, (south + north) / 2];
+  return lines.map((line) =>
+    line.map(([lng, lat]) => {
+      const [x, y] = lngLatToMercator(lng, lat);
+      return mercatorToLngLat(cx + (x - cx) * scale, cy + (y - cy) * scale);
+    }),
+  );
+}
+
 /** Positions copied out of the store, so that the map gets plain data. */
 const copy = (points: readonly LngLat[]): LngLat[] => points.map((p) => [p[0], p[1]]);
 
@@ -179,10 +191,10 @@ const feature = (geometry: GeoJSON.Geometry, properties: GeoJSON.GeoJsonProperti
 
 /**
  * The focus area as map features, each marked with its `kind`: the world with the area cut
- * out, to cover what lies outside; on the cover, a graticule and the world's outline where
- * it is loaded, both cut off at the area; the area's edges, each with how far it faces the
- * light; and its outline. The area runs counterclockwise, so the outside of each edge is to
- * its right; MapLibre takes a ring wound like the first as a polygon of its own, so the
+ * out, to cover what lies outside; on the cover, the world's outline where it is loaded,
+ * shrunk around the area and cut off at it; and the area's edges, each with how far it
+ * faces the light. The area runs counterclockwise, so the outside of each edge is to its
+ * right; MapLibre takes a ring wound like the first as a polygon of its own, so the
  * cut-out runs clockwise, against the world.
  */
 export function focusAreaFeatures(focus: readonly LngLat[] | undefined, world?: WorldOutline): GeoJSON.FeatureCollection {
@@ -190,14 +202,12 @@ export function focusAreaFeatures(focus: readonly LngLat[] | undefined, world?: 
   const corners = copy(focus);
   const ring = signedArea(corners) > 0 ? corners : [...corners].reverse();
   const closed = [...ring, ring[0]!];
-  const outside = (lines: readonly LngLat[][], properties: GeoJSON.GeoJsonProperties) =>
-    linesOutside(lines, ring).map((line) => feature({ type: 'LineString', coordinates: line }, properties));
+  const onCover = (lines: readonly LngLat[][], kind: string) =>
+    linesOutside(coverWorld(lines, ring), ring).map((line) => feature({ type: 'LineString', coordinates: line }, { kind }));
   return collection([
-    feature({ type: 'Polygon', coordinates: [WORLD, [...closed].reverse()] }, { kind: 'cover' }),
-    ...graticule(cornersBounds(ring)!).flatMap(({ minzoom, lines }) => outside(lines, { kind: 'grid', minzoom })),
-    ...(world ? [...outside(world.coastlines, { kind: 'coast' }), ...outside(world.borders, { kind: 'border' })] : []),
+    feature({ type: 'Polygon', coordinates: [WORLD_RING, [...closed].reverse()] }, { kind: 'cover' }),
+    ...(world ? [...onCover(world.coastlines, 'coast'), ...onCover(world.borders, 'border')] : []),
     ...ring.map((a, i) => feature({ type: 'LineString', coordinates: [a, closed[i + 1]!] }, { kind: 'edge', facing: facing(a, closed[i + 1]!) })),
-    feature({ type: 'LineString', coordinates: closed }, { kind: 'outline' }),
   ]);
 }
 

@@ -25,10 +25,10 @@ describe('focusAreaFeatures', () => {
       expect(Math.sign(winding(world!))).toBe(1);
       expect(Math.sign(winding(hole!))).toBe(-1);
       expect(hole).toHaveLength(5);
-      // The outline runs counterclockwise, so that the outside of each edge is to its right.
-      const outline = (ofKind(features, 'outline')[0]!.geometry as GeoJSON.LineString).coordinates;
-      expect(Math.sign(winding(outline))).toBe(1);
-      expect(outline).toHaveLength(5);
+      // The edges run counterclockwise, so that the outside of each is to its right.
+      const starts = ofKind(features, 'edge').map((e) => (e.geometry as GeoJSON.LineString).coordinates[0]!);
+      expect(starts).toHaveLength(4);
+      expect(Math.sign(winding([...starts, starts[0]!]))).toBe(1);
     }
   });
 
@@ -42,17 +42,27 @@ describe('focusAreaFeatures', () => {
     expect(facing([9, 48])).toBeCloseTo(-Math.sin(toLight));
   });
 
-  it('draws the graticule and the world outline on the cover only, cut off at the area', () => {
-    const world = { coastlines: [[[7, 48.5], [10, 48.5]]] as LngLat[][], borders: [] };
-    const features = focusAreaFeatures(square, world).features;
-    const rounded = (f: GeoJSON.Feature) => (f.geometry as GeoJSON.LineString).coordinates.map((p) => p.map((v) => Number(v.toFixed(6))));
-    expect(ofKind(features, 'coast').map(rounded)).toEqual([
-      [[7, 48.5], [8, 48.5]],
-      [[9, 48.5], [10, 48.5]],
+  /** The coastline the cover shows of `line` around `area`. */
+  const coastOf = (area: LngLat[], line: LngLat[]) =>
+    ofKind(focusAreaFeatures(area, { coastlines: [line], borders: [] }).features, 'coast').map((f) =>
+      (f.geometry as GeoJSON.LineString).coordinates.map((p) => p.map((v) => Number(v.toFixed(6)))),
+    );
+
+  it('draws the world around a large area at the map scale, cut off at the area', () => {
+    const large: LngLat[] = [[0, 30], [40, 30], [40, 60], [0, 60]];
+    expect(coastOf(large, [[-10, 45], [50, 45]])).toEqual([
+      [[-10, 45], [0, 45]],
+      [[40, 45], [50, 45]],
     ]);
-    const grid = ofKind(features, 'grid').flatMap((f) => (f.geometry as GeoJSON.LineString).coordinates);
-    expect(grid.length).toBeGreaterThan(0);
-    expect(grid.some(([lng, lat]) => lng! > 8.001 && lng! < 8.999 && lat! > 48.001 && lat! < 48.999)).toBe(false);
+  });
+
+  it('shrinks the world around a small area, as if it were raised over its place on a map at zoom 4', () => {
+    // The square fills an 800 px view at about zoom 8.5, so the world shrinks 16 to 32 times.
+    const [line] = coastOf(square, [[38.5, 48.5], [68.5, 48.5]]);
+    const [near, far] = [(line![0]![0]! - 8.5) / 30, (line![1]![0]! - 8.5) / 60];
+    expect(near).toBeCloseTo(far);
+    expect(near).toBeGreaterThan(1 / 32);
+    expect(near).toBeLessThan(1 / 16);
   });
 
   it('has nothing to draw without an area', () => {

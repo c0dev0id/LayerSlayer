@@ -44,8 +44,8 @@
 - Optional CORS proxy, used per host.
 - Light and dark interface, following the browser unless switched.
 - A focus area: a polygon outside whose bounds no layer requests tiles, with the map
-  around it covered in the dimmed background colour, showing a graticule, coastlines and
-  country borders, and the area lifted off it by a shadow.
+  around it covered in the dimmed background colour, showing the world's coastlines and
+  borders on a smaller scale, with the area raised over its place on them.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
   waypoints, undo and redo, car, bike and foot profiles, GPX export and import. Each route
   has its own colour, line width and outline, and its waypoints their own size, pin colour
