@@ -1,6 +1,7 @@
-import { createEffect, createMemo, createRoot, createSignal } from 'solid-js';
+import { batch, createEffect, createMemo, createRoot, createSignal } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { editingRouteId } from '../state/drawing';
+import type { Route } from '../model/route';
 import { clearRouteLegs, routeData, setRouteLeg } from '../state/routes';
 import { errorMessage } from '../state/ui';
 import { legState, nextMissingLeg, routedLegs, routeLegs, type LegJob } from './legs';
@@ -19,12 +20,12 @@ export function retryFailedLegs(): void {
 }
 
 /** Routes every leg of a route again, failed ones included. */
-export function recalculateRoute(id: string): void {
-  const route = routeData.routes.find((r) => r.id === id);
-  if (!route) return;
-  const keys = new Set(routedLegs(route).map((leg) => leg.key));
-  setFailedLegs((failed) => new Set([...failed].filter((key) => !keys.has(key))));
-  clearRouteLegs(id);
+export function recalculateRoute(route: Route): void {
+  const keys = new Set(routedLegs(unwrap(route)).map((leg) => leg.key));
+  batch(() => {
+    setFailedLegs((failed) => new Set([...failed].filter((key) => !keys.has(key))));
+    clearRouteLegs(route.id);
+  });
 }
 
 const pump = createPump<LegJob>({

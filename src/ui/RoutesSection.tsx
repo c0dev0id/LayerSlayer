@@ -6,7 +6,7 @@ import { PROFILES, ROUTE_LINE_WIDTH, routeOutline, waypointLook, type LngLat, ty
 import { ROUTE_COLORINGS, type RouteColoring } from '../model/routeColoring';
 import { retryColoring } from '../state/routeColoring';
 import { gpxToRouteData, routeTracks } from '../routing/gpx';
-import { routedLegs, routePoints } from '../routing/legs';
+import { routedLegCount, routePoints } from '../routing/legs';
 import { ROUTING_MIN_INTERVAL_MS } from '../routing/osrm';
 import { nextRouteColor } from '../routing/routeEdit';
 import { failedLegCount, lastError, pendingLegs, recalculateRoute, retryFailedLegs } from '../routing/service';
@@ -36,7 +36,7 @@ import { errorMessage, showBounds } from '../state/ui';
 import { askConfirmation } from './confirm';
 import { downloadBlob } from './download';
 import { EditableName } from './EditableName';
-import { durationText } from './format';
+import { countText, durationText } from './format';
 import { IconSizeSlider } from './IconSizeSlider';
 import { LineWidthSlider } from './LineWidthSlider';
 import { AreaIcon, CloseIcon, PaletteIcon, RefreshIcon } from './icons';
@@ -96,15 +96,17 @@ function flyToRoute(route: Route) {
   showPoints([...plain.points.map((p) => p.lngLat), ...routePoints(plain), ...routeWaypoints(route.id).map((w) => w.lngLat)]);
 }
 
-/** Above this many legs, recalculating a route asks first: routed one a second, they take minutes. */
+/** Above this many legs, recalculating a route asks first: they take minutes to route. */
 const RECALCULATE_WARNING_LEGS = 500;
 
 async function recalculate(route: Route) {
-  const legs = routedLegs(route).length;
-  const time = durationText((legs * ROUTING_MIN_INTERVAL_MS) / 1000);
-  const message = `Recalculating "${route.name}" routes its ${legs} legs again, about one a second: that takes at least ${time}. Until a leg is routed, it is drawn as a straight line.`;
-  if (legs > RECALCULATE_WARNING_LEGS && !(await askConfirmation(message, 'Recalculate'))) return;
-  recalculateRoute(route.id);
+  const legs = routedLegCount(route);
+  if (legs > RECALCULATE_WARNING_LEGS) {
+    const time = durationText((legs * ROUTING_MIN_INTERVAL_MS) / 1000);
+    const message = `Recalculating "${route.name}" routes its ${countText(legs, 'leg')} again, which takes at least ${time}. Until a leg is routed, it is drawn as a straight line.`;
+    if (!(await askConfirmation(message, 'Recalculate'))) return;
+  }
+  recalculateRoute(route);
 }
 
 
@@ -216,7 +218,7 @@ function RouteRow(props: { route: Route }) {
           class="icon"
           title="Recalculate the route: route all its legs again"
           aria-label={`Recalculate ${route.name}`}
-          disabled={routedLegs(route).length === 0}
+          disabled={routedLegCount(route) === 0}
           onClick={() => recalculate(route)}
         >
           <RefreshIcon />

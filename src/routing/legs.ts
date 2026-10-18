@@ -32,6 +32,11 @@ export function routedLegs(route: RoutePath): Leg[] {
   return routeLegs(route).filter((leg) => !leg.straight);
 }
 
+/** How many legs are routed, counted from the points without building the legs. */
+export function routedLegCount(route: Pick<Route, 'points'>): number {
+  return route.points.filter((p, i) => i > 0 && !p.straight).length;
+}
+
 /** Routed and straight legs are drawn as part of the route; pending and failed ones wait for routing. */
 export type LegState = 'routed' | 'straight' | 'pending' | 'failed';
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LngLat, Route } from '../model/route';
-import { legKey, legState, nextMissingLeg, pruneLegs, roundLngLat, routeLegs, routePoints } from './legs';
+import { legKey, legState, nextMissingLeg, pruneLegs, roundLngLat, routedLegCount, routeLegs, routePoints } from './legs';
 
 const route = (id: string, points: [number, number][], legs: Record<string, string> = {}): Route => ({
   id,
@@ -151,6 +151,11 @@ describe('straight legs', () => {
 
   it('keep no cached geometry', () => {
     expect(pruneLegs({ ...r, legs: { 'bike/1,1;2,2': 'a', 'bike/2,2;3,3': 'b' } })).toEqual({ 'bike/2,2;3,3': 'b' });
+  });
+
+  it('are left out of the routed legs counted', () => {
+    expect(routedLegCount(r)).toBe(1);
+    expect(routedLegCount(route('one', [[1, 1]]))).toBe(0);
   });
 });
 
