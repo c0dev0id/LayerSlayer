@@ -4,6 +4,7 @@ import type {
   SourceSpecification,
   SpriteSpecification,
   StyleSpecification,
+  SymbolLayerSpecification,
 } from 'maplibre-gl';
 import { intersectBounds } from '../geo/bounds';
 import { iconSize, type MapIcon } from '../model/icon';
@@ -463,8 +464,9 @@ const LINE_DASHES: Record<LineDash, number[]> = { dashed: [2, 3], 'long-dashed':
 
 /**
  * Features drawn in the layer's colour: polygons filled and outlined, lines, and points as
- * dots, or, where the layer has an icon, points and areas marked with it. Where the layer
- * has a label, its features are labelled on top, in `labelFont`.
+ * dots unless they are switched off, or, where the layer has an icon, points and areas
+ * marked with it. Where the layer has a label, its features are labelled on top, in
+ * `labelFont`.
  */
 function vector(layer: Layer, labelFont: string[], source: SourceSpecification, sourceLayer?: string): Fragment {
   const color = layerColor(layer);
@@ -497,7 +499,7 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': color, 'line-width': lineWidth(layer.lineWidth, LINE_WIDTH), 'line-opacity': opacity, ...dash },
       },
-      ...(layer.icon ? poiLayers(layer, layer.icon, base, color) : [dots(layer, base, color)]),
+      ...(layer.icon ? poiLayers(layer, layer.icon, base, color) : layer.dots === false ? [] : [dots(layer, base, color)]),
       ...(layer.label ? labels(layer, layer.label, base, labelFont) : []),
     ],
   };
@@ -505,14 +507,16 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
 
 /**
  * A feature property written beside the features: along lines, and next to the dot or icon
- * of points and areas, on whichever side has room, in the layer's label style; features
- * without the property are left without a label.
+ * of points and areas, on whichever side has room, or on them where they have neither, in
+ * the layer's label style; features without the property are left without a label.
  */
 function labels(layer: Layer, key: string, base: LayerBase, font: string[]): LayerSpecification[] {
   const style = labelStyle(layer.labelStyle);
   const text = { 'text-field': ['to-string', ['get', key]] as never, 'text-font': font, 'text-size': style.size };
   const paint = { 'text-color': style.color, 'text-halo-color': style.outlineColor, 'text-halo-width': style.outlineWidth, 'text-opacity': layer.opacity };
-  const reach = layer.icon ? POI_REACH * iconSize(layer.iconSize) : DOT_RADIUS + DOT_STROKE;
+  const reach = layer.icon ? POI_REACH * iconSize(layer.iconSize) : layer.dots === false ? undefined : DOT_RADIUS + DOT_STROKE;
+  const beside: SymbolLayerSpecification['layout'] =
+    reach === undefined ? {} : { 'text-variable-anchor': ['left', 'right', 'top', 'bottom'], 'text-radial-offset': (reach + 3) / style.size, 'text-justify': 'auto' };
   // Offsets are in ems of the text. Line labels lie clear of the widest line, so that a
   // change of width only repaints the line instead of laying out its labels again.
   const lineOffset = 0.5 + (MAX_LINE_WIDTH / 2 + 2) / style.size;
@@ -530,13 +534,7 @@ function labels(layer: Layer, key: string, base: LayerBase, font: string[]): Lay
       id: `${layer.id}/label`,
       type: 'symbol',
       filter: ['any', POINT, POLYGON] as never,
-      layout: {
-        ...text,
-        'text-variable-anchor': ['left', 'right', 'top', 'bottom'],
-        'text-radial-offset': (reach + 3) / style.size,
-        'text-justify': 'auto',
-        'text-max-width': 12,
-      },
+      layout: { ...text, ...beside, 'text-max-width': 12 },
       paint,
     },
   ];

@@ -244,6 +244,18 @@ describe('composeStyle', () => {
     expect(compose([layer({ name: 'g', source })])).not.toHaveProperty('glyphs');
   });
 
+  it('leaves out the dots where they are switched off, writing labels on the points instead', () => {
+    const source = { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } as const;
+    const style = compose([layer({ name: 'g', source }, { label: 'name', dots: false })]);
+    expect(style.layers.map((l) => l.id)).toEqual(['L/fill', 'L/outline', 'L/line', 'L/line-label', 'L/label']);
+    const label = style.layers.find((l) => l.id === 'L/label')!.layout!;
+    expect(label).not.toHaveProperty('text-variable-anchor');
+    expect(label).not.toHaveProperty('text-radial-offset');
+    // An icon marks the points all the same.
+    const icon = { id: 'maki:fuel', size: [15, 15] as [number, number], paths: ['M0 0h15v15z'] };
+    expect(compose([layer({ name: 'g', source }, { dots: false, icon })]).layers.map((l) => l.id)).toContain('L/icon');
+  });
+
   it('draws labels in the layer\'s label style, keeping their distance in ems of the text', () => {
     const source = { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } as const;
     const labelStyle = { color: '#0000ff', size: 16, outlineColor: '#000000', outlineWidth: 3 };

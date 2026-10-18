@@ -605,7 +605,15 @@ function ActiveLayer(props: { layer: Layer; externalTiles: string | undefined })
           <span class="muted label">Icon</span>
           <IconPickButton icon={layer.icon} color={layerColor(layer)} of={layer.name} onChange={(icon) => updateLayer(layer.id, { icon })} />
         </div>
-        <Show when={layer.icon}>
+        <Show
+          when={layer.icon}
+          fallback={
+            <label class="row" title="Without dots, points show only their label, where they have one">
+              <input type="checkbox" checked={layer.dots !== false} onChange={(e) => updateLayer(layer.id, { dots: e.currentTarget.checked ? undefined : false })} />
+              <span>Dots at points</span>
+            </label>
+          }
+        >
           <div class="row" title="How large the icon is drawn">
             <span class="muted label">Size</span>
             <IconSizeSlider label={`Icon size of ${layer.name}`} value={layer.iconSize} onInput={(iconSize) => updateLayer(layer.id, { iconSize })} />

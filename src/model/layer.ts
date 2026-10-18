@@ -202,6 +202,8 @@ export interface Layer {
   icon?: MapIcon;
   /** How many times its normal size the icon is drawn, MIN_ICON_SIZE to MAX_ICON_SIZE; 1 where unset. */
   iconSize?: number;
+  /** Whether a vector layer's points are drawn as dots where it has no icon; true where unset. */
+  dots?: boolean;
   /** Width of a vector layer's lines and area outlines in pixels; 2.5 for lines and 1.5 for outlines where unset. */
   lineWidth?: number;
   /** How a vector layer's lines and area outlines are dashed; solid where unset. */
