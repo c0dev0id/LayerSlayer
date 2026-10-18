@@ -1,6 +1,7 @@
 import type { MapIcon } from './icon';
 import { MAX_LABEL_SIZE, MIN_LABEL_SIZE } from './label';
 import { isHexColor, within } from './stored';
+import type { WaypointType } from './waypointType';
 
 /** A position as longitude and latitude in degrees. */
 export type LngLat = [number, number];
@@ -93,7 +94,9 @@ export interface Waypoint {
   lngLat: LngLat;
   name: string;
   description?: string;
-  /** Shown in the pin in place of its dot. */
+  /** What it marks, drawn as the type's own shape standing on the map; a pin where unset. */
+  type?: WaypointType;
+  /** Shown in the pin in place of its dot, where the waypoint has no type. */
   icon?: MapIcon;
 }
 
