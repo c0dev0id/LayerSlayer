@@ -1,3 +1,5 @@
+import { isHexColor, within } from './stored';
+
 /** How a vector layer's labels look: the text's colour and size, and the colour and width of the outline that keeps them readable on any map. */
 export interface LabelStyle {
   color?: string;
@@ -14,18 +16,12 @@ export const MIN_LABEL_SIZE = 8;
 export const MAX_LABEL_SIZE = 24;
 export const MAX_OUTLINE_WIDTH = 4;
 
-const isColor = (value: unknown): value is string => typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
-
-const within = (value: unknown, min: number, max: number, fallback: number) =>
-  typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
-
 /** A label style with every value, within bounds whatever a project file says, and the defaults where it sets none. */
-export function labelStyle(style: LabelStyle | undefined): Required<LabelStyle> {
-  const s = style ?? {};
+export function labelStyle(s: LabelStyle = {}): Required<LabelStyle> {
   return {
-    color: isColor(s.color) ? s.color : LABEL_STYLE.color,
+    color: isHexColor(s.color) ? s.color : LABEL_STYLE.color,
     size: within(s.size, MIN_LABEL_SIZE, MAX_LABEL_SIZE, LABEL_STYLE.size),
-    outlineColor: isColor(s.outlineColor) ? s.outlineColor : LABEL_STYLE.outlineColor,
+    outlineColor: isHexColor(s.outlineColor) ? s.outlineColor : LABEL_STYLE.outlineColor,
     outlineWidth: within(s.outlineWidth, 0, MAX_OUTLINE_WIDTH, LABEL_STYLE.outlineWidth),
   };
 }

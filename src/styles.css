@@ -1007,14 +1007,10 @@ input.swatch {
   width: 270px;
   margin: 4px 0;
   padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--panel);
   color: var(--text);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 
-.label-style .label-style-reset {
+.label-style-reset {
   margin-top: 4px;
 }
 
@@ -1383,6 +1379,15 @@ input.swatch {
   font-size: 11px;
 }
 
+/* Panels floating over the map: the context menu and a layer's label style. */
+.context-menu,
+.label-style {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
 .context-menu {
   position: absolute;
   z-index: 10;
@@ -1390,10 +1395,6 @@ input.swatch {
   margin: 0;
   padding: 4px 0;
   list-style: none;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   -webkit-touch-callout: none;
   user-select: none;
 }

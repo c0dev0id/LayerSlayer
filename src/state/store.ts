@@ -15,6 +15,7 @@ import {
   type LayerSource,
 } from '../model/layer';
 import { isLngLat, type LngLat } from '../model/route';
+import { isHexColor } from '../model/stored';
 import { fileSourceType, importFile } from '../services/importFile';
 import { deleteFile } from './files';
 import type { TerrainSky } from '../map/compose';
@@ -183,7 +184,7 @@ export function parseState(json: string): AppState {
     settings: {
       proxy: typeof settings?.proxy === 'string' ? settings.proxy : '',
       proxiedHosts: Array.isArray(settings?.proxiedHosts) ? settings.proxiedHosts.filter((h) => typeof h === 'string') : [],
-      ...(typeof settings?.background === 'string' && /^#[0-9a-f]{6}$/i.test(settings.background) && { background: settings.background }),
+      ...(isHexColor(settings?.background) && { background: settings.background }),
       ...((settings?.terrain === 'day' || settings?.terrain === 'night') && { terrain: settings.terrain }),
       ...(settings?.tileCacheOff === true && { tileCacheOff: true }),
       ...((settings?.proxyMode === 'off' || settings?.proxyMode === 'all') && { proxyMode: settings.proxyMode }),

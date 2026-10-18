@@ -9,6 +9,7 @@ import { intersectBounds } from '../geo/bounds';
 import { iconSize, type MapIcon } from '../model/icon';
 import { labelStyle } from '../model/label';
 import { lineWidth, MAX_LINE_WIDTH } from '../model/line';
+import { within } from '../model/stored';
 import {
   isShown,
   keepsTiles,
@@ -131,20 +132,14 @@ interface Fragment {
   sprite?: SpriteSpecification;
 }
 
-/**
- * The whole map as one style: the visible layers bottom to top. A layer whose assets have
- * not arrived yet is left out until they do. Of the styles among the layers, the bottom
- * one brings the fonts and the default sprite; the sprite of any style above it is added
- * under the layer's id and its image references are prefixed to match. A map has one
- * font source, so labels of the upper styles need fonts the bottom one serves, and the
- * labels of vector layers are written in one of its fonts (OpenFreeMap's without one).
- *
- * See MapOptions for what is drawn around the layers.
- */
 /** The sky over 3D terrain. */
 export type TerrainSky = 'day' | 'night';
 
-/** The skies of 3D terrain, above the horizon when the map is tilted far, and their fog over the distant ground. */
+/**
+ * The skies of 3D terrain, above the horizon when the map is tilted far, and their fog over
+ * the distant ground. Every key is written out, MapLibre's defaults included: a new sky
+ * sets only the keys it has, so one left out would keep the previous sky's value.
+ */
 const SKIES: Record<TerrainSky, StyleSpecification['sky']> = {
   day: {
     'sky-color': '#88c6fc',
@@ -164,6 +159,16 @@ const SKIES: Record<TerrainSky, StyleSpecification['sky']> = {
   },
 };
 
+/**
+ * The whole map as one style: the visible layers bottom to top. A layer whose assets have
+ * not arrived yet is left out until they do. Of the styles among the layers, the bottom
+ * one brings the fonts and the default sprite; the sprite of any style above it is added
+ * under the layer's id and its image references are prefixed to match. A map has one
+ * font source, so labels of the upper styles need fonts the bottom one serves, and the
+ * labels of vector layers are written in one of its fonts (OpenFreeMap's without one).
+ *
+ * See MapOptions for what is drawn around the layers.
+ */
 export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<string, Assets>, { focus, background, terrain, only, tileCache = true }: MapOptions = {}): StyleSpecification {
   const style: StyleSpecification = { version: 8, sources: {}, layers: [], transition: { duration: 0, delay: 0 } };
   if (background) style.layers.push({ id: BACKGROUND_LAYER, type: 'background', paint: { 'background-color': background } });
@@ -345,8 +350,6 @@ function raster(layer: Layer, source: SourceSpecification): Fragment {
 /** The raster paint properties of colour adjustments, within MapLibre's ranges, leaving out defaults. */
 export function rasterAdjustments(adjust: RasterAdjustments | undefined): Record<string, number> {
   if (!adjust) return {};
-  const within = (value: unknown, min: number, max: number, fallback: number) =>
-    typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
   const paint: [string, number, number][] = [
     ['raster-hue-rotate', within(adjust.hue, 0, 360, 0), NO_ADJUSTMENTS.hue],
     ['raster-saturation', within(adjust.saturation, -1, 1, 0), NO_ADJUSTMENTS.saturation],
@@ -499,9 +502,8 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
 
 /**
  * A feature property written beside the features: along lines, and next to the dot or icon
- * of points and areas, on whichever side has room, in the layer's label style (by default
- * dark text ringed in white, which reads on any base map); features without the property
- * are left without a label.
+ * of points and areas, on whichever side has room, in the layer's label style; features
+ * without the property are left without a label.
  */
 function labels(layer: Layer, key: string, base: LayerBase, font: string[]): LayerSpecification[] {
   const style = labelStyle(layer.labelStyle);
