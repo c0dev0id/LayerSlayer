@@ -18,7 +18,7 @@ describe('bulkPolicy', () => {
 
   it('allows codevoid.de full speed, whatever the subdomain', () => {
     expect(bulkPolicy('codevoid.de')?.level).toBe('full');
-    expect(bulkPolicy('tiles.codevoid.de')?.level).toBe('full');
+    expect(bulkPolicy('home.codevoid.de')?.level).toBe('full');
     expect(bulkPolicy('notcodevoid.de')).toBeUndefined();
     expect(bulkPolicy('codevoid.de.example.com')).toBeUndefined();
   });

@@ -206,9 +206,13 @@ function PrecacheForm(props: { area: [number, number][] }) {
                   <>
                     <span class="muted">
                       {' '}
-                      <a href={policy().url} target="_blank" rel="noopener">
-                        {policy().operator}
-                      </a>{' '}
+                      <Show when={policy().url} fallback={policy().operator}>
+                        {(url) => (
+                          <a href={url()} target="_blank" rel="noopener">
+                            {policy().operator}
+                          </a>
+                        )}
+                      </Show>{' '}
                       {policy().says}
                       {policy().level === 'forbidden' ? ': left out.' : '.'}
                     </span>

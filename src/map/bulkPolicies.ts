@@ -11,7 +11,8 @@ export interface BulkPolicy {
   /** Who runs the servers, and what they say about it. */
   operator: string;
   says: string;
-  url: string;
+  /** Where the operator says it; none where the operator says it nowhere public. */
+  url?: string;
 }
 
 const POLICIES: { host: RegExp; policy: BulkPolicy }[] = [
@@ -46,7 +47,7 @@ const POLICIES: { host: RegExp; policy: BulkPolicy }[] = [
   },
   {
     host: /(^|\.)codevoid\.de$/,
-    policy: { level: 'full', operator: 'codevoid.de', says: 'allows downloading at full speed', url: 'https://codevoid.de' },
+    policy: { level: 'full', operator: 'codevoid.de', says: 'allows downloading at full speed' },
   },
 ];
 
