@@ -27,11 +27,21 @@ describe('road queries', () => {
     ],
   ];
 
-  it('asks Postpass for the roads within reach of all lines at once', () => {
+  it('asks Postpass for the roads within reach of all lines at once, with the tags that say what they are made of', () => {
     expect(postpassRoadQuery(lines)).toBe(
-      "SELECT osm_type, osm_id, tags, geom FROM postpass_line WHERE tags ? 'highway' " +
-        "AND ST_DWithin(geom, ST_GeomFromText('MULTILINESTRING((7.7 49.1,7.71 49.1),(7.72 49.1,7.73 49.11))', 4326), 0.000274)",
+      'SELECT DISTINCT ON (road.osm_type, road.osm_id) road.osm_type, road.osm_id, ' +
+        "jsonb_strip_nulls(jsonb_build_object('highway', road.tags->'highway', 'surface', road.tags->'surface', 'tracktype', road.tags->'tracktype')) AS tags, road.geom " +
+        "FROM (VALUES (ST_GeomFromText('LINESTRING(7.7 49.1,7.71 49.1)', 4326)),(ST_GeomFromText('LINESTRING(7.72 49.1,7.73 49.11)', 4326))) AS course(line) " +
+        "JOIN postpass_line AS road ON ST_DWithin(road.geom, course.line, 0.000274) WHERE road.tags ? 'highway'",
     );
+  });
+
+  it('asks about a long line in parts of about 5 km', () => {
+    // 12 km east in 1.2 km steps.
+    const long = Array.from({ length: 11 }, (_, i): LngLat => [7 + (i * 1200) / (111_320 * Math.cos((49 * Math.PI) / 180)), 49]);
+    const course = postpassRoadQuery([long]).match(/LINESTRING\(([^)]*)\)/g)!;
+    // A part ends once it is 5 km long, the last one taking the rest.
+    expect(course.map((part) => part.split(',').length)).toEqual([6, 6]);
   });
 
   it('asks the Overpass API the same along each line', () => {
