@@ -5,7 +5,8 @@ import type { Route } from '../model/route';
 import { clearRouteLegs, routeData, setRouteLeg } from '../state/routes';
 import { errorMessage } from '../state/ui';
 import { legState, nextMissingLeg, routedLegs, routeLegs, type LegJob } from './legs';
-import { createPump, fetchLeg, ROUTING_MIN_INTERVAL_MS } from './osrm';
+import { createPump } from '../state/pump';
+import { fetchLeg, ROUTING_MIN_INTERVAL_MS } from './osrm';
 
 const [failedLegs, setFailedLegs] = createSignal<ReadonlySet<string>>(new Set());
 const [lastError, setLastError] = createSignal<string>();
