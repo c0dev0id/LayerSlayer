@@ -21,6 +21,11 @@ function Flag(props: { children: JSX.Element }) {
   );
 }
 
+/** The post a sign stands on, drawn before the sign, which hides its top. */
+function Post() {
+  return <rect x="15" y="18" width="2" height="17" rx="0.6" fill={POLE} />;
+}
+
 /** The drawing of each type, in a 32 × 36 box with its foot at (16, 35); `id` makes its clip path unique. */
 const DRAWINGS: Record<WaypointType, (id: string) => JSX.Element> = {
   start: () => (
@@ -60,7 +65,7 @@ const DRAWINGS: Record<WaypointType, (id: string) => JSX.Element> = {
   ),
   meeting: () => (
     <>
-      <rect x="15" y="18" width="2" height="17" rx="0.6" fill={POLE} />
+      <Post />
       <rect x="4" y="2.5" width="24" height="16.5" rx="3" fill="#2b8a3e" />
       <g fill="#fff">
         <circle cx="10.6" cy="9.4" r="1.7" />
@@ -74,7 +79,7 @@ const DRAWINGS: Record<WaypointType, (id: string) => JSX.Element> = {
   ),
   break: () => (
     <>
-      <rect x="15" y="19" width="2" height="16" rx="0.6" fill={POLE} />
+      <Post />
       <circle cx="16" cy="11" r="9.6" fill="#1971c2" />
       <circle cx="16" cy="11" r="8" fill="none" stroke="#fff" stroke-width="1" />
       <rect x="12" y="6.5" width="3" height="9" rx="0.8" fill="#fff" />
@@ -127,7 +132,7 @@ const DRAWINGS: Record<WaypointType, (id: string) => JSX.Element> = {
   ),
   warning: () => (
     <>
-      <rect x="15" y="20" width="2" height="15" rx="0.6" fill={POLE} />
+      <Post />
       <path d="M16 2.2 L29.4 24.6 L2.6 24.6 Z" fill="#fcc419" stroke="#212529" stroke-width="2.2" stroke-linejoin="round" />
       <rect x="14.8" y="8.5" width="2.4" height="8.6" rx="1.1" fill="#111" />
       <circle cx="16" cy="20.2" r="1.4" fill="#111" />
@@ -135,7 +140,7 @@ const DRAWINGS: Record<WaypointType, (id: string) => JSX.Element> = {
   ),
   info: () => (
     <>
-      <rect x="15" y="21" width="2" height="14" rx="0.6" fill={POLE} />
+      <Post />
       <rect x="5" y="2.5" width="22" height="20" rx="3" fill="#1971c2" />
       <rect x="6.5" y="4" width="19" height="17" rx="2" fill="none" stroke="#fff" stroke-width="0.9" />
       <circle cx="16" cy="7.8" r="2" fill="#fff" />
