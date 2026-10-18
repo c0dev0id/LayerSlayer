@@ -688,6 +688,17 @@
   same tiles through a second source, as MapLibre advises for terrain and hillshade, and
   is lighter than MapLibre's default (exaggeration 0.3), which darkened a raster base
   map's labels in the Alps.
+  In 3D, distant tiles keep more detail than MapLibre gives them. All but labels and icons
+  is drawn into textures of the elevation tiles, and MapLibre's default lets their zoom
+  fall off so fast toward the horizon that the distant base map and tracks came from tiles
+  several zooms coarser, with oversized labels and fat roads. Compared at 70° over the
+  Alps, 6 zoom levels on screen (`setSourceTileLodParams`, default about 9.3) sharpened
+  the distance for about twice the tiles and left the near ground as it was; 4 made the
+  near ground coarser, and allowing more tiles (a ratio of 6 instead of 3) cost three
+  times the tiles for little more. The setting belongs to each source rather than to the
+  style, so it is set again after every style change, which may bring new sources; a flat
+  map keeps MapLibre's default. Finer distant tiles also draw a far track thinner, down to
+  broken dashes near the horizon.
 - **Spot details pick what matters on the move.** One Overpass query (`around`, about 40
   pixels at the zoom, 15 to 250 m) asks for drivable ways (motorways down to tracks,
   paths and bridleways; footways and cycleways are left out), places to go to (amenity,

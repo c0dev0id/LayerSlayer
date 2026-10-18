@@ -34,6 +34,14 @@ maplibregl.addProtocol(COG_PROTOCOL, async (params) => (await import('@geomatico
 /** What the app draws over the layers, bottom to top. */
 const OVERLAYS = [focusAreaOverlay, focusDraftOverlay, detailsOverlay, routeOverlay];
 
+/**
+ * How fast tiles lose detail toward the horizon of a tilted map, as MapLibre's
+ * maxZoomLevelsOnScreen and tileCountMaxMinRatio: MapLibre's default on a flat map, and in 3D
+ * a slower falloff that keeps the distance sharp for about twice the tiles.
+ */
+const FLAT_DETAIL: [number, number] = [9.314, 3];
+const TERRAIN_DETAIL: [number, number] = [6, 3];
+
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits;
 
 /**
@@ -120,6 +128,8 @@ export function MapView() {
       if (icon) map.addImage(id, icon.image, { pixelRatio: icon.pixelRatio, sdf: icon.sdf });
     });
     watchGeoJsonBounds(map);
+    // Each source keeps its own detail setting, and a style change may bring new sources.
+    map.on('style.load', () => map.setSourceTileLodParams(...(state.settings.terrain ? TERRAIN_DETAIL : FLAT_DETAIL)));
     map.on('sourcedata', (event) => {
       const id = layerOf(event.sourceId);
       if (id && event.tile) clearLayerError(id);
