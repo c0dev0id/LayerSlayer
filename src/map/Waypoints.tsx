@@ -7,6 +7,7 @@ import { waypointLook } from '../model/route';
 import { removeWaypoint, routeById, routeData, updateWaypoint } from '../state/routes';
 import { WaypointPin } from '../ui/icons';
 import { WaypointShape } from '../ui/WaypointShape';
+import { waypointScale, zoomAt } from './waypointScale';
 import { MarkerHandle, onMarkerMenu } from './markers';
 
 /**
@@ -44,6 +45,13 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
     const w = waypoint();
     handle.setPosition(w && [w.lngLat[0], w.lngLat[1]]);
   });
+  // The waypoint shrinks with the map, and in 3D with distance from the camera.
+  const fit = () => {
+    const w = waypoint();
+    if (w) content.style.setProperty('--waypoint-scale', String(waypointScale(zoomAt(map, w.lngLat))));
+  };
+  createEffect(fit);
+  map.on('move', fit);
   // Inline, since MapLibre sets pointer-events on a marker after dragging it.
   createEffect(() => {
     handle.marker.setDraggable(editable());
@@ -69,6 +77,7 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
     ];
   });
   onCleanup(() => {
+    map.off('move', fit);
     stopMenu();
     handle.remove();
   });

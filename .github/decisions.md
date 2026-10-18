@@ -459,6 +459,12 @@
     waypoint that has a type. The dialog shows the types drawn as the map draws them. A
     type this version does not know is dropped when routes are read, which leaves a plain
     pin. GPX export writes no types, as it writes no symbols.
+  - Waypoints shrink with the map, names included: full size from zoom 14, half every four
+    zooms below it, and never below about a third. The zoom is measured at the waypoint's
+    place, from how many pixels ten metres across the screen take there, so on a flat map
+    it is the map's zoom and in 3D distant waypoints shrink while near ones keep their
+    size. The whole marker is scaled from its foot by a CSS transform, set again whenever
+    the map moves; MapLibre's markers keep one size otherwise.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all

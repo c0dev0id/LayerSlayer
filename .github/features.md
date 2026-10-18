@@ -52,7 +52,8 @@
   and name colour, size and box colour. A waypoint is a pin, with a symbol of choice, or
   one of ten little objects standing on the map: start and finish flags, a camera for a
   photo spot, a meeting point sign, a pause sign for a break, a plate, a coffee cup, a
-  fuel pump, a warning triangle and an information sign.
+  fuel pump, a warning triangle and an information sign. Waypoints shrink as the map zooms
+  out, and in 3D with distance.
 - Layers, routes, settings, view and imported files survive a browser restart, and go
   to another browser as a `.lslay` project file (`.webmap` files from before the
   rename still open).

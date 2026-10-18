@@ -1108,9 +1108,12 @@ input.swatch {
   cursor: pointer;
 }
 
+/* A waypoint with its name, shrunk from its foot as Waypoints.tsx sets --waypoint-scale. */
 .waypoint {
   position: relative;
   isolation: isolate;
+  transform: scale(var(--waypoint-scale, 1));
+  transform-origin: 50% 100%;
 }
 
 /* A soft shadow on the ground under the pin's tip, 1 of its 28 units above the bottom. */
