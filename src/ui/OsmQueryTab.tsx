@@ -68,7 +68,7 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
     const name = layerName();
     const filters = [...new Set(chosen().flatMap((f) => f.filters))];
     const layerIcon = icon();
-    const look = { ...(layerIcon && { icon: layerIcon }), ...(namesOnly() && { label: 'name', dots: false }) };
+    const look = { ...(layerIcon && { icon: layerIcon }), ...(namesOnly() && { label: 'name', dots: false as const }) };
     void querying.run(async () => {
       const count = await addOsmQueryLayer(name, filters, look);
       if (count === 0) return 'Nothing was found in the focus area.';

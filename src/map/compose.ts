@@ -4,7 +4,6 @@ import type {
   SourceSpecification,
   SpriteSpecification,
   StyleSpecification,
-  SymbolLayerSpecification,
 } from 'maplibre-gl';
 import { intersectBounds } from '../geo/bounds';
 import { iconSize, type MapIcon } from '../model/icon';
@@ -473,6 +472,7 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
   const base: LayerBase = { source: layer.id, ...(sourceLayer && { 'source-layer': sourceLayer }), ...zoomRange(layer) };
   const opacity = layer.opacity;
   const dash = layer.lineDash && { 'line-dasharray': LINE_DASHES[layer.lineDash] };
+  const mark = pointMark(layer, base, color);
   return {
     sources: { [layer.id]: source },
     layers: [
@@ -499,24 +499,22 @@ function vector(layer: Layer, labelFont: string[], source: SourceSpecification, 
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': color, 'line-width': lineWidth(layer.lineWidth, LINE_WIDTH), 'line-opacity': opacity, ...dash },
       },
-      ...(layer.icon ? poiLayers(layer, layer.icon, base, color) : layer.dots === false ? [] : [dots(layer, base, color)]),
-      ...(layer.label ? labels(layer, layer.label, base, labelFont) : []),
+      ...mark.layers,
+      ...(layer.label ? labels(layer, layer.label, base, labelFont, mark.reach) : []),
     ],
   };
 }
 
 /**
- * A feature property written beside the features: along lines, and next to the dot or icon
- * of points and areas, on whichever side has room, or on them where they have neither, in
- * the layer's label style; features without the property are left without a label.
+ * A feature property written beside the features: along lines, and next to the mark of
+ * points and areas, `reach` pixels from them, on whichever side has room, or on them where
+ * they are unmarked, in the layer's label style; features without the property are left
+ * without a label.
  */
-function labels(layer: Layer, key: string, base: LayerBase, font: string[]): LayerSpecification[] {
+function labels(layer: Layer, key: string, base: LayerBase, font: string[], reach: number | undefined): LayerSpecification[] {
   const style = labelStyle(layer.labelStyle);
   const text = { 'text-field': ['to-string', ['get', key]] as never, 'text-font': font, 'text-size': style.size };
   const paint = { 'text-color': style.color, 'text-halo-color': style.outlineColor, 'text-halo-width': style.outlineWidth, 'text-opacity': layer.opacity };
-  const reach = layer.icon ? POI_REACH * iconSize(layer.iconSize) : layer.dots === false ? undefined : DOT_RADIUS + DOT_STROKE;
-  const beside: SymbolLayerSpecification['layout'] =
-    reach === undefined ? {} : { 'text-variable-anchor': ['left', 'right', 'top', 'bottom'], 'text-radial-offset': (reach + 3) / style.size, 'text-justify': 'auto' };
   // Offsets are in ems of the text. Line labels lie clear of the widest line, so that a
   // change of width only repaints the line instead of laying out its labels again.
   const lineOffset = 0.5 + (MAX_LINE_WIDTH / 2 + 2) / style.size;
@@ -534,7 +532,15 @@ function labels(layer: Layer, key: string, base: LayerBase, font: string[]): Lay
       id: `${layer.id}/label`,
       type: 'symbol',
       filter: ['any', POINT, POLYGON] as never,
-      layout: { ...text, ...beside, 'text-max-width': 12 },
+      layout: {
+        ...text,
+        ...(reach !== undefined && {
+          'text-variable-anchor': ['left', 'right', 'top', 'bottom'],
+          'text-radial-offset': (reach + 3) / style.size,
+          'text-justify': 'auto',
+        }),
+        'text-max-width': 12,
+      },
       paint,
     },
   ];
@@ -551,6 +557,16 @@ interface LayerBase {
 /** Radius of the dots points are drawn as, and of their white ring, in CSS pixels. */
 const DOT_RADIUS = 5;
 const DOT_STROKE = 1.5;
+
+/**
+ * How points, and with an icon areas too, are marked: the style layers, and how far the
+ * mark reaches from the point, which labels keep clear of; none where they are unmarked.
+ */
+function pointMark(layer: Layer, base: LayerBase, color: string): { layers: LayerSpecification[]; reach?: number } {
+  if (layer.icon) return { layers: poiLayers(layer, layer.icon, base, color), reach: POI_REACH * iconSize(layer.iconSize) };
+  if (layer.dots === false) return { layers: [] };
+  return { layers: [dots(layer, base, color)], reach: DOT_RADIUS + DOT_STROKE };
+}
 
 /** Points as dots of the layer's colour. */
 function dots(layer: Layer, base: LayerBase, color: string): LayerSpecification {
