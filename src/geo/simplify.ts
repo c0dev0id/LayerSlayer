@@ -39,14 +39,24 @@ export function simplifyLine(points: readonly LngLat[], tolerance: number): LngL
   return points.filter((_, i) => keep[i] === 1);
 }
 
-/** The line simplified until it has at most `maxPoints`, starting at a tolerance of 5 m. */
+/**
+ * The line simplified to at most `maxPoints`, at a tolerance of 5 m or, where that keeps
+ * too many, at the least tolerance that does not, found to within a metre.
+ */
 export function simplifyToCount(points: readonly LngLat[], maxPoints: number): LngLat[] {
   if (points.length <= maxPoints) return [...points];
-  let tolerance = 5;
-  let result = simplifyLine(points, tolerance);
+  let [tooFew, enough] = [0, 5];
+  let result = simplifyLine(points, enough);
+  if (result.length <= maxPoints) return result;
   while (result.length > maxPoints) {
-    tolerance *= 2;
-    result = simplifyLine(points, tolerance);
+    [tooFew, enough] = [enough, enough * 2];
+    result = simplifyLine(points, enough);
+  }
+  while (enough - tooFew > 1) {
+    const middle = (tooFew + enough) / 2;
+    const attempt = simplifyLine(points, middle);
+    if (attempt.length > maxPoints) tooFew = middle;
+    else [enough, result] = [middle, attempt];
   }
   return result;
 }
