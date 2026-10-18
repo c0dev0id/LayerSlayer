@@ -463,8 +463,9 @@
     zooms below it, and never below about a third. The zoom is measured at the waypoint's
     place, from how many pixels ten metres across the screen take there, so on a flat map
     it is the map's zoom and in 3D distant waypoints shrink while near ones keep their
-    size. The whole marker is scaled from its foot by a CSS transform, set again whenever
-    the map moves; MapLibre's markers keep one size otherwise.
+    size. The whole marker is scaled from its foot by a CSS transform, set again on the
+    events MapLibre places markers on (the map moving, the terrain changing) and while it
+    is dragged; MapLibre's markers keep one size otherwise.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all
