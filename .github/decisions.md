@@ -778,13 +778,14 @@
   MapLibre's default, which allows up to 180 but calls anything past 60 experimental:
   tried over the Alps with terrain, from 75° on the ground nearest the camera went missing
   in wedges. With terrain the style has a sky, by day MapLibre's own colours and by night
-  a dark blue, whose fog blends the distant ground into the horizon; the 3D button goes
-  from flat to day to night and back to flat. The map itself is not dimmed at night: dark
-  base maps exist, and dimming them would leave them too dark. A flat map has no sky:
-  tilted that far it shows white above the horizon, which is fine for a map. It reads the
-  same tiles through a second source, as MapLibre advises for terrain and hillshade, and
-  is lighter than MapLibre's default (exaggeration 0.3), which darkened a raster base
-  map's labels in the Alps.
+  a dark blue, whose fog blends the distant ground into the horizon, except while a focus
+  area is set, when the small world on its cover would fade into it (a ground blend of 1
+  puts the fog beyond the horizon); the 3D button goes from flat to day to night and back
+  to flat. The map itself is not dimmed at night: dark base maps exist, and dimming them
+  would leave them too dark. A flat map has no sky: tilted that far it shows white above
+  the horizon, which is fine for a map. It reads the same tiles through a second source,
+  as MapLibre advises for terrain and hillshade, and is lighter than MapLibre's default
+  (exaggeration 0.3), which darkened a raster base map's labels in the Alps.
   In 3D, the layers keep more detail in the distance than MapLibre gives them: its default
   lets the tile zoom fall off so fast toward the horizon that the distant base map and
   tracks came from tiles several zooms coarser, with oversized labels and fat roads.

@@ -104,6 +104,9 @@ describe('composeStyle', () => {
     expect(day['sky-color']).toBe('#88c6fc');
     expect(night['sky-color']).not.toBe(day['sky-color']);
     expect(night['fog-color']).not.toBe(day['fog-color']);
+    // A focus area keeps the ground clear of fog, under the same sky.
+    const focused = compose([], {}, { terrain: 'day', focus: [8, 48, 9, 49] }).sky!;
+    expect(focused).toEqual({ ...day, 'fog-ground-blend': 1 });
   });
 
   it('draws the map on its background colour, white where unset, under every layer', () => {

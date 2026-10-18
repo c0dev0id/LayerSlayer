@@ -84,7 +84,8 @@ function cached(keep: boolean, tiles: string[]): string[] {
 export interface MapOptions {
   /**
    * The bounds of the focus area: every layer requests tiles within them only, and a layer
-   * whose bounds lie outside is left out. Outside the area the focus overlay covers them.
+   * whose bounds lie outside is left out. Outside the area the focus overlay covers them,
+   * and in 3D no fog lies on the ground.
    */
   focus?: Bounds;
   /** The colour the map is drawn on; MAP_BACKGROUND where unset. */
@@ -224,7 +225,8 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     style.sources[TERRAIN_SOURCE] = TERRAIN;
     style.sources[HILLSHADE_SOURCE] = withinFocus(TERRAIN, focus);
     style.terrain = { source: TERRAIN_SOURCE, exaggeration: 1 };
-    style.sky = SKIES[terrain];
+    // Fog only lies deeper than its ground blend, which never exceeds 1: none over a focus area.
+    style.sky = focus ? { ...SKIES[terrain], 'fog-ground-blend': 1 } : SKIES[terrain];
     style.layers.splice(aboveBottom, 0, { id: HILLSHADE_LAYER, type: 'hillshade', source: HILLSHADE_SOURCE, paint: HILLSHADE_PAINT });
   }
   return style;
