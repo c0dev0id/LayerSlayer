@@ -249,6 +249,16 @@ export const TypographyIcon = () => (
   </Icon>
 );
 
+/** How a route and its waypoints look (Tabler's palette). */
+export const PaletteIcon = () => (
+  <Icon>
+    <path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25" />
+    <path d="M8.5 10.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+    <path d="M12.5 7.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+    <path d="M16.5 10.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  </Icon>
+);
+
 /** Rename (Tabler's pencil). */
 export const PencilIcon = () => (
   <Icon>
@@ -492,14 +502,14 @@ export const BarrierIcon = () => (
 /** How wide a waypoint pin is drawn at size 1, in CSS pixels. */
 const PIN_WIDTH = 27;
 
-/** The map pin of a waypoint, `scale` times its normal size; its tip marks the place. */
-export function WaypointPin(props: { icon?: MapIcon | undefined; scale?: number }) {
+/** The map pin of a waypoint in `color`, `scale` times its normal size; its tip marks the place. */
+export function WaypointPin(props: { icon?: MapIcon | undefined; scale?: number; color: string }) {
   const width = () => PIN_WIDTH * (props.scale ?? 1);
   return (
     <svg viewBox="0 0 22 28" width={width()} height={(width() * 28) / 22} aria-hidden="true">
       <path
         d="M11 27s-9.5-9.2-9.5-15.6a9.5 9.5 0 0 1 19 0C20.5 17.8 11 27 11 27z"
-        fill="#c92a2a"
+        fill={props.color}
         stroke="#fff"
         stroke-width="1.5"
       />

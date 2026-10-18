@@ -21,9 +21,9 @@ describe('routeFeatures', () => {
   it('draws routed, pending, failed and straight legs', () => {
     const lines = routeFeatures([route], new Set(['car/2,2;3,3']));
     expect(lines.features.map((f) => f.properties)).toEqual([
-      { state: 'routed', color: '#e8590c', width: 4 },
-      { state: 'failed', color: '#e8590c', width: 4 },
-      { state: 'straight', color: '#e8590c', width: 4 },
+      { state: 'routed', color: '#e8590c', width: 4, outlineColor: '#ffffff', outlineWidth: 1.5 },
+      { state: 'failed', color: '#e8590c', width: 4, outlineColor: '#ffffff', outlineWidth: 1.5 },
+      { state: 'straight', color: '#e8590c', width: 4, outlineColor: '#ffffff', outlineWidth: 1.5 },
     ]);
     expect(lines.features[0]!.geometry.coordinates).toEqual([
       [1, 1],
@@ -38,5 +38,10 @@ describe('routeFeatures', () => {
     expect(lines.features.map((f) => f.properties!['width'])).toEqual([7.5, 7.5, 7.5]);
     // Whatever a project file says is kept within the slider's bounds.
     expect(routeFeatures([{ ...route, lineWidth: 500 }], new Set()).features[0]!.properties!['width']).toBe(10);
+  });
+
+  it('outlines a route in its own colour and width, within bounds', () => {
+    expect(routeFeatures([{ ...route, outlineColor: '#000000', outlineWidth: 3 }], new Set()).features[0]!.properties).toMatchObject({ outlineColor: '#000000', outlineWidth: 3 });
+    expect(routeFeatures([{ ...route, outlineColor: 'black', outlineWidth: 50 }], new Set()).features[0]!.properties).toMatchObject({ outlineColor: '#ffffff', outlineWidth: 4 });
   });
 });

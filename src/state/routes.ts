@@ -122,8 +122,18 @@ export function removeRoute(id: string): void {
   setRouteData('waypoints', (list) => list.filter((w) => w.routeId !== id));
 }
 
+/** How the route's line is outlined, and how its waypoints look. */
+type OutlineSetting = 'outlineColor' | 'outlineWidth';
+type WaypointLookSetting = 'waypointColor' | 'waypointTextColor' | 'waypointTextSize' | 'waypointBoxColor';
+
 /** Sets a property of a route as an undo step; with `gesture`, the values set until the gesture ends make one step. */
-function setRouteProperty<K extends 'name' | 'color' | 'waypointSize' | 'lineWidth'>(id: string, key: K, value: Route[K], label: string, gesture = false): void {
+function setRouteProperty<K extends 'name' | 'color' | 'waypointSize' | 'lineWidth' | OutlineSetting | WaypointLookSetting>(
+  id: string,
+  key: K,
+  value: Route[K],
+  label: string,
+  gesture = false,
+): void {
   const index = routeData.routes.findIndex((r) => r.id === id);
   if (index < 0 || routeData.routes[index]![key] === value) return;
   recordEdit(label, gesture ? `${key} ${id}` : undefined);
@@ -147,6 +157,33 @@ export function setWaypointSize(id: string, size: number): void {
 /** Sets the width of a route's line; dragging the slider makes one undo step. */
 export function setRouteLineWidth(id: string, width: number): void {
   setRouteProperty(id, 'lineWidth', width, 'Change line width', true);
+}
+
+/** Sets the colour or width of a route's outline; picking or dragging makes one undo step. */
+export function setRouteOutline<K extends OutlineSetting>(id: string, key: K, value: Route[K]): void {
+  setRouteProperty(id, key, value, 'Change outline', true);
+}
+
+/** Sets how a route's waypoints look; picking or dragging makes one undo step. */
+export function setWaypointLook<K extends WaypointLookSetting>(id: string, key: K, value: Route[K]): void {
+  setRouteProperty(id, key, value, 'Change waypoint look', true);
+}
+
+/** Puts back the white outline of a route's line, as one undo step. */
+export function resetRouteOutline(id: string): void {
+  clearRouteProperties(id, ['outlineColor', 'outlineWidth'], 'Reset outline');
+}
+
+/** Puts back the default look of a route's waypoints, as one undo step. */
+export function resetWaypointLook(id: string): void {
+  clearRouteProperties(id, ['waypointColor', 'waypointTextColor', 'waypointTextSize', 'waypointBoxColor'], 'Reset waypoint look');
+}
+
+function clearRouteProperties(id: string, keys: readonly (OutlineSetting | WaypointLookSetting)[], label: string): void {
+  const index = routeData.routes.findIndex((r) => r.id === id);
+  if (index < 0 || keys.every((key) => routeData.routes[index]![key] === undefined)) return;
+  recordEdit(label);
+  setRouteData('routes', index, Object.fromEntries(keys.map((key) => [key, undefined])) as Partial<Route>);
 }
 
 /**

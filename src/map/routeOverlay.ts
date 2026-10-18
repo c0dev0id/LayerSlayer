@@ -1,7 +1,7 @@
 import type { FilterSpecification, LayerSpecification } from 'maplibre-gl';
 import { createMemo, createRoot } from 'solid-js';
 import { lineWidth } from '../model/line';
-import { ROUTE_LINE_WIDTH, type LngLat, type Route } from '../model/route';
+import { ROUTE_LINE_WIDTH, routeOutline, type LngLat, type Route } from '../model/route';
 import { legCoordinates, legState, routeLegs } from '../routing/legs';
 import { ROUTING_ATTRIBUTION } from '../routing/osrm';
 import { decodePolyline } from '../routing/polyline';
@@ -11,9 +11,6 @@ import { ROUND_LINE, type Overlay } from './overlays';
 
 /** The source of the route tool's lines. */
 const ROUTES_SOURCE = 'route-tool';
-
-/** How far the white casing reaches beyond a route's line on each side, in pixels. */
-const CASING = 1.5;
 
 /** Legs drawn as part of the route: routed, or straight by choice. Pending and failed legs are dashed. */
 const DRAWN: FilterSpecification = ['in', ['get', 'state'], ['literal', ['routed', 'straight']]];
@@ -25,7 +22,7 @@ const ROUTE_LAYERS: LayerSpecification[] = [
     source: ROUTES_SOURCE,
     filter: DRAWN,
     layout: ROUND_LINE,
-    paint: { 'line-color': '#ffffff', 'line-width': ['+', ['get', 'width'], 2 * CASING], 'line-opacity': 0.85 },
+    paint: { 'line-color': ['get', 'outlineColor'], 'line-width': ['+', ['get', 'width'], ['*', 2, ['get', 'outlineWidth']]], 'line-opacity': 0.85 },
   },
   {
     id: `${ROUTES_SOURCE}-line`,
@@ -67,7 +64,14 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
   for (const route of routes) {
     for (const leg of routeLegs(route)) {
       const coordinates = legCoordinates(route, leg, decode).map((p): LngLat => [p[0], p[1]]);
-      const properties = { state: legState(route, leg, failed), color: route.color, width: lineWidth(route.lineWidth, ROUTE_LINE_WIDTH) };
+      const outline = routeOutline(route);
+      const properties = {
+        state: legState(route, leg, failed),
+        color: route.color,
+        width: lineWidth(route.lineWidth, ROUTE_LINE_WIDTH),
+        outlineColor: outline.color,
+        outlineWidth: outline.width,
+      };
       features.push({ type: 'Feature', properties, geometry: { type: 'LineString', coordinates } });
     }
   }

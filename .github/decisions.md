@@ -425,15 +425,24 @@
     still what a GPX file holds, the line with its waypoints, so a route's deletion takes
     its waypoints along in the same undo step, and only the route being drawn has its
     waypoints draggable. Stored waypoints whose route is missing are dropped when read.
-  - A route's colour, line width and waypoint size are route edits like its name, so they
-    are undo steps: left out of the history, an undo of an earlier edit would restore the
-    snapshot taken before it and quietly revert them. A colour picker and a slider send an
-    input per movement, so edits of one gesture (`recordEdit(label, gesture)`) make one
-    step; the input's change event (`endGesture`) closes it. The waypoint size shares the
-    1–3× range of layer icons (`model/icon.ts`); pins are 27 px wide at 1×. The line width
-    shares the 0.5–10 px range and the slider of a vector layer's lines; it is a property
-    of each line feature of the route overlay (`width`), read by the line and its casing
-    (1.5 px wider on each side), so one overlay layer draws every route at its own width.
+  - A route's colour, line width, outline, waypoint size and waypoint look are route edits
+    like its name, so they are undo steps: left out of the history, an undo of an earlier
+    edit would restore the snapshot taken before it and quietly revert them. A colour
+    picker and a slider send an input per movement, so edits of one gesture
+    (`recordEdit(label, gesture)`) make one step; the input's change event (`endGesture`)
+    closes it. The waypoint size shares the 1–3× range of layer icons (`model/icon.ts`);
+    pins are 27 px wide at 1×. The line width shares the 0.5–10 px range and the slider of
+    a vector layer's lines. Width and outline are properties of each line feature of the
+    route overlay, read by the line and its casing (white, 1.5 px on each side, unless the
+    route sets its own colour and a width of 0–4 px), so one overlay layer draws every
+    route in its own look.
+  - Waypoints take a pin colour, and their names a text colour, a size (8–24 px, as layer
+    labels) and a box colour, from their route, like their size. The name keeps its box:
+    the box keeps it readable on any map, as an outline does for a layer's labels, so the
+    text gets no outline of its own. Colours a route leaves unset follow the panel's
+    theme, and their pickers show the theme's colour. The outline and the waypoint look
+    are set in panels like a layer's label style, beside the line width and waypoint size
+    sliders; each panel names its own anchor, as every route's settings are shown at once.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all

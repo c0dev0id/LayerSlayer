@@ -47,7 +47,9 @@
   around it covered in the dimmed background colour, showing a graticule, coastlines and
   country borders, and the area lifted off it by a shadow.
 - Route drawing over the layers: routed or straight legs, insert, drag and delete points,
-  waypoints, undo and redo, car, bike and foot profiles, GPX export and import.
+  waypoints, undo and redo, car, bike and foot profiles, GPX export and import. Each route
+  has its own colour, line width and outline, and its waypoints their own size, pin colour
+  and name colour, size and box colour.
 - Layers, routes, settings, view and imported files survive a browser restart, and go
   to another browser as a `.lslay` project file (`.webmap` files from before the
   rename still open).

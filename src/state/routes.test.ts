@@ -106,6 +106,30 @@ describe('route history', () => {
     expect(s.undoLabel()).toBe('Draw route');
   });
 
+  it('sets the outline and waypoint look per setting, and puts each back in one step', async () => {
+    const s = await freshStore();
+    s.addRoute(route('r'));
+    for (const width of [2, 3]) s.setRouteOutline('r', 'outlineWidth', width);
+    s.endGesture();
+    s.setRouteOutline('r', 'outlineColor', '#000000');
+    s.endGesture();
+    s.setWaypointLook('r', 'waypointColor', '#1971c2');
+    s.endGesture();
+    s.setWaypointLook('r', 'waypointTextSize', 16);
+    expect(s.routeById('r')).toMatchObject({ outlineWidth: 3, outlineColor: '#000000', waypointColor: '#1971c2', waypointTextSize: 16 });
+    s.resetWaypointLook('r');
+    expect(s.routeById('r')).not.toHaveProperty('waypointColor');
+    expect(s.routeById('r')).not.toHaveProperty('waypointTextSize');
+    expect(s.routeById('r')).toMatchObject({ outlineWidth: 3 });
+    s.undo();
+    expect(s.routeById('r')).toMatchObject({ waypointColor: '#1971c2', waypointTextSize: 16 });
+    s.resetRouteOutline('r');
+    s.resetRouteOutline('r');
+    expect(s.undoLabel()).toBe('Reset outline');
+    s.undo();
+    expect(s.undoLabel()).toBe('Change waypoint look');
+  });
+
   it('keeps routes in the browser', async () => {
     const s = await freshStore();
     s.addRoute(route('kept'));

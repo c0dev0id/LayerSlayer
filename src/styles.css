@@ -1125,10 +1125,10 @@ input.swatch {
   overflow: hidden;
   transform: translateY(-50%);
   border-radius: 4px;
-  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  background: color-mix(in srgb, var(--waypoint-box, var(--panel)) 92%, transparent);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  color: var(--text);
-  font: 600 12px/1.4 system-ui, sans-serif;
+  color: var(--waypoint-text, var(--text));
+  font: 600 var(--waypoint-size, 12px) / 1.4 system-ui, sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
   pointer-events: none;

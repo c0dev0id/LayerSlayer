@@ -3,6 +3,7 @@ import { createEffect, createMemo, For, onCleanup } from 'solid-js';
 import { roundLngLat } from '../routing/legs';
 import { editingRouteId, setWaypointDraft, tool } from '../state/drawing';
 import { iconSize } from '../model/icon';
+import { waypointLook } from '../model/route';
 import { removeWaypoint, routeById, routeData, updateWaypoint } from '../state/routes';
 import { WaypointPin } from '../ui/icons';
 import { MarkerHandle, onMarkerMenu } from './markers';
@@ -19,11 +20,17 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
   const { map, id } = props;
   const waypoint = createMemo(() => routeData.waypoints.find((w) => w.id === id));
   const editable = () => editingRouteId() !== undefined && editingRouteId() === waypoint()?.routeId;
-  const scale = createMemo(() => iconSize(routeById(waypoint()?.routeId)?.waypointSize));
+  const route = () => routeById(waypoint()?.routeId);
+  const scale = createMemo(() => iconSize(route()?.waypointSize));
+  const look = createMemo(() => waypointLook(route()));
 
   const content = (
-    <div class="waypoint" title={waypoint()?.description ?? ''}>
-      <WaypointPin icon={waypoint()?.icon} scale={scale()} />
+    <div
+      class="waypoint"
+      title={waypoint()?.description ?? ''}
+      style={{ '--waypoint-text': look().text, '--waypoint-size': `${look().size}px`, '--waypoint-box': look().box }}
+    >
+      <WaypointPin icon={waypoint()?.icon} scale={scale()} color={look().pin} />
       <span class="waypoint-name">{waypoint()?.name}</span>
     </div>
   ) as HTMLElement;

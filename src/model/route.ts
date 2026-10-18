@@ -1,4 +1,6 @@
 import type { MapIcon } from './icon';
+import { MAX_LABEL_SIZE, MIN_LABEL_SIZE } from './label';
+import { isHexColor, within } from './stored';
 
 /** A position as longitude and latitude in degrees. */
 export type LngLat = [number, number];
@@ -36,10 +38,49 @@ export interface Route {
   waypointSize?: number;
   /** Width of the route's line in pixels; ROUTE_LINE_WIDTH where unset. */
   lineWidth?: number;
+  /** Colour of the outline along both sides of the route's line, and its width on each side in pixels; ROUTE_OUTLINE where unset. */
+  outlineColor?: string;
+  outlineWidth?: number;
+  /** Colour of the route's waypoint pins; WAYPOINT_COLOR where unset. */
+  waypointColor?: string;
+  /** Colour and size in pixels of the waypoints' names, and colour of the box behind them; the panel's own where unset. */
+  waypointTextColor?: string;
+  waypointTextSize?: number;
+  waypointBoxColor?: string;
 }
 
 /** Width of a route's line in pixels where it sets none. */
 export const ROUTE_LINE_WIDTH = 4;
+
+/** A white outline, 1.5 px on each side of the line, that keeps a route readable on any map. */
+export const ROUTE_OUTLINE = { color: '#ffffff', width: 1.5 };
+export const MAX_ROUTE_OUTLINE_WIDTH = 4;
+
+/** The route's outline, within bounds whatever a project file says. */
+export function routeOutline(route: Pick<Route, 'outlineColor' | 'outlineWidth'>): { color: string; width: number } {
+  return {
+    color: isHexColor(route.outlineColor) ? route.outlineColor : ROUTE_OUTLINE.color,
+    width: within(route.outlineWidth, 0, MAX_ROUTE_OUTLINE_WIDTH, ROUTE_OUTLINE.width),
+  };
+}
+
+export const WAYPOINT_COLOR = '#c92a2a';
+export const WAYPOINT_TEXT_SIZE = 12;
+
+/** How a route's waypoints look; the name's colours are left out where unset, so that they follow the panel's theme. */
+export function waypointLook(route: Partial<Pick<Route, 'waypointColor' | 'waypointTextColor' | 'waypointTextSize' | 'waypointBoxColor'>> = {}): {
+  pin: string;
+  text?: string;
+  size: number;
+  box?: string;
+} {
+  return {
+    pin: isHexColor(route.waypointColor) ? route.waypointColor : WAYPOINT_COLOR,
+    ...(isHexColor(route.waypointTextColor) && { text: route.waypointTextColor }),
+    size: within(route.waypointTextSize, MIN_LABEL_SIZE, MAX_LABEL_SIZE, WAYPOINT_TEXT_SIZE),
+    ...(isHexColor(route.waypointBoxColor) && { box: route.waypointBoxColor }),
+  };
+}
 
 /**
  * A named place (a GPX waypoint). It is none of a route's points, but belongs to a route
