@@ -48,8 +48,11 @@ export function toGpx(name: string, waypoints: readonly Waypoint[], tracks: read
 /** What a GPX file holds: waypoints, routes (`rte`) and tracks (`trk`) with their segments. */
 export interface GpxContent {
   waypoints: { lngLat: LngLat; name?: string; description?: string }[];
-  /** `course` is the line a Garmin device or BaseCamp calculated for the route, where the file has it. */
-  routes: { name?: string; points: LngLat[]; course?: LngLat[] }[];
+  /**
+   * `ways` holds, where the file has it, the way a Garmin device or BaseCamp calculated from
+   * each point on to the next: the point, then the points of the road after it.
+   */
+  routes: { name?: string; points: LngLat[]; ways?: LngLat[][] }[];
   tracks: { name?: string; segments: LngLat[][] }[];
 }
 
@@ -69,14 +72,14 @@ function garminShape(rtept: Element): Element[] {
   return extension ? children(extension, 'rpt') : [];
 }
 
-/** A route from its points, with the course Garmin calculated where its points carry one. */
+/** A route from its points, with the ways Garmin calculated between them where its points carry them. */
 function route(rte: Element): GpxContent['routes'][number] {
-  const rtepts = children(rte, 'rtept');
+  const rtepts = children(rte, 'rtept').filter((p) => position(p) !== undefined);
   const name = text(rte, 'name');
   const points = positions(rtepts);
   const shapes = rtepts.map(garminShape);
   if (!shapes.some((shape) => shape.length > 0)) return { name, points };
-  return { name, points, course: positions(rtepts.flatMap((p, i) => [p, ...shapes[i]!])) };
+  return { name, points, ways: rtepts.map((p, i) => positions([p, ...shapes[i]!])) };
 }
 
 /** Reads a GPX 1.0 or 1.1 document. */
@@ -103,7 +106,7 @@ export function parseGpx(xml: string): GpxContent {
  */
 export function gpxTracksGeoJson(xml: string): GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.MultiLineString> {
   const gpx = parseGpx(xml);
-  const courses = gpx.routes.flatMap((r) => (r.course ? [{ name: r.name, segments: [r.course] }] : []));
+  const courses = gpx.routes.flatMap((r) => (r.ways ? [{ name: r.name, segments: [r.ways.flat()] }] : []));
   const features = [...courses, ...gpx.tracks].flatMap((track) => {
     const segments = track.segments.filter((line) => line.length >= 2);
     if (segments.length === 0) return [];

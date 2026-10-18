@@ -3,6 +3,7 @@ import type { LngLat, Route } from '../model/route';
 import { parseGpx } from '../services/gpx';
 import GARMIN_ROUTE from '../services/fixtures/gpx-garmin-route.gpx?raw';
 import { gpxToRouteData, MAX_TRACK_POINTS, routeTracks } from './gpx';
+import { routePoints } from './legs';
 
 const decode = (geometry: string): LngLat[] => JSON.parse(geometry);
 
@@ -56,16 +57,36 @@ describe('gpxToRouteData', () => {
     expect(data.waypoints.every((w) => w.routeId === data.routes[0]!.id)).toBe(true);
   });
 
-  it("takes a route with Garmin's calculated course as a track, routing none of it", () => {
+  it("keeps a Garmin route's points, each leg routed along the way Garmin calculated", () => {
     const [garmin, plain] = gpxToRouteData(parseGpx(GARMIN_ROUTE), options).routes;
     expect(garmin!.name).toBe('Pass road');
     expect(garmin!.points.map((p) => [p.lngLat, p.straight === true])).toEqual([
       [[11, 48], false],
-      [[11.1, 48.1], true],
-      [[11.1, 48.2], true],
-      [[11.2, 48.3], true],
+      [[11.2, 48.3], false],
     ]);
-    expect(plain!.points.map((p) => p.straight === true)).toEqual([false, false]);
+    expect(Object.keys(garmin!.legs)).toEqual([`${options.profile}/11,48;11.2,48.3`]);
+    expect(routePoints(garmin!)).toEqual([
+      [11, 48],
+      [11.1, 48.1],
+      [11.1, 48.2],
+      [11.2, 48.3],
+    ]);
+    expect(plain!.legs).toEqual({});
+  });
+
+  it('joins the way of a Garmin route point that repeats the one before to the leg it lies on', () => {
+    const ways: [number, number][][] = [[[11, 48]], [[11, 48], [11.1, 48.1]], [[11.2, 48.3]]];
+    const gpx = { waypoints: [], tracks: [], routes: [{ points: [[11, 48], [11, 48], [11.2, 48.3]] as [number, number][], ways }] };
+    const [route] = gpxToRouteData(gpx, options).routes;
+    expect(route!.points.map((p) => p.lngLat)).toEqual([
+      [11, 48],
+      [11.2, 48.3],
+    ]);
+    expect(routePoints(route!)).toEqual([
+      [11, 48],
+      [11.1, 48.1],
+      [11.2, 48.3],
+    ]);
   });
 
   it('puts waypoints without a route or track into a route of their own, named after the file', () => {

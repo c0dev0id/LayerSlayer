@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodePolyline } from './polyline';
+import { decodePolyline, encodePolyline } from './polyline';
 
 describe('decodePolyline', () => {
   it('decodes the reference example of the encoding (precision 5)', () => {
@@ -23,5 +23,30 @@ describe('decodePolyline', () => {
 
   it('returns no points for an empty string', () => {
     expect(decodePolyline('')).toEqual([]);
+  });
+});
+
+describe('encodePolyline', () => {
+  it('writes the reference example of the encoding (precision 5)', () => {
+    expect(
+      encodePolyline(
+        [
+          [-120.2, 38.5],
+          [-120.95, 40.7],
+          [-126.453, 43.252],
+        ],
+        5,
+      ),
+    ).toBe('_p~iF~ps|U_ulLnnqC_mqNvxq`@');
+  });
+
+  it('writes what decodePolyline reads back, to six decimals', () => {
+    const points: [number, number][] = [
+      [11.575513, 48.137427],
+      [-0.000001, -33.9],
+      [179.999999, 85.05],
+    ];
+    expect(decodePolyline(encodePolyline(points))).toEqual(points);
+    expect(encodePolyline([])).toBe('');
   });
 });

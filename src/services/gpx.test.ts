@@ -143,7 +143,7 @@ describe('parseGpx', () => {
     ]);
   });
 
-  it("reads the course Garmin calculated for a route from its route points' extensions", () => {
+  it("reads the ways Garmin calculated between a route's points from their extensions", () => {
     const [garmin, plain] = parseGpx(GARMIN_ROUTE).routes;
     expect(garmin).toEqual({
       name: 'Pass road',
@@ -151,14 +151,16 @@ describe('parseGpx', () => {
         [11, 48],
         [11.2, 48.3],
       ],
-      course: [
-        [11, 48],
-        [11.1, 48.1],
-        [11.1, 48.2],
-        [11.2, 48.3],
+      ways: [
+        [
+          [11, 48],
+          [11.1, 48.1],
+          [11.1, 48.2],
+        ],
+        [[11.2, 48.3]],
       ],
     });
-    expect(plain).not.toHaveProperty('course');
+    expect(plain).not.toHaveProperty('ways');
   });
 
   it('reads GPX 1.0 and documents without a namespace', () => {
