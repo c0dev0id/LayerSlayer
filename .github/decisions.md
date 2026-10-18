@@ -512,20 +512,25 @@
       legs missing it at once, a second apart, and only once all of a route's legs are
       routed: a route routed leg by leg would otherwise send a query per leg.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
-    waypoints belong to its first route or track, or to a route without points named
-    after the file when it has none. A `<rte>` keeps all
-    its points and every leg is routed with the profile of the last route, however long
-    that takes at one request per second; a leg that fails stays unrouted (red dashed)
-    until a point of it moves, which gives it a new key. A `<trk>` is simplified with
-    Douglas–Peucker to at most 500 points joined by straight lines, since every point is
-    a marker while the route is drawn and an undo step copies all routes. Straight legs
-    keep their shape when the profile changes.
+    waypoints belong to its first route or track, or to a route without points named after
+    the file when it has none. A `<rte>` keeps all its points and every leg is routed with
+    the profile of the last route, however long that takes at one request per second; a
+    leg that fails stays unrouted (red dashed) until a point of it moves, which gives it a
+    new key. A `<trk>` is simplified with Douglas–Peucker to at most 500 points joined by
+    straight lines, since every point is a marker while the route is drawn and an undo
+    step copies all routes. The tolerance is the least that gets there, to within a metre:
+    doubling it from 5 m alone overshot, keeping 303 points at 160 m where 80 m kept 501.
+    Straight legs keep their shape when the profile changes.
   - Garmin devices and BaseCamp write the way they calculated for a route into the file:
     each `<rtept>` carries the points of the road on to the next as `gpxx:rpt` in its
-    `gpxx:RoutePointExtension` (GPX Extensions v3). Such a route is as good as a track,
-    so its route points and their `rpt`s, in order, are read as its course and imported
-    like a `<trk>`: simplified, straight legs, nothing routed. Routing its route points
-    again would replace Garmin's road with OSRM's, which may take another one. A route
+    `gpxx:RoutePointExtension` (GPX Extensions v3). Such a route keeps its route points,
+    and the way between each two becomes their leg's geometry, encoded and keyed as an
+    OSRM answer would be: the route follows Garmin's road with only its route points as
+    markers, and nothing is routed until it is recalculated or a point moves, which
+    replaces Garmin's road with OSRM's for those legs. Changing the profile routes all its
+    legs again, as for any route. It was first imported like a `<trk>`, its route points
+    and `rpt`s simplified to straight legs: a 290 km tour of 5,825 points kept 303 at 160
+    m of tolerance, cut across towns, and had no routed leg to recalculate. A route
     without `rpt`s is routed as before.
   - A GPX file can also be a layer (Add layer > Files), for tracks to look at rather than
     edit. Only its tracks are read (and routes with Garmin's course, which are as good as
