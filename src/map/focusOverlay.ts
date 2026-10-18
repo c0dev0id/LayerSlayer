@@ -4,6 +4,7 @@ import { MAX_LATITUDE } from '../geo/mercator';
 import type { LngLat } from '../model/route';
 import { focusCursor, focusDraft } from '../state/drawing';
 import { state } from '../state/store';
+import { MAP_BACKGROUND } from './compose';
 import { ROUND_LINE, type Overlay } from './overlays';
 
 /**
@@ -25,9 +26,19 @@ const lineLayer = (source: string): LayerSpecification => ({
   paint: { 'line-color': FOCUS_COLOR, 'line-width': 2 },
 });
 
+/** The layer that hides the map outside the focus area: a tap on it finds no features. */
+export const FOCUS_COVER_LAYER = `${AREA_SOURCE}-cover`;
+
 const AREA_LAYERS: LayerSpecification[] = [
   {
-    id: `${AREA_SOURCE}-mask`,
+    id: FOCUS_COVER_LAYER,
+    type: 'fill',
+    source: AREA_SOURCE,
+    filter: ['==', ['geometry-type'], 'Polygon'],
+    paint: { 'fill-color': ['get', 'background'] },
+  },
+  {
+    id: `${AREA_SOURCE}-dim`,
     type: 'fill',
     source: AREA_SOURCE,
     filter: ['==', ['geometry-type'], 'Polygon'],
@@ -84,16 +95,17 @@ const feature = (geometry: GeoJSON.Geometry, properties: GeoJSON.GeoJsonProperti
 });
 
 /**
- * The focus area as map features: the world with the area cut out, to dim what lies
- * outside, and the area's outline. MapLibre takes a ring wound like the first as a polygon
- * of its own, so the cut-out runs clockwise, against the world.
+ * The focus area as map features: the world with the area cut out, which covers what lies
+ * outside in the map's `background` colour, and the area's outline. MapLibre takes a ring
+ * wound like the first as a polygon of its own, so the cut-out runs clockwise, against the
+ * world.
  */
-export function focusAreaFeatures(focus: readonly LngLat[] | undefined): GeoJSON.FeatureCollection {
+export function focusAreaFeatures(focus: readonly LngLat[] | undefined, background: string): GeoJSON.FeatureCollection {
   if (!focus || focus.length < 3) return collection([]);
   const corners = copy(focus);
   const hole = signedArea(corners) > 0 ? [...corners].reverse() : corners;
   return collection([
-    feature({ type: 'Polygon', coordinates: [WORLD, [...hole, hole[0]!]] }),
+    feature({ type: 'Polygon', coordinates: [WORLD, [...hole, hole[0]!]] }, { background }),
     feature({ type: 'LineString', coordinates: [...corners, corners[0]!] }),
   ]);
 }
@@ -110,7 +122,7 @@ export function focusDraftFeatures(draft: readonly LngLat[] | undefined, cursor?
 
 export const focusAreaOverlay: Overlay = {
   id: AREA_SOURCE,
-  data: createRoot(() => createMemo(() => focusAreaFeatures(state.focus))),
+  data: createRoot(() => createMemo(() => focusAreaFeatures(state.focus, state.settings.background ?? MAP_BACKGROUND))),
   layers: AREA_LAYERS,
 };
 

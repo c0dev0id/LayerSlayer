@@ -15,7 +15,7 @@ const winding = (ring: GeoJSON.Position[]) => ring.slice(1).reduce((sum, [x2, y2
 describe('focusAreaFeatures', () => {
   it('cuts the area out of the world against its winding, whichever way it was drawn', () => {
     for (const corners of [square, [...square].reverse()]) {
-      const [mask, outline] = focusAreaFeatures(corners).features;
+      const [mask, outline] = focusAreaFeatures(corners, '#ffffff').features;
       const [world, hole] = (mask!.geometry as GeoJSON.Polygon).coordinates;
       expect(Math.sign(winding(world!))).toBe(1);
       expect(Math.sign(winding(hole!))).toBe(-1);
@@ -24,8 +24,13 @@ describe('focusAreaFeatures', () => {
     }
   });
 
+  it('covers the world around the area in the background colour', () => {
+    const [mask] = focusAreaFeatures(square, '#1b2b44').features;
+    expect(mask!.properties).toEqual({ background: '#1b2b44' });
+  });
+
   it('has nothing to draw without an area', () => {
-    expect(focusAreaFeatures(undefined).features).toEqual([]);
+    expect(focusAreaFeatures(undefined, '#ffffff').features).toEqual([]);
   });
 });
 
