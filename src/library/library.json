@@ -91,6 +91,7 @@
       "id": "global-openstreetmap-terrestris",
       "type": "wms",
       "url": "https://ows.terrestris.de/osm/service?SERVICE=WMS&REQUEST=GetCapabilities",
+      "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, © Natural Earth Data, © GEBCO Bathymetric Compilation Group 2019, © <a href=\"https://terrestris.de/en/products/free-osm-wms/\">terrestris</a>",
       "dmd": true
     },
     {

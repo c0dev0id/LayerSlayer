@@ -4,6 +4,8 @@ import { IMPORT_ACCEPT } from '../services/importFile';
 import { SERVICE_TYPES } from '../services/types';
 import topplus from '../services/fixtures/wmts-topplus.xml?raw';
 import { parseWmts } from '../services/wmts';
+import terrestris from '../services/fixtures/wms130-terrestris.xml?raw';
+import { parseWms } from '../services/wms';
 import { parseXyz } from '../services/xyz';
 import { originOf } from '../ui/offers';
 import { defaultState } from '../state/store';
@@ -101,6 +103,14 @@ describe('library', () => {
     const info = withEntry(parseXyz(entry.url), entry);
     expect(info.title).toBe('OpenTopoMap');
     expect(info.offers[0]!.draft).toMatchObject({ name: 'OpenTopoMap', source: { maxzoom: 17 }, attribution: expect.stringContaining('OpenTopoMap') });
+  });
+
+  it('gives the entry attribution to the layers of a service that names none', () => {
+    const entry = service('OpenStreetMap — terrestris');
+    const drafts = withEntry(parseWms(terrestris, entry.url), entry).offers.flatMap((o) => (o.draft ? [o.draft] : []));
+    expect(entry.attribution).toContain('terrestris');
+    expect(drafts.length).toBeGreaterThan(0);
+    for (const draft of drafts) expect(draft.attribution).toBe(entry.attribution);
   });
 
   it('names the layer of a downloaded file after its entry, with the file address as its origin', () => {

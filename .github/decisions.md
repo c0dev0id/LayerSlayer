@@ -316,6 +316,11 @@
     short, and copy themselves when clicked: the source line copies the address the layer
     was added from (a capabilities document, not a tile template with matrix
     placeholders), the same one its details show.
+  - An entry's attribution credits every layer of its service, not only the tile templates
+    and files that cannot name one themselves. It is set where a service credits its
+    sources elsewhere than in its layers: terrestris names them only in its service's
+    access constraints, a long list of sources ending in a privacy clause, so its entry
+    holds the line terrestris asks for, with a link to its service page.
 - **Data a provider keeps to itself stays out.** Rumo's PMTiles archives and styles allow
   only Rumo's own site by their CORS rules, and the MapTiler key in them is limited to
   that domain; OsmAnd's off-road tiles answer other pages' requests with 502. A CORS proxy

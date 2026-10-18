@@ -11,7 +11,7 @@ interface EntryBase {
   region: string;
   category: string;
   note?: string;
-  /** For a tile template or a file: what it cannot say itself. */
+  /** The credit line for what cannot give one itself: a tile template, a file, or a service whose layers name no attribution. */
   attribution?: string;
   bounds?: Bounds;
 }
@@ -75,8 +75,9 @@ export function entryService(entry: Pick<ServiceEntry, 'type' | 'url' | 'name' |
 
 /**
  * What a service read from the library offers, with what the entry knows on top: a
- * service with a single layer takes the entry's name, a tile template its attribution,
- * bounds and zooms, and feature layers the service's own symbols where the entry says so.
+ * service with a single layer takes the entry's name, every layer its attribution and
+ * bounds, a tile template its zooms, and feature layers the service's own symbols where
+ * the entry says so.
  */
 export function withEntry(info: ServiceInfo, entry: ServiceEntry): ServiceInfo {
   const single = info.offers.length === 1;
