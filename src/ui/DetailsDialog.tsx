@@ -240,7 +240,7 @@ function SeaCard(props: { sea: Sea }) {
 }
 
 function DetailCard(props: { details: Details; presets: OsmFeature[] | undefined }) {
-  const preset = () => (props.presets ? matchingFeature(props.presets, props.details.tags) : undefined);
+  const preset = () => (props.presets ? matchingFeature(props.presets, props.details) : undefined);
   const KindIcon = KIND_ICONS[props.details.kind];
   return (
     <section class="detail-card">

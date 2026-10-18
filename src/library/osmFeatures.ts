@@ -1,5 +1,5 @@
 import type { MapIcon } from '../model/icon';
-import { formatFilter, matchesFilter, parseFilter } from '../services/osm';
+import { formatFilter, matchesFilter, parseFilter, type OsmObject } from '../services/osm';
 
 /**
  * A kind of OpenStreetMap feature to query: what it is called, the tag filters that find
@@ -31,9 +31,9 @@ export function filterOsmFeatures(features: readonly OsmFeature[], query: string
   return features.filter((f) => words.every((w) => `${f.name} ${f.category} ${f.filters.join(' ')}`.toLowerCase().includes(w)));
 }
 
-/** The first feature with an icon whose filters the tags match: the icon an OSM element is shown with. */
-export function matchingFeature(features: readonly OsmFeature[], tags: Readonly<Record<string, string>>): OsmFeature | undefined {
-  return features.find((feature) => feature.icon && feature.filters.some((filter) => matchesFilter(filter, tags)));
+/** The first feature with an icon whose filters the object matches: the icon an OSM element is shown with. */
+export function matchingFeature(features: readonly OsmFeature[], object: Pick<OsmObject, 'type' | 'tags'>): OsmFeature | undefined {
+  return features.find((feature) => feature.icon && feature.filters.some((filter) => matchesFilter(filter, object)));
 }
 
 /** Tags typed in as a feature of their own, named by its filter. Throws where the tags cannot be read. */

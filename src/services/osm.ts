@@ -99,9 +99,11 @@ export function searchesOf(filters: readonly string[]): Search[] {
   return searches;
 }
 
-/** Whether OSM tags match a filter's tags, as the sources find them; the kind of object it names is not looked at. */
-export function matchesFilter(filter: string, tags: Readonly<Record<string, string>>): boolean {
-  return parseFilter(filter).conditions.every((condition) => {
+/** Whether an OSM object matches a filter, as the sources find it: its kind, where the filter names one, and its tags. */
+export function matchesFilter(filter: string, { type, tags }: Pick<OsmObject, 'type' | 'tags'>): boolean {
+  const { type: wanted, conditions } = parseFilter(filter);
+  if (wanted && wanted !== type) return false;
+  return conditions.every((condition) => {
     const tag = tags[condition.key];
     if (condition.op === 'any') return tag !== undefined;
     if (condition.op === 'contains') return tag?.toLowerCase().includes(condition.value.toLowerCase()) === true;

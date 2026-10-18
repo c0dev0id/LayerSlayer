@@ -1,6 +1,6 @@
 import { insideRing } from '../geo/clip';
 import type { LngLat } from '../model/route';
-import { postpassOrOverpass, type OsmObject } from './osm';
+import { postpassOrOverpass, type OsmObject, type OsmType } from './osm';
 import { askOverpass, fromOverpass } from './overpass';
 import { askPostpass, condition, selectObjects, sql, tagCondition } from './postpass';
 
@@ -313,6 +313,7 @@ export interface Details {
   rows: DetailRow[];
   /** The element on openstreetmap.org, with all its tags. */
   url: string;
+  type: OsmType;
   tags: Record<string, string>;
   /** Where it lies, for the map to show: a node as a point, a way as a line, a relation as its members' lines. */
   geometry: GeoJSON.Geometry;
@@ -584,6 +585,7 @@ export function describe({ kind, object: { type, id, tags, geometry }, distance 
     distance,
     rows,
     url: `https://www.openstreetmap.org/${type}/${id}`,
+    type,
     tags,
     geometry,
   };

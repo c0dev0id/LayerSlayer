@@ -93,15 +93,16 @@ describe('searchesOf', () => {
 });
 
 describe('matchesFilter', () => {
-  it('matches tags as Overpass finds them', () => {
-    const tags = { name: 'Ehemaliges US-Sonderwaffenlager Clausen', natural: 'grassland' };
-    expect(matchesFilter('name~sonderwaffenlager', tags)).toBe(true);
-    expect(matchesFilter('name~Sonderwaffenlager natural=grassland', tags)).toBe(true);
-    expect(matchesFilter('way natural=grassland', tags)).toBe(true);
-    expect(matchesFilter('name~Raketenstellung', tags)).toBe(false);
-    expect(matchesFilter('natural=*', tags)).toBe(true);
-    expect(matchesFilter('natural=heath', tags)).toBe(false);
-    expect(matchesFilter('landuse=*', tags)).toBe(false);
+  it('matches objects as Overpass finds them', () => {
+    const area = { type: 'way', tags: { name: 'Ehemaliges US-Sonderwaffenlager Clausen', natural: 'grassland' } } as const;
+    expect(matchesFilter('name~sonderwaffenlager', area)).toBe(true);
+    expect(matchesFilter('name~Sonderwaffenlager natural=grassland', area)).toBe(true);
+    expect(matchesFilter('way natural=grassland', area)).toBe(true);
+    expect(matchesFilter('node natural=grassland', area)).toBe(false);
+    expect(matchesFilter('name~Raketenstellung', area)).toBe(false);
+    expect(matchesFilter('natural=*', area)).toBe(true);
+    expect(matchesFilter('natural=heath', area)).toBe(false);
+    expect(matchesFilter('landuse=*', area)).toBe(false);
   });
 });
 

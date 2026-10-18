@@ -37,12 +37,12 @@ describe('OSM features', () => {
 describe('matchingFeature', () => {
   it('finds the feature an element is, among those with an icon', async () => {
     const loaded = await loadOsmFeatures();
-    expect(matchingFeature(loaded, { amenity: 'fuel', brand: 'Aral' })?.name).toBe('Fuel stations');
-    expect(matchingFeature(loaded, { barrier: 'gate' })?.name).toBe('Gates');
-    expect(matchingFeature(loaded, { power: 'generator', 'generator:source': 'wind' })?.name).toBe('Wind turbines');
-    expect(matchingFeature(loaded, { shop: 'jewelry' })?.name).toBe('All shops');
+    expect(matchingFeature(loaded, { type: 'node', tags: { amenity: 'fuel', brand: 'Aral' } })?.name).toBe('Fuel stations');
+    expect(matchingFeature(loaded, { type: 'node', tags: { barrier: 'gate' } })?.name).toBe('Gates');
+    expect(matchingFeature(loaded, { type: 'node', tags: { power: 'generator', 'generator:source': 'wind' } })?.name).toBe('Wind turbines');
+    expect(matchingFeature(loaded, { type: 'node', tags: { shop: 'jewelry' } })?.name).toBe('All shops');
     // Roads are found as lines, which have no icon.
-    expect(matchingFeature(loaded, { highway: 'track' })).toBeUndefined();
+    expect(matchingFeature(loaded, { type: 'way', tags: { highway: 'track' } })).toBeUndefined();
   });
 });
 
