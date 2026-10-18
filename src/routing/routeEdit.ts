@@ -2,7 +2,7 @@ import { VECTOR_COLORS } from '../model/layer';
 import type { LngLat, Profile, Route, RoutePoint } from '../model/route';
 import { pruneLegs, routedLegs } from './legs';
 
-/** Pure route edits. Each result keeps exactly the cached legs it still needs. */
+/** Pure route edits. Each result keeps exactly the routed legs it still needs. */
 
 function withPrunedLegs(route: Route): Route {
   return { ...route, legs: pruneLegs(route) };

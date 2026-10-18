@@ -1,7 +1,7 @@
 import type { LngLat, Profile, Route } from '../model/route';
 import { decodePolyline } from './polyline';
 
-/** Cache key of a routed leg: profile and both end points (exact coordinates). */
+/** The key a routed leg's geometry is kept under: profile and both end points (exact coordinates). */
 export function legKey(profile: Profile, from: LngLat, to: LngLat): string {
   return `${profile}/${from[0]},${from[1]};${to[0]},${to[1]}`;
 }
@@ -70,7 +70,7 @@ export function routePoints(route: RoutePath & Pick<Route, 'legs'>, decode = dec
   return withoutRepeats(routeLegs(route).flatMap((leg) => legCoordinates(route, leg, decode)));
 }
 
-/** The cached legs the route still needs; everything else, straight legs included, is dropped. */
+/** The routed legs the route still needs; everything else, straight legs included, is dropped. */
 export function pruneLegs(route: RoutePath & Pick<Route, 'legs'>): Record<string, string> {
   const needed = new Set(routedLegs(route).map((l) => l.key));
   return Object.fromEntries(Object.entries(route.legs).filter(([key]) => needed.has(key)));

@@ -403,7 +403,7 @@
 - **The route tool is mappic's.** Route model, leg routing, edits, history, markers, tap
   filter, toolbar, hint bar, context menu and GPX export are ported from mappic with their
   tests. A route is a list of points; each leg between two points is routed (OSRM
-  polyline6, cached on the route under a key of profile and both ends) or straight. Edits
+  polyline6, kept on the route under a key of profile and both ends) or straight. Edits
   are pure functions that keep exactly the legs still needed, and a pull-based pump asks
   the state for the next missing leg, one request per 1.1 s as FOSSGIS asks, so nothing
   stale is queued. What differs from mappic:
@@ -416,9 +416,9 @@
   - Routes and waypoints are a store of their own under the storage key
     `layerslayer-routes`, apart from the layers. Undo and redo cover this store only, so
     layer changes are never undone; the toolbar and Ctrl+Z work while a route is drawn.
-    Routing results are not undo steps; an undo restores the cached legs with the points.
+    Routing results are not undo steps; an undo restores the routed legs with the points.
   - A route can be recalculated, for a road network that changed since or legs that
-    failed: its cached legs are dropped and routed again, failed ones included. The old
+    failed: its routed legs are dropped and routed again, failed ones included. The old
     lines are not kept on screen until the new ones arrive; the pump knows only missing
     legs, and a third state for outdated ones would reach into the drawing, the counts
     and the export. The legs are drawn straight meanwhile, which also shows the progress.
@@ -518,20 +518,24 @@
     leg that fails stays unrouted (red dashed) until a point of it moves, which gives it a
     new key. A `<trk>` is simplified with Douglas–Peucker to at most 500 points joined by
     straight lines, since every point is a marker while the route is drawn and an undo
-    step copies all routes. The tolerance is the least that gets there, to within a metre:
-    doubling it from 5 m alone overshot, keeping 303 points at 160 m where 80 m kept 501.
-    Straight legs keep their shape when the profile changes.
+    step copies all routes. The tolerance is the least from 5 m that gets there.
+    Douglas–Peucker splits a line the same way at any tolerance, so one pass ranks the
+    points by the tolerance up to which each is kept, and the cut falls after the 500th.
+    Doubling the tolerance overshot, cutting a 290 km line that kept 501 points at 80 m to
+    303 at 160 m, and narrowing it down by trying tolerances in turn took twice as long on
+    a track of 200,000 points. Straight legs keep their shape when the profile changes.
   - Garmin devices and BaseCamp write the way they calculated for a route into the file:
     each `<rtept>` carries the points of the road on to the next as `gpxx:rpt` in its
     `gpxx:RoutePointExtension` (GPX Extensions v3). Such a route keeps its route points,
-    and the way between each two becomes their leg's geometry, encoded and keyed as an
-    OSRM answer would be: the route follows Garmin's road with only its route points as
-    markers, and nothing is routed until it is recalculated or a point moves, which
-    replaces Garmin's road with OSRM's for those legs. Changing the profile routes all its
-    legs again, as for any route. It was first imported like a `<trk>`, its route points
+    and where the file carries the way on from a point, that way becomes the geometry of
+    the leg to the next, encoded and keyed as an OSRM answer would be: the route follows
+    Garmin's road with only its route points as markers, and nothing is routed until it is
+    recalculated or a point moves, which replaces Garmin's road with OSRM's for those
+    legs. Legs without such a way are routed as in any route. Unlike OSRM's answers,
+    Garmin's way cannot be fetched again: recalculating or changing the profile drops it,
+    and only undo brings it back. It was first imported like a `<trk>`, its route points
     and `rpt`s simplified to straight legs: a 290 km tour of 5,825 points kept 303 at 160
-    m of tolerance, cut across towns, and had no routed leg to recalculate. A route
-    without `rpt`s is routed as before.
+    m of tolerance, cut across towns, and had no routed leg to recalculate.
   - A GPX file can also be a layer (Add layer > Files), for tracks to look at rather than
     edit. Only its tracks are read (and routes with Garmin's course, which are as good as
     tracks), converted to GeoJSON at import and kept as a GeoJSON file, so the layer is an
