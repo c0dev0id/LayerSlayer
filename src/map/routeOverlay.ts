@@ -1,19 +1,26 @@
 import type { FilterSpecification, LayerSpecification } from 'maplibre-gl';
 import { createMemo, createRoot } from 'solid-js';
+import type { Measured } from '../geo/densify';
 import { lineWidth } from '../model/line';
 import { ROUTE_LINE_WIDTH, routeOutline, type LngLat, type Route } from '../model/route';
-import { legCoordinates, legState, routeLegs } from '../routing/legs';
+import { legSamples, sampleKey } from '../routing/legSamples';
+import { legCoordinates, legState, routeLegs, type Leg } from '../routing/legs';
 import { ROUTING_ATTRIBUTION } from '../routing/osrm';
 import { decodePolyline } from '../routing/polyline';
 import { failedLegs } from '../routing/service';
+import { coloringData } from '../state/routeColoring';
 import { routeData } from '../state/routes';
 import { ROUND_LINE, type Overlay } from './overlays';
+import { coloredPieces, type ColoringData } from './routeColoring';
 
 /** The source of the route tool's lines. */
 const ROUTES_SOURCE = 'route-tool';
 
 /** Legs drawn as part of the route: routed, or straight by choice. Pending and failed legs are dashed. */
 const DRAWN: FilterSpecification = ['in', ['get', 'state'], ['literal', ['routed', 'straight']]];
+
+/** What the line layer draws: the pieces of coloured legs, and drawn legs in their route's colour. */
+const LINE: FilterSpecification = ['any', ['==', ['get', 'state'], 'piece'], ['all', DRAWN, ['!', ['has', 'colored']]]];
 
 const ROUTE_LAYERS: LayerSpecification[] = [
   {
@@ -28,7 +35,7 @@ const ROUTE_LAYERS: LayerSpecification[] = [
     id: `${ROUTES_SOURCE}-line`,
     type: 'line',
     source: ROUTES_SOURCE,
-    filter: DRAWN,
+    filter: LINE,
     layout: ROUND_LINE,
     paint: { 'line-color': ['get', 'color'], 'line-width': ['get', 'width'] },
   },
@@ -47,34 +54,50 @@ const ROUTE_LAYERS: LayerSpecification[] = [
 
 /** Decoded leg geometries; polyline strings are immutable, so they are their own cache key. */
 let decoded = new Map<string, LngLat[]>();
+/** The samples of the legs of coloured routes, by sample key. */
+let sampled = new Map<string, Measured>();
 
 /**
  * Every leg of every route as a line: routed and straight legs solid in the route's
- * colour and width, pending legs grey dashed, failed legs red dashed. Coordinates are copied, so
- * the result holds no store proxies.
+ * colour and width, pending legs grey dashed, failed legs red dashed. The drawn legs of a
+ * coloured route come in pieces of one colour each, where its colouring has the data for
+ * them. Coordinates are copied, so the result holds no store proxies.
  */
-export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<string>): GeoJSON.FeatureCollection<GeoJSON.LineString> {
-  const cache = new Map<string, LngLat[]>();
+export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<string>, data: ColoringData): GeoJSON.FeatureCollection<GeoJSON.LineString> {
+  const [decodedNow, sampledNow] = [new Map<string, LngLat[]>(), new Map<string, Measured>()];
   const decode = (geometry: string) => {
     const coordinates = decoded.get(geometry) ?? decodePolyline(geometry);
-    cache.set(geometry, coordinates);
+    decodedNow.set(geometry, coordinates);
     return coordinates;
+  };
+  const sample = (route: Route, leg: Leg) => {
+    const key = sampleKey(leg);
+    const samples = sampled.get(key) ?? legSamples(route, leg, decode);
+    sampledNow.set(key, samples);
+    return { key, samples };
   };
   const features: GeoJSON.Feature<GeoJSON.LineString>[] = [];
   for (const route of routes) {
     const outline = routeOutline(route.outline);
     const look = { color: route.color, width: lineWidth(route.lineWidth, ROUTE_LINE_WIDTH), outlineColor: outline.color, outlineWidth: outline.width };
-    for (const leg of routeLegs(route)) {
+    const legs = routeLegs(route).map((leg) => ({ leg, state: legState(route, leg, failed) }));
+    const drawn = legs.filter(({ state }) => state === 'routed' || state === 'straight');
+    const pieces = route.coloring && coloredPieces(route.coloring, drawn.map(({ leg }) => sample(route, leg)), data, route.color);
+    for (const { leg, state } of legs) {
       const coordinates = legCoordinates(route, leg, decode).map((p): LngLat => [p[0], p[1]]);
-      const properties = { state: legState(route, leg, failed), ...look };
-      features.push({ type: 'Feature', properties, geometry: { type: 'LineString', coordinates } });
+      const colored = pieces?.get(sampleKey(leg));
+      features.push({ type: 'Feature', properties: { state, ...look, ...(colored && { colored: true }) }, geometry: { type: 'LineString', coordinates } });
+      for (const piece of colored ?? []) {
+        const properties = { state: 'piece', color: piece.color, width: look.width };
+        features.push({ type: 'Feature', properties, geometry: { type: 'LineString', coordinates: piece.coordinates } });
+      }
     }
   }
-  decoded = cache;
+  [decoded, sampled] = [decodedNow, sampledNow];
   return { type: 'FeatureCollection', features };
 }
 
 /** The route lines as they are now, as plain data for the map. */
-const routeLines = createRoot(() => createMemo(() => routeFeatures(routeData.routes, failedLegs())));
+const routeLines = createRoot(() => createMemo(() => routeFeatures(routeData.routes, failedLegs(), coloringData())));
 
 export const routeOverlay: Overlay = { id: ROUTES_SOURCE, data: routeLines, layers: ROUTE_LAYERS, attribution: ROUTING_ATTRIBUTION };

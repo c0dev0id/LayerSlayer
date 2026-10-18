@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 import { reconcile, unwrap } from 'solid-js/store';
 import { isLngLat, PROFILES, type LngLat, type Profile, type Route, type RouteData, type RouteOutline, type Waypoint, type WaypointLook } from '../model/route';
+import { isRouteColoring, type RouteColoring } from '../model/routeColoring';
 import { isWaypointType } from '../model/waypointType';
 import * as edit from '../routing/routeEdit';
 import { History } from './history';
@@ -48,13 +49,21 @@ function isWaypoint(value: unknown): value is Waypoint {
  */
 export function parseRouteData(json: string): RouteData {
   const stored = JSON.parse(json) as Partial<RouteData>;
-  const routes = Array.isArray(stored.routes) ? stored.routes.filter(isRoute) : [];
+  const routes = Array.isArray(stored.routes) ? stored.routes.filter(isRoute).map(withKnownColoring) : [];
   const ids = new Set(routes.map((r) => r.id));
   const waypoints = Array.isArray(stored.waypoints) ? stored.waypoints.filter((w) => isWaypoint(w) && ids.has(w.routeId)).map(withKnownType) : [];
   return { routes, waypoints };
 }
 
 /** A waypoint of a type this version does not know is kept as a plain pin. */
+/** The route without a colouring this version does not know, which leaves its own colour. */
+function withKnownColoring(route: Route): Route {
+  if (route.coloring === undefined || isRouteColoring(route.coloring)) return route;
+  const plain = { ...route };
+  delete plain.coloring;
+  return plain;
+}
+
 function withKnownType(waypoint: Waypoint): Waypoint {
   if (waypoint.type === undefined || isWaypointType(waypoint.type)) return waypoint;
   const pin = { ...waypoint };
@@ -132,7 +141,7 @@ export function removeRoute(id: string): void {
 }
 
 /** Sets a property of a route as an undo step; with `gesture`, the values set until the gesture ends make one step. */
-function setRouteProperty<K extends 'name' | 'color' | 'waypointSize' | 'lineWidth' | 'outline' | 'waypointLook'>(
+function setRouteProperty<K extends 'name' | 'color' | 'waypointSize' | 'lineWidth' | 'coloring' | 'outline' | 'waypointLook'>(
   id: string,
   key: K,
   value: Route[K],
@@ -162,6 +171,11 @@ export function setWaypointSize(id: string, size: number): void {
 /** Sets the width of a route's line; dragging the slider makes one undo step. */
 export function setRouteLineWidth(id: string, width: number): void {
   setRouteProperty(id, 'lineWidth', width, 'Change line width', true);
+}
+
+/** Sets how a route's line is coloured along its length, or back to its colour for undefined. */
+export function setRouteColoring(id: string, coloring: RouteColoring | undefined): void {
+  setRouteProperty(id, 'coloring', coloring, 'Change line colouring');
 }
 
 /** Sets the colour or width of a route's outline; picking or dragging makes one undo step. */

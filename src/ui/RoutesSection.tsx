@@ -3,6 +3,7 @@ import { unwrap } from 'solid-js/store';
 import { geojsonBounds } from '../geo/bounds';
 import { lineWidth } from '../model/line';
 import { PROFILES, ROUTE_LINE_WIDTH, routeOutline, waypointLook, type LngLat, type Profile, type Route } from '../model/route';
+import { ROUTE_COLORINGS, type RouteColoring } from '../model/routeColoring';
 import { gpxToRouteData, routeTracks } from '../routing/gpx';
 import { routedLegs, routePoints } from '../routing/legs';
 import { ROUTING_MIN_INTERVAL_MS } from '../routing/osrm';
@@ -20,6 +21,7 @@ import {
   routeData,
   routeWaypoints,
   setRouteColor,
+  setRouteColoring,
   setRouteLineWidth,
   setRouteOutline,
   setRouteProfile,
@@ -230,6 +232,17 @@ function RouteRow(props: { route: Route }) {
         <StylePopover id={`route-outline-${route.id}`} title="The line's outline" label={`Outline of ${route.name}`} icon={<PaletteIcon />}>
           <OutlineRows route={route} />
         </StylePopover>
+      </div>
+      <div class="row" title="How the route's line is coloured along its length">
+        <span class="muted label">Colours</span>
+        <select
+          aria-label={`Line colouring of ${route.name}`}
+          value={route.coloring ?? ''}
+          onChange={(e) => setRouteColoring(route.id, (e.currentTarget.value || undefined) as RouteColoring | undefined)}
+        >
+          <option value="">Route colour</option>
+          <For each={ROUTE_COLORINGS}>{(coloring) => <option value={coloring.id}>{coloring.name}</option>}</For>
+        </select>
       </div>
       <Show when={waypoints() > 0}>
         <div class="row" title="How large the route's waypoints are drawn">

@@ -6,6 +6,8 @@ import { focusAreaFeatures, focusAreaOverlay, focusDraftFeatures, focusDraftOver
 import { withOverlays } from './overlays';
 import { routeFeatures, routeOverlay } from './routeOverlay';
 
+const NO_DATA = { elevations: new Map(), surfaces: new Map() };
+
 const corners: LngLat[] = [
   [8, 48],
   [9, 48],
@@ -30,7 +32,7 @@ describe('withOverlays', () => {
     const overlays = [
       { ...focusAreaOverlay, data: () => focusAreaFeatures(corners) },
       { ...focusDraftOverlay, data: () => focusDraftFeatures(corners, [8.5, 48.5]) },
-      { ...routeOverlay, data: () => routeFeatures([route], new Set()) },
+      { ...routeOverlay, data: () => routeFeatures([route], new Set(), NO_DATA) },
     ];
     const result = withOverlays(style, overlays);
     expect(validateStyleMin(result)).toEqual([]);

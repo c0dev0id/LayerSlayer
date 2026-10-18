@@ -1,7 +1,5 @@
 import type { LngLat } from '../model/route';
-
-/** Metres per degree of latitude, and of longitude at the equator. */
-const METRES_PER_DEGREE = 111_320;
+import { planeAt } from './plane';
 
 /**
  * The points of a line that Douglas–Peucker keeps at a tolerance in metres: the ends, and
@@ -11,9 +9,7 @@ const METRES_PER_DEGREE = 111_320;
  */
 export function simplifyLine(points: readonly LngLat[], tolerance: number): LngLat[] {
   if (points.length <= 2) return [...points];
-  const meanLat = points.reduce((sum, p) => sum + p[1], 0) / points.length;
-  const scale = Math.cos((meanLat * Math.PI) / 180);
-  const xy = points.map(([lng, lat]) => [lng * scale * METRES_PER_DEGREE, lat * METRES_PER_DEGREE] as const);
+  const xy = points.map(planeAt(points));
   const keep = new Uint8Array(points.length);
   keep[0] = keep[points.length - 1] = 1;
   // A stack of index ranges rather than recursion, for tracks of many thousand points.

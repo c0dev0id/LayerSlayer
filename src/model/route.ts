@@ -1,5 +1,6 @@
 import type { MapIcon } from './icon';
 import { MAX_LABEL_SIZE, MAX_OUTLINE_WIDTH, MIN_LABEL_SIZE } from './label';
+import type { RouteColoring } from './routeColoring';
 import { isHexColor, within } from './stored';
 import type { WaypointType } from './waypointType';
 
@@ -39,6 +40,8 @@ export interface Route {
   waypointSize?: number;
   /** Width of the route's line in pixels; ROUTE_LINE_WIDTH where unset. */
   lineWidth?: number;
+  /** How the route's line is coloured along its length; in the route's colour where unset. */
+  coloring?: RouteColoring;
   /** The outline along both sides of the route's line; ROUTE_OUTLINE where unset. */
   outline?: RouteOutline;
   /** How the route's waypoints look; red pins with names in the panel's colours where unset. */
