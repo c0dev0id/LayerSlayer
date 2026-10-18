@@ -454,9 +454,10 @@
     reads the same on every route; the route's pin colour is for plain pins. A white
     outline around the whole drawing, an SVG filter that grows its silhouette, sets every
     object off from the map, and the waypoint size scales them as it does pins. A plain
-    pin keeps the free choice of a symbol from the icon sets; picking a type drops it. The
-    dialog shows the types drawn as the map draws them. A type this version does not know
-    is drawn as a pin. GPX export writes no types, as it writes no symbols.
+    pin keeps the free choice of a symbol from the icon sets; the store drops the symbol
+    of a waypoint that has a type. The dialog shows the types drawn as the map draws them.
+    A type this version does not know is dropped when routes are read, which leaves a
+    plain pin. GPX export writes no types, as it writes no symbols.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all

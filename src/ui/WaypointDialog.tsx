@@ -2,8 +2,8 @@ import { createSignal, For, Show } from 'solid-js';
 import type { MapIcon } from '../model/icon';
 import { waypointLook } from '../model/route';
 import { WAYPOINT_TYPES, type WaypointType } from '../model/waypointType';
-import { setWaypointDraft, waypointDraft, type WaypointDraft } from '../state/drawing';
-import { addWaypoint, routeById, routeData, updateWaypoint } from '../state/routes';
+import { setWaypointDraft, waypointDraft } from '../state/drawing';
+import { addWaypoint, routeById, updateWaypoint } from '../state/routes';
 import { IconPickButton } from './IconPicker';
 import { WaypointPin } from './icons';
 import { showModalWhile } from './modal';
@@ -27,12 +27,9 @@ export function WaypointDialog() {
     const name = String(data.get('name') ?? '').trim();
     const description = String(data.get('description') ?? '').trim();
     if (!name) return;
-    const symbol = type ? undefined : icon;
-    if ('id' in draft) updateWaypoint(draft.id, { name, description, type, icon: symbol }, 'Edit waypoint');
-    else {
-      const waypoint = { id: crypto.randomUUID(), routeId: draft.routeId, lngLat: draft.lngLat, name };
-      addWaypoint({ ...waypoint, ...(description && { description }), ...(type && { type }), ...(symbol && { icon: symbol }) });
-    }
+    const change = { name, description, type, icon };
+    if (draft.id) updateWaypoint(draft.id, change, 'Edit waypoint');
+    else addWaypoint({ id: crypto.randomUUID(), routeId: draft.routeId, lngLat: draft.lngLat, ...change });
     setWaypointDraft(undefined);
   };
   return (
@@ -41,7 +38,7 @@ export function WaypointDialog() {
         {(draft) => {
           const [type, setType] = createSignal(draft.type);
           const [icon, setIcon] = createSignal(draft.icon);
-          const pinColor = () => waypointLook(routeById(routeOf(draft))).pin;
+          const pinColor = () => waypointLook(routeById(draft.routeId)?.waypointLook).pin;
           return (
             <form
               onSubmit={(e) => {
@@ -49,7 +46,7 @@ export function WaypointDialog() {
                 save(e.currentTarget, type(), icon());
               }}
             >
-              <h2>{'id' in draft ? 'Edit waypoint' : 'New waypoint'}</h2>
+              <h2>{draft.id ? 'Edit waypoint' : 'New waypoint'}</h2>
               <label>
                 Name
                 <input name="name" required autofocus value={draft.name} placeholder="Viewpoint, café, gravel ahead…" />
@@ -99,9 +96,4 @@ export function WaypointDialog() {
       </Show>
     </dialog>
   );
-}
-
-/** The route a waypoint draft belongs to. */
-function routeOf(draft: WaypointDraft): string | undefined {
-  return 'routeId' in draft ? draft.routeId : routeData.waypoints.find((w) => w.id === draft.id)?.routeId;
 }

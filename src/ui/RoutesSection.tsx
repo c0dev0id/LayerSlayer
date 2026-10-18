@@ -2,8 +2,7 @@ import { createMemo, createSignal, For, Show } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { geojsonBounds } from '../geo/bounds';
 import { lineWidth } from '../model/line';
-import { MAX_LABEL_SIZE, MIN_LABEL_SIZE } from '../model/label';
-import { MAX_ROUTE_OUTLINE_WIDTH, PROFILES, ROUTE_LINE_WIDTH, routeOutline, waypointLook, type LngLat, type Profile, type Route } from '../model/route';
+import { PROFILES, ROUTE_LINE_WIDTH, routeOutline, waypointLook, type LngLat, type Profile, type Route } from '../model/route';
 import { gpxToRouteData, routeTracks } from '../routing/gpx';
 import { routePoints } from '../routing/legs';
 import { nextRouteColor } from '../routing/routeEdit';
@@ -36,7 +35,9 @@ import { EditableName } from './EditableName';
 import { IconSizeSlider } from './IconSizeSlider';
 import { LineWidthSlider } from './LineWidthSlider';
 import { AreaIcon, CloseIcon, PaletteIcon } from './icons';
+import { OutlineWidthSlider } from './OutlineWidthSlider';
 import { StylePopover } from './StylePopover';
+import { TextSizeSlider } from './TextSizeSlider';
 
 /** A number with the word it counts, as `3 points`. */
 const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
@@ -229,7 +230,7 @@ function RouteRow(props: { route: Route }) {
 /** The colour and width of the outline along the route's line. */
 function OutlineRows(props: { route: Route }) {
   const route = props.route;
-  const outline = () => routeOutline(route);
+  const outline = () => routeOutline(route.outline);
   return (
     <>
       <div class="row" title="The colour and width of the outline along both sides of the line">
@@ -239,23 +240,17 @@ function OutlineRows(props: { route: Route }) {
           class="swatch"
           aria-label={`Outline colour of ${route.name}`}
           value={outline().color}
-          onInput={(e) => setRouteOutline(route.id, 'outlineColor', e.currentTarget.value)}
+          onInput={(e) => setRouteOutline(route.id, { color: e.currentTarget.value })}
           onChange={endGesture}
         />
-        <input
-          class="grow"
-          type="range"
-          aria-label={`Outline width of ${route.name}`}
-          min="0"
-          max={MAX_ROUTE_OUTLINE_WIDTH}
-          step="0.5"
+        <OutlineWidthSlider
+          label={`Outline width of ${route.name}`}
           value={outline().width}
-          onInput={(e) => setRouteOutline(route.id, 'outlineWidth', e.currentTarget.valueAsNumber)}
+          onInput={(width) => setRouteOutline(route.id, { width })}
           onChange={endGesture}
         />
-        <span class="value">{outline().width} px</span>
       </div>
-      <Show when={route.outlineColor !== undefined || route.outlineWidth !== undefined}>
+      <Show when={route.outline}>
         <button class="style-reset" onClick={() => resetRouteOutline(route.id)}>
           Back to a white outline
         </button>
@@ -270,7 +265,7 @@ const PANEL_COLORS = { light: { text: '#212529', box: '#ffffff' }, dark: { text:
 /** The colour of the route's waypoint pins, and the colours and size of their names. */
 function WaypointLookRows(props: { route: Route }) {
   const route = props.route;
-  const look = () => waypointLook(route);
+  const look = () => waypointLook(route.waypointLook);
   return (
     <>
       <div class="row" title="The colour of the pins">
@@ -280,7 +275,7 @@ function WaypointLookRows(props: { route: Route }) {
           class="swatch"
           aria-label={`Pin colour of ${route.name}`}
           value={look().pin}
-          onInput={(e) => setWaypointLook(route.id, 'waypointColor', e.currentTarget.value)}
+          onInput={(e) => setWaypointLook(route.id, { pin: e.currentTarget.value })}
           onChange={endGesture}
         />
       </div>
@@ -291,21 +286,10 @@ function WaypointLookRows(props: { route: Route }) {
           class="swatch"
           aria-label={`Name colour of ${route.name}`}
           value={look().text ?? PANEL_COLORS[theme()].text}
-          onInput={(e) => setWaypointLook(route.id, 'waypointTextColor', e.currentTarget.value)}
+          onInput={(e) => setWaypointLook(route.id, { text: e.currentTarget.value })}
           onChange={endGesture}
         />
-        <input
-          class="grow"
-          type="range"
-          aria-label={`Name size of ${route.name}`}
-          min={MIN_LABEL_SIZE}
-          max={MAX_LABEL_SIZE}
-          step="1"
-          value={look().size}
-          onInput={(e) => setWaypointLook(route.id, 'waypointTextSize', e.currentTarget.valueAsNumber)}
-          onChange={endGesture}
-        />
-        <span class="value">{look().size} px</span>
+        <TextSizeSlider label={`Name size of ${route.name}`} value={look().size} onInput={(size) => setWaypointLook(route.id, { size })} onChange={endGesture} />
       </div>
       <div class="row" title="The colour of the box behind the names">
         <span class="muted label">Box</span>
@@ -314,11 +298,11 @@ function WaypointLookRows(props: { route: Route }) {
           class="swatch"
           aria-label={`Name box colour of ${route.name}`}
           value={look().box ?? PANEL_COLORS[theme()].box}
-          onInput={(e) => setWaypointLook(route.id, 'waypointBoxColor', e.currentTarget.value)}
+          onInput={(e) => setWaypointLook(route.id, { box: e.currentTarget.value })}
           onChange={endGesture}
         />
       </div>
-      <Show when={route.waypointColor ?? route.waypointTextColor ?? route.waypointTextSize ?? route.waypointBoxColor}>
+      <Show when={route.waypointLook}>
         <button class="style-reset" onClick={() => resetWaypointLook(route.id)}>
           Back to the default look
         </button>

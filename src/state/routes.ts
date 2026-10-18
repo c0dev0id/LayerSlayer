@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 import { reconcile, unwrap } from 'solid-js/store';
-import { isLngLat, PROFILES, type LngLat, type Profile, type Route, type RouteData, type Waypoint } from '../model/route';
+import { isLngLat, PROFILES, type LngLat, type Profile, type Route, type RouteData, type RouteOutline, type Waypoint, type WaypointLook } from '../model/route';
+import { isWaypointType } from '../model/waypointType';
 import * as edit from '../routing/routeEdit';
 import { History } from './history';
 import { persistedStore } from './persist';
@@ -49,8 +50,16 @@ export function parseRouteData(json: string): RouteData {
   const stored = JSON.parse(json) as Partial<RouteData>;
   const routes = Array.isArray(stored.routes) ? stored.routes.filter(isRoute) : [];
   const ids = new Set(routes.map((r) => r.id));
-  const waypoints = Array.isArray(stored.waypoints) ? stored.waypoints.filter((w) => isWaypoint(w) && ids.has(w.routeId)) : [];
+  const waypoints = Array.isArray(stored.waypoints) ? stored.waypoints.filter((w) => isWaypoint(w) && ids.has(w.routeId)).map(withKnownType) : [];
   return { routes, waypoints };
+}
+
+/** A waypoint of a type this version does not know is kept as a plain pin. */
+function withKnownType(waypoint: Waypoint): Waypoint {
+  if (waypoint.type === undefined || isWaypointType(waypoint.type)) return waypoint;
+  const pin = { ...waypoint };
+  delete pin.type;
+  return pin;
 }
 
 const [routeData, setRouteData] = persistedStore<RouteData>(STORAGE_KEY, 'routes', parseRouteData, () => ({ routes: [], waypoints: [] }));
@@ -122,12 +131,8 @@ export function removeRoute(id: string): void {
   setRouteData('waypoints', (list) => list.filter((w) => w.routeId !== id));
 }
 
-/** How the route's line is outlined, and how its waypoints look. */
-type OutlineSetting = 'outlineColor' | 'outlineWidth';
-type WaypointLookSetting = 'waypointColor' | 'waypointTextColor' | 'waypointTextSize' | 'waypointBoxColor';
-
 /** Sets a property of a route as an undo step; with `gesture`, the values set until the gesture ends make one step. */
-function setRouteProperty<K extends 'name' | 'color' | 'waypointSize' | 'lineWidth' | OutlineSetting | WaypointLookSetting>(
+function setRouteProperty<K extends 'name' | 'color' | 'waypointSize' | 'lineWidth' | 'outline' | 'waypointLook'>(
   id: string,
   key: K,
   value: Route[K],
@@ -160,30 +165,23 @@ export function setRouteLineWidth(id: string, width: number): void {
 }
 
 /** Sets the colour or width of a route's outline; picking or dragging makes one undo step. */
-export function setRouteOutline<K extends OutlineSetting>(id: string, key: K, value: Route[K]): void {
-  setRouteProperty(id, key, value, 'Change outline', true);
+export function setRouteOutline(id: string, change: RouteOutline): void {
+  setRouteProperty(id, 'outline', { ...routeById(id)?.outline, ...change }, 'Change outline', true);
 }
 
 /** Sets how a route's waypoints look; picking or dragging makes one undo step. */
-export function setWaypointLook<K extends WaypointLookSetting>(id: string, key: K, value: Route[K]): void {
-  setRouteProperty(id, key, value, 'Change waypoint look', true);
+export function setWaypointLook(id: string, change: WaypointLook): void {
+  setRouteProperty(id, 'waypointLook', { ...routeById(id)?.waypointLook, ...change }, 'Change waypoint look', true);
 }
 
 /** Puts back the white outline of a route's line, as one undo step. */
 export function resetRouteOutline(id: string): void {
-  clearRouteProperties(id, ['outlineColor', 'outlineWidth'], 'Reset outline');
+  setRouteProperty(id, 'outline', undefined, 'Reset outline');
 }
 
 /** Puts back the default look of a route's waypoints, as one undo step. */
 export function resetWaypointLook(id: string): void {
-  clearRouteProperties(id, ['waypointColor', 'waypointTextColor', 'waypointTextSize', 'waypointBoxColor'], 'Reset waypoint look');
-}
-
-function clearRouteProperties(id: string, keys: readonly (OutlineSetting | WaypointLookSetting)[], label: string): void {
-  const index = routeData.routes.findIndex((r) => r.id === id);
-  if (index < 0 || keys.every((key) => routeData.routes[index]![key] === undefined)) return;
-  recordEdit(label);
-  setRouteData('routes', index, Object.fromEntries(keys.map((key) => [key, undefined])) as Partial<Route>);
+  setRouteProperty(id, 'waypointLook', undefined, 'Reset waypoint look');
 }
 
 /**
@@ -228,19 +226,25 @@ export function setRouteLeg(routeId: string, key: string, geometry: string): voi
   updateRoute(routeId, (r) => edit.addLeg(r, key, geometry));
 }
 
-export function addWaypoint(waypoint: Waypoint): void {
-  recordEdit('Add waypoint');
-  setRouteData('waypoints', (list) => [...list, waypoint]);
+/** The waypoint as kept: without an empty description, type or icon, and without an icon where its type draws it. */
+function keptWaypoint(waypoint: Waypoint): Waypoint {
+  const kept = { ...waypoint };
+  if (!kept.description) delete kept.description;
+  if (!kept.type) delete kept.type;
+  if (!kept.icon || kept.type) delete kept.icon;
+  return kept;
 }
 
-/** Changes a waypoint's position, name, description, type or icon; an empty description, type or icon is dropped. */
+export function addWaypoint(waypoint: Waypoint): void {
+  recordEdit('Add waypoint');
+  setRouteData('waypoints', (list) => [...list, keptWaypoint(waypoint)]);
+}
+
+/** Changes a waypoint's position, name, description, type or icon. */
 export function updateWaypoint(id: string, change: Partial<Omit<Waypoint, 'id'>>, label: string): void {
   const index = routeData.waypoints.findIndex((w) => w.id === id);
   if (index < 0) return;
-  const next: Waypoint = { ...unwrap(routeData.waypoints[index]!), ...change };
-  if (!next.description) delete next.description;
-  if (!next.type) delete next.type;
-  if (!next.icon) delete next.icon;
+  const next = keptWaypoint({ ...unwrap(routeData.waypoints[index]!), ...change });
   recordEdit(label);
   setRouteData('waypoints', index, reconcile(next, { merge: false }));
 }

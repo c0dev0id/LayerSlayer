@@ -41,7 +41,7 @@ describe('routeFeatures', () => {
   });
 
   it('outlines a route in its own colour and width, within bounds', () => {
-    expect(routeFeatures([{ ...route, outlineColor: '#000000', outlineWidth: 3 }], new Set()).features[0]!.properties).toMatchObject({ outlineColor: '#000000', outlineWidth: 3 });
-    expect(routeFeatures([{ ...route, outlineColor: 'black', outlineWidth: 50 }], new Set()).features[0]!.properties).toMatchObject({ outlineColor: '#ffffff', outlineWidth: 4 });
+    expect(routeFeatures([{ ...route, outline: { color: '#000000', width: 3 } }], new Set()).features[0]!.properties).toMatchObject({ outlineColor: '#000000', outlineWidth: 3 });
+    expect(routeFeatures([{ ...route, outline: { color: 'black', width: 50 } }], new Set()).features[0]!.properties).toMatchObject({ outlineColor: '#ffffff', outlineWidth: 4 });
   });
 });

@@ -34,11 +34,11 @@ export interface MenuItem {
  */
 export const [menu, setMenu] = createSignal<{ x: number; y: number; touch: boolean; items: MenuItem[] }>();
 
-/**
- * A waypoint in the waypoint dialog: an existing one by its id, or a new one with the route
- * it belongs to, the one being drawn when it was placed.
- */
-export type WaypointDraft = ({ id: string } | { routeId: string }) & {
+/** A waypoint in the waypoint dialog, with the route it belongs to: for a new one, the route being drawn. */
+export type WaypointDraft = {
+  /** The waypoint being edited; a new one where unset. */
+  id?: string;
+  routeId: string;
   lngLat: LngLat;
   name: string;
   description: string;

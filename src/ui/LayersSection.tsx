@@ -25,7 +25,7 @@ import {
   type RasterAdjustments,
   type WmsTime,
 } from '../model/layer';
-import { labelStyle, MAX_LABEL_SIZE, MAX_OUTLINE_WIDTH, MIN_LABEL_SIZE, type LabelStyle } from '../model/label';
+import { labelStyle, type LabelStyle } from '../model/label';
 import { lineWidth } from '../model/line';
 import { propertyKeys, withLayerStyle } from '../services/featureProperties';
 import { importAccept } from '../services/importFile';
@@ -40,7 +40,9 @@ import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
 import { LineWidthSlider } from './LineWidthSlider';
 import { downloadBlob, fileNameFor } from './download';
+import { OutlineWidthSlider } from './OutlineWidthSlider';
 import { StylePopover } from './StylePopover';
+import { TextSizeSlider } from './TextSizeSlider';
 import { createOutcome, OutcomeNote } from './outcome';
 import { LayerInfo, layerAddress } from './LayerInfo';
 import { AlertIcon, AreaIcon, CloseIcon, DownloadIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge, InfoIcon, TypographyIcon } from './icons';
@@ -434,17 +436,7 @@ function LabelStyleRows(props: { layer: Layer }) {
       <div class="row" title="The colour and size of the text">
         <span class="muted label">Text</span>
         <input type="color" class="swatch" aria-label={`Label colour of ${layer.name}`} value={style().color} onInput={(e) => set({ color: e.currentTarget.value })} />
-        <input
-          class="grow"
-          type="range"
-          aria-label={`Label size of ${layer.name}`}
-          min={MIN_LABEL_SIZE}
-          max={MAX_LABEL_SIZE}
-          step="1"
-          value={style().size}
-          onInput={(e) => set({ size: e.currentTarget.valueAsNumber })}
-        />
-        <span class="value">{style().size} px</span>
+        <TextSizeSlider label={`Label size of ${layer.name}`} value={style().size} onInput={(size) => set({ size })} />
       </div>
       <div class="row" title="The colour and width of the outline that keeps the text readable on the map">
         <span class="muted label">Outline</span>
@@ -455,17 +447,7 @@ function LabelStyleRows(props: { layer: Layer }) {
           value={style().outlineColor}
           onInput={(e) => set({ outlineColor: e.currentTarget.value })}
         />
-        <input
-          class="grow"
-          type="range"
-          aria-label={`Label outline width of ${layer.name}`}
-          min="0"
-          max={MAX_OUTLINE_WIDTH}
-          step="0.5"
-          value={style().outlineWidth}
-          onInput={(e) => set({ outlineWidth: e.currentTarget.valueAsNumber })}
-        />
-        <span class="value">{style().outlineWidth} px</span>
+        <OutlineWidthSlider label={`Label outline width of ${layer.name}`} value={style().outlineWidth} onInput={(outlineWidth) => set({ outlineWidth })} />
       </div>
       <Show when={layer.labelStyle}>
         <button class="style-reset" onClick={() => updateLayer(layer.id, { labelStyle: undefined })}>

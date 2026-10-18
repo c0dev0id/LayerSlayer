@@ -13,6 +13,7 @@
   --muted: light-dark(#868e96, #9aa1a9);
   --subtle: light-dark(#adb5bd, #6c737a);
   --page: light-dark(#f1f3f5, #141517);
+  /* --panel and --text are also in RoutesSection.tsx (PANEL_COLORS), for the colour pickers. */
   --panel: light-dark(#fff, #212327);
   --button: light-dark(#f8f9fa, #2c2f34);
   --text: light-dark(#212529, #e9ecef);
@@ -597,7 +598,9 @@ input.swatch {
   border-left: 1px solid var(--control-border);
 }
 
-.segmented input {
+/* Radio buttons shown by their label alone. */
+.segmented input,
+.form-dialog .waypoint-types input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
@@ -994,8 +997,8 @@ input.swatch {
   font-size: 13px;
 }
 
-/* A layer's label style: a small panel under its button, above everything else, closed by a click elsewhere or Esc. */
-/* Style settings beside their button; each sets its own anchor name inline (StylePopover). */
+/* Style settings in a small panel under their button, above everything else, closed by a
+   click elsewhere or Esc; each panel names its own anchor inline (StylePopover). */
 .style-panel {
   position-area: bottom span-right;
   position-try-fallbacks: flip-inline, flip-block, flip-block flip-inline;
@@ -1401,7 +1404,7 @@ input.swatch {
   font-size: 11px;
 }
 
-/* Panels floating over the map: the context menu and a layer's label style. */
+/* Panels floating over the map: the context menu and the style panels. */
 .context-menu,
 .style-panel {
   background: var(--panel);
@@ -1514,12 +1517,6 @@ input.swatch {
 
 .waypoint-types label:has(input:focus-visible) {
   outline: 2px solid var(--accent);
-}
-
-.form-dialog .waypoint-types input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
 }
 
 .form-dialog .question {

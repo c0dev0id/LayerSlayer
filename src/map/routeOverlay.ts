@@ -62,16 +62,11 @@ export function routeFeatures(routes: readonly Route[], failed: ReadonlySet<stri
   };
   const features: GeoJSON.Feature<GeoJSON.LineString>[] = [];
   for (const route of routes) {
+    const outline = routeOutline(route.outline);
+    const look = { color: route.color, width: lineWidth(route.lineWidth, ROUTE_LINE_WIDTH), outlineColor: outline.color, outlineWidth: outline.width };
     for (const leg of routeLegs(route)) {
       const coordinates = legCoordinates(route, leg, decode).map((p): LngLat => [p[0], p[1]]);
-      const outline = routeOutline(route);
-      const properties = {
-        state: legState(route, leg, failed),
-        color: route.color,
-        width: lineWidth(route.lineWidth, ROUTE_LINE_WIDTH),
-        outlineColor: outline.color,
-        outlineWidth: outline.width,
-      };
+      const properties = { state: legState(route, leg, failed), ...look };
       features.push({ type: 'Feature', properties, geometry: { type: 'LineString', coordinates } });
     }
   }

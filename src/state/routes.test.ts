@@ -26,12 +26,15 @@ describe('parseRouteData', () => {
           { id: 'x', routeId: 'a', lngLat: [1, 2] },
           { id: 'y', name: 'Y', lngLat: [1, 2] },
           { id: 'z', routeId: 'b', name: 'Z', lngLat: [1, 2] },
+          { id: 'v', routeId: 'a', name: 'V', lngLat: [1, 2], type: 'rocket' },
         ],
       }),
     );
     expect(data.routes.map((r) => r.id)).toEqual(['a']);
     // Without a name, without a route, and with a route that was dropped.
-    expect(data.waypoints.map((w) => w.id)).toEqual(['w']);
+    expect(data.waypoints.map((w) => w.id)).toEqual(['w', 'v']);
+    // A type this version does not know leaves a plain pin.
+    expect(data.waypoints[1]).not.toHaveProperty('type');
     expect(parseRouteData('{}')).toEqual({ routes: [], waypoints: [] });
   });
 });
@@ -109,20 +112,19 @@ describe('route history', () => {
   it('sets the outline and waypoint look per setting, and puts each back in one step', async () => {
     const s = await freshStore();
     s.addRoute(route('r'));
-    for (const width of [2, 3]) s.setRouteOutline('r', 'outlineWidth', width);
+    for (const width of [2, 3]) s.setRouteOutline('r', { width });
     s.endGesture();
-    s.setRouteOutline('r', 'outlineColor', '#000000');
+    s.setRouteOutline('r', { color: '#000000' });
     s.endGesture();
-    s.setWaypointLook('r', 'waypointColor', '#1971c2');
+    s.setWaypointLook('r', { pin: '#1971c2' });
     s.endGesture();
-    s.setWaypointLook('r', 'waypointTextSize', 16);
-    expect(s.routeById('r')).toMatchObject({ outlineWidth: 3, outlineColor: '#000000', waypointColor: '#1971c2', waypointTextSize: 16 });
+    s.setWaypointLook('r', { size: 16 });
+    expect(s.routeById('r')).toMatchObject({ outline: { width: 3, color: '#000000' }, waypointLook: { pin: '#1971c2', size: 16 } });
     s.resetWaypointLook('r');
-    expect(s.routeById('r')).not.toHaveProperty('waypointColor');
-    expect(s.routeById('r')).not.toHaveProperty('waypointTextSize');
-    expect(s.routeById('r')).toMatchObject({ outlineWidth: 3 });
+    expect(s.routeById('r')).not.toHaveProperty('waypointLook');
+    expect(s.routeById('r')).toMatchObject({ outline: { width: 3 } });
     s.undo();
-    expect(s.routeById('r')).toMatchObject({ waypointColor: '#1971c2', waypointTextSize: 16 });
+    expect(s.routeById('r')).toMatchObject({ waypointLook: { pin: '#1971c2', size: 16 } });
     s.resetRouteOutline('r');
     s.resetRouteOutline('r');
     expect(s.undoLabel()).toBe('Reset outline');
@@ -130,11 +132,12 @@ describe('route history', () => {
     expect(s.undoLabel()).toBe('Change waypoint look');
   });
 
-  it('gives a waypoint a type, and drops it again when the type is cleared', async () => {
+  it('gives a waypoint a type in place of its symbol, and drops the type again when it is cleared', async () => {
     const s = await freshStore();
     s.addRoute(route('r'));
-    s.addWaypoint({ id: 'w', routeId: 'r', lngLat: [1, 1], name: 'Lunch', icon: { id: 'maki:cafe', size: [15, 15], paths: ['M0 0h1z'] } });
-    s.updateWaypoint('w', { type: 'food', icon: undefined }, 'Edit waypoint');
+    s.addWaypoint({ id: 'w', routeId: 'r', lngLat: [1, 1], name: 'Lunch', description: '', icon: { id: 'maki:cafe', size: [15, 15], paths: ['M0 0h1z'] } });
+    expect(s.routeData.waypoints[0]).not.toHaveProperty('description');
+    s.updateWaypoint('w', { type: 'food' }, 'Edit waypoint');
     expect(s.routeData.waypoints[0]).toMatchObject({ type: 'food' });
     expect(s.routeData.waypoints[0]).not.toHaveProperty('icon');
     s.updateWaypoint('w', { type: undefined }, 'Edit waypoint');

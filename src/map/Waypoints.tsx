@@ -4,7 +4,6 @@ import { roundLngLat } from '../routing/legs';
 import { editingRouteId, setWaypointDraft, tool } from '../state/drawing';
 import { iconSize } from '../model/icon';
 import { waypointLook } from '../model/route';
-import { isWaypointType } from '../model/waypointType';
 import { removeWaypoint, routeById, routeData, updateWaypoint } from '../state/routes';
 import { WaypointPin } from '../ui/icons';
 import { WaypointShape } from '../ui/WaypointShape';
@@ -22,13 +21,10 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
   const { map, id } = props;
   const waypoint = createMemo(() => routeData.waypoints.find((w) => w.id === id));
   const editable = () => editingRouteId() !== undefined && editingRouteId() === waypoint()?.routeId;
-  const route = () => routeById(waypoint()?.routeId);
+  const route = createMemo(() => routeById(waypoint()?.routeId));
   const scale = createMemo(() => iconSize(route()?.waypointSize));
-  const look = createMemo(() => waypointLook(route()));
-  const type = () => {
-    const t = waypoint()?.type;
-    return isWaypointType(t) ? t : undefined;
-  };
+  const look = createMemo(() => waypointLook(route()?.waypointLook));
+  const type = () => waypoint()?.type;
 
   const content = (
     <div
@@ -67,7 +63,7 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
       {
         label: 'Edit waypoint…',
         run: () =>
-          setWaypointDraft({ id, lngLat: w.lngLat, name: w.name, description: w.description ?? '', ...(isWaypointType(w.type) && { type: w.type }), ...(w.icon && { icon: w.icon }) }),
+          setWaypointDraft({ id, routeId: w.routeId, lngLat: w.lngLat, name: w.name, description: w.description ?? '', type: w.type, icon: w.icon }),
       },
       { label: 'Delete waypoint', run: () => removeWaypoint(id) },
     ];
