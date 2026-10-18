@@ -51,7 +51,7 @@ const POLICIES: { host: RegExp; policy: BulkPolicy }[] = [
   },
 ];
 
-/** What the operator of a tile server says about downloading areas, where it restricts it. */
+/** What the operator of a tile server says about downloading areas, where it says anything. */
 export function bulkPolicy(host: string | undefined): BulkPolicy | undefined {
   return host ? POLICIES.find((p) => p.host.test(host))?.policy : undefined;
 }
