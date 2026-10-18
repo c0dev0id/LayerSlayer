@@ -1,5 +1,5 @@
 import { createMemo, createResource, createSignal, For, Match, Show, Switch } from 'solid-js';
-import { filterOsmFeatures, loadOsmFeatures, typedFeature, type OsmFeature } from '../library/osmFeatures';
+import { filterOsmFeatures, foundAsLines, layerLook, loadOsmFeatures, typedFeature, type OsmFeature } from '../library/osmFeatures';
 import type { MapIcon } from '../model/icon';
 import { OSM_CREDIT } from '../services/osm';
 import { startFocusDrawing } from '../state/drawing';
@@ -13,9 +13,7 @@ import { createOutcome, OutcomeNote } from './outcome';
 /**
  * A layer of OpenStreetMap features found in the focus area: features chosen from the list
  * or typed in as tags, queried together. Tags typed in join the list at the top. The layer
- * takes the icon of the first chosen feature that has one, unless another is picked; a layer
- * of features found as lines only has none, as icons do not mark lines. A layer of place
- * names only shows their names, without dots.
+ * looks as `layerLook` says, with another icon where one is picked here.
  */
 export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
   // The list and its icons load the first time the tab is shown, not with the app.
@@ -44,13 +42,7 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
   const toggle = (feature: OsmFeature) =>
     setChosen(isChosen(feature) ? chosen().filter((c) => c.name !== feature.name) : [...chosen(), feature]);
   const layerName = () => chosen().map((f) => f.name).join(', ');
-  const linesOnly = () => chosen().length > 0 && chosen().every((f) => f.lines);
-  const namesOnly = () => chosen().length > 0 && chosen().every((f) => f.nameOnly);
-  const icon = () => {
-    const choice = picked();
-    if (linesOnly()) return undefined;
-    return choice === undefined ? chosen().find((f) => f.icon)?.icon : (choice ?? undefined);
-  };
+  const look = () => layerLook(chosen(), picked());
 
   function addTags() {
     try {
@@ -67,10 +59,9 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
   function query() {
     const name = layerName();
     const filters = [...new Set(chosen().flatMap((f) => f.filters))];
-    const layerIcon = icon();
-    const look = { ...(layerIcon && { icon: layerIcon }), ...(namesOnly() && { label: 'name', dots: false as const }) };
+    const drawn = look();
     void querying.run(async () => {
-      const count = await addOsmQueryLayer(name, filters, look);
+      const count = await addOsmQueryLayer(name, filters, drawn);
       if (count === 0) return 'Nothing was found in the focus area.';
       setChosen([]);
       setPicked(undefined);
@@ -149,8 +140,8 @@ export function OsmQueryTab(props: { active: boolean; onClose: () => void }) {
         {(message) => <p class="note error">{message()}</p>}
       </Show>
       <div class="row">
-        <Show when={!linesOnly()}>
-          <IconPickButton icon={icon()} of="the new layer" onChange={(choice) => setPicked(choice ?? null)} />
+        <Show when={!foundAsLines(chosen())}>
+          <IconPickButton icon={look().icon} of="the new layer" onChange={(choice) => setPicked(choice ?? null)} />
         </Show>
         <span class="grow name" classList={{ muted: chosen().length === 0 }} title={layerName()}>
           {chosen().length > 0 ? layerName() : 'Choose features or add tags; together they form one layer.'}

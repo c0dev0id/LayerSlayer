@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { formatFilter, parseFilter } from '../services/osm';
 import list from './osmFeatures.json';
-import { filterOsmFeatures, loadOsmFeatures, matchingFeature, typedFeature, type OsmFeature } from './osmFeatures';
+import { filterOsmFeatures, layerLook, loadOsmFeatures, matchingFeature, typedFeature, type OsmFeature } from './osmFeatures';
 
 const features: OsmFeature[] = list.features.map(({ icon: _, ...feature }) => feature);
 
@@ -43,6 +43,31 @@ describe('matchingFeature', () => {
     expect(matchingFeature(loaded, { type: 'node', tags: { shop: 'jewelry' } })?.name).toBe('All shops');
     // Roads are found as lines, which have no icon.
     expect(matchingFeature(loaded, { type: 'way', tags: { highway: 'track' } })).toBeUndefined();
+  });
+});
+
+describe('layerLook', () => {
+  const fuelIcon = { id: 'maki:fuel', size: [15, 15] as [number, number], paths: ['M0 0h15v15z'] };
+  const benchIcon = { id: 'maki:bench', size: [15, 15] as [number, number], paths: ['M0 0h15v15z'] };
+  const fuel: OsmFeature = { name: 'Fuel', category: 'C', filters: ['amenity=fuel'], icon: fuelIcon };
+  const roads: OsmFeature = { name: 'Roads', category: 'C', filters: ['highway=primary'], lines: true };
+  const towns: OsmFeature = { name: 'Towns', category: 'C', filters: ['node place=town'], nameOnly: true };
+  const villages: OsmFeature = { name: 'Villages', category: 'C', filters: ['node place=village'], nameOnly: true };
+
+  it('takes the first chosen icon, unless another or none is picked', () => {
+    expect(layerLook([roads, fuel], undefined)).toEqual({ icon: fuelIcon });
+    expect(layerLook([fuel], benchIcon)).toEqual({ icon: benchIcon });
+    expect(layerLook([fuel], null)).toEqual({});
+  });
+
+  it('gives features found as lines no icon, even a picked one', () => {
+    expect(layerLook([roads], benchIcon)).toEqual({});
+  });
+
+  it('writes place names alone, without dots, unless mixed with other features', () => {
+    expect(layerLook([towns, villages], undefined)).toEqual({ label: 'name', dots: false });
+    expect(layerLook([towns, fuel], undefined)).toEqual({ icon: fuelIcon });
+    expect(layerLook([], undefined)).toEqual({});
   });
 });
 
