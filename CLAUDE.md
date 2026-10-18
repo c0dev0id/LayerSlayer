@@ -57,7 +57,8 @@ Source and layer ids are the user layer's id or `<id>/…`, which is how map err
 traced back to layers. The style is round-tripped through JSON before `setStyle`: Solid
 store proxies cannot be posted to MapLibre's workers. `setStyle` also gets a
 `transformStyle` from `map/geojsonDiff.ts` (`keepLoadedGeoJson`); without it every diff
-refetches each GeoJSON source loaded from an address.
+refetches each GeoJSON source loaded from an address and clones and compares every
+overlay's data.
 
 **Custom protocols** (registered in `MapView.tsx`, handlers in `map/protocols.ts`):
 `features://` (ArcGIS FeatureServer, WFS and OGC API queried per tile, turned into vector

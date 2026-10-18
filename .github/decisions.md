@@ -712,6 +712,12 @@
   into the next style instead, the documented way, would have MapLibre compare and clone
   all of it on every change. A layer whose file changes keeps drawing its old file until
   the new one has loaded, rather than vanishing meanwhile.
+  - The overlays' data is inline, and with the world's outline on the focus cover it runs
+    to thousands of points, which every diff cloned and compared, a few milliseconds per
+    step of a slider. Once an overlay is on the map, the same `transformStyle` shows the
+    diff an empty stand-in for its data on both sides, so its data changes through
+    `setData` alone and reaches the map once per change. The style given to `setStyle`
+    is copied rather than changed: MapLibre rebuilds from it when a diff fails.
 - **Layer icons.** Vector layers can mark their points, and their areas at the pole of
   inaccessibility MapLibre places point symbols at, with an icon: white on a disc of the
   layer's colour, which stays readable on any base map while the colour still tells layers

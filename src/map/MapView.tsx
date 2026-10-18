@@ -152,7 +152,7 @@ export function MapView() {
       );
       // A layer change carries the overlays' data as it is; a change of an overlay's data
       // only replaces it.
-      const transformStyle = keepLoadedGeoJson();
+      const transformStyle = keepLoadedGeoJson(OVERLAYS.map((overlay) => overlay.id));
       createEffect(() => {
         const style = layers();
         map.setStyle(untrack(() => withOverlays(style, OVERLAYS)), { diff: true, transformStyle });
