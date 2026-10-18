@@ -40,6 +40,7 @@ import { IconPickButton } from './IconPicker';
 import { IconSizeSlider } from './IconSizeSlider';
 import { LineWidthSlider } from './LineWidthSlider';
 import { downloadBlob, fileNameFor } from './download';
+import { StylePopover } from './StylePopover';
 import { createOutcome, OutcomeNote } from './outcome';
 import { LayerInfo, layerAddress } from './LayerInfo';
 import { AlertIcon, AreaIcon, CloseIcon, DownloadIcon, DownloadLink, EyeIcon, EyeOffIcon, GripIcon, IconBadge, InfoIcon, TypographyIcon } from './icons';
@@ -415,12 +416,9 @@ function LabelRow(props: { layer: Layer }) {
         </For>
       </select>
       <Show when={layer.label}>
-        <button class="icon label-style-button" popovertarget="label-style" title="How the labels look" aria-label={`Label style of ${layer.name}`}>
-          <TypographyIcon />
-        </button>
-        <div id="label-style" popover class="label-style">
+        <StylePopover id={`label-style-${layer.id}`} title="How the labels look" label={`Label style of ${layer.name}`} icon={<TypographyIcon />}>
           <LabelStyleRows layer={layer} />
-        </div>
+        </StylePopover>
       </Show>
     </div>
   );
@@ -470,7 +468,7 @@ function LabelStyleRows(props: { layer: Layer }) {
         <span class="value">{style().outlineWidth} px</span>
       </div>
       <Show when={layer.labelStyle}>
-        <button class="label-style-reset" onClick={() => updateLayer(layer.id, { labelStyle: undefined })}>
+        <button class="style-reset" onClick={() => updateLayer(layer.id, { labelStyle: undefined })}>
           Back to dark text in white
         </button>
       </Show>

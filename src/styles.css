@@ -995,12 +995,8 @@ input.swatch {
 }
 
 /* A layer's label style: a small panel under its button, above everything else, closed by a click elsewhere or Esc. */
-.label-style-button {
-  anchor-name: --label-style;
-}
-
-.label-style {
-  position-anchor: --label-style;
+/* Style settings beside their button; each sets its own anchor name inline (StylePopover). */
+.style-panel {
   position-area: bottom span-right;
   position-try-fallbacks: flip-inline, flip-block, flip-block flip-inline;
   inset: auto;
@@ -1010,7 +1006,7 @@ input.swatch {
   color: var(--text);
 }
 
-.label-style-reset {
+.style-reset {
   margin-top: 4px;
 }
 
@@ -1381,7 +1377,7 @@ input.swatch {
 
 /* Panels floating over the map: the context menu and a layer's label style. */
 .context-menu,
-.label-style {
+.style-panel {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 6px;
