@@ -182,7 +182,7 @@ function LayerSummary(props: { layer: Layer }) {
     <div class="layer-summary">
       <span>{Math.round(layer.opacity * 100)}%</span>
       <Show when={isVector(layer.source) && !layer.ownStyle}>
-        <Show when={layer.icon} fallback={<span class="layer-color" style={{ 'background-color': layerColor(layer) }} title={layerColor(layer)} />}>
+        <Show when={layer.icon} fallback={<span class="color-chip" style={{ 'background-color': layerColor(layer) }} title={layerColor(layer)} />}>
           {(icon) => <IconBadge icon={icon()} color={layerColor(layer)} />}
         </Show>
       </Show>

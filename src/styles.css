@@ -278,7 +278,9 @@ header.section > .row {
   color: var(--muted);
 }
 
-.layer-color {
+/* A small square of a colour: a layer's, or one a legend explains. */
+.color-chip {
+  flex: none;
   width: 10px;
   height: 10px;
   border-radius: 2px;
@@ -1096,6 +1098,7 @@ input.swatch {
 .legend-steps {
   height: 8px;
   border-radius: 4px;
+  overflow: hidden;
 }
 
 .legend-ends {
@@ -1106,11 +1109,8 @@ input.swatch {
 .legend-steps,
 .legend-ticks {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-}
-
-.legend-steps {
-  overflow: hidden;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
 }
 
 /* Each tick stands on the border between two steps. */
@@ -1133,12 +1133,6 @@ input.swatch {
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-.legend-swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
 }
 
 .route.active {

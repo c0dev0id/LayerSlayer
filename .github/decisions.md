@@ -481,27 +481,36 @@
     per route, against the overlay's fixed layers. Each drawn leg is instead sampled at
     least every 25 m and drawn as pieces of one colour, the line layer taking each piece's
     colour; continuous scales come in 32 steps, so that neighbouring stretches join into
-    one piece. The outline stays one line per leg underneath, and a leg whose data has not
-    arrived keeps the route's colour.
+    one piece, and a piece keeps only the line's own points and those where the colour
+    changes. The outline stays one line per leg underneath: drawn see-through, an outline
+    per piece would darken where pieces meet. A leg whose data has not arrived keeps the
+    route's colour, and the overlay reuses a route's pieces until anything they are made
+    from changes, so that sliders do not recolour a long route.
     - Elevation comes from Mapterhorn's Terrarium tiles, the ones 3D terrain uses, read at
       zoom 12 (about 13 m a pixel in central Europe, some 100 kB a tile) and interpolated
-      between pixels. Its colours span the route's own lowest to highest point, so a
-      low-mountain tour uses the whole ramp; they cannot be compared between routes. Slope
-      is the rise over the samples around 100 m centred on each stretch, in classes at 3,
-      6, 10 and 15 % either way: climbs warm, descents cool, the flat green. The reversed
-      slope reads the route from its end.
+      between pixels; a tile that cannot be read leaves its points without a value, in the
+      route's colour, rather than failing the rest. Its colours span the route's own
+      lowest to highest point, so a low-mountain tour uses the whole ramp; they cannot be
+      compared between routes. Slope is the rise over the samples around 100 m centred on
+      each stretch, in classes at 3, 6, 10 and 15 % either way: climbs warm, descents
+      cool, the flat green. The reversed slope reads the route from its end.
     - OSRM answers with no surface. One Postpass query fetches the OSM roads within 20 m
-      of all legs that lack one, as a strip along their simplified course, and each
-      stretch takes the surface of the nearest road that runs along it, within 35°, so
-      that roads crossing it do not count. Asking for the nearest road of each sample in
-      SQL took 37 s for a 26 km route; the strip took 1.6 s and 143 kB. The Overpass API
-      (`around` the lines) answers where Postpass fails. Surfaces are grouped as paved,
-      compacted (with fine gravel), gravel (with `unpaved`, which says no more), dirt and
-      sand, and grass. Without a surface tag a track's grade decides, and main and
-      residential roads count as paved, as nearly all are; other roads stay unknown.
+      of all legs that lack one, along their simplified course in parts of about 5 km, and
+      each stretch takes the surface of the nearest road that runs along it, within 35°,
+      so that roads crossing it do not count; road segments are found through a grid of 40
+      m cells. Asking for the nearest road of each sample in SQL took 37 s for a 26 km
+      route. One strip around the whole course took 1.6 s there but 26 s for a 135 km
+      route, as its box held every road of the region; in parts the same route takes under
+      2 s, and matching it 72 ms. The Overpass API (`around` the lines) answers where
+      Postpass fails. Surfaces are grouped as paved, compacted (with fine gravel), gravel
+      (with `unpaved`, which says no more), dirt and sand, and grass. Without a surface
+      tag a track's grade decides, and main and residential roads count as paved, as
+      nearly all are; other roads stay unknown.
     - Both are read per leg, keyed by its routed geometry, so that a leg recalculated
-      along other roads is read anew, for all legs missing them at once, and kept for the
-      session only: the route stores its colouring, not the data.
+      along other roads is read anew, and kept for the session only: the route stores its
+      colouring, not the data. Each kind is read by a pump like the routing's, for all
+      legs missing it at once, a second apart, and only once all of a route's legs are
+      routed: a route routed leg by leg would otherwise send a query per leg.
   - GPX import goes into the route editor. GPX ties waypoints to no route, so a file's
     waypoints belong to its first route or track, or to a route without points named
     after the file when it has none. A `<rte>` keeps all

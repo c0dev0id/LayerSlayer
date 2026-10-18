@@ -55,7 +55,6 @@ export function parseRouteData(json: string): RouteData {
   return { routes, waypoints };
 }
 
-/** A waypoint of a type this version does not know is kept as a plain pin. */
 /** The route without a colouring this version does not know, which leaves its own colour. */
 function withKnownColoring(route: Route): Route {
   if (route.coloring === undefined || isRouteColoring(route.coloring)) return route;
@@ -63,6 +62,8 @@ function withKnownColoring(route: Route): Route {
   delete plain.coloring;
   return plain;
 }
+
+/** A waypoint of a type this version does not know is kept as a plain pin. */
 
 function withKnownType(waypoint: Waypoint): Waypoint {
   if (waypoint.type === undefined || isWaypointType(waypoint.type)) return waypoint;

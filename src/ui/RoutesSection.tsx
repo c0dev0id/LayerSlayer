@@ -247,7 +247,9 @@ function RouteRow(props: { route: Route }) {
           <For each={ROUTE_COLORINGS}>{(coloring) => <option value={coloring.id}>{coloring.name}</option>}</For>
         </select>
       </div>
-      <Show when={route.coloring}>{(coloring) => <ColoringLegend route={route} coloring={coloring()} />}</Show>
+      <Show when={route.coloring}>
+        <ColoringLegend route={route} />
+      </Show>
       <Show when={waypoints() > 0}>
         <div class="row" title="How large the route's waypoints are drawn">
           <span class="muted label">Waypoints</span>

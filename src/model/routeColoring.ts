@@ -57,7 +57,7 @@ export function rainbowColor(t: number): string {
 }
 
 /** From the lowest point of a route to its highest. */
-export const ELEVATION_RAMP = ['#2f9e44', '#94d82d', '#fcc419', '#f76707', '#c92a2a'] as const;
+const ELEVATION_RAMP = ['#2f9e44', '#94d82d', '#fcc419', '#f76707', '#c92a2a'] as const;
 
 /** The colour of an elevation, `t` being its share of the way from the route's lowest point to its highest. */
 export const elevationColor = (t: number): string => ELEVATION_STEPS[Math.round(within(t, 0, 1, 0) * STEPS)]!;
