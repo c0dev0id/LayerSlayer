@@ -97,7 +97,7 @@ function DistancePanel() {
   const [dragged, setDragged] = createSignal<number>();
   const distance = () => dragged() ?? scene().symbolDistance;
   return (
-    <div id={DISTANCE_PANEL} popover class="distance-panel" style={`position-anchor: --${DISTANCE_PANEL}`}>
+    <div id={DISTANCE_PANEL} popover class="style-panel distance-panel" style={`position-anchor: --${DISTANCE_PANEL}`}>
       <label>
         <span>Symbol distance</span>
         <input
@@ -112,7 +112,7 @@ function DistancePanel() {
             setDragged(undefined);
           }}
         />
-        <output>{distance()} m</output>
+        <span class="value">{distance()} m</span>
       </label>
     </div>
   );

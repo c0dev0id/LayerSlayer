@@ -20,7 +20,7 @@ export const MAX_SYMBOL_DISTANCE = 300;
 
 /** A stored scene, each part that is not one as DEFAULT_SCENE has it. */
 export function parseScene(value: unknown): Scene {
-  const stored = (typeof value === 'object' && value !== null ? value : {}) as Partial<Record<keyof Scene, unknown>>;
+  const stored = (value ?? {}) as Partial<Record<keyof Scene, unknown>>;
   return {
     sky: stored.sky === 'night' ? 'night' : 'day',
     buildings: typeof stored.buildings === 'boolean' ? stored.buildings : DEFAULT_SCENE.buildings,

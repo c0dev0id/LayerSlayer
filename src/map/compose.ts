@@ -199,7 +199,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   }
   for (const [index, layer] of layers.entries()) {
     if (!drawn(layer, index)) continue;
-    const part = fragment(layer, assets.get(layer.id), labelFont, tileCache && keepsTiles(layer));
+    const part = fragment(layer, assets.get(layer.id), labelFont, tileCache && keepsTiles(layer), terrain);
     if (!part) continue;
     let partLayers = part.layers;
     const sprite = part.sprite;
@@ -214,7 +214,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     } else if (sprite) {
       console.warn(`${layer.name}: a sprite list is only supported in the bottom style; its icons are left out.`);
     }
-    if (terrain) partLayers = inScene(partLayers, terrain, layer.source.type === 'style');
+    if (terrain && terrain.symbolDistance > 0) partLayers = raised(partLayers, terrain.symbolDistance);
     for (const [id, source] of Object.entries(part.sources)) style.sources[id] = withinFocus(source, focus);
     style.layers.push(...partLayers);
     if (index === 0) aboveBottom = style.layers.length;
@@ -232,15 +232,9 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   return style;
 }
 
-/**
- * A layer's part of the style as the scene shows it in 3D: without the buildings, and
- * without the labels and icons of a map style, where those are switched off, and with
- * every label and icon raised by the symbol distance.
- */
-function inScene(layers: LayerSpecification[], scene: Scene, fromStyle: boolean): LayerSpecification[] {
-  return layers
-    .filter((l) => (scene.buildings || l.type !== 'fill-extrusion') && (scene.labels || !fromStyle || l.type !== 'symbol'))
-    .map((l) => (l.type === 'symbol' && scene.symbolDistance > 0 ? { ...l, layout: { ...l.layout, 'symbol-height-offset': scene.symbolDistance } } : l));
+/** The layers with their labels and icons floating `distance` metres above the ground. */
+function raised(layers: LayerSpecification[], distance: number): LayerSpecification[] {
+  return layers.map((l) => (l.type === 'symbol' ? { ...l, layout: { ...l.layout, 'symbol-height-offset': distance } } : l));
 }
 
 /** Whether a style layer writes text, which needs a font source. */
@@ -271,7 +265,7 @@ export function layerSource(layer: Layer): SourceSpecification | undefined {
  * One user layer as MapLibre sources and layers; `labelFont` is what the labels of a vector
  * layer are written in, and `keep` whether its tiles go through the tile cache.
  */
-function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[], keep: boolean): Fragment | undefined {
+function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[], keep: boolean, scene?: Scene): Fragment | undefined {
   const src = layer.source;
   switch (src.type) {
     case 'xyz':
@@ -329,7 +323,7 @@ function fragment(layer: Layer, assets: Assets | undefined, labelFont: string[],
       return layer.ownStyle && assets?.symbology ? symbolized(layer, source, assets.symbology) : vector(layer, labelFont, source, FEATURE_LAYER);
     }
     case 'style':
-      return assets?.style ? fromStyle(layer, assets.style, src.url) : undefined;
+      return assets?.style ? fromStyle(layer, assets.style, src.url, scene) : undefined;
   }
 }
 
@@ -663,14 +657,19 @@ function symbolized(layer: Layer, source: SourceSpecification, symbology: Symbol
  * A fetched MapLibre style as part of the map: ids prefixed with the layer's, URLs made
  * absolute, the layer's opacity and zoom range applied to each of its layers.
  */
-function fromStyle(layer: Layer, style: StyleSpecification, styleUrl: string): Fragment {
+function fromStyle(layer: Layer, style: StyleSpecification, styleUrl: string, scene: Scene | undefined): Fragment {
   const prefix = `${layer.id}/`;
+  // The types of the style's layers the 3D scene leaves out: its buildings, its labels and icons.
+  const hidden: string[] = [];
+  if (scene && !scene.buildings) hidden.push('fill-extrusion');
+  if (scene && !scene.labels) hidden.push('symbol');
   const sources: Record<string, SourceSpecification> = {};
   for (const [id, source] of Object.entries(style.sources)) sources[prefix + id] = absoluteSource(source, styleUrl);
   const sprite = typeof style.sprite === 'string' ? resolveUrl(style.sprite, styleUrl) : style.sprite;
   return {
     sources,
     layers: style.layers.flatMap((sub) => {
+      if (hidden.includes(sub.type)) return [];
       const minzoom = Math.max(sub.minzoom ?? MIN_ZOOM, layer.minzoom);
       const maxzoom = Math.min(sub.maxzoom ?? MAX_ZOOM, layer.maxzoom);
       if (minzoom >= maxzoom) return [];

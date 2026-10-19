@@ -429,7 +429,8 @@ header.section > .row {
 }
 
 .active-layer .value,
-.route .value {
+.route .value,
+.distance-panel .value {
   width: 38px;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -1429,7 +1430,7 @@ input.swatch {
 
 /*
  * The map's buttons run down its right edge, and where the map is too short for all of
- * them, on in a second column to the left, clear of the scale bar and the credits.
+ * them, on in a second column to the left, clear of the credits.
  */
 .maplibregl-ctrl-top-right {
   bottom: 40px;
@@ -1439,19 +1440,11 @@ input.swatch {
   align-items: flex-start;
 }
 
-/* While the ground is in 3D, the switches of how the map looks there extend the 3D button's group downwards. */
-.maplibregl-ctrl button.scene-button {
-  display: grid;
-  place-items: center;
-}
-
 /* The symbol distance's slider, beside its button. */
 .distance-panel {
   position-area: left center;
-  inset: auto;
+  width: auto;
   margin: 0 8px;
-  padding: 6px 10px;
-  color: var(--text);
   font-size: 12px;
 }
 
@@ -1468,12 +1461,6 @@ input.swatch {
   accent-color: var(--accent);
 }
 
-.distance-panel output {
-  min-width: 3.4em;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
 .maplibregl-ctrl button:is(.terrain-toggle, .only-toggle, .scene-button)[aria-pressed='true'],
 .maplibregl-ctrl button.scene-button.raised {
   background: var(--active);
@@ -1485,7 +1472,7 @@ input.swatch {
   color: var(--night-text);
 }
 
-.maplibregl-ctrl button.only-toggle {
+.maplibregl-ctrl button:is(.only-toggle, .scene-button) {
   display: grid;
   place-items: center;
 }
@@ -1542,8 +1529,7 @@ input.swatch {
 
 /* Panels floating over the map: the context menu and the style panels. */
 .context-menu,
-.style-panel,
-.distance-panel {
+.style-panel {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 6px;

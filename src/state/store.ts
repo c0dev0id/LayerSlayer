@@ -348,7 +348,7 @@ export function setTerrain(on: boolean): void {
   setState('settings', 'terrain', on || undefined);
 }
 
-/** How the map looks in 3D: its scene. */
+/** How the map looks in 3D: as set, or DEFAULT_SCENE where it never was. */
 export const scene = (): Scene => state.settings.scene ?? DEFAULT_SCENE;
 
 /** Changes part of how the map looks in 3D. */
