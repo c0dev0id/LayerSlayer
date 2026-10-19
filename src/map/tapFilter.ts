@@ -4,6 +4,9 @@ export const BOUNCE_MS = 150;
 /** How far a press may travel and still be a tap, in CSS pixels: fingers wobble more than mice. */
 const SLOP = { mouse: 5, touch: 12 };
 
+/** How near a tap or a drop must be to what it acts on (a route line, a first corner), in CSS pixels. */
+export const tapReach = (touch: boolean): number => (touch ? 24 : 10);
+
 /** Where and when a pointer was, with its time in the clock of DOM event time stamps. */
 export interface PointerSample {
   x: number;

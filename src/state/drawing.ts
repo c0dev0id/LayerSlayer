@@ -1,6 +1,7 @@
 import { createEffect, createRoot, createSignal } from 'solid-js';
 import type { MapIcon } from '../model/icon';
 import type { LngLat } from '../model/route';
+import { placingTape } from './measure';
 import { routeById } from './routes';
 import { setFocus } from './store';
 import type { WaypointType } from '../model/waypointType';
@@ -93,6 +94,17 @@ export function closeFocusArea(): void {
   if (!corners || corners.length < 3) return;
   setFocus(corners);
   stopFocusDrawing();
+}
+
+/**
+ * What the next tap on the map does: place the measuring tape's end, which comes first, a
+ * corner of the focus area, or the tool's work on the route being drawn. None while
+ * nothing is drawn: a tap then shows the layers' features.
+ */
+export function tapAction(): 'measure' | 'focus' | Tool | undefined {
+  if (placingTape()) return 'measure';
+  if (focusDraft()) return 'focus';
+  return editingRouteId() ? tool() : undefined;
 }
 
 // Drawing ends when its route goes, however it goes: deleted, undone or replaced.

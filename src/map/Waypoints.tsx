@@ -1,7 +1,7 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { createEffect, createMemo, For, onCleanup, Show } from 'solid-js';
 import { roundLngLat } from '../routing/legs';
-import { editingRouteId, setWaypointDraft, tool } from '../state/drawing';
+import { editingRouteId, setWaypointDraft, tapAction } from '../state/drawing';
 import { iconSize } from '../model/icon';
 import { waypointLook } from '../model/route';
 import { removeWaypoint, routeById, routeData, updateWaypoint } from '../state/routes';
@@ -64,7 +64,7 @@ function WaypointMarker(props: { map: MapLibreMap; id: string }) {
     updateWaypoint(id, { lngLat: roundLngLat([lng, lat]) }, 'Move waypoint');
   });
   handle.root.addEventListener('click', () => {
-    if (editable() && tool() === 'delete') removeWaypoint(id);
+    if (editable() && tapAction() === 'delete') removeWaypoint(id);
   });
   const stopMenu = onMarkerMenu(handle, map, () => {
     const w = waypoint();

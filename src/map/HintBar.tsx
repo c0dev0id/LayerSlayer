@@ -1,4 +1,4 @@
-import { Show } from 'solid-js';
+import { Match, Switch } from 'solid-js';
 import { editingRouteId, focusDraft, reach, removeLastFocusCorner, stopDrawing, stopFocusDrawing, tool, type Tool } from '../state/drawing';
 import { placingTape, removeTape, tapeLine } from '../state/measure';
 import { routeById } from '../state/routes';
@@ -22,8 +22,8 @@ const LINE_HINT = 'tap the map to add points at the end, joined by straight line
 export function HintBar() {
   const hint = () => (tool() === 'append' && reach() === 'line' ? LINE_HINT : ROUTE_HINTS[tool()]);
   return (
-    <>
-      <Show when={placingTape()}>
+    <Switch>
+      <Match when={placingTape()}>
         <div class="hint-bar">
           <span>
             <strong>Measure</strong>
@@ -34,20 +34,8 @@ export function HintBar() {
             Cancel
           </button>
         </div>
-      </Show>
-      <Show when={!placingTape() && routeById(editingRouteId())}>
-        {(route) => (
-          <div class="hint-bar">
-            <span>
-              <strong>{route().name}</strong>: {hint()}
-            </span>
-            <button class="primary" onClick={stopDrawing}>
-              Done
-            </button>
-          </div>
-        )}
-      </Show>
-      <Show when={!placingTape() && focusDraft()}>
+      </Match>
+      <Match when={focusDraft()}>
         {(corners) => (
           <div class="hint-bar">
             <span>
@@ -61,7 +49,19 @@ export function HintBar() {
             </button>
           </div>
         )}
-      </Show>
-    </>
+      </Match>
+      <Match when={routeById(editingRouteId())}>
+        {(route) => (
+          <div class="hint-bar">
+            <span>
+              <strong>{route().name}</strong>: {hint()}
+            </span>
+            <button class="primary" onClick={stopDrawing}>
+              Done
+            </button>
+          </div>
+        )}
+      </Match>
+    </Switch>
   );
 }

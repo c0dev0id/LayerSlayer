@@ -1,7 +1,7 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { createEffect, createMemo, For, onCleanup, Show, type Accessor } from 'solid-js';
 import { roundLngLat } from '../routing/legs';
-import { editingRouteId, tool } from '../state/drawing';
+import { editingRouteId, tapAction } from '../state/drawing';
 import { movePoint, removePoint, routeById } from '../state/routes';
 import { MarkerHandle, onMarkerMenu } from './markers';
 
@@ -40,7 +40,7 @@ function PointMarker(props: { map: MapLibreMap; routeId: string; pointId: string
     movePoint(routeId, pointId, roundLngLat([lng, lat]));
   });
   handle.root.addEventListener('click', () => {
-    if (tool() === 'delete') removePoint(routeId, pointId);
+    if (tapAction() === 'delete') removePoint(routeId, pointId);
   });
   const stopMenu = onMarkerMenu(handle, map, () => [{ label: 'Remove point', run: () => removePoint(routeId, pointId) }]);
   onCleanup(() => {
