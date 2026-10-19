@@ -8,6 +8,7 @@ import { focusBounds, setTerrain, setView, state } from '../state/store';
 import { clearLayerError, onlyLayerId, onlyOpen, reportLayerError, setMap, setOnlyOpen, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
+import { CoffeeControl } from './coffeeControl';
 import { CACHED_SCHEMES, COG_PROTOCOL, composeStyle, HILLSHADE_SOURCE, TERRAIN_SOURCE, WMTS_PROTOCOL } from './compose';
 import { FEATURE_PROTOCOL } from './featureTiles';
 import { detailsOverlay } from './detailsOverlay';
@@ -77,6 +78,7 @@ export function MapView() {
     // MapLibre's default (1/450) zooms about 0.15 levels per wheel notch; this makes it about
     // 0.55, two notches to a level.
     map.scrollZoom.setWheelZoomRate(1 / 100);
+    map.addControl(new CoffeeControl(), 'top-right');
     // The map's frame goes fullscreen, with what is drawn over the map and without the panel;
     // where the page may not (iPhones, frames), it fills the window instead.
     map.addControl(new maplibregl.FullscreenControl({ container: container.parentElement!, pseudo: !document.fullscreenEnabled }), 'top-right');

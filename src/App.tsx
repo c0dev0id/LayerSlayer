@@ -1,4 +1,5 @@
 import { createSignal, Show } from 'solid-js';
+import { COFFEE_URL } from './map/coffeeControl';
 import { ContextMenu } from './map/ContextMenu';
 import { HintBar } from './map/HintBar';
 import { Interactions } from './map/Interactions';
@@ -36,7 +37,7 @@ export function App() {
         <footer class="footer">
           Layers, routes and settings are kept in this browser; Save takes them to another. <a href="https://github.com/c0dev0id/LayerSlayer">Source</a>
           {' · '}
-          <a class="coffee" href="https://buymeacoffee.com/shagen" target="_blank" rel="noopener">
+          <a class="coffee" href={COFFEE_URL} target="_blank" rel="noopener">
             <CoffeeIcon />
             Buy me a coffee
           </a>
