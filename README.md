@@ -1,4 +1,4 @@
-# <img src="public/logo.png" alt="" width="40" align="top"> Layer Slayer
+![Layer Slayer](docs/banner.png)
 
 A static, server-less map viewer that stacks base maps and overlays from many kinds of
 map service and draws routes over them. For anyone who needs to combine layers no single
