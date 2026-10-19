@@ -171,6 +171,17 @@ header.section > .row {
   color: var(--muted);
 }
 
+.footer .coffee {
+  white-space: nowrap;
+}
+
+.footer .coffee svg {
+  width: 14px;
+  height: 14px;
+  margin-right: 3px;
+  vertical-align: -2px;
+}
+
 .map-wrap {
   position: relative;
   min-width: 0;

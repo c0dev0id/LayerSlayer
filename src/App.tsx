@@ -21,6 +21,7 @@ import { ProjectSection } from './ui/ProjectSection';
 import { RoutesSection } from './ui/RoutesSection';
 import { SettingsSection } from './ui/SettingsSection';
 import { WaypointDialog } from './ui/WaypointDialog';
+import { CoffeeIcon } from './ui/icons';
 
 export function App() {
   const [adding, setAdding] = createSignal(false);
@@ -34,6 +35,11 @@ export function App() {
         <SettingsSection />
         <footer class="footer">
           Layers, routes and settings are kept in this browser; Save takes them to another. <a href="https://github.com/c0dev0id/LayerSlayer">Source</a>
+          {' · '}
+          <a class="coffee" href="https://buymeacoffee.com/shagen" target="_blank" rel="noopener">
+            <CoffeeIcon />
+            Buy me a coffee
+          </a>
         </footer>
       </aside>
       <PanelResizer />
