@@ -889,11 +889,16 @@
   change, which may bring new sources; a flat map keeps MapLibre's default. Finer distant
   tiles also draw a far track thinner, down to broken dashes near the horizon.
 - **The 3D scene is a set of style options too.** The 3D button switches the ground on and
-  off. While it is on, a row of switches beside it sets how the map looks there
-  (`settings.scene`): the sky, whether map styles show their buildings and their labels
-  and icons, and the symbol distance. `composeStyle` applies them in 3D only; they stay
-  set while the map is flat, and a flat map shows each style as it is, its buildings
-  standing up when tilted, since there every layer covers the layers below it.
+  off. While it is on, switches under it set how the map looks there (`settings.scene`):
+  the sky, whether map styles show their buildings and their labels and icons, and the
+  symbol distance. `composeStyle` applies them in 3D only; they stay set while the map is
+  flat, and a flat map shows each style as it is, its buildings standing up when tilted,
+  since there every layer covers the layers below it. The switches stay on screen while 3D
+  is on, so they extend the 3D button's group down the map's edge rather than reach into
+  the map, and the symbol distance's slider opens beside its button only while it is set.
+  Where the map is too short for all its buttons in one column (phones in landscape, or
+  with the panel open below a small map), they go on in a second column to the left;
+  MapLibre stacks them in one column that would run under the credits.
   The buildings and labels switches answer a limit of MapLibre's terrain: it drapes only
   background, fill, line, raster, hillshade and colour-relief layers onto the ground.
   Buildings (fill extrusions), labels, icons and circles are drawn into the 3D scene,

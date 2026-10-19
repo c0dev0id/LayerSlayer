@@ -36,10 +36,9 @@
   coordinates, a link that opens Layer Slayer there, Google Maps and Street View (Google's
   documented Maps URLs, no key).
 - 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched on and off
-  by a button on the map. While it is on, a row of switches beside the button sets a day
-  or night sky, shows or hides the buildings and the labels and icons of map styles, and
-  sets the symbol distance: how high the labels and icons of every layer float above the
-  ground.
+  by a button on the map. While it is on, switches under the button set a day or night
+  sky, show or hide the buildings and the labels and icons of map styles, and set the
+  symbol distance: how high the labels and icons of every layer float above the ground.
 - Icons for vector layers from about 7,900 (Maki, Temaki, Material Design Icons), white on
   a disc of the layer's colour, picked by search; OSM presets come with theirs.
 - OSM query layers: OpenStreetMap features in the focus area, chosen from a list of about

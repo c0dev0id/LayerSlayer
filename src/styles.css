@@ -1427,56 +1427,55 @@ input.swatch {
   font-weight: 700;
 }
 
-/* While the ground is in 3D, the switches of how the map looks there lie to the left of the 3D button, in one row. */
-.terrain-control {
-  position: relative;
-}
-
-.maplibregl-ctrl-group.scene-bar {
-  position: absolute;
-  top: 0;
-  right: calc(100% + 8px);
+/*
+ * The map's buttons run down its right edge, and where the map is too short for all of
+ * them, on in a second column to the left, clear of the scale bar and the credits.
+ */
+.maplibregl-ctrl-top-right {
+  bottom: 40px;
   display: flex;
+  flex-flow: column wrap-reverse;
+  align-content: flex-start;
+  align-items: flex-start;
 }
 
-.scene-bar > button {
+/* While the ground is in 3D, the switches of how the map looks there extend the 3D button's group downwards. */
+.maplibregl-ctrl button.scene-button {
   display: grid;
   place-items: center;
 }
 
-.maplibregl-ctrl-group.scene-bar > * + * {
-  border-top: none;
-  border-left: 1px solid var(--border);
+/* The symbol distance's slider, beside its button. */
+.distance-panel {
+  position-area: left center;
+  inset: auto;
+  margin: 0 8px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 12px;
 }
 
-.maplibregl-ctrl-group.scene-bar > button:first-child {
-  border-radius: 4px 0 0 4px;
-}
-
-.scene-bar .symbol-distance {
+.distance-panel label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 29px;
-  padding: 0 8px 0 6px;
-  font-size: 12px;
+  gap: 8px;
   white-space: nowrap;
 }
 
-.symbol-distance input {
-  width: 90px;
+.distance-panel input {
+  width: 100px;
   margin: 0;
   accent-color: var(--accent);
 }
 
-.symbol-distance output {
+.distance-panel output {
   min-width: 3.4em;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.maplibregl-ctrl button:is(.terrain-toggle, .only-toggle)[aria-pressed='true'],
-.scene-bar button[aria-pressed='true'] {
+.maplibregl-ctrl button:is(.terrain-toggle, .only-toggle, .scene-button)[aria-pressed='true'],
+.maplibregl-ctrl button.scene-button.raised {
   background: var(--active);
   color: var(--accent-text);
 }
@@ -1543,7 +1542,8 @@ input.swatch {
 
 /* Panels floating over the map: the context menu and the style panels. */
 .context-menu,
-.style-panel {
+.style-panel,
+.distance-panel {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 6px;
