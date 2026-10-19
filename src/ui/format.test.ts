@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countText, durationText, sizeText } from './format';
+import { countText, distanceText, durationText, sizeText } from './format';
 
 describe('format', () => {
   it('counts with the noun, singular for one', () => {
@@ -21,5 +21,13 @@ describe('format', () => {
     expect(durationText(12 * 60 + 10)).toBe('12 min');
     expect(durationText(125 * 60)).toBe('2 h 5 min');
     expect(durationText(120 * 60)).toBe('2 h');
+  });
+
+  it('gives distances in the unit that reads best', () => {
+    expect(distanceText(0)).toBe('0 m');
+    expect(distanceText(850.4)).toBe('850 m');
+    expect(distanceText(1249)).toBe('1.25 km');
+    expect(distanceText(12_345)).toBe('12.3 km');
+    expect(distanceText(1_234_000)).toBe('1,234 km');
   });
 });

@@ -1,13 +1,18 @@
 /** A point in a plane, such as screen pixels or Web Mercator metres. */
 export type XY = readonly [number, number];
 
-/** The point of the segment a–b closest to p. */
-export function closestOnSegment(p: XY, a: XY, b: XY): XY {
+/** How far along the segment a–b its point closest to p lies: 0 at a, 1 at b. */
+export function fractionOnSegment(p: XY, a: XY, b: XY): number {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
   const length2 = dx * dx + dy * dy;
-  const t = length2 === 0 ? 0 : Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / length2));
-  return [a[0] + t * dx, a[1] + t * dy];
+  return length2 === 0 ? 0 : Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / length2));
+}
+
+/** The point of the segment a–b closest to p. */
+export function closestOnSegment(p: XY, a: XY, b: XY): XY {
+  const t = fractionOnSegment(p, a, b);
+  return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
 }
 
 /**

@@ -20,3 +20,11 @@ export function durationText(seconds: number): string {
   const hours = Math.floor(minutes / 60);
   return minutes % 60 ? `${hours} h ${minutes % 60} min` : `${hours} h`;
 }
+
+/** A distance in the unit that reads best: "850 m", "1.25 km", "12.3 km", "1,234 km". */
+export function distanceText(metres: number): string {
+  if (metres < 1e3) return `${Math.round(metres)} m`;
+  if (metres < 1e4) return `${(metres / 1e3).toFixed(2)} km`;
+  if (metres < 1e5) return `${(metres / 1e3).toFixed(1)} km`;
+  return `${Math.round(metres / 1e3).toLocaleString('en-US')} km`;
+}
