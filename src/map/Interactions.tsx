@@ -20,18 +20,20 @@ import {
 } from '../state/drawing';
 import { searchRadius } from '../services/osmDetails';
 import { closeDetails, detailsRequest, showDetails, showFeatures } from '../state/details';
+import { moveTapeEnd, placingTape, removeTape, setTapeCursor, startTape } from '../state/measure';
 import { appendPoint, redo, undo } from '../state/routes';
 import { state } from '../state/store';
 import { featuresAt } from './layerFeatures';
 import { fromMarker } from './markers';
 import { googleMapsUrl, latLonText, spotLink, streetViewUrl } from './placeLinks';
-import { insertPointOnLine } from './routeTools';
+import { insertPointOnLine, tapeEndAt } from './routeTools';
 import { TapFilter, type PointerSample } from './tapFilter';
 
 /**
- * Taps on the map and keys while a route or the focus area is drawn, taps on the features
- * of the layers otherwise, and the menu of a spot on the map (right-click or long press):
- * what OSM knows there, its coordinates, Google Maps and Street View.
+ * Taps on the map and keys while a route or the focus area is drawn or a measuring tape is
+ * laid, taps on the features of the layers otherwise, and the menu of a spot on the map
+ * (right-click or long press): what OSM knows there, a measuring tape from there, its
+ * coordinates, Google Maps and Street View.
  */
 export function Interactions(props: { map: MapLibreMap }) {
   const map = props.map;
@@ -39,7 +41,8 @@ export function Interactions(props: { map: MapLibreMap }) {
   // What the next tap does, for the cursor over the map and for the markers (styles.css).
   createEffect(() => {
     const container = map.getContainer();
-    if (editingRouteId()) container.dataset.tool = tool();
+    if (placingTape()) container.dataset.tool = 'measure';
+    else if (editingRouteId()) container.dataset.tool = tool();
     else if (focusDraft()) container.dataset.tool = 'focus';
     else delete container.dataset.tool;
   });
@@ -86,6 +89,7 @@ export function Interactions(props: { map: MapLibreMap }) {
       touch,
       items: [
         { label: 'Show details', run: () => showDetails(spot, searchRadius(lat, map.getZoom())) },
+        { label: 'Measure', run: () => startTape(tapeEndAt(map, [e.point.x, e.point.y], tapRadius())) },
         { label: 'Copy coordinates', run: () => void navigator.clipboard?.writeText(latLonText(spot)).catch(() => {}) },
         {
           label: 'Copy link',
@@ -101,7 +105,7 @@ export function Interactions(props: { map: MapLibreMap }) {
       swallowClick = false;
       return;
     }
-    taps.click(sample(e.originalEvent), () => (editingRouteId() || focusDraft() ? onTap(e) : onFeatureTap(e)));
+    taps.click(sample(e.originalEvent), () => (placingTape() ? onTapeTap(e) : editingRouteId() || focusDraft() ? onTap(e) : onFeatureTap(e)));
   };
   /**
    * A tap that draws nothing opens the details of the layers' features there; a tap beside
@@ -127,6 +131,11 @@ export function Interactions(props: { map: MapLibreMap }) {
     else if (t === 'waypoint') setWaypointDraft({ routeId, lngLat: roundLngLat([lng, lat]), name: '', description: '' });
     else if (t === 'append') appendPoint(routeId, roundLngLat([lng, lat]), reach() === 'line');
   };
+  /** A tap places the end of the measuring tape, on a route where it is near one. */
+  const onTapeTap = (e: MapMouseEvent) => {
+    if (fromMarker(e.originalEvent)) return;
+    moveTapeEnd('end', tapeEndAt(map, [e.point.x, e.point.y], tapRadius()));
+  };
   /** A tap on the first corner closes the focus area; anywhere else it adds a corner. */
   const onFocusTap = (e: MapMouseEvent) => {
     const corners = focusDraft();
@@ -139,12 +148,16 @@ export function Interactions(props: { map: MapLibreMap }) {
     }
   };
   const onMouseMove = (e: MapMouseEvent) => {
+    if (placingTape()) setTapeCursor(tapeEndAt(map, [e.point.x, e.point.y], tapRadius()));
     // Before the first corner there is no line to the pointer.
     if (!focusDraft()?.length) return;
     const { lng, lat } = e.lngLat.wrap();
     setFocusCursor([lng, lat]);
   };
-  const onMouseOut = () => setFocusCursor(undefined);
+  const onMouseOut = () => {
+    setFocusCursor(undefined);
+    setTapeCursor(undefined);
+  };
   const onMoveStart = () => setMenu(undefined);
   // A tap made before a key comes first, so that Esc or Undo act on it, here or in a dialog.
   const onKeyDownFirst = () => taps.flush();
@@ -152,6 +165,7 @@ export function Interactions(props: { map: MapLibreMap }) {
     // Keys a dialog has handled are done; text fields keep their own undo and Escape handling,
     // and an open modal dialog has the keyboard to itself (its Esc closes only the dialog).
     if (e.defaultPrevented || isTextField(e.target) || document.querySelector('dialog:modal')) return;
+    if (placingTape() && e.key === 'Escape') return removeTape();
     if (focusDraft()) return onFocusKey(e);
     if (!editingRouteId()) return;
     const key = e.key.toLowerCase();

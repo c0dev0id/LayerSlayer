@@ -3,6 +3,7 @@ import { COFFEE_URL } from './map/coffeeControl';
 import { ContextMenu } from './map/ContextMenu';
 import { HintBar } from './map/HintBar';
 import { Interactions } from './map/Interactions';
+import { MeasureTape } from './map/MeasureTape';
 import { MapView } from './map/MapView';
 import { RouteEditor } from './map/RouteEditor';
 import { SearchBox } from './map/SearchBox';
@@ -51,6 +52,7 @@ export function App() {
             <>
               <Waypoints map={m()} />
               <RouteEditor map={m()} />
+              <MeasureTape map={m()} />
               <Interactions map={m()} />
               <ContextMenu map={m()} />
               <SearchBox map={m()} />

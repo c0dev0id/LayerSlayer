@@ -917,6 +917,25 @@
   as belonging to whatever lies below it on screen, so the distance stops at 300 m. The
   slider applies a new distance when it is let go, as every label and icon is laid out
   anew for it.
+- **The measuring tape measures on a sphere, or along a route.** "Measure" in the menu of
+  a spot starts a tape there; the next tap ends it, and until then the tape runs on to the
+  pointer and the hint bar gives its length. Both ends are markers that can be dragged,
+  and the end carries the length and a button that takes the tape away. There is one tape
+  at a time; it is never kept and is no undo step, like the drawing of a route or a focus
+  area.
+  A straight tape is the great circle between its ends, drawn with points at most 20 km
+  apart, and measured by the haversine formula on a sphere of the Earth's mean radius: a
+  line straight on the Mercator map would be neither the shortest way nor easy to measure,
+  and the sphere is within half a percent of the ellipsoid. The plane fitted at the mean
+  latitude that route colouring uses would be off by more over long distances.
+  An end placed or dropped within reach of a route's line (10 CSS pixels, 24 for a finger,
+  as for taps on a route) is laid on the nearest route, found on screen like a tap that
+  inserts a point. With both ends on the same route, the tape is the stretch of that
+  route's line between them, as drawn, routed legs and straight ones alike, and its length
+  is that stretch's. Each end keeps the route it was laid on, so a tape with its ends on
+  two routes, or one on none, stays straight rather than guessing a way between routes.
+  While the end is placed, the pointer is laid on routes the same way, so the tape shows
+  its course before the tap.
 - **Spot details pick what matters on the move.** One Overpass query (`around`, about 40
   pixels at the zoom, 15 to 250 m) asks for drivable ways (motorways down to tracks,
   paths and bridleways; footways and cycleways are left out), places to go to (amenity,

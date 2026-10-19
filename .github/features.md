@@ -35,6 +35,10 @@
   barrier, piece of history, water and bridge, in words) and the sea it lies in, its
   coordinates, a link that opens Layer Slayer there, Google Maps and Street View (Google's
   documented Maps URLs, no key).
+- A measuring tape from that menu: from the spot to a point tapped next, the line
+  following the pointer until then, with its length at its end. Both ends can be dragged;
+  an end that comes near a route is laid on it, and with both ends on the same route the
+  tape follows the route between them.
 - 3D terrain with hillshading from Mapterhorn's open elevation tiles, switched on and off
   by a button on the map. While it is on, switches under the button set a day or night
   sky, show or hide the buildings and the labels and icons of map styles, and set the

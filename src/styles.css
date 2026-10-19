@@ -1174,6 +1174,70 @@ input.swatch {
   user-select: none;
 }
 
+/* The ends of the measuring tape, the end with the tape's length beside it. */
+.tape-end {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 3px solid #212529;
+  border-radius: 50%;
+  background: #fcc419;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+}
+
+.tape-label {
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 2px 2px 8px;
+  transform: translateY(-50%);
+  border-radius: 6px;
+  background: rgba(33, 37, 41, 0.85);
+  color: #fff;
+  font: 600 13px/18px system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.tape-route {
+  font-weight: 400;
+}
+
+.tape-label button {
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tape-label button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tape-label svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (pointer: coarse) {
+  .tape-end {
+    width: 24px;
+    height: 24px;
+  }
+
+  .tape-label {
+    left: 28px;
+  }
+}
+
 /* Waypoints: a pin whose tip marks the place, with the name beside its head. */
 .waypoint-marker {
   pointer-events: none;

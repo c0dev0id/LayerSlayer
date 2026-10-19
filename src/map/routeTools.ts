@@ -1,7 +1,8 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { nearestLine, type XY } from '../geo/nearest';
-import { legCoordinates, roundLngLat, routeLegs } from '../routing/legs';
-import { insertPoint, routeById } from '../state/routes';
+import { legCoordinates, roundLngLat, routeLegs, routePoints } from '../routing/legs';
+import type { TapeEnd } from '../state/measure';
+import { insertPoint, routeById, routeData } from '../state/routes';
 
 /**
  * Inserts a point into the route where a tap hits its line (within `tolerance` CSS
@@ -22,4 +23,23 @@ export function insertPointOnLine(map: MapLibreMap, routeId: string, tap: XY, to
   const { lng, lat } = map.unproject([hit.point[0], hit.point[1]]).wrap();
   insertPoint(routeId, hit.index + 1, roundLngLat([lng, lat]));
   return true;
+}
+
+/**
+ * An end of the measuring tape at a spot on screen: on the nearest route's line where one
+ * passes within `tolerance` CSS pixels, otherwise at the spot itself.
+ */
+export function tapeEndAt(map: MapLibreMap, spot: XY, tolerance: number): TapeEnd {
+  const routes = routeData.routes;
+  const lines = routes.map((route) =>
+    routePoints(route).map((c): XY => {
+      const { x, y } = map.project(c);
+      return [x, y];
+    }),
+  );
+  const hit = nearestLine(lines, spot);
+  const onRoute = hit && hit.distance <= tolerance ? hit : undefined;
+  const at = onRoute?.point ?? spot;
+  const { lng, lat } = map.unproject([at[0], at[1]]).wrap();
+  return { at: [lng, lat], ...(onRoute && { routeId: routes[onRoute.index]!.id }) };
 }

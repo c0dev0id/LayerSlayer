@@ -1,6 +1,8 @@
 import { Show } from 'solid-js';
 import { editingRouteId, focusDraft, reach, removeLastFocusCorner, stopDrawing, stopFocusDrawing, tool, type Tool } from '../state/drawing';
+import { placingTape, removeTape, tapeLine } from '../state/measure';
 import { routeById } from '../state/routes';
+import { distanceText } from '../ui/format';
 
 const ROUTE_HINTS: Record<Tool, string> = {
   append: 'tap the map to add points at the end, drag points to move them.',
@@ -14,13 +16,26 @@ const LINE_HINT = 'tap the map to add points at the end, joined by straight line
 
 /**
  * What the current tool does while a route is drawn, with the button that ends drawing;
- * or how the focus area is drawn.
+ * how the focus area is drawn; or, taking the place of either while it is laid, how the
+ * measuring tape's end is placed.
  */
 export function HintBar() {
   const hint = () => (tool() === 'append' && reach() === 'line' ? LINE_HINT : ROUTE_HINTS[tool()]);
   return (
     <>
-      <Show when={routeById(editingRouteId())}>
+      <Show when={placingTape()}>
+        <div class="hint-bar">
+          <span>
+            <strong>Measure</strong>
+            {tapeLine() ? ` ${distanceText(tapeLine()!.metres)}` : ''}: tap where the tape ends; from one point of a route to another it follows
+            the route.
+          </span>
+          <button title="Stop measuring (Esc)" onClick={removeTape}>
+            Cancel
+          </button>
+        </div>
+      </Show>
+      <Show when={!placingTape() && routeById(editingRouteId())}>
         {(route) => (
           <div class="hint-bar">
             <span>
@@ -32,7 +47,7 @@ export function HintBar() {
           </div>
         )}
       </Show>
-      <Show when={focusDraft()}>
+      <Show when={!placingTape() && focusDraft()}>
         {(corners) => (
           <div class="hint-bar">
             <span>

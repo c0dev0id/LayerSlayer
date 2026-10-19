@@ -15,6 +15,7 @@ import { detailsOverlay } from './detailsOverlay';
 import { focusAreaOverlay, focusDraftOverlay } from './focusOverlay';
 import { drawFocusShadow } from './focusShadow';
 import { keepLoadedGeoJson } from './geojsonDiff';
+import { measureOverlay } from './measureOverlay';
 import { PIN_COLOR } from './markers';
 import { withOverlays } from './overlays';
 import { latLonText, readSpotLink, type SpotView } from './placeLinks';
@@ -34,7 +35,7 @@ for (const scheme of CACHED_SCHEMES) maplibregl.addProtocol(scheme, loadCachedTi
 maplibregl.addProtocol(COG_PROTOCOL, async (params) => (await import('@geomatico/maplibre-cog-protocol')).cogProtocol(params));
 
 /** What the app draws over the layers, bottom to top. */
-const OVERLAYS = [focusAreaOverlay, focusDraftOverlay, detailsOverlay, routeOverlay];
+const OVERLAYS = [focusAreaOverlay, focusDraftOverlay, detailsOverlay, routeOverlay, measureOverlay];
 
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits;
 

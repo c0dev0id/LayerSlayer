@@ -25,6 +25,8 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
   undo/redo and GPX import and export.
 - **Spot details** — right-click anywhere for what OpenStreetMap knows there, in plain
   words.
+- **Measuring tape** — right-click to measure from there; between two points of a route
+  it follows the route.
 - **3D terrain** — hillshaded relief from open worldwide elevation tiles, under a day or a
   night sky, with the buildings and labels of map styles switchable and labels floating
   above the ground.
