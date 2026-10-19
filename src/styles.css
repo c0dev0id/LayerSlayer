@@ -1655,11 +1655,20 @@ input.swatch {
     display: none;
   }
 
-  /* Where the search box is on wide screens, between its button and the map's controls. */
+  /*
+   * Where the search box is on wide screens, between its button and the map's controls;
+   * its text has the bar's whole width, and its buttons a row of their own below.
+   */
   .hint-bar {
     top: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     max-width: calc(100% - 130px);
     font-size: 12px;
+  }
+
+  .hint-bar > span {
+    flex-basis: 100%;
   }
 
   /*
