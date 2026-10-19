@@ -2,7 +2,7 @@ import { createMemo, createRoot, createSignal } from 'solid-js';
 import { lineLength, tapeCourse } from '../geo/measure';
 import type { LngLat, Route } from '../model/route';
 import { routePoints } from '../routing/legs';
-import { routeById } from './routes';
+import { routeById, routeData } from './routes';
 
 /** An end of the measuring tape: where it lies, and the route it was laid on, if any. */
 export interface TapeEnd {
@@ -41,9 +41,16 @@ export function moveTapeEnd(which: keyof Tape, to: TapeEnd): void {
 }
 
 export function removeTape(): void {
-  setTapeCursor(undefined);
   setTape(undefined);
 }
+
+/**
+ * The line of each route as drawn, which the tape is laid on: read once for all moves of
+ * the pointer or an end, and again only when a route changes.
+ */
+export const routeLines = createRoot(() =>
+  createMemo((): { id: string; line: LngLat[] }[] => routeData.routes.map((route) => ({ id: route.id, line: routePoints(route) }))),
+);
 
 /** The tape as laid out, with its length in metres: along its route where both ends lie on the same one, else straight. */
 export const tapeLine = createRoot(() =>
@@ -52,7 +59,7 @@ export const tapeLine = createRoot(() =>
     const end = t?.end ?? tapeCursor();
     if (!t || !end) return undefined;
     const route = t.start.routeId === end.routeId ? routeById(end.routeId) : undefined;
-    const points = tapeCourse(t.start.at, end.at, route && routePoints(route));
+    const points = tapeCourse(t.start.at, end.at, route && routeLines().find((r) => r.id === route.id)?.line);
     return { points, metres: lineLength(points), ...(route && { route }) };
   }),
 );

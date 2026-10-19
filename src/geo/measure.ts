@@ -1,5 +1,5 @@
 import type { LngLat } from '../model/route';
-import { fractionOnSegment } from './nearest';
+import { nearestLine } from './nearest';
 import { planeAt } from './plane';
 
 /** The Earth's mean radius in metres. */
@@ -57,16 +57,10 @@ export interface PlaceOnLine {
 
 /** The place on a line nearest to a point; none on a line without a segment. */
 export function placeOnLine(line: readonly LngLat[], point: LngLat): PlaceOnLine | undefined {
+  if (line.length < 2) return undefined;
   const toPlane = planeAt(line);
-  const p = toPlane(point);
-  let best: (PlaceOnLine & { distance: number }) | undefined;
-  for (let i = 1; i < line.length; i++) {
-    const [a, b] = [toPlane(line[i - 1]!), toPlane(line[i]!)];
-    const t = fractionOnSegment(p, a, b);
-    const distance = Math.hypot(a[0] + t * (b[0] - a[0]) - p[0], a[1] + t * (b[1] - a[1]) - p[1]);
-    if (!best || distance < best.distance) best = { segment: i - 1, t, distance };
-  }
-  return best && { segment: best.segment, t: best.t };
+  const nearest = nearestLine([line.map(toPlane)], toPlane(point));
+  return nearest && { segment: nearest.segment, t: nearest.t };
 }
 
 function pointAt(line: readonly LngLat[], { segment, t }: PlaceOnLine): LngLat {

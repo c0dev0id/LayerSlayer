@@ -1,10 +1,11 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
-import { createEffect, onCleanup, Show } from 'solid-js';
+import { createEffect, onCleanup, Show, type JSX } from 'solid-js';
 import { moveTapeEnd, removeTape, tape, tapeLine, type Tape } from '../state/measure';
 import { CloseIcon } from '../ui/icons';
 import { distanceText } from '../ui/format';
 import { MarkerHandle, onMarkerMenu } from './markers';
 import { tapeEndAt } from './routeTools';
+import { tapReach } from './tapFilter';
 
 /**
  * The ends of the measuring tape as markers that can be dragged, each laid on a route it
@@ -13,43 +14,31 @@ import { tapeEndAt } from './routeTools';
 export function MeasureTape(props: { map: MapLibreMap }) {
   return (
     <Show when={tape() !== undefined}>
-      <TapeEndMarker map={props.map} which="start" content={(<div class="tape-end" />) as HTMLElement} />
-      <TapeEndMarker
-        map={props.map}
-        which="end"
-        content={
-          (
-            <div class="tape-end">
-              <div class="tape-label">
-                <span>
-                  {distanceText(tapeLine()?.metres ?? 0)}
-                  <Show when={tapeLine()?.route}>{(route) => <span class="tape-route"> along {route().name}</span>}</Show>
-                </span>
-                <button title="Take the tape away" aria-label="Take the tape away" onClick={removeTape}>
-                  <CloseIcon />
-                </button>
-              </div>
-            </div>
-          ) as HTMLElement
-        }
-      />
+      <TapeEndMarker map={props.map} which="start" />
+      <TapeEndMarker map={props.map} which="end">
+        <div class="tape-label">
+          <span>
+            {distanceText(tapeLine()?.metres ?? 0)}
+            <Show when={tapeLine()?.route}>{(route) => <span class="tape-route"> along {route().name}</span>}</Show>
+          </span>
+          <button class="icon" title="Take the tape away" aria-label="Take the tape away" onClick={removeTape}>
+            <CloseIcon />
+          </button>
+        </div>
+      </TapeEndMarker>
     </Show>
   );
 }
 
-function TapeEndMarker(props: { map: MapLibreMap; which: keyof Tape; content: HTMLElement }) {
+function TapeEndMarker(props: { map: MapLibreMap; which: keyof Tape; children?: JSX.Element }) {
   const { map, which } = props;
-  const handle = new MarkerHandle(map, props.content, { className: 'tape-end-marker' });
-  createEffect(() => {
-    const at = tape()?.[which]?.at;
-    handle.setPosition(at && [at[0], at[1]]);
-  });
-  // A finger needs a wider reach than a mouse to land on a route.
-  let reach = 10;
-  handle.root.addEventListener('pointerdown', (e) => (reach = e.pointerType === 'mouse' ? 10 : 24));
+  const handle = new MarkerHandle(map, (<div class="tape-end">{props.children}</div>) as HTMLElement, { className: 'tape-end-marker' });
+  createEffect(() => handle.setPosition(tape()?.[which]?.at));
+  let touch = false;
+  handle.root.addEventListener('pointerdown', (e) => (touch = e.pointerType !== 'mouse'));
   handle.marker.on('drag', () => {
     const { x, y } = map.project(handle.marker.getLngLat());
-    moveTapeEnd(which, tapeEndAt(map, [x, y], reach));
+    moveTapeEnd(which, tapeEndAt(map, [x, y], tapReach(touch)));
   });
   const stopMenu = onMarkerMenu(handle, map, () => [{ label: 'Take the tape away', run: removeTape }]);
   onCleanup(() => {

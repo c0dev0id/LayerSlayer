@@ -23,12 +23,12 @@ describe('nearestLine', () => {
         [10, 20],
       ],
     ] as const;
-    expect(nearestLine(lines, [4, 2])).toEqual({ index: 0, distance: 2, point: [4, 0] });
-    expect(nearestLine(lines, [13, 15])).toEqual({ index: 1, distance: 3, point: [10, 15] });
+    expect(nearestLine(lines, [4, 2])).toEqual({ index: 0, segment: 0, t: 0.4, distance: 2, point: [4, 0] });
+    expect(nearestLine(lines, [13, 15])).toEqual({ index: 1, segment: 1, t: 0.5, distance: 3, point: [10, 15] });
   });
 
   it('handles single points and no lines', () => {
-    expect(nearestLine([[[3, 4]]], [0, 0])).toEqual({ index: 0, distance: 5, point: [3, 4] });
+    expect(nearestLine([[[3, 4]]], [0, 0])).toEqual({ index: 0, segment: 0, t: 0, distance: 5, point: [3, 4] });
     expect(nearestLine([], [0, 0])).toBeUndefined();
   });
 });

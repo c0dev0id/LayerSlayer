@@ -15,19 +15,32 @@ export function closestOnSegment(p: XY, a: XY, b: XY): XY {
   return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
 }
 
+/** Where a point lies nearest on lines: which line, which of its segments and how far along it, how far from p, and the point. */
+export interface NearestPlace {
+  index: number;
+  segment: number;
+  t: number;
+  distance: number;
+  point: XY;
+}
+
 /**
- * The line nearest to p: its index, the distance and the closest point on it. Lines are
- * polylines; undefined when there is none with a point.
+ * The place on the lines nearest to p. Lines are polylines; a line of one point has it as
+ * its only place. Undefined when there is no line with a point.
  */
-export function nearestLine(lines: readonly (readonly XY[])[], p: XY): { index: number; distance: number; point: XY } | undefined {
-  let best: { index: number; distance: number; point: XY } | undefined;
-  const consider = (index: number, point: XY) => {
+export function nearestLine(lines: readonly (readonly XY[])[], p: XY): NearestPlace | undefined {
+  let best: NearestPlace | undefined;
+  const consider = (index: number, segment: number, t: number, point: XY) => {
     const distance = Math.hypot(p[0] - point[0], p[1] - point[1]);
-    if (!best || distance < best.distance) best = { index, distance, point };
+    if (!best || distance < best.distance) best = { index, segment, t, distance, point };
   };
   lines.forEach((line, index) => {
-    if (line.length === 1) consider(index, line[0]!);
-    for (let i = 1; i < line.length; i++) consider(index, closestOnSegment(p, line[i - 1]!, line[i]!));
+    if (line.length === 1) consider(index, 0, 0, line[0]!);
+    for (let i = 1; i < line.length; i++) {
+      const [a, b] = [line[i - 1]!, line[i]!];
+      const t = fractionOnSegment(p, a, b);
+      consider(index, i - 1, t, [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])]);
+    }
   });
   return best;
 }

@@ -1,8 +1,17 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { nearestLine, type XY } from '../geo/nearest';
-import { legCoordinates, roundLngLat, routeLegs, routePoints } from '../routing/legs';
-import type { TapeEnd } from '../state/measure';
-import { insertPoint, routeById, routeData } from '../state/routes';
+import type { LngLat } from '../model/route';
+import { legCoordinates, roundLngLat, routeLegs } from '../routing/legs';
+import { routeLines, type TapeEnd } from '../state/measure';
+import { insertPoint, routeById } from '../state/routes';
+
+/** Points as the map shows them on screen, in CSS pixels. */
+function onScreen(map: MapLibreMap, points: readonly LngLat[]): XY[] {
+  return points.map((p) => {
+    const { x, y } = map.project(p);
+    return [x, y];
+  });
+}
 
 /**
  * Inserts a point into the route where a tap hits its line (within `tolerance` CSS
@@ -12,12 +21,7 @@ import { insertPoint, routeById, routeData } from '../state/routes';
 export function insertPointOnLine(map: MapLibreMap, routeId: string, tap: XY, tolerance: number): boolean {
   const route = routeById(routeId);
   if (!route) return false;
-  const lines = routeLegs(route).map((leg) =>
-    legCoordinates(route, leg).map((c): XY => {
-      const { x, y } = map.project(c);
-      return [x, y];
-    }),
-  );
+  const lines = routeLegs(route).map((leg) => onScreen(map, legCoordinates(route, leg)));
   const hit = nearestLine(lines, tap);
   if (!hit || hit.distance > tolerance) return false;
   const { lng, lat } = map.unproject([hit.point[0], hit.point[1]]).wrap();
@@ -30,14 +34,11 @@ export function insertPointOnLine(map: MapLibreMap, routeId: string, tap: XY, to
  * passes within `tolerance` CSS pixels, otherwise at the spot itself.
  */
 export function tapeEndAt(map: MapLibreMap, spot: XY, tolerance: number): TapeEnd {
-  const routes = routeData.routes;
-  const lines = routes.map((route) =>
-    routePoints(route).map((c): XY => {
-      const { x, y } = map.project(c);
-      return [x, y];
-    }),
+  const routes = routeLines();
+  const hit = nearestLine(
+    routes.map((r) => onScreen(map, r.line)),
+    spot,
   );
-  const hit = nearestLine(lines, spot);
   const onRoute = hit && hit.distance <= tolerance ? hit : undefined;
   const at = onRoute?.point ?? spot;
   const { lng, lat } = map.unproject([at[0], at[1]]).wrap();

@@ -210,7 +210,7 @@ header.section > .row {
 
 /* Buttons */
 
-:where(.panel, .dialog, .hint-bar) :is(button, a).icon {
+:where(.panel, .dialog, .hint-bar, .tape-label) :is(button, a).icon {
   display: inline-grid;
   place-items: center;
   padding: 2px 4px;
@@ -1190,7 +1190,7 @@ input.swatch {
 .tape-label {
   position: absolute;
   top: 50%;
-  left: 20px;
+  left: calc(100% + 10px);
   display: flex;
   align-items: center;
   gap: 2px;
@@ -1208,14 +1208,7 @@ input.swatch {
 }
 
 .tape-label button {
-  display: grid;
-  place-items: center;
-  padding: 2px;
-  border: none;
   border-radius: 4px;
-  background: none;
-  color: inherit;
-  cursor: pointer;
 }
 
 .tape-label button:hover {
@@ -1231,10 +1224,6 @@ input.swatch {
   .tape-end {
     width: 24px;
     height: 24px;
-  }
-
-  .tape-label {
-    left: 28px;
   }
 }
 
@@ -1843,7 +1832,7 @@ input.swatch {
     font-size: 16px;
   }
 
-  :where(.panel, .dialog, .hint-bar) :is(button, a).icon {
+  :where(.panel, .dialog, .hint-bar, .tape-label) :is(button, a).icon {
     min-width: 34px;
     min-height: 34px;
   }
