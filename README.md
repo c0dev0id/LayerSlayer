@@ -26,7 +26,8 @@ Nothing runs on a server; layers, routes, settings and imported files stay in th
 - **Spot details** — right-click anywhere for what OpenStreetMap knows there, in plain
   words.
 - **3D terrain** — hillshaded relief from open worldwide elevation tiles, under a day or a
-  night sky.
+  night sky, with the buildings and labels of map styles switchable and labels floating
+  above the ground.
 - **Fullscreen** — one button shows the map alone, without the panel and controls.
 - **Focus area** — a polygon that limits requests and floats over a small outline map of
   the world, with precaching for later.

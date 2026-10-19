@@ -4,7 +4,7 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createEffect, createMemo, on, onCleanup, onMount, untrack } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import { describeLoadError, requestUrl } from '../state/net';
-import { focusBounds, setTerrain, setView, state } from '../state/store';
+import { focusBounds, scene, setView, state } from '../state/store';
 import { clearLayerError, onlyLayerId, onlyOpen, reportLayerError, setMap, setOnlyOpen, setZoom } from '../state/ui';
 import { assets } from './assets';
 import { watchGeoJsonBounds } from './bounds';
@@ -84,9 +84,7 @@ export function MapView() {
     map.addControl(new maplibregl.FullscreenControl({ container: container.parentElement!, pseudo: !document.fullscreenEnabled }), 'top-right');
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     map.addControl(new maplibregl.GeolocateControl({ fitBoundsOptions: { maxZoom: 15 } }), 'top-right');
-    const terrainControl = new TerrainControl(() => state.settings.terrain, setTerrain);
-    map.addControl(terrainControl, 'top-right');
-    createEffect(() => terrainControl.show(state.settings.terrain));
+    map.addControl(new TerrainControl(), 'top-right');
     const onlyControl = new OnlyControl(() => setOnlyOpen(!onlyOpen()));
     map.addControl(onlyControl, 'top-right');
     createEffect(() => onlyControl.show(onlyOpen(), state.layers.find((l) => l.id === state.activeLayerId)?.name));
@@ -150,7 +148,7 @@ export function MapView() {
             composeStyle(state.layers, assets(), {
               focus: focusBounds(),
               background: state.settings.background,
-              terrain: state.settings.terrain,
+              terrain: state.settings.terrain && scene(),
               only: onlyLayerId(),
               tileCache: !state.settings.tileCacheOff,
             }),

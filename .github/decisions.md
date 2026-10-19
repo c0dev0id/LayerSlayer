@@ -869,8 +869,8 @@
   in wedges. With terrain the style has a sky, by day MapLibre's own colours and by night
   a dark blue, whose fog blends the distant ground into the horizon, except while a focus
   area is set, when the small world on its cover would fade into it (a ground blend of 1
-  puts the fog beyond the horizon); the 3D button goes from flat to day to night and back
-  to flat. The map itself is not dimmed at night: dark base maps exist, and dimming them
+  puts the fog beyond the horizon); the sky is a switch beside the 3D button (see the 3D
+  scene). The map itself is not dimmed at night: dark base maps exist, and dimming them
   would leave them too dark. A flat map has no sky: tilted that far it shows white above
   the horizon, which is fine for a map. It reads the same tiles through a second source,
   as MapLibre advises for terrain and hillshade, and is lighter than MapLibre's default
@@ -888,6 +888,30 @@
   belongs to each source rather than to the style, so it is set again after every style
   change, which may bring new sources; a flat map keeps MapLibre's default. Finer distant
   tiles also draw a far track thinner, down to broken dashes near the horizon.
+- **The 3D scene is a set of style options too.** The 3D button switches the ground on and
+  off. While it is on, a row of switches beside it sets how the map looks there
+  (`settings.scene`): the sky, whether map styles show their buildings and their labels
+  and icons, and the symbol distance. `composeStyle` applies them in 3D only; they stay
+  set while the map is flat, and a flat map shows each style as it is, its buildings
+  standing up when tilted, since there every layer covers the layers below it.
+  The buildings and labels switches answer a limit of MapLibre's terrain: it drapes only
+  background, fill, line, raster, hillshade and colour-relief layers onto the ground.
+  Buildings (fill extrusions), labels, icons and circles are drawn into the 3D scene,
+  where no layer above can cover them, so Liberty's buildings and labels showed through an
+  opaque raster stacked over it. Which layers are covered cannot be known: a raster at
+  full opacity may be mostly transparent, as trail overlays are, and a rule that left out
+  what lies below one would take the labels from under them. So the user switches them.
+  The switches cover map styles only; a layer's own labels and icons were chosen for it.
+  The symbol distance raises the labels and icons of every layer, but not the app's
+  overlays (routes, waypoints), by `symbol-height-offset` (MapLibre 6.6), in metres above
+  the ground. No other layer type has a height: lines, areas, rasters and the dots of
+  vector layers stay on the ground, and a weather layer cannot float above the buildings
+  without a custom layer, which the composed style rules out. A per-layer distance that
+  moved the layers above along with it was the first idea, and was dropped, as it could
+  only ever move symbols. A label raised far has nothing linking it to its place and reads
+  as belonging to whatever lies below it on screen, so the distance stops at 300 m. The
+  slider applies a new distance when it is let go, as every label and icon is laid out
+  anew for it.
 - **Spot details pick what matters on the move.** One Overpass query (`around`, about 40
   pixels at the zoom, 15 to 250 m) asks for drivable ways (motorways down to tracks,
   paths and bridleways; footways and cycleways are left out), places to go to (amenity,

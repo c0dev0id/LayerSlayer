@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createLayer, storedFile } from '../model/layer';
+import { DEFAULT_SCENE, MAX_SYMBOL_DISTANCE } from '../model/scene';
 import { importFile } from '../services/importFile';
 import { addLayer, browserSettings, defaultState, moveItem, parseState, proxiedHostsOf, projectSettings, replaceLayerFile, state, updateLayer } from './store';
 
@@ -39,8 +40,6 @@ describe('parseState', () => {
     ];
     expect(parseState(JSON.stringify({ layers: [], focus: corners })).focus).toEqual(corners);
     expect(parseState(JSON.stringify({ layers: [], focus: corners.slice(1) }))).not.toHaveProperty('focus');
-    expect(parseState(JSON.stringify({ layers: [], settings: { terrain: 'night' } })).settings.terrain).toBe('night');
-    expect(parseState(JSON.stringify({ layers: [], settings: { terrain: true } })).settings).not.toHaveProperty('terrain');
     expect(parseState(JSON.stringify({ layers: [], focus: [[1, 1], [2, 'x'], [2, 2]] }))).not.toHaveProperty('focus');
   });
 
@@ -53,6 +52,16 @@ describe('parseState', () => {
     expect(parseState(JSON.stringify({ layers: [], settings: { tileCacheOff: true, proxyMode: 'all' } })).settings).toMatchObject({ tileCacheOff: true, proxyMode: 'all' });
     expect(parseState(JSON.stringify({ layers: [], settings: { proxyMode: 'some' } })).settings).not.toHaveProperty('proxyMode');
     expect(parseState(JSON.stringify({ layers: [], settings: { tileCacheOff: 'yes' } })).settings).not.toHaveProperty('tileCacheOff');
+  });
+
+  it('keeps 3D on or off, and each part of its scene that is one', () => {
+    expect(parseState(JSON.stringify({ layers: [], settings: { terrain: true } })).settings.terrain).toBe(true);
+    expect(parseState(JSON.stringify({ layers: [], settings: { terrain: 'night' } })).settings).not.toHaveProperty('terrain');
+    expect(parseState(JSON.stringify({ layers: [], settings: {} })).settings).not.toHaveProperty('scene');
+    const scene = { sky: 'night', buildings: false, labels: false, symbolDistance: 40 };
+    expect(parseState(JSON.stringify({ layers: [], settings: { scene } })).settings.scene).toEqual(scene);
+    const odd = { sky: 'dusk', buildings: 'no', symbolDistance: 9000 };
+    expect(parseState(JSON.stringify({ layers: [], settings: { scene: odd } })).settings.scene).toEqual({ ...DEFAULT_SCENE, symbolDistance: MAX_SYMBOL_DISTANCE });
   });
 
   it('keeps an empty layer list empty', () => {
@@ -102,8 +111,9 @@ describe('replaceLayerFile', () => {
 
 describe('browserSettings and projectSettings', () => {
   it('split the settings into this browser\'s own and the project\'s', () => {
-    const settings = { proxy: 'p', proxiedHosts: ['h'], terrain: 'night' as const, tileCacheOff: true, proxyMode: 'off' as const };
-    expect(projectSettings(settings)).toEqual({ proxiedHosts: ['h'], terrain: 'night' });
+    const scene = { ...DEFAULT_SCENE, sky: 'night' as const };
+    const settings = { proxy: 'p', proxiedHosts: ['h'], terrain: true as const, scene, tileCacheOff: true, proxyMode: 'off' as const };
+    expect(projectSettings(settings)).toEqual({ proxiedHosts: ['h'], terrain: true, scene });
     expect({ ...projectSettings(settings), ...browserSettings(settings) }).toEqual(settings);
     // Every key of this browser's own, so that a project's cannot outlast them.
     expect(Object.keys(browserSettings({ proxy: '', proxiedHosts: [] }))).toEqual(['proxy', 'tileCacheOff', 'proxyMode']);

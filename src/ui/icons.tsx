@@ -432,6 +432,29 @@ export const LockIcon = () => (
   </Icon>
 );
 
+/** The buildings of map styles in 3D (Tabler's building-skyscraper). */
+export const BuildingIcon = () => (
+  <Icon>
+    <path d="M3 21l18 0" />
+    <path d="M5 21v-14l8 -4v18" />
+    <path d="M19 21v-10l-6 -4" />
+    <path d="M9 9l0 .01" />
+    <path d="M9 12l0 .01" />
+    <path d="M9 15l0 .01" />
+    <path d="M9 18l0 .01" />
+  </Icon>
+);
+
+/** How high labels and icons float in 3D (Tabler's map-pin-up). */
+export const MapPinUpIcon = () => (
+  <Icon>
+    <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+    <path d="M12.789 21.324a2 2 0 0 1 -2.202 -.424l-4.244 -4.243a8 8 0 1 1 13.59 -4.626" />
+    <path d="M19 22v-6" />
+    <path d="M22 19l-3 -3l-3 3" />
+  </Icon>
+);
+
 /** An address or place (Tabler's map-pin). */
 export const MapPinIcon = () => (
   <Icon>

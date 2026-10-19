@@ -15,10 +15,10 @@ import {
   type LayerSource,
 } from '../model/layer';
 import { isLngLat, type LngLat } from '../model/route';
+import { DEFAULT_SCENE, parseScene, type Scene } from '../model/scene';
 import { isHexColor } from '../model/stored';
 import { fileSourceType, importFile } from '../services/importFile';
 import { deleteFile } from './files';
-import type { TerrainSky } from '../map/compose';
 import { parsePmtilesUrl } from '../map/urls';
 import { hostOf, setProxy } from './net';
 import { persistedStore } from './persist';
@@ -34,8 +34,10 @@ export interface Settings {
   focusOutline?: string;
   /** The colour of the focus area's shadow, as #rrggbb; none for one that suits the background. */
   focusShadow?: string;
-  /** The ground in 3D, raised by its elevation, under a day or night sky; flat where unset. */
-  terrain?: TerrainSky;
+  /** The ground in 3D, raised by its elevation; flat where unset. */
+  terrain?: true;
+  /** How the map looks in 3D; DEFAULT_SCENE where unset. */
+  scene?: Scene;
   /** No layer keeps tiles, whatever its own setting says: a switch of this browser, for testing. */
   tileCacheOff?: boolean;
   /**
@@ -191,7 +193,8 @@ export function parseState(json: string): AppState {
       ...(isHexColor(settings?.background) && { background: settings.background }),
       ...(isHexColor(settings?.focusOutline) && { focusOutline: settings.focusOutline }),
       ...(isHexColor(settings?.focusShadow) && { focusShadow: settings.focusShadow }),
-      ...((settings?.terrain === 'day' || settings?.terrain === 'night') && { terrain: settings.terrain }),
+      ...(settings?.terrain === true && { terrain: true }),
+      ...(settings?.scene !== undefined && { scene: parseScene(settings.scene) }),
       ...(settings?.tileCacheOff === true && { tileCacheOff: true }),
       ...((settings?.proxyMode === 'off' || settings?.proxyMode === 'all') && { proxyMode: settings.proxyMode }),
     },
@@ -340,9 +343,17 @@ export function setFocusShadow(color: string | undefined): void {
   setState('settings', 'focusShadow', color);
 }
 
-/** Shows the ground in 3D, raised by its elevation, under a day or night sky, or flat. */
-export function setTerrain(sky: TerrainSky | undefined): void {
-  setState('settings', 'terrain', sky);
+/** Shows the ground in 3D, raised by its elevation, or flat. */
+export function setTerrain(on: boolean): void {
+  setState('settings', 'terrain', on || undefined);
+}
+
+/** How the map looks in 3D: its scene. */
+export const scene = (): Scene => state.settings.scene ?? DEFAULT_SCENE;
+
+/** Changes part of how the map looks in 3D. */
+export function setScene(part: Partial<Scene>): void {
+  setState('settings', 'scene', { ...scene(), ...part });
 }
 
 /** Routes a host's requests through the CORS proxy, or stops doing so. */

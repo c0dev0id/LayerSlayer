@@ -9,6 +9,7 @@ import { intersectBounds } from '../geo/bounds';
 import { iconSize, type MapIcon } from '../model/icon';
 import { labelStyle } from '../model/label';
 import { lineWidth, MAX_LINE_WIDTH } from '../model/line';
+import type { Scene, TerrainSky } from '../model/scene';
 import { within } from '../model/stored';
 import {
   isShown,
@@ -92,11 +93,11 @@ export interface MapOptions {
   /** The colour the map is drawn on; MAP_BACKGROUND where unset. */
   background?: string;
   /**
-   * The ground in 3D under a day or night sky, raised by its elevation everywhere and
-   * shaded by its relief within the focus area, like the layers. The shading lies on the
+   * The ground in 3D, raised by its elevation everywhere and shaded by its relief within
+   * the focus area, like the layers, and how the map looks on it. The shading lies on the
    * bottom layer, under every layer above it.
    */
-  terrain?: TerrainSky;
+  terrain?: Scene;
   /** The id of the one layer shown, with the bottom layer under it; see `isShown`. */
   only?: string;
   /** Whether layers keep tiles as each says; false, none does (a switch for testing). */
@@ -138,9 +139,6 @@ interface Fragment {
   layers: LayerSpecification[];
   sprite?: SpriteSpecification;
 }
-
-/** The sky over 3D terrain. */
-export type TerrainSky = 'day' | 'night';
 
 /**
  * The skies of 3D terrain, above the horizon when the map is tilted far, and their fog over
@@ -216,6 +214,7 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     } else if (sprite) {
       console.warn(`${layer.name}: a sprite list is only supported in the bottom style; its icons are left out.`);
     }
+    if (terrain) partLayers = inScene(partLayers, terrain, layer.source.type === 'style');
     for (const [id, source] of Object.entries(part.sources)) style.sources[id] = withinFocus(source, focus);
     style.layers.push(...partLayers);
     if (index === 0) aboveBottom = style.layers.length;
@@ -227,10 +226,21 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     style.sources[HILLSHADE_SOURCE] = withinFocus(TERRAIN, focus);
     style.terrain = { source: TERRAIN_SOURCE, exaggeration: 1 };
     // Fog only lies deeper than its ground blend, which never exceeds 1: none over a focus area.
-    style.sky = focus ? { ...SKIES[terrain], 'fog-ground-blend': 1 } : SKIES[terrain];
+    style.sky = focus ? { ...SKIES[terrain.sky], 'fog-ground-blend': 1 } : SKIES[terrain.sky];
     style.layers.splice(aboveBottom, 0, { id: HILLSHADE_LAYER, type: 'hillshade', source: HILLSHADE_SOURCE, paint: HILLSHADE_PAINT });
   }
   return style;
+}
+
+/**
+ * A layer's part of the style as the scene shows it in 3D: without the buildings, and
+ * without the labels and icons of a map style, where those are switched off, and with
+ * every label and icon raised by the symbol distance.
+ */
+function inScene(layers: LayerSpecification[], scene: Scene, fromStyle: boolean): LayerSpecification[] {
+  return layers
+    .filter((l) => (scene.buildings || l.type !== 'fill-extrusion') && (scene.labels || !fromStyle || l.type !== 'symbol'))
+    .map((l) => (l.type === 'symbol' && scene.symbolDistance > 0 ? { ...l, layout: { ...l.layout, 'symbol-height-offset': scene.symbolDistance } } : l));
 }
 
 /** Whether a style layer writes text, which needs a font source. */

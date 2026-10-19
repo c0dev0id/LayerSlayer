@@ -110,6 +110,7 @@ erDiagram
     list proxiedHosts
     string background
     boolean terrain
+    object scene "sky, buildings, labels, symbol distance"
     boolean tileCacheOff "browser only"
     string proxyMode "browser only"
   }

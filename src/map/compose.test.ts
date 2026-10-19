@@ -2,6 +2,7 @@ import { validateStyleMin } from '@maplibre/maplibre-gl-style-spec';
 import type { StyleSpecification } from 'maplibre-gl';
 import { describe, expect, it } from 'vitest';
 import { createLayer, type Bounds, type Layer, type LayerDraft } from '../model/layer';
+import { DEFAULT_SCENE } from '../model/scene';
 import {
   composeStyle,
   prefixImage,
@@ -86,7 +87,7 @@ describe('composeStyle', () => {
     const xyz = (id: string) => layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 } }, {}, id);
     expect(compose([xyz('A')])).not.toHaveProperty('terrain');
     // The ground is not limited to the focus area; its shading is, like the layers.
-    const style = compose([xyz('A'), xyz('B')], {}, { terrain: 'day', focus: [8, 48, 9, 49] });
+    const style = compose([xyz('A'), xyz('B')], {}, { terrain: DEFAULT_SCENE, focus: [8, 48, 9, 49] });
     expect(style.terrain).toEqual({ source: TERRAIN_SOURCE, exaggeration: 1 });
     expect(style.sources[TERRAIN_SOURCE]).toMatchObject({ type: 'raster-dem', encoding: 'terrarium', tileSize: 512 });
     expect(style.sources[TERRAIN_SOURCE]).not.toHaveProperty('bounds');
@@ -94,18 +95,18 @@ describe('composeStyle', () => {
     expect(style.layers.map((l) => l.id)).toEqual(['A', 'terrain-hillshade', 'B']);
     expect(style.layers[1]).toMatchObject({ type: 'hillshade', source: HILLSHADE_SOURCE });
     // Without a bottom layer to lie on, the shading lies on the background.
-    expect(compose([], {}, { terrain: 'day' }).layers.map((l) => l.id)).toEqual(['terrain-hillshade']);
+    expect(compose([], {}, { terrain: DEFAULT_SCENE }).layers.map((l) => l.id)).toEqual(['terrain-hillshade']);
   });
 
   it('puts a day or night sky over 3D terrain and none over a flat map', () => {
     expect(compose([])).not.toHaveProperty('sky');
-    const day = compose([], {}, { terrain: 'day' }).sky!;
-    const night = compose([], {}, { terrain: 'night' }).sky!;
+    const day = compose([], {}, { terrain: DEFAULT_SCENE }).sky!;
+    const night = compose([], {}, { terrain: { ...DEFAULT_SCENE, sky: 'night' } }).sky!;
     expect(day['sky-color']).toBe('#88c6fc');
     expect(night['sky-color']).not.toBe(day['sky-color']);
     expect(night['fog-color']).not.toBe(day['fog-color']);
     // A focus area keeps the ground clear of fog, under the same sky.
-    const focused = compose([], {}, { terrain: 'day', focus: [8, 48, 9, 49] }).sky!;
+    const focused = compose([], {}, { terrain: DEFAULT_SCENE, focus: [8, 48, 9, 49] }).sky!;
     expect(focused).toEqual({ ...day, 'fog-ground-blend': 1 });
   });
 
@@ -412,6 +413,29 @@ describe('composeStyle', () => {
       const style = compose([styleLayer('A'), labelled], { A: { style: lettered } });
       expect(style.glyphs).toBe('https://s.example/fonts/{fontstack}/{range}.pbf');
       expect(style.layers.find((l) => l.id === 'G/label')!.layout).toMatchObject({ 'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'] });
+    });
+
+    it('shows or leaves out the buildings and labels of styles in 3D, and raises every symbol', () => {
+      const built: StyleSpecification = {
+        ...base,
+        layers: [...base.layers, { id: 'houses', type: 'fill-extrusion', source: 'osm', 'source-layer': 'building', paint: { 'fill-extrusion-height': 10 } }],
+      };
+      const labelled = layer({ name: 'g', source: { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } }, { label: 'name' }, 'G');
+      const ids = (options: MapOptions) => compose([styleLayer('A'), labelled], { A: { style: built } }, options).layers.map((l) => l.id);
+      const all = ['A/bg', 'A/roads', 'A/pois', 'A/houses', 'G/fill', 'G/outline', 'G/line', 'G/point', 'G/line-label', 'G/label'];
+      // A flat map shows each style as it is, whatever the scene would say in 3D.
+      expect(ids({})).toEqual(all);
+      expect(ids({ terrain: DEFAULT_SCENE })).toEqual([...all.slice(0, 4), 'terrain-hillshade', ...all.slice(4)]);
+      const hidden = ids({ terrain: { ...DEFAULT_SCENE, buildings: false, labels: false } });
+      // A layer's own labels stay: they were chosen for it.
+      expect(hidden).toEqual(['A/bg', 'A/roads', 'terrain-hillshade', 'G/fill', 'G/outline', 'G/line', 'G/point', 'G/line-label', 'G/label']);
+      const raised = compose([styleLayer('A'), labelled], { A: { style: built } }, { terrain: { ...DEFAULT_SCENE, symbolDistance: 40 } }).layers;
+      const offsets = raised.map((l) => [l.id, (l.layout as Record<string, unknown> | undefined)?.['symbol-height-offset']]).filter(([, offset]) => offset !== undefined);
+      expect(offsets).toEqual([
+        ['A/pois', 40],
+        ['G/line-label', 40],
+        ['G/label', 40],
+      ]);
     });
 
     it('shares the sprite of a style added twice', () => {

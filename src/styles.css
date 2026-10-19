@@ -1427,7 +1427,56 @@ input.swatch {
   font-weight: 700;
 }
 
-.maplibregl-ctrl button:is(.terrain-toggle, .only-toggle)[aria-pressed='true'] {
+/* While the ground is in 3D, the switches of how the map looks there lie to the left of the 3D button, in one row. */
+.terrain-control {
+  position: relative;
+}
+
+.maplibregl-ctrl-group.scene-bar {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 8px);
+  display: flex;
+}
+
+.scene-bar > button {
+  display: grid;
+  place-items: center;
+}
+
+.maplibregl-ctrl-group.scene-bar > * + * {
+  border-top: none;
+  border-left: 1px solid var(--border);
+}
+
+.maplibregl-ctrl-group.scene-bar > button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.scene-bar .symbol-distance {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 29px;
+  padding: 0 8px 0 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.symbol-distance input {
+  width: 90px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.symbol-distance output {
+  min-width: 3.4em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.maplibregl-ctrl button:is(.terrain-toggle, .only-toggle)[aria-pressed='true'],
+.scene-bar button[aria-pressed='true'] {
   background: var(--active);
   color: var(--accent-text);
 }
