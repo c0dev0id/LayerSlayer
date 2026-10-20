@@ -5,6 +5,7 @@ import { createLayer, type Bounds, type Layer, type LayerDraft } from '../model/
 import { DEFAULT_SCENE } from '../model/scene';
 import {
   composeStyle,
+  isDraped,
   prefixImage,
   rasterAdjustments,
   resolveWmtsTile,
@@ -560,5 +561,33 @@ describe('WMTS tiles', () => {
     expect(url.startsWith('wmts-matrix://{z}/{x}/{y}?')).toBe(true);
     const tile = url.replace('{z}', '9').replace('{x}', '0').replace('{y}', '1');
     expect(resolveWmtsTile(tile)).toBe('https://w.example/t/09/1/0.png');
+  });
+});
+
+describe('composeStyle in 3D', () => {
+  const xyz = (id: string) => layer({ name: id, source: { type: 'xyz', tiles: [`https://${id}/{z}/{x}/{y}.png`], scheme: 'xyz', tileSize: 256 } }, {}, id);
+  const points = (id: string) => layer({ name: id, source: { type: 'geojson', data: { url: `https://a.example/${id}.geojson` } } }, { label: 'name' }, id);
+  /** Runs of layers MapLibre drapes over the ground, each one a texture per ground tile. */
+  const runs = (style: StyleSpecification) => style.layers.filter((l, i) => isDraped(l) && !(i > 0 && isDraped(style.layers[i - 1]!))).length;
+  const stack = [xyz('A'), points('P'), points('Q'), xyz('B'), points('R')];
+
+  it('draws the points and labels of vector layers stacked on each other after all their areas and lines', () => {
+    const style = compose(stack, {}, { terrain: DEFAULT_SCENE });
+    expect(style.layers.map((l) => l.id)).toEqual([
+      'A',
+      'terrain-hillshade',
+      ...['P', 'Q'].flatMap((id) => [`${id}/fill`, `${id}/outline`, `${id}/line`]),
+      ...['P', 'Q'].flatMap((id) => [`${id}/point`, `${id}/line-label`, `${id}/label`]),
+      // A raster above them still covers their points and labels.
+      'B',
+      ...['R/fill', 'R/outline', 'R/line', 'R/point', 'R/line-label', 'R/label'],
+    ]);
+    expect(runs(style)).toBe(2);
+  });
+
+  it('keeps each layer whole on a flat map', () => {
+    const style = compose(stack);
+    expect(style.layers.slice(1, 7).map((l) => l.id)).toEqual(['P/fill', 'P/outline', 'P/line', 'P/point', 'P/line-label', 'P/label']);
+    expect(runs(style)).toBe(3);
   });
 });

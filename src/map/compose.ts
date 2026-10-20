@@ -13,6 +13,7 @@ import type { Scene, TerrainSky } from '../model/scene';
 import { within } from '../model/stored';
 import {
   isShown,
+  isVector,
   keepsTiles,
   FILL_SHARE,
   layerColor,
@@ -186,6 +187,10 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
   /** Where the layers above the bottom one begin, which the hillshading goes under. */
   let aboveBottom = style.layers.length;
   const drawn = (layer: Layer, index: number) => isShown(layer, index, only) && !(focus && layer.bounds && !intersectBounds(layer.bounds, focus));
+  // In 3D, the points and labels of vector layers stacked directly on each other wait until
+  // the last of them has drawn its areas and lines: each draped run costs a texture per
+  // ground tile, and each layer's points would end one.
+  let held: LayerSpecification[] = [];
   // The first style drawn with fonts brings the map's font source, and the labels' font.
   let labelFont = LABEL_FONT;
   for (const [index, layer] of layers.entries()) {
@@ -216,9 +221,16 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
     }
     if (terrain && terrain.symbolDistance > 0) partLayers = raised(partLayers, terrain.symbolDistance);
     for (const [id, source] of Object.entries(part.sources)) style.sources[id] = withinFocus(source, focus);
-    style.layers.push(...partLayers);
+    if (terrain && isVector(layer.source)) {
+      style.layers.push(...partLayers.filter(isDraped));
+      held.push(...partLayers.filter((l) => !isDraped(l)));
+    } else {
+      style.layers.push(...held, ...partLayers);
+      held = [];
+    }
     if (index === 0) aboveBottom = style.layers.length;
   }
+  style.layers.push(...held);
   if (sprites.length > 0) style.sprite = sprites;
   if (!style.glyphs && style.layers.some(hasText)) style.glyphs = LABEL_GLYPHS;
   if (terrain) {
@@ -236,6 +248,26 @@ export function composeStyle(layers: readonly Layer[], assets: ReadonlyMap<strin
 function raised(layers: LayerSpecification[], distance: number): LayerSpecification[] {
   return layers.map((l) => (l.type === 'symbol' ? { ...l, layout: { ...l.layout, 'symbol-height-offset': distance } } : l));
 }
+
+/**
+ * The types of layer MapLibre drapes over 3D terrain, as its render-to-texture does: every
+ * run of them is drawn into a texture of its own per ground tile. Typed by every layer
+ * type, so that a type a new MapLibre brings has to be placed here.
+ */
+const DRAPED: Record<LayerSpecification['type'], boolean> = {
+  background: true,
+  fill: true,
+  line: true,
+  raster: true,
+  hillshade: true,
+  'color-relief': true,
+  symbol: false,
+  circle: false,
+  heatmap: false,
+  'fill-extrusion': false,
+};
+
+export const isDraped = (layer: LayerSpecification): boolean => DRAPED[layer.type];
 
 /** Whether a style layer writes text, which needs a font source. */
 function hasText(layer: LayerSpecification): boolean {

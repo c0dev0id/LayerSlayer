@@ -888,6 +888,20 @@
   belongs to each source rather than to the style, so it is set again after every style
   change, which may bring new sources; a flat map keeps MapLibre's default. Finer distant
   tiles also draw a far track thinner, down to broken dashes near the horizon.
+  MapLibre drapes every run of fill, line, raster and hillshade layers over the 3D ground
+  through a texture of its own per ground tile, 2048 pixels square here, about 22 MB with
+  its smaller copies. Points and labels end a run, and the next run is drawn over them, as
+  on a flat map. Each vector layer ends with its points, so a project of 26 vector layers
+  made 26 runs: about 230 such textures in a small window, gigabytes on a large screen,
+  and the browser lost the map's graphics context over and over. So in 3D the points and
+  labels of vector layers stacked directly on each other wait until the last of them has
+  drawn its areas and lines, and the overlays' points and labels come after all the
+  overlays' lines: two runs for such a project, about 26 textures in that window. A raster
+  or a map style above vector layers still covers their points and labels, and the
+  overlays still cover the layers. What changes is that a vector layer's areas and lines
+  no longer cover the points and labels of a vector layer below it, which they are rarely
+  meant to. Moving every point and label to the end of the style made one run, but let
+  them show through rasters, styles and the focus area's cover above them.
 - **The 3D scene is a set of style options too.** The 3D button switches the ground on and
   off. While it is on, switches under it set how the map looks there (`settings.scene`):
   the sky, whether map styles show their buildings and their labels and icons, and the
@@ -899,14 +913,16 @@
   Where the map is too short for all its buttons in one column (phones in landscape, or
   with the panel open below a small map), they go on in a second column to the left;
   MapLibre stacks them in one column that would run under the credits.
-  The buildings and labels switches answer a limit of MapLibre's terrain: it drapes only
-  background, fill, line, raster, hillshade and colour-relief layers onto the ground.
-  Buildings (fill extrusions), labels, icons and circles are drawn into the 3D scene,
-  where no layer above can cover them, so Liberty's buildings and labels showed through an
-  opaque raster stacked over it. Which layers are covered cannot be known: a raster at
-  full opacity may be mostly transparent, as trail overlays are, and a rule that left out
-  what lies below one would take the labels from under them. So the user switches them.
-  The switches cover map styles only; a layer's own labels and icons were chosen for it.
+  The buildings switch answers a limit of MapLibre's terrain: buildings (fill extrusions)
+  are drawn into the 3D scene with depth, so no draped layer above can cover them, and
+  Liberty's buildings showed through an opaque raster stacked over it. Its labels and
+  icons do not show through: a later draped run is drawn over them, as on a flat map (an
+  early test that suggested otherwise had not loaded the raster). Which layers are covered
+  cannot be known: a raster at full opacity may be mostly transparent, as trail overlays
+  are, and a rule that left out what lies below one would take the buildings from under
+  them. So the user switches them. The labels switch hides a style's labels and icons,
+  which stand up from a tilted map and crowd it. Both cover map styles only; a layer's own
+  labels and icons were chosen for it.
   The symbol distance raises the labels and icons of every layer, but not the app's
   overlays (routes, waypoints), by `symbol-height-offset` (MapLibre 6.6), in metres above
   the ground. No other layer type has a height: lines, areas, rasters and the dots of

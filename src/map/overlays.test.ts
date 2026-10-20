@@ -44,4 +44,16 @@ describe('withOverlays', () => {
     ]);
     expect(style.layers).toHaveLength(1);
   });
+
+  it('puts the overlays\' points and labels after all their lines and areas in 3D', () => {
+    const style: StyleSpecification = { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background' }], terrain: { source: 'dem' } };
+    const overlays = [
+      { ...focusDraftOverlay, data: () => focusDraftFeatures(corners, [8.5, 48.5]) },
+      { ...routeOverlay, data: () => routeFeatures([route], new Set(), NO_DATA) },
+    ];
+    const types = withOverlays(style, overlays).layers.map((l) => l.type);
+    expect(types.slice(1, -1).every((t) => t === 'line')).toBe(true);
+    expect(types.at(-1)).toBe('circle');
+    expect(withOverlays({ ...style, terrain: undefined }, overlays).layers.map((l) => l.type).indexOf('circle')).toBe(2);
+  });
 });
