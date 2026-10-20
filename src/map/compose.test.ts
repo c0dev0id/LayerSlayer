@@ -72,7 +72,7 @@ describe('composeStyle', () => {
       ),
     ]);
     expect(style.layers[0]!.paint).toEqual({
-      'raster-opacity': 0.5,
+      'raster-opacity': 1,
       'raster-fade-duration': 0,
       'raster-hue-rotate': 180,
       'raster-saturation': -1,
@@ -200,8 +200,8 @@ describe('composeStyle', () => {
   it('draws lines and outlines at the width and with the dashes of the layer', () => {
     const source = { type: 'geojson', data: { url: 'https://a.example/g.geojson' } } as const;
     const plain = compose([layer({ name: 'g', source })]);
-    expect(plain.layers[1]!.paint).toEqual({ 'line-color': '#e8590c', 'line-width': 1.5, 'line-opacity': 0.5 });
-    expect(plain.layers[2]!.paint).toEqual({ 'line-color': '#e8590c', 'line-width': 2.5, 'line-opacity': 0.5 });
+    expect(plain.layers[1]!.paint).toEqual({ 'line-color': '#e8590c', 'line-width': 1.5, 'line-opacity': 1 });
+    expect(plain.layers[2]!.paint).toEqual({ 'line-color': '#e8590c', 'line-width': 2.5, 'line-opacity': 1 });
     const dotted = compose([layer({ name: 'g', source }, { lineWidth: 4, lineDash: 'dotted' })]);
     expect(dotted.layers[1]!.paint).toMatchObject({ 'line-width': 4, 'line-dasharray': [0, 2] });
     expect(dotted.layers[2]!.paint).toMatchObject({ 'line-width': 4, 'line-dasharray': [0, 2] });

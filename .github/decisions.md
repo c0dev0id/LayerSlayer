@@ -758,12 +758,12 @@
   any busy server's, are put in words by `statusMessage`. One layer has one colour;
   features that should look different go in separate layers.
   - Place names are presets of their own (`"nameOnly": true`): their layers are labelled
-    with `name` and have no dots, so they read as a labels layer over any base map, and
-    start opaque like layers with icons. They ask for nodes only (`node place=town`): in a
-    box around Germany, beside 2 902 town and 51 457 village nodes, 309 towns and 746
-    villages are also areas, nearly all municipality boundaries tagged with the place and
-    mostly with a node of the same name inside, which drew a filled area and the name
-    twice. Islands are left out, being mostly areas.
+    with `name` and have no dots, so they read as a labels layer over any base map. They
+    ask for nodes only (`node place=town`): in a box around Germany, beside 2 902 town and
+    51 457 village nodes, 309 towns and 746 villages are also areas, nearly all
+    municipality boundaries tagged with the place and mostly with a node of the same name
+    inside, which drew a filled area and the name twice. Islands are left out, being
+    mostly areas.
   - Postpass first, Overpass as fallback. overpass-api.de was often too busy to answer at
     all ("Dispatcher_Client … timeout", 504 even for one node), and its mirrors refused or
     failed in turn. Postpass (github.com/woodpeck/postpass, run by Geofabrik) is an
@@ -821,12 +821,11 @@
   the picker opens. A layer keeps its icon's shape, not just its id, so drawing it needs
   no set loaded and a project file carries it. Its size (1× to 3×) scales the disc, which
   a distance field allows, and is drawn into the icon image, rendered at that many times
-  the display's resolution and handed to the map at the display's pixel ratio. Layers
-  created with an icon or a label start opaque, the exceptions to the half-transparent
-  default, since icons on see-through discs and see-through text read poorly. The OSM
-  feature presets each name an icon, except the 38 found as lines (`"lines": true`):
-  icons mark points and areas, never lines, so roads or fences get none; and the place
-  names, which are shown by their name alone. The plugin serves just those icons
+  the display's resolution and handed to the map at the display's pixel ratio. New layers
+  start opaque; they once started half transparent, except those with an icon or a label.
+  The OSM feature presets each name an icon, except the 38 found as lines (`"lines":
+  true`): icons mark points and areas, never lines, so roads or fences get none; and the
+  place names, which are shown by their name alone. The plugin serves just those icons
   (`virtual:osm-feature-icons`, 30 kB, loaded when the OSM tab is first shown) and fails
   the build on a name no set has. The disc is one signed distance field image for all
   layers, tinted with `icon-color` and ringed by a white `icon-halo`: colour and opacity
