@@ -50,6 +50,17 @@ body,
   margin: 0;
 }
 
+/*
+ * The page is the frame of an app, also on phones: it neither scrolls nor zooms. The map
+ * pans and zooms itself; the panel, dialogs and lists scroll within themselves.
+ */
+html,
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+}
+
 body {
   font: 14px/1.4 system-ui, sans-serif;
   color: var(--text);

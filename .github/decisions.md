@@ -707,6 +707,13 @@
   The hint of the route tools is left out there: it took a band across the top of a
   small map to repeat what the icons show, and the toolbar's Done, there on every screen,
   ends drawing.
+  The page itself neither zooms nor scrolls, as an app's frame: `touch-action: pan-x
+  pan-y` on its root (Safari 13, Chrome 36) leaves swiping to the panel and the lists and
+  takes pinching and double tapping away from the page, while the map zooms itself, and
+  `overflow: hidden` with `overscroll-behavior: none` keeps the page from scrolling or
+  bouncing when the panel reaches its end. A two-finger pinch on the panel zoomed the
+  page fivefold before. The viewport's `user-scalable=no` is not used: iOS Safari ignores
+  it.
 - **Light and dark interface.** Every colour of the stylesheet is a token on `:root`
   with a light and a dark value (`light-dark()`), so each colour is written once and the
   page shows the browser's preference from the first paint, before any script runs; the
