@@ -1781,12 +1781,13 @@ input.swatch {
   }
 
   /*
-   * One bar in one row, above the attribution (expanded over two lines on narrow screens):
-   * the groups lose their own cards for dividers, and the captions stay as the buttons'
-   * names for assistive technology; the hint bar says what the active tool does.
+   * One bar in one row at the map's bottom edge, the scale and the credits moved up above
+   * it: the groups lose their own cards for dividers, and the captions stay as the buttons'
+   * names for assistive technology. The hint of the route tools is left out; the icons say
+   * what they do.
    */
   .toolbar {
-    bottom: 64px;
+    bottom: 8px;
     flex-wrap: nowrap;
     gap: 0;
     padding: 3px;
@@ -1810,8 +1811,20 @@ input.swatch {
   }
 
   .tool {
-    min-width: 38px;
-    padding: 8px 4px;
+    min-width: 34px;
+    padding: 8px 3px;
+  }
+
+  .hint-bar.route-hint {
+    display: none;
+  }
+
+  .map-wrap:has(.toolbar) :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right) {
+    bottom: 46px;
+  }
+
+  .map-wrap:has(.toolbar) .maplibregl-ctrl-top-right {
+    bottom: 86px;
   }
 
   .tool-label {

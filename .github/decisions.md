@@ -702,8 +702,11 @@
   narrow screens. There, everything on the
   map competes for little room: the panel folds to its header (a flag in local storage,
   as the panel width is), the search is a button until opened, and the route toolbar is
-  one bar of icons in one row (eight tools fit 360 px), its captions kept as the buttons'
-  accessible names while the hint bar says what the active tool does.
+  one bar of icons in one row at the map's bottom edge (nine tools fit 360 px), the scale
+  and the credits moved up above it, its captions kept as the buttons' accessible names.
+  The hint of the route tools is left out there: it took a band across the top of a
+  small map to repeat what the icons show, and the toolbar's Done, there on every screen,
+  ends drawing.
 - **Light and dark interface.** Every colour of the stylesheet is a token on `:root`
   with a light and a dark value (`light-dark()`), so each colour is written once and the
   page shows the browser's preference from the first paint, before any script runs; the

@@ -1,7 +1,7 @@
 import type { JSX } from 'solid-js';
-import { reach, setReach, setTool, tool, type Tool } from '../state/drawing';
+import { reach, setReach, setTool, stopDrawing, tool, type Tool } from '../state/drawing';
 import { redo, redoLabel, undo, undoLabel } from '../state/routes';
-import { AppendIcon, DeleteIcon, InsertIcon, LineIcon, RedoIcon, RouteIcon, UndoIcon, WaypointIcon } from '../ui/icons';
+import { AppendIcon, CheckIcon, DeleteIcon, InsertIcon, LineIcon, RedoIcon, RouteIcon, UndoIcon, WaypointIcon } from '../ui/icons';
 
 /**
  * A toolbar button: an icon over a short caption, with a tooltip that says more. `active`
@@ -30,7 +30,7 @@ function ToolButton(props: {
   );
 }
 
-/** The tools of the route being drawn over the map, with undo and redo of route edits. */
+/** The tools of the route being drawn over the map, with undo and redo of route edits and the button that ends drawing. */
 export function Toolbar() {
   const button = (t: Tool, label: string, title: string, icon: JSX.Element) => (
     <ToolButton label={label} title={title} active={tool() === t} onClick={() => setTool(t)}>
@@ -69,6 +69,11 @@ export function Toolbar() {
         </ToolButton>
         <ToolButton label="Redo" title={redoLabel() ? `Redo: ${redoLabel()} (Ctrl+Shift+Z)` : 'Nothing to redo'} disabled={!redoLabel()} onClick={redo}>
           <RedoIcon />
+        </ToolButton>
+      </div>
+      <div class="toolbar-group" role="group" aria-label="Drawing">
+        <ToolButton label="Done" title="Stop drawing this route (Esc)" onClick={stopDrawing}>
+          <CheckIcon />
         </ToolButton>
       </div>
     </div>
