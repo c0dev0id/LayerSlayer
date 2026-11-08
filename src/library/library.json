@@ -113,6 +113,12 @@
       "dmd": true
     },
     {
+      "id": "global-ellipsis-nasa-30m-elevation",
+      "type": "wmts",
+      "url": "https://api.ellipsis-drive.com/v3/ogc/wmts/085f5e10-63b6-4e8f-a4c6-dce9689100d3?request=getCapabilities",
+      "dmd": true
+    },
+    {
       "id": "global-openrailwaymap-railways",
       "type": "xyz",
       "url": "https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
@@ -1024,6 +1030,11 @@
       "type": "arcgis-mapserver",
       "url": "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/IFR_High/MapServer",
       "dmd": true
+    },
+    {
+      "id": "united-states-marble-falls-flock-cameras",
+      "type": "arcgis-features",
+      "url": "https://services8.arcgis.com/IeXFMFwivjBzu9iB/ArcGIS/rest/services/Flock_Locations_WFL1/FeatureServer"
     },
     {
       "id": "united-states-nrl-faa-and-noaa-charts",

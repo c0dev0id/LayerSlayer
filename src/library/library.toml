@@ -131,6 +131,13 @@ category = "Terrain"
 description = "Sea floor depth, shaded relief."
 
 [[entries]]
+id = "global-ellipsis-nasa-30m-elevation"
+name = "Ellipsis Drive — NASA 30 m elevation"
+region = "Global"
+category = "Terrain"
+description = "NASA's 30 m elevation as colours and as a hillshade, from 56° S to 61° N; to zoom 13."
+
+[[entries]]
 id = "global-openrailwaymap-railways"
 name = "OpenRailwayMap — railways"
 region = "Global"
@@ -1137,6 +1144,13 @@ name = "FAA — IFR high altitude enroute charts"
 region = "United States"
 category = "Traffic"
 description = "Charts for instrument flight at 18,000 ft and above: jet routes, RNAV Q-routes, navigation aids and reporting points. Cached for zooms 5 to 9, for a zoomed-out view."
+
+[[entries]]
+id = "united-states-marble-falls-flock-cameras"
+name = "Marble Falls — Flock cameras"
+region = "United States"
+category = "Traffic"
+description = "The city's 15 Flock licence-plate reader cameras in Marble Falls, Texas, with their street and how each was funded."
 
 [[entries]]
 id = "united-states-nrl-faa-and-noaa-charts"
