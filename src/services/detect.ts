@@ -14,6 +14,8 @@ export function detectServiceType(url: string): ServiceType | undefined {
   if (service === 'WMTS' || path.endsWith('wmtscapabilities.xml')) return 'wmts';
   if (service === 'WMS' || path.endsWith('/wmsserver')) return 'wms';
   if (service === 'WFS' || path.endsWith('/wfsserver')) return 'wfs';
+  // Without a SERVICE parameter, a path through a `wmts` folder names the service.
+  if (/\/wmts(\/|$)/.test(path)) return 'wmts';
   if (/\/collections(\/[^/]+(\/items)?)?$/.test(path)) return 'ogc-features';
   if (/\/featureserver(\/\d+)?$/.test(path) || /\/mapserver\/\d+$/.test(path)) return 'arcgis-features';
   if (path.endsWith('/mapserver')) return 'arcgis-mapserver';

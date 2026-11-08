@@ -7,6 +7,8 @@ describe('detectServiceType', () => {
     ['https://x/arcgis/rest/services/A/MapServer/tile/{z}/{y}/{x}', 'xyz'],
     ['https://x/wmts/1.0.0/WMTSCapabilities.xml', 'wmts'],
     ['https://x/wmts?SERVICE=WMTS&REQUEST=GetCapabilities', 'wmts'],
+    ['https://x/v3/ogc/wmts/085f5e10?request=getCapabilities', 'wmts'],
+    ['https://x/wmts?SERVICE=WMS&REQUEST=GetCapabilities', 'wms'],
     ['https://x/service?service=wms&request=GetCapabilities', 'wms'],
     ['https://x/arcgis/services/A/MapServer/WMSServer', 'wms'],
     ['https://x/arcgis/rest/services/A/MapServer?f=json', 'arcgis-mapserver'],
